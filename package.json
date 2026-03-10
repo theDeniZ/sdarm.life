@@ -2,12 +2,8 @@
   "name": "sdarm.life",
   "version": "1.0.0",
   "description": "",
+  "private": true,
   "main": "index.js",
-  "scripts": {
-    "build": "turbo build",
-    "dev":   "turbo dev",
-    "lint":  "turbo lint"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",
