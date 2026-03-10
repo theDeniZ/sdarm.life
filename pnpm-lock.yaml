@@ -63,6 +63,9 @@ importers:
 
   apps/api:
     dependencies:
+      drizzle-orm:
+        specifier: ^0.45.1
+        version: 0.45.1(@cloudflare/workers-types@4.20260310.1)
       hono:
         specifier: ^4.12.6
         version: 4.12.6

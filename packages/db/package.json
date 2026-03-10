@@ -6,7 +6,8 @@
   "types": "./src/index.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo \"DB Build\""
+    "build": "echo \"DB Build\"",
+    "generate": "drizzle-kit generate --dialect=sqlite --schema=./src/index.ts --out=./migrations"
   },
   "keywords": [],
   "author": "",
