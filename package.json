@@ -1,0 +1,18 @@
+{
+  "name": "sdarm.life",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "build": "turbo build",
+    "dev":   "turbo dev",
+    "lint":  "turbo lint"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.32.0",
+  "devDependencies": {
+    "turbo": "^2.8.15"
+  }
+}
