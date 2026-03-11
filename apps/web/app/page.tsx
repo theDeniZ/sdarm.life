@@ -137,9 +137,11 @@ export default async function HomePage() {
   const aboutConfig = config ? toAboutConfig(config) : undefined;
   const footerConfig = config ? toFooterConfig(config) : undefined;
 
+  const bgImageUrl = config?.hero_bg_key ? r2url(config.hero_bg_key) : null;
+
   return (
     <>
-      <BgCanvas />
+      <BgCanvas bgImageUrl={bgImageUrl} />
       <Navbar />
       
       <div className="page">

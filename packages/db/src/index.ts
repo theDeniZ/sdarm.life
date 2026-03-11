@@ -2,6 +2,8 @@ import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const KNOWN_CONFIG_KEYS = [
   'donation_url',
+  'hero_bg_key',
+  'hero_bg_alt',
   'about_text_1',
   'about_text_2',
   'about_image_key',

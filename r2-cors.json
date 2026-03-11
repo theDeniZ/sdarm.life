@@ -1,0 +1,17 @@
+{
+  "rules": [
+    {
+      "allowed": {
+        "origins": [
+          "https://sdarm.life",
+          "https://admin.sdarm.life",
+          "http://localhost:3000",
+          "http://localhost:3001"
+        ],
+        "methods": ["GET"],
+        "headers": ["*"]
+      },
+      "maxAgeSeconds": 3600
+    }
+  ]
+}

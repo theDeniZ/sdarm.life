@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import ConfigEditor from '../components/ConfigEditor';
 
 export default function ConfigPage() {

@@ -2,13 +2,16 @@
 
 import { useEffect, useRef } from 'react';
 
+interface BgCanvasProps {
+  bgImageUrl?: string | null;
+}
+
 /**
- * Fixed grayscale canvas background — synced with the hero image.
- * Instead of creating a new Image (which fails CORS for external URLs),
- * we grab the already-rendered #heroImg from the DOM — it's already loaded
- * by the browser with no taint issues for canvas drawImage.
+ * Fixed grayscale canvas background.
+ * If bgImageUrl is provided (from hero_bg_key config), it loads that image.
+ * Otherwise falls back to grabbing the already-rendered #heroImg from the DOM.
  */
-export default function BgCanvas() {
+export default function BgCanvas({ bgImageUrl }: BgCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -19,10 +22,8 @@ export default function BgCanvas() {
 
     const WARM = 'rgba(216,210,200,';
 
-    function draw() {
+    function draw(img: HTMLImageElement) {
       if (!canvas || !ctx) return;
-      const img = document.getElementById('heroImg') as HTMLImageElement | null;
-      if (!img || !img.complete || img.naturalWidth === 0) return;
 
       const W = window.innerWidth;
       const H = window.innerHeight;
@@ -57,28 +58,45 @@ export default function BgCanvas() {
       ctx.fillRect(0, 0, W, H * 0.12);
     }
 
-    // The hero img may not be painted yet when this effect runs.
-    // Poll via requestAnimationFrame until it's ready, then draw once.
     let rafId: number;
-    function waitForHeroAndDraw() {
-      const img = document.getElementById('heroImg') as HTMLImageElement | null;
-      if (img && img.complete && img.naturalWidth > 0) {
-        draw();
-      } else {
-        rafId = requestAnimationFrame(waitForHeroAndDraw);
-      }
-    }
-    waitForHeroAndDraw();
+    let resizeImg: HTMLImageElement | null = null;
 
-    window.addEventListener('resize', draw);
-    window.addEventListener('scroll', draw);
+    if (bgImageUrl) {
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      img.onload = () => {
+        draw(img);
+        resizeImg = img;
+        window.addEventListener('resize', onResize);
+        window.addEventListener('scroll', onResize);
+      };
+      img.src = bgImageUrl;
+    } else {
+      // Fallback: poll for #heroImg already rendered in the DOM
+      function waitForHeroAndDraw() {
+        const img = document.getElementById('heroImg') as HTMLImageElement | null;
+        if (img && img.complete && img.naturalWidth > 0) {
+          draw(img);
+          resizeImg = img;
+          window.addEventListener('resize', onResize);
+          window.addEventListener('scroll', onResize);
+        } else {
+          rafId = requestAnimationFrame(waitForHeroAndDraw);
+        }
+      }
+      waitForHeroAndDraw();
+    }
+
+    function onResize() {
+      if (resizeImg) draw(resizeImg);
+    }
 
     return () => {
       cancelAnimationFrame(rafId);
-      window.removeEventListener('resize', draw);
-      window.removeEventListener('scroll', draw);
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('scroll', onResize);
     };
-  }, []);
+  }, [bgImageUrl]);
 
   return (
     <canvas

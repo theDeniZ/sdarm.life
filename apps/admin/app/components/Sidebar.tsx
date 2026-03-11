@@ -16,16 +16,16 @@ export default function Sidebar() {
       </div>
       <nav className="sidebar-nav">
         <Link
-          href="/posts"
-          className={`sidebar-link${path.startsWith('/posts') ? ' active' : ''}`}
-        >
-          Posts
-        </Link>
-        <Link
           href="/config"
           className={`sidebar-link${path.startsWith('/config') ? ' active' : ''}`}
         >
           Config
+        </Link>
+        <Link
+          href="/posts"
+          className={`sidebar-link${path.startsWith('/posts') ? ' active' : ''}`}
+        >
+          Posts
         </Link>
         <Link
           href="/subscribers"

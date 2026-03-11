@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 import SubscriberList from '../components/SubscriberList';
 
 export default function SubscribersPage() {

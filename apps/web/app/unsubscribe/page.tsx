@@ -1,3 +1,5 @@
+export const runtime = 'edge';
+
 const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 
 export default async function UnsubscribePage({

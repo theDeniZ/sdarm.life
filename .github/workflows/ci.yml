@@ -19,7 +19,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo lint
-      - run: pnpm turbo build
+      - run: pnpm turbo build --filter=!@sdarm/web --filter=!@sdarm/admin
+      - run: pnpm --filter @sdarm/web pages:build
+      - run: pnpm --filter @sdarm/admin pages:build
+        env:
+          NEXT_PUBLIC_CF_CLIENT_ID: dev
+          NEXT_PUBLIC_CF_CLIENT_SECRET: dev
 
   migrate:
     if: github.ref == 'refs/heads/main'

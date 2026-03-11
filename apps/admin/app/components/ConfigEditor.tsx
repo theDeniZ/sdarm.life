@@ -15,6 +15,8 @@ function adminHeaders(): HeadersInit {
 
 const LABELS: Record<ConfigKey, string> = {
   donation_url:    'Donation link',
+  hero_bg_key:     'Hero background image',
+  hero_bg_alt:     'Hero background image alt text',
   about_text_1:    'About paragraph 1',
   about_text_2:    'About paragraph 2',
   about_image_key: 'About image',
@@ -27,7 +29,7 @@ const LABELS: Record<ConfigKey, string> = {
 };
 
 const TEXTAREA_KEYS: ConfigKey[] = ['about_text_1', 'about_text_2'];
-const IMAGE_KEYS:    ConfigKey[] = ['about_image_key'];
+const IMAGE_KEYS:    ConfigKey[] = ['about_image_key', 'hero_bg_key'];
 const URL_KEYS:      ConfigKey[] = [
   'donation_url', 'about_link_url', 'facebook_url',
   'whatsapp_url', 'instagram_url', 'youtube_url',
