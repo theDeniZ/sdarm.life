@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { drizzle } from 'drizzle-orm/d1';
-import { posts, siteConfig } from '@sdarm/db';
+import { posts, siteConfig, KNOWN_CONFIG_KEYS } from '@sdarm/db';
 import { and, isNull, eq, isNotNull, desc } from 'drizzle-orm';
 
 type Bindings = {
@@ -67,6 +67,15 @@ v1.get('/config', async (c) => {
 	const rows = await db.select().from(siteConfig);
 	const config = Object.fromEntries(rows.map((r) => [r.key, r.value]));
 	return c.json(config);
+});
+
+v1.get('/images/*', async (c) => {
+	const key = c.req.path.replace(/^\/api\/v1\/images\//, '');
+	const obj = await c.env.IMAGES.get(key);
+	if (!obj) return c.json({ error: 'Not found' }, 404);
+	const headers = new Headers();
+	if (obj.httpMetadata?.contentType) headers.set('Content-Type', obj.httpMetadata.contentType);
+	return new Response(obj.body, { headers });
 });
 
 // ── Admin middleware ───────────────────────────────────────────────────────────
@@ -177,6 +186,11 @@ admin.delete('/posts/:id', async (c) => {
 admin.put('/config/:key', async (c) => {
 	const db = drizzle(c.env.DB);
 	const key = c.req.param('key');
+
+	if (!KNOWN_CONFIG_KEYS.includes(key as never)) {
+		return c.json({ error: 'Unknown config key' }, 400);
+	}
+
 	const { value } = await c.req.json<{ value: string | null }>();
 
 	await db

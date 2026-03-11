@@ -27,9 +27,9 @@ type ApiConfig = Record<string, string | null>;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-const API = 'https://api.sdarm.life/api/v1';
+const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 
-const R2 = 'https://images.sdarm.life';
+const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
 
 function r2url(key: string | null): string | null {
   return key && R2 ? `${R2}/${key}` : null;
@@ -138,8 +138,9 @@ export default async function HomePage() {
     <>
       <BgCanvas />
       <Navbar />
-      <HeroSection post={heroPost} />
+      
       <div className="page">
+        <HeroSection post={heroPost} />
         <NewsSection  posts={newsPosts} />
         <VideoSection videos={videoPosts} />
         <SongbookSection />
