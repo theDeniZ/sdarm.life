@@ -27,6 +27,12 @@ export default function Sidebar() {
         >
           Config
         </Link>
+        <Link
+          href="/subscribers"
+          className={`sidebar-link${path.startsWith('/subscribers') ? ' active' : ''}`}
+        >
+          Subscribers
+        </Link>
       </nav>
     </aside>
   );

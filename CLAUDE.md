@@ -63,6 +63,8 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `CF_CLIEN
 
 **`siteConfig`** table: `key` (PK), `value`, `updated_at`
 
+**`subscribers`** table: `id`, `email` (unique), `token` (unique), `unsubscribed_at`, `created_at`
+
 **`KNOWN_CONFIG_KEYS`** (single source of truth — both API and admin import this):
 `donation_url`, `about_text_1`, `about_text_2`, `about_image_key`, `about_image_alt`, `about_link_url`, `facebook_url`, `whatsapp_url`, `instagram_url`, `youtube_url`
 
@@ -79,6 +81,8 @@ All routes versioned under `/api/v1`.
 | `GET` | `/api/v1/posts/:slug` | Single post by slug. 404 if deleted. |
 | `GET` | `/api/v1/config` | All `site_config` rows as `{ key: value }` map. |
 | `GET` | `/api/v1/images/*` | Proxy-serves R2 objects by key path (local dev only). |
+| `POST` | `/api/v1/subscribe` | Subscribe email. 409 if already subscribed (including unsubscribed). |
+| `GET` | `/api/v1/unsubscribe` | `?token=` — marks subscriber as unsubscribed. Idempotent. |
 
 ### Admin (require `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers)
 | Method | Route | Description |
@@ -88,6 +92,8 @@ All routes versioned under `/api/v1`.
 | `DELETE` | `/api/v1/admin/posts/:id` | Soft-delete: sets `deleted_at = now()` |
 | `PUT` | `/api/v1/admin/config/:key` | Upsert site_config key. 400 if unknown key. |
 | `POST` | `/api/v1/admin/images/upload` | `multipart/form-data` → R2 → returns `{ key: "uploads/{uuid}.{ext}" }` |
+| `GET` | `/api/v1/admin/subscribers` | Active subscribers (no `unsubscribed_at`), newest first. |
+| `DELETE` | `/api/v1/admin/subscribers/:id` | Soft-delete: sets `unsubscribed_at = now()`. |
 
 **CORS origins:** `https://sdarm.life`, `https://admin.sdarm.life`, `http://localhost:3000`, `http://localhost:3001`
 
@@ -138,7 +144,7 @@ CF_CLIENT_SECRET=dev
 | `SongbookSection` | Server | static search + song cards |
 | `AboutSection` | Server | 2-col about layout |
 | `ProductsSection` | **Client** | book/product cards |
-| `Footer` | **Client** | subscribe, donate, socials |
+| `Footer` | **Client** | subscribe, donate, socials. Accepts `apiUrl` prop (passed from `page.tsx` via `process.env.API_URL`). |
 
 `page.tsx` fetches `fetchPosts()` + `fetchConfig()` in parallel with `revalidate: 60`. Both return `null` on error → components fall back to static data silently.
 
@@ -154,6 +160,7 @@ Data mappers: `toHeroPost`, `toNewsPost`, `toVideoPost`, `toAboutConfig`, `toFoo
 | `PostForm` | create/edit form with auto-slug |
 | `ImageUpload` | drag-drop → multipart POST → R2 |
 | `ConfigEditor` | iterates `KNOWN_CONFIG_KEYS`, saves on blur |
+| `SubscriberList` | active subscribers table with Remove (soft-delete) |
 
 ## Styling
 
@@ -187,3 +194,4 @@ All images use Next.js `<Image fill>` inside aspect-ratio containers. `next.conf
 - **`drizzle-orm` in `@sdarm/api`** — must be a direct dependency (not just in `@sdarm/db`); wrangler bundles per-package and won't hoist workspace deps.
 - **`@cloudflare/next-on-pages`** — requires `vercel@47.0.4` pinned as devDep (later versions break the build). Requires `nodejs_compat` flag set in Pages project settings.
 - **Next.js version** — both apps use **15.2.2** (not 16). Next.js 16 Turbopack fails inside `vercel build` in a monorepo.
+- **Passing server env vars to client components** — `apps/web` uses server-only env vars (`API_URL`, `R2_URL`). Client components cannot read these. Pass them as props from the server `page.tsx` instead of adding `NEXT_PUBLIC_` vars. Example: `Footer` receives `apiUrl={process.env.API_URL}`.

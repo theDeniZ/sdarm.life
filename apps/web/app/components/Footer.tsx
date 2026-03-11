@@ -24,9 +24,10 @@ const NAV_LINKS = [
 
 interface FooterProps {
   config?: FooterConfig;
+  apiUrl?: string;
 }
 
-export default function Footer({ config }: FooterProps) {
+export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1' }: FooterProps) {
   const donationUrl  = config?.donation_url  ?? '#';
   const facebookUrl  = config?.facebook_url  ?? 'https://www.facebook.com/sdarmchurch';
   const whatsappUrl  = config?.whatsapp_url  ?? '#';
@@ -35,6 +36,29 @@ export default function Footer({ config }: FooterProps) {
   const [lang, setLang] = useState<Lang>('DE');
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const [email, setEmail] = useState('');
+  const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'conflict'>('idle');
+
+  async function handleSubscribe() {
+    if (!email) return;
+    setSubStatus('loading');
+    try {
+      const res = await fetch(
+        `${apiUrl}/subscribe`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email }),
+        }
+      );
+      if (res.status === 409) { setSubStatus('conflict'); return; }
+      if (!res.ok) throw new Error();
+      setSubStatus('ok');
+      setEmail('');
+    } catch {
+      setSubStatus('error');
+    }
+  }
 
   useEffect(() => {
     function onClickOutside(e: MouseEvent) {
@@ -60,9 +84,25 @@ export default function Footer({ config }: FooterProps) {
         <div className="f-sub">
           <h4>Abonnieren Sie unsere Neuigkeiten!</h4>
           <div className="f-sub-row">
-            <input type="email" placeholder="Ihre E-Mail-Adresse" />
-            <button type="button">Subscribe</button>
+            <input
+              type="email"
+              placeholder="Ihre E-Mail-Adresse"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
+              disabled={subStatus === 'loading'}
+            />
+            <button
+              type="button"
+              onClick={handleSubscribe}
+              disabled={subStatus === 'loading'}
+            >
+              {subStatus === 'loading' ? '…' : 'Subscribe'}
+            </button>
           </div>
+          {subStatus === 'ok'       && <p className="f-sub-ok">Vielen Dank für Ihre Anmeldung!</p>}
+          {subStatus === 'conflict' && <p className="f-sub-err">Diese E-Mail ist bereits registriert.</p>}
+          {subStatus === 'error'    && <p className="f-sub-err">Fehler. Bitte versuchen Sie es später.</p>}
         </div>
 
         {/* Donate */}

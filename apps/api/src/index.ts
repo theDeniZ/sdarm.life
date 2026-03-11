@@ -1,7 +1,7 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { drizzle } from 'drizzle-orm/d1';
-import { posts, siteConfig, KNOWN_CONFIG_KEYS } from '@sdarm/db';
+import { posts, siteConfig, subscribers, KNOWN_CONFIG_KEYS } from '@sdarm/db';
 import { and, isNull, eq, isNotNull, desc } from 'drizzle-orm';
 
 type Bindings = {
@@ -76,6 +76,45 @@ v1.get('/images/*', async (c) => {
 	const headers = new Headers();
 	if (obj.httpMetadata?.contentType) headers.set('Content-Type', obj.httpMetadata.contentType);
 	return new Response(obj.body, { headers });
+});
+
+v1.post('/subscribe', async (c) => {
+	const db = drizzle(c.env.DB);
+	const { email } = await c.req.json<{ email: string }>();
+
+	if (!email || !email.includes('@')) {
+		return c.json({ error: 'Invalid email' }, 400);
+	}
+
+	const token = crypto.randomUUID();
+
+	try {
+		await db.insert(subscribers).values({ email: email.toLowerCase().trim(), token });
+	} catch {
+		// unique constraint — already subscribed (or was unsubscribed)
+		return c.json({ error: 'Already subscribed' }, 409);
+	}
+
+	return c.json({ ok: true }, 201);
+});
+
+v1.get('/unsubscribe', async (c) => {
+	const db = drizzle(c.env.DB);
+	const token = c.req.query('token');
+
+	if (!token) return c.json({ error: 'Missing token' }, 400);
+
+	const [sub] = await db
+		.select()
+		.from(subscribers)
+		.where(eq(subscribers.token, token))
+		.limit(1);
+
+	if (!sub) return c.json({ error: 'Invalid token' }, 404);
+
+	await db.delete(subscribers).where(eq(subscribers.token, token));
+
+	return c.json({ ok: true });
 });
 
 // ── Admin middleware ───────────────────────────────────────────────────────────
@@ -217,6 +256,30 @@ admin.post('/images/upload', async (c) => {
 	});
 
 	return c.json({ key });
+});
+
+// ── Admin — subscribers ───────────────────────────────────────────────────────
+
+admin.get('/subscribers', async (c) => {
+	const db = drizzle(c.env.DB);
+	const rows = await db
+		.select()
+		.from(subscribers)
+		.orderBy(desc(subscribers.createdAt));
+	return c.json(rows);
+});
+
+admin.delete('/subscribers/:id', async (c) => {
+	const db = drizzle(c.env.DB);
+	const id = parseInt(c.req.param('id'), 10);
+
+	const [sub] = await db
+		.delete(subscribers)
+		.where(eq(subscribers.id, id))
+		.returning();
+
+	if (!sub) return c.json({ error: 'Not found' }, 404);
+	return c.json({ ok: true });
 });
 
 // ── Mount ─────────────────────────────────────────────────────────────────────

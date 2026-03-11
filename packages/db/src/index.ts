@@ -37,3 +37,11 @@ export const siteConfig = sqliteTable('site_config', {
   value:     text('value'),
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
+
+export const subscribers = sqliteTable('subscribers', {
+  id:             integer('id').primaryKey({ autoIncrement: true }),
+  email:          text('email').notNull().unique(),
+  token:          text('token').notNull().unique(),
+  unsubscribedAt: integer('unsubscribed_at', { mode: 'timestamp' }),
+  createdAt:      integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});

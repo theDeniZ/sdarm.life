@@ -150,7 +150,7 @@ export default async function HomePage() {
         <AboutSection config={aboutConfig} />
         <ProductsSection />
       </div>
-      <Footer config={footerConfig} />
+      <Footer config={footerConfig} apiUrl={process.env.API_URL} />
     </>
   );
 }
