@@ -42,9 +42,35 @@ jobs:
           workingDirectory: apps/api
           command: d1 migrations apply sdarm-db --remote
 
-  deploy-api:
+  sync-secrets:
     if: github.ref == 'refs/heads/main'
     needs: migrate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          secrets: |
+            CF_CLIENT_ID
+            CF_CLIENT_SECRET
+        env:
+          CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+
+  deploy-api:
+    if: github.ref == 'refs/heads/main'
+    needs: [migrate, sync-secrets]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
