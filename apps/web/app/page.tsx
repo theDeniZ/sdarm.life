@@ -8,6 +8,9 @@ import AboutSection, { type AboutConfig } from './components/AboutSection';
 import ProductsSection from './components/ProductsSection';
 import Footer, { type FooterConfig } from './components/Footer';
 
+export const runtime = 'edge';
+export const dynamic = 'force-dynamic';
+
 // ── API types (shape returned by Drizzle / Hono) ──────────────────────────────
 
 interface ApiPost {
@@ -45,7 +48,7 @@ function formatDate(iso: string | null): string {
 
 async function fetchPosts(): Promise<ApiPost[] | null> {
   try {
-    const res = await fetch(`${API}/posts`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API}/posts`, { cache: 'no-store' });
     if (!res.ok) return null;
     return res.json();
   } catch {
@@ -55,7 +58,7 @@ async function fetchPosts(): Promise<ApiPost[] | null> {
 
 async function fetchConfig(): Promise<ApiConfig | null> {
   try {
-    const res = await fetch(`${API}/config`, { next: { revalidate: 60 } });
+    const res = await fetch(`${API}/config`, { cache: 'no-store' });
     if (!res.ok) return null;
     return res.json();
   } catch {
