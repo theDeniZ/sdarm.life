@@ -18,6 +18,7 @@ interface ApiPost {
   title: string;
   slug: string;
   excerpt: string | null;
+  body: string | null;
   author: string | null;
   videoUrl: string | null;
   coverKey: string | null;
@@ -75,8 +76,11 @@ function toHeroPost(post: ApiPost): HeroPost {
   return {
     title: post.title,
     meta: `${formatDate(post.publishedAt)}${post.author ? ` · ${post.author}` : ''}`,
+    excerpt: post.excerpt ?? '',
+    body: post.body ?? '',
     imageUrl: r2url(post.coverKey) ?? FALLBACK_IMG,
     imageAlt: post.coverAlt ?? post.title,
+    slug: post.slug,
   };
 }
 
@@ -129,11 +133,10 @@ function toFooterConfig(config: ApiConfig): FooterConfig {
 export default async function HomePage() {
   const [allPosts, config] = await Promise.all([fetchPosts(), fetchConfig()]);
 
-  const featuredPost = allPosts?.find((p) => p.isFeatured);
+  const heroPosts = allPosts?.filter((p) => p.isFeatured).map(toHeroPost) ?? [];
   const newsPosts    = allPosts?.map(toNewsPost);
   const videoPosts   = allPosts?.filter((p) => !!p.videoUrl).map(toVideoPost);
 
-  const heroPost    = featuredPost ? toHeroPost(featuredPost) : undefined;
   const aboutConfig = config ? toAboutConfig(config) : undefined;
   const footerConfig = config ? toFooterConfig(config) : undefined;
 
@@ -145,7 +148,7 @@ export default async function HomePage() {
       <Navbar />
       
       <div className="page">
-        <HeroSection post={heroPost} />
+        <HeroSection posts={heroPosts} />
         <NewsSection  posts={newsPosts} />
         <VideoSection videos={videoPosts} />
         <SongbookSection />

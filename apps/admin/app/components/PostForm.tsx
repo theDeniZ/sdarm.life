@@ -134,7 +134,7 @@ export default function PostForm({ id, initial = {} }: Props) {
       </div>
 
       <div className="form-row">
-        <label>Excerpt</label>
+        <label>Preview Text</label>
         <textarea
           rows={3}
           value={form.excerpt}

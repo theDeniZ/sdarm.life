@@ -138,7 +138,7 @@ CF_CLIENT_SECRET=dev
 | `page.tsx` | Server (async) | `app/page.tsx` |
 | `BgCanvas` | **Client** | canvas grayscale background effect |
 | `Navbar` | **Client** | sticky nav with language switcher |
-| `HeroSection` | Server | featured post or static fallback |
+| `HeroSection` | **Client** | featured-posts carousel + static fallback |
 | `NewsSection` | Server | 2-col news grid |
 | `VideoSection` | Server | 2-col video grid |
 | `SongbookSection` | Server | static search + song cards |
@@ -149,6 +149,27 @@ CF_CLIENT_SECRET=dev
 `page.tsx` fetches `fetchPosts()` + `fetchConfig()` in parallel with `revalidate: 60`. Both return `null` on error → components fall back to static data silently.
 
 Data mappers: `toHeroPost`, `toNewsPost`, `toVideoPost`, `toAboutConfig`, `toFooterConfig`.
+
+### HeroSection carousel
+
+`HeroSection` is a `'use client'` strip carousel. It receives only **featured** posts (`isFeatured = true`) via `posts?: HeroPost[]`. Falls back to a static placeholder if the array is empty.
+
+**`HeroPost` interface:**
+| Field | Source | Used in |
+|---|---|---|
+| `title` | `posts.title` | Detail area (h1) |
+| `meta` | formatted date + author | Detail area |
+| `body` | `posts.body` | Detail area paragraph |
+| `excerpt` | `posts.excerpt` | Strip card preview text (falls back to `title`) |
+| `imageUrl` | R2 cover key → URL | Both: hero background + card thumbnail |
+| `imageAlt` | `posts.cover_alt` | Alt text |
+| `slug` | `posts.slug` | React key |
+
+**Layout:** `.hero` (full-bleed, dark background image + overlay, text bottom-aligned) sits above `.hero-strip-wrap` (full-bleed dark strip). Both use `margin-left: calc(-1 * var(--gl))` / `margin-right: calc(-1 * var(--gr))` to bleed.
+
+**Carousel behaviour:** 5 s auto-cycle, progress bar via CSS animation restarted by React `key`, hero text + background cross-fade (420 ms), strip scrolls horizontally when posts overflow. Card text slides in from right, exits left on `.leaving` class.
+
+**Admin note:** The `excerpt` field is labelled **"Preview Text"** in the PostForm (it drives the card strip text, not a traditional excerpt).
 
 ## `apps/admin` component map
 
