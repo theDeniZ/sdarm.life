@@ -135,20 +135,32 @@ CF_CLIENT_SECRET=dev
 
 | Component | Type | File |
 |---|---|---|
-| `page.tsx` | Server (async) | `app/page.tsx` |
-| `BgCanvas` | **Client** | canvas grayscale background effect |
-| `Navbar` | **Client** | sticky nav with language switcher |
+| `layout.tsx` | Server (async) | root layout — fetches config, renders `BgCanvas` once for all pages |
+| `page.tsx` | Server (async) | `app/page.tsx` — home page |
+| `posts/[slug]/page.tsx` | Server (async) | post detail page at `/posts/[slug]` |
+| `BgCanvas` | **Client** | canvas grayscale background effect — lives in `layout.tsx`, persists across navigations |
+| `Navbar` | **Client** | sticky nav; all links use `/#section` hrefs for always-home anchors |
 | `HeroSection` | **Client** | featured-posts carousel + static fallback |
-| `NewsSection` | Server | 2-col news grid |
+| `NewsSection` | Server | 2-col news grid; cards link to `/posts/[slug]` via `<Link>` |
 | `VideoSection` | Server | 2-col video grid |
 | `SongbookSection` | Server | static search + song cards |
 | `AboutSection` | Server | 2-col about layout |
 | `ProductsSection` | **Client** | book/product cards |
-| `Footer` | **Client** | subscribe, donate, socials. Accepts `apiUrl` prop (passed from `page.tsx` via `process.env.API_URL`). |
+| `Footer` | **Client** | subscribe, donate, socials. Accepts `apiUrl` prop (passed from server component via `process.env.API_URL`). |
 
-`page.tsx` fetches `fetchPosts()` + `fetchConfig()` in parallel with `revalidate: 60`. Both return `null` on error → components fall back to static data silently.
+`page.tsx` fetches `fetchPosts()` + `fetchConfig()` in parallel with `cache: 'no-store'`. Both return `null` on error → components fall back to static data silently.
 
 Data mappers: `toHeroPost`, `toNewsPost`, `toVideoPost`, `toAboutConfig`, `toFooterConfig`.
+
+### Post detail page (`posts/[slug]/page.tsx`)
+
+Server component with edge runtime. Fetches the single post + all posts in parallel.
+
+**Layout:** hero (cover image as full-bleed background + overlay + back button) → Inhalt section (body text) → Video section (if `videoUrl` set) → Weitere Beiträge grid (up to 4 other posts). Reuses `.hero*`, `.section-block`, `.section-label`, `.video-card`, `.news-card` CSS classes.
+
+**Post-detail CSS classes** (in `globals.css`): `.post-hero`, `.post-back`, `.post-meta`, `.post-body`, `.post-more-title`.
+
+**`BgCanvas` placement** — `layout.tsx` fetches `hero_bg_key` from config and passes it to `BgCanvas`. Falls back to a static Unsplash URL. `BgCanvas` is NOT in individual pages. Do not add `export const runtime = 'edge'` to `layout.tsx` — it breaks the build.
 
 ### HeroSection carousel
 
@@ -208,6 +220,10 @@ All images use Next.js `<Image fill>` inside aspect-ratio containers. `next.conf
 - **Date types** — all date fields from API are ISO strings (`string | null`), not numbers.
 - **`BgCanvas` z-index** — must be `-1` (step 2, below block content). At `0` it covers page text.
 - **`.page { background: #fff }`** — required to prevent canvas bleeding through transparent sections.
+- **`BgCanvas` in layout, not in pages** — `BgCanvas` lives in `layout.tsx` so it persists across client-side navigations (no redraw flash). Never add it to individual pages.
+- **`export const runtime = 'edge'` in layout breaks the build** — only set this on individual page files, never on `layout.tsx`.
+- **Internal navigation must use `<Link>`** — using plain `<a href>` for internal routes causes a full page reload, remounting `BgCanvas` and causing a background flicker. Always use Next.js `<Link>` for same-site navigation.
+- **R2 image cache headers** — new uploads get `Cache-Control: public, max-age=31536000, immutable`. Existing objects in R2 have no cache header; apply a Cloudflare Cache Rule on `images.sdarm.life/*` to cover them.
 - **Image preview after upload** — keep `URL.createObjectURL(file)` as preview; don't switch to R2 URL (local `.wrangler/state/` objects aren't on `images.sdarm.life`). R2 key is still stored correctly.
 - **`setupDevPlatform` in `next.config.ts`** — use `.then()`, not top-level `await` (Next.js 15 compiles config to CJS).
 - **`.dev.vars` vs `wrangler.jsonc`** — local secrets go in `apps/api/.dev.vars` (auto-loaded by Wrangler). The `dev.vars` field inside `wrangler.jsonc` is not valid.
@@ -215,4 +231,4 @@ All images use Next.js `<Image fill>` inside aspect-ratio containers. `next.conf
 - **`drizzle-orm` in `@sdarm/api`** — must be a direct dependency (not just in `@sdarm/db`); wrangler bundles per-package and won't hoist workspace deps.
 - **`@cloudflare/next-on-pages`** — requires `vercel@47.0.4` pinned as devDep (later versions break the build). Requires `nodejs_compat` flag set in Pages project settings.
 - **Next.js version** — both apps use **15.2.2** (not 16). Next.js 16 Turbopack fails inside `vercel build` in a monorepo.
-- **Passing server env vars to client components** — `apps/web` uses server-only env vars (`API_URL`, `R2_URL`). Client components cannot read these. Pass them as props from the server `page.tsx` instead of adding `NEXT_PUBLIC_` vars. Example: `Footer` receives `apiUrl={process.env.API_URL}`.
+- **Passing server env vars to client components** — `apps/web` uses server-only env vars (`API_URL`, `R2_URL`). Client components cannot read these. Pass them as props from the server component instead of adding `NEXT_PUBLIC_` vars. Example: `Footer` receives `apiUrl={process.env.API_URL}`.

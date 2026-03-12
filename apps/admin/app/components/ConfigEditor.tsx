@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { KNOWN_CONFIG_KEYS, type ConfigKey } from '@sdarm/db';
+import { type ConfigKey } from '@sdarm/db';
 import ImageUpload from './ImageUpload';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life';
@@ -27,6 +27,12 @@ const LABELS: Record<ConfigKey, string> = {
   instagram_url:   'Instagram',
   youtube_url:     'YouTube',
 };
+
+const SECTIONS: { label: string; keys: ConfigKey[] }[] = [
+  { label: 'General',  keys: ['hero_bg_key', 'hero_bg_alt', 'donation_url'] },
+  { label: 'About',    keys: ['about_text_1', 'about_text_2', 'about_image_key', 'about_image_alt', 'about_link_url'] },
+  { label: 'Footer',   keys: ['facebook_url', 'whatsapp_url', 'instagram_url', 'youtube_url'] },
+];
 
 const TEXTAREA_KEYS: ConfigKey[] = ['about_text_1', 'about_text_2'];
 const IMAGE_KEYS:    ConfigKey[] = ['about_image_key', 'hero_bg_key'];
@@ -57,10 +63,26 @@ function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initia
     timer.current = setTimeout(() => setFlash(null), 2000);
   }
 
+  function clear() {
+    setValue('');
+    save('');
+  }
+
+  const cardHeader = (
+    <div className="config-card-header">
+      <span className="config-label">{LABELS[configKey]}</span>
+      {value && (
+        <button className="config-clear-btn" onClick={clear} title="Remove">
+          ✕
+        </button>
+      )}
+    </div>
+  );
+
   if (IMAGE_KEYS.includes(configKey)) {
     return (
       <div className="config-card">
-        <div className="config-label">{LABELS[configKey]}</div>
+        {cardHeader}
         <ImageUpload
           value={value || null}
           onChange={(key) => { setValue(key); save(key); }}
@@ -74,7 +96,7 @@ function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initia
   if (TEXTAREA_KEYS.includes(configKey)) {
     return (
       <div className="config-card">
-        <div className="config-label">{LABELS[configKey]}</div>
+        {cardHeader}
         <textarea
           className="config-textarea"
           rows={4}
@@ -90,7 +112,7 @@ function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initia
 
   return (
     <div className="config-card">
-      <div className="config-label">{LABELS[configKey]}</div>
+      {cardHeader}
       <input
         className="config-input"
         type={URL_KEYS.includes(configKey) ? 'url' : 'text'}
@@ -119,13 +141,20 @@ export default function ConfigEditor() {
   if (!values) return <div className="state-loading">Loading…</div>;
 
   return (
-    <div className="config-grid">
-      {KNOWN_CONFIG_KEYS.map((key) => (
-        <ConfigField
-          key={key}
-          configKey={key}
-          initialValue={values[key] ?? ''}
-        />
+    <div className="config-sections">
+      {SECTIONS.map((section) => (
+        <div key={section.label} className="config-section">
+          <h2 className="config-section-title">{section.label}</h2>
+          <div className="config-grid">
+            {section.keys.map((key) => (
+              <ConfigField
+                key={key}
+                configKey={key}
+                initialValue={values[key] ?? ''}
+              />
+            ))}
+          </div>
+        </div>
       ))}
     </div>
   );

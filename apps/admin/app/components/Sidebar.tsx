@@ -33,6 +33,12 @@ export default function Sidebar() {
         >
           Subscribers
         </Link>
+        <Link
+          href="/images"
+          className={`sidebar-link${path.startsWith('/images') ? ' active' : ''}`}
+        >
+          Images
+        </Link>
       </nav>
     </aside>
   );

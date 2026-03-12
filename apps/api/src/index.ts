@@ -244,6 +244,51 @@ admin.put('/config/:key', async (c) => {
 	return c.json({ ok: true });
 });
 
+// ── Admin — image library ─────────────────────────────────────────────────────
+
+admin.get('/images', async (c) => {
+	const db = drizzle(c.env.DB);
+
+	const [list, postRows, configRows] = await Promise.all([
+		c.env.IMAGES.list(),
+		db.select({
+			title: posts.title,
+			coverKey: posts.coverKey,
+			thumbKey: posts.thumbKey,
+		}).from(posts).where(isNull(posts.deletedAt)),
+		db.select().from(siteConfig),
+	]);
+
+	const usage = new Map<string, { type: string; label: string }[]>();
+	function addUsage(key: string | null, type: string, label: string) {
+		if (!key) return;
+		if (!usage.has(key)) usage.set(key, []);
+		usage.get(key)!.push({ type, label });
+	}
+
+	for (const p of postRows) {
+		addUsage(p.coverKey, 'post_cover', p.title);
+		addUsage(p.thumbKey, 'post_thumb', p.title);
+	}
+	for (const cfg of configRows) {
+		addUsage(cfg.value, 'config', cfg.key);
+	}
+
+	return c.json(list.objects.map((o) => ({
+		key: o.key,
+		size: o.size,
+		uploaded: o.uploaded.toISOString(),
+		usedIn: usage.get(o.key) ?? [],
+	})));
+});
+
+admin.delete('/images', async (c) => {
+	const key = c.req.query('key');
+	if (!key) return c.json({ error: 'Missing key' }, 400);
+	await c.env.IMAGES.delete(key);
+	return c.json({ ok: true });
+});
+
 // ── Admin — image upload ──────────────────────────────────────────────────────
 
 admin.post('/images/upload', async (c) => {

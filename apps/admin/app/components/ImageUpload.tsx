@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life';
 const R2  = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
@@ -24,6 +24,10 @@ export default function ImageUpload({ value, onChange }: Props) {
   const [status, setStatus] = useState<'idle' | 'uploading' | 'ok' | 'err'>('idle');
   const [drag, setDrag] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (value === null) setPreview(null);
+  }, [value]);
 
   async function upload(file: File) {
     setStatus('uploading');
