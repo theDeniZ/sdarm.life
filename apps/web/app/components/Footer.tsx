@@ -1,10 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 
-const LANGS = ['DE', 'RU', 'EN'] as const;
-type Lang = (typeof LANGS)[number];
 
 export interface FooterConfig {
   donation_url?: string | null;
@@ -14,12 +12,10 @@ export interface FooterConfig {
   youtube_url?: string | null;
 }
 
-const NAV_LINKS = [
-  { label: 'Neuigkeiten', href: '#neuigkeiten' },
-  { label: 'Video',       href: '#video' },
-  { label: 'Liederbuch',  href: '#liederbuch' },
+const FOOTER_LINKS = [
   { label: 'Über uns',    href: '#ueber-uns' },
-  { label: 'Produkte',    href: '#produkte' },
+  { label: 'Impressum',   href: '/impressum' },
+  { label: 'Datenschutz', href: '/datenschutz' },
 ];
 
 interface FooterProps {
@@ -33,9 +29,6 @@ export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1
   const whatsappUrl  = config?.whatsapp_url  ?? '#';
   const instagramUrl = config?.instagram_url ?? 'https://www.instagram.com/sdarmchurch';
   const youtubeUrl   = config?.youtube_url   ?? 'https://www.youtube.com/sdarmchurch';
-  const [lang, setLang] = useState<Lang>('DE');
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   const [email, setEmail] = useState('');
   const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'conflict'>('idle');
 
@@ -60,17 +53,7 @@ export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1
     }
   }
 
-  useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('click', onClickOutside);
-    return () => document.removeEventListener('click', onClickOutside);
-  }, []);
-
-  return (
+return (
     <footer>
       <div className="footer-top">
         {/* Logo */}
@@ -82,7 +65,6 @@ export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1
 
         {/* Subscribe */}
         <div className="f-sub">
-          <h4>Abonnieren Sie unsere Neuigkeiten!</h4>
           <div className="f-sub-row">
             <input
               type="email"
@@ -107,22 +89,21 @@ export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1
 
         {/* Donate */}
         <div className="f-don">
-          <h4>Bitte unterstützen Sie das Projekt.</h4>
           <a href={donationUrl} target="_blank" rel="noopener noreferrer" className="btn-donate">Donate</a>
         </div>
       </div>
 
       <div className="footer-bottom">
         <ul className="f-nav">
-          {NAV_LINKS.map(({ label, href }) => (
+          {FOOTER_LINKS.map(({ label, href }) => (
             <li key={href}>
-              <a href={href}>{label}</a>
+              <a href={href} rel="noopener noreferrer">{label}</a>
             </li>
           ))}
         </ul>
 
         {/* Footer lang switcher */}
-        <div
+        {/* <div
           className={`f-lang-sw${open ? ' open' : ''}`}
           ref={ref}
         >
@@ -151,7 +132,7 @@ export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1
               </a>
             ))}
           </div>
-        </div>
+        </div> */}
 
         {/* Social icons */}
         <div className="f-social">

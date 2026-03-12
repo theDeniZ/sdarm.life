@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 const NAV_LINKS = [
@@ -11,25 +10,7 @@ const NAV_LINKS = [
   { label: 'Produkte',    href: '#produkte' },
 ];
 
-const LANGS = ['DE', 'RU', 'EN'] as const;
-type Lang = (typeof LANGS)[number];
-
 export default function Navbar() {
-  const [lang, setLang] = useState<Lang>('DE');
-  const [open, setOpen] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
-
-  // Close dropdown when clicking outside
-  useEffect(() => {
-    function onClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
-        setOpen(false);
-      }
-    }
-    document.addEventListener('click', onClickOutside);
-    return () => document.removeEventListener('click', onClickOutside);
-  }, []);
-
   return (
     <nav>
       <div className="nav-logo">
@@ -47,7 +28,7 @@ export default function Navbar() {
       </ul>
 
       <div className="nav-right">
-        {/* Language switcher */}
+        {/* Language switcher — commented out
         <div
           className={`lang-sw${open ? ' open' : ''}`}
           id="navLang"
@@ -79,6 +60,7 @@ export default function Navbar() {
             ))}
           </div>
         </div>
+        */}
 
         {/* Search button */}
         <button className="search-btn" aria-label="Suche">

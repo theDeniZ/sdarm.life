@@ -69,7 +69,7 @@ export default function NewsSection({ posts = STATIC_NEWS }: NewsSectionProps) {
         <div className="news-grid">
           {posts.map((post) => (
             <div key={post.id} className="news-card">
-              <a className="img16" href={post.href} style={{ position: 'relative' }}>
+              <a className="img16" href={post.href} target="_blank" rel="noopener noreferrer" style={{ position: 'relative' }}>
                 <Image
                   src={post.imageUrl}
                   alt={post.imageAlt}

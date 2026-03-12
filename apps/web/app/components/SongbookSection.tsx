@@ -10,9 +10,9 @@ const STATIC_SONGS: Song[] = [
   { id: '1', num: '№ 1', title: 'Heilig, heilig, heilig', tag: 'Lobpreis · Reginald Heber', firstLine: 'Heilig, heilig, heilig! Herr, allmächtiger Gott! Früh am Morgen steigt unser Lied zu Dir empor...' },
   { id: '2', num: '№ 2', title: 'Ein feste Burg ist unser Gott', tag: 'Reformation · Martin Luther', firstLine: 'Ein feste Burg ist unser Gott, ein gute Wehr und Waffen. Er hilft uns frei aus aller Not...' },
   { id: '3', num: '№ 3', title: 'Amazing Grace', tag: 'Gnade · John Newton', firstLine: 'Amazing grace, how sweet the sound that saved a wretch like me...' },
-  { id: '4', num: '№ 4', title: 'In Christ Alone', tag: 'Christologie · Townend / Getty', firstLine: 'In Christ alone my hope is found, He is my light, my strength, my song...' },
-  { id: '5', num: '№ 5', title: 'Wie groß bist du', tag: 'Anbetung · Carl Boberg', firstLine: 'O Herr mein Gott, wenn ich in Ehrfurcht staune über all das, was deine Hand erschuf...' },
-  { id: '6', num: '№ 6', title: 'Come Thou Fount', tag: 'Hingabe · Robert Robinson', firstLine: 'Come, Thou Fount of every blessing, tune my heart to sing Thy grace...' },
+  // { id: '4', num: '№ 4', title: 'In Christ Alone', tag: 'Christologie · Townend / Getty', firstLine: 'In Christ alone my hope is found, He is my light, my strength, my song...' },
+  // { id: '5', num: '№ 5', title: 'Wie groß bist du', tag: 'Anbetung · Carl Boberg', firstLine: 'O Herr mein Gott, wenn ich in Ehrfurcht staune über all das, was deine Hand erschuf...' },
+  // { id: '6', num: '№ 6', title: 'Come Thou Fount', tag: 'Hingabe · Robert Robinson', firstLine: 'Come, Thou Fount of every blessing, tune my heart to sing Thy grace...' },
 ];
 
 interface SongbookSectionProps {

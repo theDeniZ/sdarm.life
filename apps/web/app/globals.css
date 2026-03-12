@@ -438,6 +438,7 @@ nav {
 }
 
 .section-block {
+  scroll-margin-top: 52px;
   display: grid;
   grid-template-columns: 120px 1fr;
   gap: 32px;
@@ -755,7 +756,8 @@ footer {
   cursor: pointer;
   transition: background .18s;
   white-space: nowrap;
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
 }
 
 .btn-donate:hover { background: #333; }
@@ -817,6 +819,61 @@ footer {
 .f-lang-drop a:hover { background: var(--light); color: var(--red); }
 .f-lang-drop a.active { color: var(--red); font-weight: 600; }
 
+/* ══════════════════════════════════════════════
+   LEGAL PAGES (impressum, datenschutz)
+══════════════════════════════════════════════ */
+
+.legal-page {
+  max-width: 720px;
+  padding-top: 56px;
+  padding-bottom: 100px;
+}
+
+.legal-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 40px;
+  padding: 8px 18px;
+  background: var(--light);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--mid);
+  text-decoration: none;
+  transition: background .15s, color .15s;
+}
+.legal-back:hover { background: var(--border); color: var(--dark); }
+
+.legal-page h1 {
+  font-size: 32px;
+  font-weight: 700;
+  margin-bottom: 40px;
+  color: var(--dark);
+}
+
+.legal-page h2 {
+  font-size: 14px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .06em;
+  color: var(--mid);
+  margin-top: 36px;
+  margin-bottom: 8px;
+}
+
+.legal-page p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+
+.legal-page a { color: var(--dark); text-decoration: underline; }
+.legal-page a:hover { color: var(--red); }
+.legal-page code { font-family: monospace; font-size: 13px; background: var(--border); padding: 1px 5px; border-radius: 3px; }
+
+
 .f-social { display: flex; gap: 16px; align-items: center; }
 .f-social a { color: #8a8078; display: flex; align-items: center; transition: color .18s; }
 .f-social a:hover { color: var(--dark); }
@@ -829,6 +886,7 @@ footer {
 
 @media (max-width: 900px) {
   .page { padding: 0 32px; }
+  .legal-page { padding-top: 56px; }
 
   .hero {
     margin-left: -32px;
@@ -885,6 +943,7 @@ footer {
   body { box-shadow: none; }
 
   .page { padding: 0 16px; }
+  .legal-page { padding-top: 56px; }
 
   .hero {
     min-height: 220px;
@@ -928,5 +987,5 @@ footer {
 
   .f-don { min-width: 0; width: 100%; }
   .f-sub-row { width: 100%; }
-  .btn-donate { width: 100%; text-align: center; padding: 0; }
+  .btn-donate { width: 100%; justify-content: center; padding: 0; }
 }
