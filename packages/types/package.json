@@ -1,0 +1,12 @@
+{
+  "name": "@sdarm/types",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "build": "echo \"Types build\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

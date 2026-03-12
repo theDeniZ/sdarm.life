@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 
-import SubscriberList from '../components/SubscriberList';
+import SubscriberList from '../domains/subscribers/SubscriberList';
 
 export default function SubscribersPage() {
   return (

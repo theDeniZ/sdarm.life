@@ -1,7 +1,7 @@
 export const runtime = 'edge';
 
 import Link from 'next/link';
-import PostList from '../components/PostList';
+import PostList from '../domains/posts/PostList';
 
 export default function PostsPage() {
   return (

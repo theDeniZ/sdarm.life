@@ -1,0 +1,67 @@
+# API reference
+
+Hono Worker at `api.sdarm.life`. All routes versioned under `/api/v1`.
+
+Source: `apps/api/src/index.ts` (target: `apps/api/src/routes/` — see [architecture.md](architecture.md)).
+
+## Public routes
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/api/v1/posts` | Active posts. `?featured=1`, `?video=1`, `?limit=N`, `?offset=N`. Returns `{ items, total }`. |
+| `GET` | `/api/v1/posts/:slug` | Single post by slug. 404 if deleted. |
+| `GET` | `/api/v1/config` | All `site_config` rows as `{ key: value }` map. |
+| `GET` | `/api/v1/images/*` | Proxy-serves R2 objects by key path (local dev only). |
+| `POST` | `/api/v1/subscribe` | Subscribe email. 409 if already subscribed (including unsubscribed). |
+| `GET` | `/api/v1/unsubscribe` | `?token=` — marks subscriber as unsubscribed. Idempotent. |
+
+## Admin routes
+
+Require `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers on every request.
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/api/v1/admin/posts/:id` | Single post by ID (for edit page). |
+| `POST` | `/api/v1/admin/posts` | Create post. |
+| `PATCH` | `/api/v1/admin/posts/:id` | Partial update (any field). |
+| `DELETE` | `/api/v1/admin/posts/:id` | Soft-delete: sets `deleted_at = now()`. |
+| `PUT` | `/api/v1/admin/config/:key` | Upsert site_config key. 400 if unknown key. |
+| `GET` | `/api/v1/admin/images` | List images from D1 with usage info. `?limit=N&offset=N&unused=1`. Returns `{ items, total }`. |
+| `DELETE` | `/api/v1/admin/images?key=` | Delete from R2 + D1. |
+| `POST` | `/api/v1/admin/images/upload` | `multipart/form-data` → R2 + D1 → returns `{ key }`. |
+| `POST` | `/api/v1/admin/images/backfill` | One-time: syncs all R2 objects into `images` table. Returns `{ synced }`. |
+| `GET` | `/api/v1/admin/subscribers` | Active subscribers, newest first. `?limit=N&offset=N`. Returns `{ items, total }`. |
+| `DELETE` | `/api/v1/admin/subscribers/:id` | Hard-delete subscriber. |
+
+**Image usage** — `GET /admin/images` cross-references `posts` (`cover_key`, `thumb_key`) and `site_config` to compute `usedIn` per image. Each item: `{ key, size, uploaded, usedIn: { type, label }[] }`. `?unused=1` filters to images not referenced in either table.
+
+**CORS origins:** `https://sdarm.life`, `https://admin.sdarm.life`, `http://localhost:3000`, `http://localhost:3001`
+
+## Auth model
+
+- `CF_CLIENT_ID` / `CF_CLIENT_SECRET` are plain random hex strings (not CF Access service tokens)
+- Stored as GitHub Actions secrets; synced to Worker via `sync-secrets` CI job on every push to `main`
+- Same values set as `NEXT_PUBLIC_CF_CLIENT_ID/SECRET` env vars in the admin Pages project
+- Local dev: both set to `dev`/`dev` in `apps/api/.dev.vars` and `apps/admin/.env.local`
+
+## Response contract
+
+All list endpoints return `{ items: T[], total: number }`. Never return a bare array.
+
+All date fields are ISO strings (`string | null`) — Drizzle stores as integer seconds, Hono serializes on the way out. See [schema.md](schema.md) for Drizzle timestamp note.
+
+Target DTO types live in `packages/types` (`@sdarm/types`) — see [architecture.md](architecture.md).
+
+## API coding conventions
+
+**Routes are versioned under `/api/v1`.** Admin routes live under `/api/v1/admin/*` — always verify auth before any mutation.
+
+**Partial updates use `PATCH`.** Only set fields the caller explicitly provides.
+
+**Soft-delete only for posts.** `DELETE /admin/posts/:id` sets `deleted_at`. Hard-delete is only used for subscribers and images.
+
+**`notInArray(col, [])` is invalid Drizzle SQL.** When the input array is empty, skip the filter entirely — do not pass an empty array.
+
+**`drizzle-orm` must be a direct dependency of `@sdarm/api`.** Wrangler bundles per-package and will not hoist it from `@sdarm/db`.
+
+**`fetch().json<T>()`** is Cloudflare Workers-only. In Next.js always use `(await res.json()) as T`.

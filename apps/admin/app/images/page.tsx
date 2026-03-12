@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 
-import ImageLibrary from '../components/ImageLibrary';
+import ImageLibrary from '../domains/images/ImageLibrary';
 
 export default function ImagesPage() {
   return (

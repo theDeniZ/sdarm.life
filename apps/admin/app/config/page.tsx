@@ -1,6 +1,6 @@
 export const runtime = 'edge';
 
-import ConfigEditor from '../components/ConfigEditor';
+import ConfigEditor from '../domains/config/ConfigEditor';
 
 export default function ConfigPage() {
   return (

@@ -3,45 +3,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Navbar from '../../components/Navbar';
 import Footer from '../../components/Footer';
+import { fetchPost, fetchPosts, r2url, FALLBACK_IMG } from '../../lib/api';
+import { formatDate } from '../../lib/format';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
-
-// ── Types ─────────────────────────────────────────────────────────────────────
-
-interface ApiPost {
-  id: number;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  body: string | null;
-  author: string | null;
-  videoUrl: string | null;
-  coverKey: string | null;
-  coverAlt: string | null;
-  thumbKey: string | null;
-  isFeatured: boolean;
-  publishedAt: string | null;
-}
-
-// ── Helpers ───────────────────────────────────────────────────────────────────
-
-const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
-const R2  = process.env.R2_URL  ?? 'https://images.sdarm.life';
-
-function r2url(key: string | null): string | null {
-  return key && R2 ? `${R2}/${key}` : null;
-}
-
-function formatDate(iso: string | null): string {
-  if (!iso) return '';
-  const d = new Date(iso);
-  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-}
-
-const FALLBACK_IMG = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=85&fit=crop';
-
-// ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function PostDetailPage({
   params,
@@ -50,20 +16,16 @@ export default async function PostDetailPage({
 }) {
   const { slug } = await params;
 
-  const [postRes, allRes] = await Promise.all([
-    fetch(`${API}/posts/${slug}`, { cache: 'no-store' }),
-    fetch(`${API}/posts?limit=5`, { cache: 'no-store' }),
+  const [post, allPosts] = await Promise.all([
+    fetchPost(slug),
+    fetchPosts('limit=5'),
   ]);
 
-  if (!postRes.ok) notFound();
-
-  const post = (await postRes.json()) as ApiPost;
-  const allPosts: ApiPost[] = allRes.ok ? ((await allRes.json()) as { items: ApiPost[] }).items : [];
+  if (!post) notFound();
 
   const coverUrl = r2url(post.coverKey) ?? FALLBACK_IMG;
   const meta = [formatDate(post.publishedAt), post.author].filter(Boolean).join(' · ');
-
-  const others = allPosts.filter((p) => p.slug !== slug).slice(0, 4);
+  const others = (allPosts ?? []).filter((p) => p.slug !== slug).slice(0, 4);
 
   return (
     <>
@@ -72,9 +34,7 @@ export default async function PostDetailPage({
       <div className="page">
         {/* Hero */}
         <div className="hero post-hero">
-          <Link href="/" className="post-back">
-            ← Zurück
-          </Link>
+          <Link href="/" className="post-back">← Zurück</Link>
           <div className="hero-bg">
             <Image
               src={coverUrl}
@@ -100,7 +60,7 @@ export default async function PostDetailPage({
           </div>
         )}
 
-        {/* Video section */}
+        {/* Video */}
         {post.videoUrl && (
           <div className="section-block">
             <div className="section-label">Video</div>
@@ -138,7 +98,7 @@ export default async function PostDetailPage({
             <div className="news-grid">
               {others.map((p) => {
                 const imgUrl = r2url(p.coverKey) ?? FALLBACK_IMG;
-                const pMeta = [formatDate(p.publishedAt), p.author].filter(Boolean).join(' · ');
+                const pMeta  = [formatDate(p.publishedAt), p.author].filter(Boolean).join(' · ');
                 return (
                   <div key={p.id} className="news-card">
                     <Link
