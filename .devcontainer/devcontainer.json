@@ -1,0 +1,55 @@
+{
+	"name": "sdarm.life",
+	"build": {
+		"dockerfile": "Dockerfile",
+		"context": "."
+	},
+	"features": {
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/github-cli:1": {}
+	},
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"editor.defaultFormatter": "esbenp.prettier-vscode",
+				"editor.formatOnSave": true,
+				"editor.rulers": [80, 120],
+				"files.watcherExclude": {
+					"**/node_modules": true,
+					"**/.turbo": true,
+					"**/.next": true,
+					"**/.vercel": true
+				},
+				"search.exclude": {
+					"**/node_modules": true,
+					"**/.turbo": true,
+					"**/pnpm-lock.yaml": true
+				}
+			},
+			"extensions": [
+				"dbaeumer.vscode-eslint",
+				"esbenp.prettier-vscode",
+				"bradlc.vscode-tailwindcss",
+				"vitest.explorer",
+				"github.copilot"
+			]
+		}
+	},
+	"remoteUser": "node",
+	"postCreateCommand": "bash .devcontainer/post-create.sh",
+	"forwardPorts": [3000, 3001, 8787],
+	"portAttributes": {
+		"3000": {
+			"label": "Web (port 3000)",
+			"onAutoForward": "notify"
+		},
+		"3001": {
+			"label": "Admin (port 3001)",
+			"onAutoForward": "notify"
+		},
+		"8787": {
+			"label": "Wrangler Dev (port 8787)",
+			"onAutoForward": "notify"
+		}
+	}
+}
