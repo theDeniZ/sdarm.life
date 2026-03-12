@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Pagination from './Pagination';
+
+const LIMIT = 20;
 
 type Subscriber = {
   id: number;
@@ -26,16 +29,24 @@ function fmtDate(ts: string | null) {
 
 export default function SubscriberList() {
   const [items, setItems] = useState<Subscriber[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
+  async function load(p: number) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/v1/admin/subscribers`, { headers: adminHeaders() });
+      const offset = (p - 1) * LIMIT;
+      const res = await fetch(
+        `${API}/api/v1/admin/subscribers?limit=${LIMIT}&offset=${offset}`,
+        { headers: adminHeaders() },
+      );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setItems(await res.json());
+      const data = await res.json() as { items: Subscriber[]; total: number };
+      setItems(data.items);
+      setTotal(data.total);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -43,7 +54,7 @@ export default function SubscriberList() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(page); }, [page]);
 
   async function remove(sub: Subscriber) {
     if (!confirm(`Remove ${sub.email}?`)) return;
@@ -51,7 +62,7 @@ export default function SubscriberList() {
       method: 'DELETE',
       headers: adminHeaders(),
     });
-    load();
+    load(page);
   }
 
   if (loading) return <div className="state-loading">Loading…</div>;
@@ -59,6 +70,7 @@ export default function SubscriberList() {
   if (items.length === 0) return <div className="state-empty">No subscribers yet.</div>;
 
   return (
+    <>
     <div className="table-wrap">
       <table>
         <thead>
@@ -83,5 +95,7 @@ export default function SubscriberList() {
         </tbody>
       </table>
     </div>
+    <Pagination page={page} total={total} limit={LIMIT} onChange={setPage} />
+    </>
   );
 }

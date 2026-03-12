@@ -1,8 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import { drizzle } from 'drizzle-orm/d1';
-import { posts, siteConfig, subscribers, KNOWN_CONFIG_KEYS } from '@sdarm/db';
-import { and, isNull, eq, isNotNull, desc } from 'drizzle-orm';
+import { posts, siteConfig, subscribers, images, KNOWN_CONFIG_KEYS } from '@sdarm/db';
+import { and, isNull, eq, isNotNull, desc, count, notInArray } from 'drizzle-orm';
 
 type Bindings = {
 	DB: D1Database;
@@ -33,19 +33,22 @@ const v1 = new Hono<{ Bindings: Bindings }>();
 
 v1.get('/posts', async (c) => {
 	const db = drizzle(c.env.DB);
-	const { featured, video } = c.req.query();
+	const { featured, video, limit: limitQ, offset: offsetQ } = c.req.query();
 
 	let filter = isNull(posts.deletedAt);
 	if (featured === '1') filter = and(filter, eq(posts.isFeatured, true))!;
 	if (video === '1') filter = and(filter, isNotNull(posts.videoUrl))!;
 
-	const rows = await db
-		.select()
-		.from(posts)
-		.where(filter)
-		.orderBy(desc(posts.publishedAt));
+	const limit  = limitQ  ? parseInt(limitQ,  10) : undefined;
+	const offset = offsetQ ? parseInt(offsetQ, 10) : 0;
 
-	return c.json(rows);
+	const [items, [{ total }]] = await Promise.all([
+		db.select().from(posts).where(filter).orderBy(desc(posts.publishedAt))
+			.limit(limit ?? 10_000).offset(offset),
+		db.select({ total: count() }).from(posts).where(filter),
+	]);
+
+	return c.json({ items, total });
 });
 
 v1.get('/posts/:slug', async (c) => {
@@ -131,6 +134,14 @@ admin.use('*', async (c, next) => {
 });
 
 // ── Admin — posts ─────────────────────────────────────────────────────────────
+
+admin.get('/posts/:id', async (c) => {
+	const db = drizzle(c.env.DB);
+	const id = parseInt(c.req.param('id'), 10);
+	const [post] = await db.select().from(posts).where(eq(posts.id, id)).limit(1);
+	if (!post) return c.json({ error: 'Not found' }, 404);
+	return c.json(post);
+});
 
 admin.post('/posts', async (c) => {
 	const db = drizzle(c.env.DB);
@@ -248,14 +259,15 @@ admin.put('/config/:key', async (c) => {
 
 admin.get('/images', async (c) => {
 	const db = drizzle(c.env.DB);
+	const { limit: limitQ, offset: offsetQ, unused } = c.req.query();
+	const limit  = limitQ  ? parseInt(limitQ,  10) : 24;
+	const offset = offsetQ ? parseInt(offsetQ, 10) : 0;
+	const unusedOnly = unused === '1';
 
-	const [list, postRows, configRows] = await Promise.all([
-		c.env.IMAGES.list(),
-		db.select({
-			title: posts.title,
-			coverKey: posts.coverKey,
-			thumbKey: posts.thumbKey,
-		}).from(posts).where(isNull(posts.deletedAt)),
+	// Fetch usage data first — needed both for labels and for unused filter
+	const [postRows, configRows] = await Promise.all([
+		db.select({ title: posts.title, coverKey: posts.coverKey, thumbKey: posts.thumbKey })
+			.from(posts).where(isNull(posts.deletedAt)),
 		db.select().from(siteConfig),
 	]);
 
@@ -265,7 +277,6 @@ admin.get('/images', async (c) => {
 		if (!usage.has(key)) usage.set(key, []);
 		usage.get(key)!.push({ type, label });
 	}
-
 	for (const p of postRows) {
 		addUsage(p.coverKey, 'post_cover', p.title);
 		addUsage(p.thumbKey, 'post_thumb', p.title);
@@ -274,24 +285,42 @@ admin.get('/images', async (c) => {
 		addUsage(cfg.value, 'config', cfg.key);
 	}
 
-	return c.json(list.objects.map((o) => ({
-		key: o.key,
-		size: o.size,
-		uploaded: o.uploaded.toISOString(),
-		usedIn: usage.get(o.key) ?? [],
-	})));
+	const usedKeys = [...usage.keys()];
+	const filter = unusedOnly && usedKeys.length
+		? notInArray(images.key, usedKeys)
+		: undefined;
+
+	const [items, [{ total }]] = await Promise.all([
+		db.select().from(images).where(filter).orderBy(desc(images.uploadedAt)).limit(limit).offset(offset),
+		db.select({ total: count() }).from(images).where(filter),
+	]);
+
+	return c.json({
+		items: items.map((img) => ({
+			key: img.key,
+			size: img.size,
+			uploaded: img.uploadedAt.toISOString(),
+			usedIn: usage.get(img.key) ?? [],
+		})),
+		total,
+	});
 });
 
 admin.delete('/images', async (c) => {
+	const db = drizzle(c.env.DB);
 	const key = c.req.query('key');
 	if (!key) return c.json({ error: 'Missing key' }, 400);
-	await c.env.IMAGES.delete(key);
+	await Promise.all([
+		c.env.IMAGES.delete(key),
+		db.delete(images).where(eq(images.key, key)),
+	]);
 	return c.json({ ok: true });
 });
 
 // ── Admin — image upload ──────────────────────────────────────────────────────
 
 admin.post('/images/upload', async (c) => {
+	const db = drizzle(c.env.DB);
 	const form = await c.req.formData();
 	const file = form.get('file') as File | null;
 
@@ -300,9 +329,12 @@ admin.post('/images/upload', async (c) => {
 	const ext = file.name.split('.').pop() ?? 'bin';
 	const key = `uploads/${crypto.randomUUID()}.${ext}`;
 
-	await c.env.IMAGES.put(key, file.stream(), {
-		httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' },
-	});
+	await Promise.all([
+		c.env.IMAGES.put(key, file.stream(), {
+			httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' },
+		}),
+		db.insert(images).values({ key, size: file.size }),
+	]);
 
 	return c.json({ key });
 });
@@ -311,11 +343,18 @@ admin.post('/images/upload', async (c) => {
 
 admin.get('/subscribers', async (c) => {
 	const db = drizzle(c.env.DB);
-	const rows = await db
-		.select()
-		.from(subscribers)
-		.orderBy(desc(subscribers.createdAt));
-	return c.json(rows);
+	const { limit: limitQ, offset: offsetQ } = c.req.query();
+
+	const limit  = limitQ  ? parseInt(limitQ,  10) : undefined;
+	const offset = offsetQ ? parseInt(offsetQ, 10) : 0;
+
+	const [items, [{ total }]] = await Promise.all([
+		db.select().from(subscribers).orderBy(desc(subscribers.createdAt))
+			.limit(limit ?? 10_000).offset(offset),
+		db.select({ total: count() }).from(subscribers),
+	]);
+
+	return c.json({ items, total });
 });
 
 admin.delete('/subscribers/:id', async (c) => {

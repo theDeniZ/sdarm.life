@@ -52,13 +52,13 @@ export default async function PostDetailPage({
 
   const [postRes, allRes] = await Promise.all([
     fetch(`${API}/posts/${slug}`, { cache: 'no-store' }),
-    fetch(`${API}/posts`, { cache: 'no-store' }),
+    fetch(`${API}/posts?limit=5`, { cache: 'no-store' }),
   ]);
 
   if (!postRes.ok) notFound();
 
   const post = (await postRes.json()) as ApiPost;
-  const allPosts: ApiPost[] = allRes.ok ? (await allRes.json()) as ApiPost[] : [];
+  const allPosts: ApiPost[] = allRes.ok ? ((await allRes.json()) as { items: ApiPost[] }).items : [];
 
   const coverUrl = r2url(post.coverKey) ?? FALLBACK_IMG;
   const meta = [formatDate(post.publishedAt), post.author].filter(Boolean).join(' · ');

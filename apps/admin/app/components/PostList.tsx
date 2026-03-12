@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import Pagination from './Pagination';
+
+const LIMIT = 20;
 
 type Post = {
   id: number;
@@ -37,16 +40,21 @@ function fmtDate(ts: string | null) {
 
 export default function PostList() {
   const [posts, setPosts] = useState<Post[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  async function load() {
+  async function load(p: number) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/v1/posts`);
+      const offset = (p - 1) * LIMIT;
+      const res = await fetch(`${API}/api/v1/posts?limit=${LIMIT}&offset=${offset}`);
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setPosts(await res.json());
+      const data = await res.json() as { items: Post[]; total: number };
+      setPosts(data.items);
+      setTotal(data.total);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -54,7 +62,7 @@ export default function PostList() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(page); }, [page]);
 
   async function toggleFeatured(post: Post) {
     await fetch(`${API}/api/v1/admin/posts/${post.id}`, {
@@ -62,7 +70,7 @@ export default function PostList() {
       headers: { 'Content-Type': 'application/json', ...adminHeaders() },
       body: JSON.stringify({ isFeatured: !post.isFeatured }),
     });
-    load();
+    load(page);
   }
 
   async function deletePost(post: Post) {
@@ -71,7 +79,7 @@ export default function PostList() {
       method: 'DELETE',
       headers: adminHeaders(),
     });
-    load();
+    load(page);
   }
 
   if (loading) return <div className="state-loading">Loading…</div>;
@@ -79,6 +87,7 @@ export default function PostList() {
   if (posts.length === 0) return <div className="state-empty">No posts yet.</div>;
 
   return (
+    <>
     <div className="table-wrap">
       <table>
         <thead>
@@ -138,5 +147,7 @@ export default function PostList() {
         </tbody>
       </table>
     </div>
+    <Pagination page={page} total={total} limit={LIMIT} onChange={setPage} />
+    </>
   );
 }

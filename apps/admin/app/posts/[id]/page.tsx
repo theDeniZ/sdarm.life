@@ -34,13 +34,14 @@ export default function EditPostPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch(`${API}/api/v1/posts`)
-      .then((r) => r.json() as Promise<Post[]>)
-      .then((posts) => {
-        const found = posts.find((p) => p.id === parseInt(id, 10));
-        if (!found) throw new Error('Post not found');
-        setPost(found);
-      })
+    fetch(`${API}/api/v1/admin/posts/${id}`, {
+      headers: {
+        'CF-Access-Client-Id':     process.env.NEXT_PUBLIC_CF_CLIENT_ID     ?? '',
+        'CF-Access-Client-Secret': process.env.NEXT_PUBLIC_CF_CLIENT_SECRET ?? '',
+      },
+    })
+      .then((r) => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json() as Promise<Post>; })
+      .then(setPost)
       .catch((e) => setError(String(e)));
   }, [id]);
 

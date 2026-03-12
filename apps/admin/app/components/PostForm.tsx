@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import ImageUpload from './ImageUpload';
+import ImagePicker from './ImagePicker';
 
 type PostData = {
   title: string;
@@ -184,7 +184,7 @@ export default function PostForm({ id, initial = {} }: Props) {
 
       <div className="form-row">
         <label>Cover image (hero background)</label>
-        <ImageUpload
+        <ImagePicker
           value={form.coverKey}
           onChange={(key) => set('coverKey', key)}
         />
@@ -192,7 +192,7 @@ export default function PostForm({ id, initial = {} }: Props) {
 
       <div className="form-row">
         <label>Thumbnail (strip card preview)</label>
-        <ImageUpload
+        <ImagePicker
           value={form.thumbKey}
           onChange={(key) => set('thumbKey', key)}
         />

@@ -13,6 +13,7 @@ type R2Image = {
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life';
 const R2  = process.env.NEXT_PUBLIC_R2_URL  ?? 'https://images.sdarm.life';
+const LIMIT = 24;
 
 function adminHeaders(): HeadersInit {
   return {
@@ -41,19 +42,28 @@ function fmtDate(ts: string) {
 }
 
 export default function ImageLibrary() {
-  const [images, setImages] = useState<R2Image[]>([]);
+  const [images, setImages]   = useState<R2Image[]>([]);
+  const [total, setTotal]     = useState(0);
+  const [page, setPage]       = useState(1);
+  const [unusedOnly, setUnusedOnly] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [error, setError]   = useState<string | null>(null);
+  const [error, setError]     = useState<string | null>(null);
 
-  async function load() {
+  const pages = Math.ceil(total / LIMIT);
+
+  async function load(p: number, unused: boolean) {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API}/api/v1/admin/images`, { headers: adminHeaders() });
+      const url = new URL(`${API}/api/v1/admin/images`);
+      url.searchParams.set('limit', String(LIMIT));
+      url.searchParams.set('offset', String((p - 1) * LIMIT));
+      if (unused) url.searchParams.set('unused', '1');
+      const res = await fetch(url.toString(), { headers: adminHeaders() });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      setImages((await res.json() as R2Image[]).sort(
-        (a, b) => new Date(b.uploaded).getTime() - new Date(a.uploaded).getTime(),
-      ));
+      const data = await res.json() as { items: R2Image[]; total: number };
+      setImages(data.items);
+      setTotal(data.total);
     } catch (e) {
       setError(String(e));
     } finally {
@@ -61,7 +71,12 @@ export default function ImageLibrary() {
     }
   }
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(page, unusedOnly); }, [page, unusedOnly]);
+
+  function toggleUnused() {
+    setPage(1);
+    setUnusedOnly((u) => !u);
+  }
 
   async function remove(img: R2Image) {
     if (!confirm(`Delete ${img.key}?`)) return;
@@ -69,36 +84,66 @@ export default function ImageLibrary() {
       method: 'DELETE',
       headers: adminHeaders(),
     });
-    load();
+    load(page, unusedOnly);
   }
 
-  if (loading) return <div className="state-loading">Loading…</div>;
-  if (error)   return <div className="state-error">{error}</div>;
-  if (images.length === 0) return <div className="state-empty">No images yet.</div>;
-
   return (
-    <div className="image-library">
-      {images.map((img) => (
-        <div key={img.key} className="image-library-card">
-          <div className="image-library-thumb">
-            <img src={`${R2}/${img.key}`} alt={img.key} />
-          </div>
-          <div className="image-library-meta">
-            <span className="image-library-key" title={img.key}>{img.key}</span>
-            <span className="image-library-info">{fmtSize(img.size)} · {fmtDate(img.uploaded)}</span>
-            {img.usedIn.length > 0 ? (
-              <ul className="image-usage-list">
-                {img.usedIn.map((u, i) => (
-                  <li key={i} className="image-usage-item">{usageLabel(u)}</li>
-                ))}
-              </ul>
-            ) : (
-              <span className="image-usage-unused">Unused</span>
-            )}
-          </div>
-          <button className="btn-danger" onClick={() => remove(img)}>Delete</button>
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
+        <button
+          className={`btn-ghost${unusedOnly ? ' active' : ''}`}
+          style={unusedOnly ? { borderColor: 'var(--red)', color: 'var(--red)' } : undefined}
+          onClick={toggleUnused}
+        >
+          {unusedOnly ? '✕ Clear filter' : 'Show unused only'}
+        </button>
+        {!loading && <span className="pagination-total">{total} image{total !== 1 ? 's' : ''}</span>}
+      </div>
+
+      {loading ? (
+        <div className="state-loading">Loading…</div>
+      ) : error ? (
+        <div className="state-error">{error}</div>
+      ) : images.length === 0 ? (
+        <div className="state-empty">{unusedOnly ? 'No unused images.' : 'No images yet.'}</div>
+      ) : (
+        <div className="image-library">
+          {images.map((img) => (
+            <div key={img.key} className="image-library-card">
+              <div className="image-library-thumb">
+                <img src={`${R2}/${img.key}`} alt={img.key} />
+              </div>
+              <div className="image-library-meta">
+                <span className="image-library-key" title={img.key}>{img.key}</span>
+                <span className="image-library-info">{fmtSize(img.size)} · {fmtDate(img.uploaded)}</span>
+                {img.usedIn.length > 0 ? (
+                  <ul className="image-usage-list">
+                    <li className="image-usage-item">{usageLabel(img.usedIn[0])}</li>
+                    {img.usedIn.length > 1 && (
+                      <li className="image-usage-item">+{img.usedIn.length - 1} more</li>
+                    )}
+                  </ul>
+                ) : (
+                  <span className="image-usage-unused">Unused</span>
+                )}
+              </div>
+              <button className="btn-danger" onClick={() => remove(img)}>Delete</button>
+            </div>
+          ))}
         </div>
-      ))}
-    </div>
+      )}
+
+      {pages > 1 && (
+        <div className="pagination">
+          <button className="pagination-btn" disabled={page <= 1} onClick={() => setPage((p) => p - 1)}>
+            ← Prev
+          </button>
+          <span className="pagination-info">Page {page} / {pages}</span>
+          <button className="pagination-btn" disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
+            Next →
+          </button>
+        </div>
+      )}
+    </>
   );
 }

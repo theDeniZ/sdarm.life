@@ -41,6 +41,12 @@ export const siteConfig = sqliteTable('site_config', {
   updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
 
+export const images = sqliteTable('images', {
+  key:        text('key').primaryKey(),
+  size:       integer('size').notNull(),
+  uploadedAt: integer('uploaded_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
 export const subscribers = sqliteTable('subscribers', {
   id:             integer('id').primaryKey({ autoIncrement: true }),
   email:          text('email').notNull().unique(),

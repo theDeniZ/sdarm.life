@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { type ConfigKey } from '@sdarm/db';
-import ImageUpload from './ImageUpload';
+import ImagePicker from './ImagePicker';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life';
 
@@ -63,19 +63,9 @@ function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initia
     timer.current = setTimeout(() => setFlash(null), 2000);
   }
 
-  function clear() {
-    setValue('');
-    save('');
-  }
-
   const cardHeader = (
     <div className="config-card-header">
       <span className="config-label">{LABELS[configKey]}</span>
-      {value && (
-        <button className="config-clear-btn" onClick={clear} title="Remove">
-          ✕
-        </button>
-      )}
     </div>
   );
 
@@ -83,9 +73,9 @@ function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initia
     return (
       <div className="config-card">
         {cardHeader}
-        <ImageUpload
+        <ImagePicker
           value={value || null}
-          onChange={(key) => { setValue(key); save(key); }}
+          onChange={(key) => { setValue(key ?? ''); save(key ?? ''); }}
         />
         {flash === 'ok'  && <div className="save-flash">✓ saved</div>}
         {flash === 'err' && <div className="save-flash" style={{ color: 'var(--red)' }}>Save failed</div>}

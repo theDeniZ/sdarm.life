@@ -47,11 +47,11 @@ function formatDate(iso: string | null): string {
 
 // ── Fetchers ──────────────────────────────────────────────────────────────────
 
-async function fetchPosts(): Promise<ApiPost[] | null> {
+async function fetchPosts(params: string): Promise<ApiPost[] | null> {
   try {
-    const res = await fetch(`${API}/posts`, { cache: 'no-store' });
+    const res = await fetch(`${API}/posts?${params}`, { cache: 'no-store' });
     if (!res.ok) return null;
-    return res.json();
+    return ((await res.json()) as { items: ApiPost[] }).items;
   } catch {
     return null;
   }
@@ -132,11 +132,16 @@ function toFooterConfig(config: ApiConfig): FooterConfig {
 // ── Page ──────────────────────────────────────────────────────────────────────
 
 export default async function HomePage() {
-  const [allPosts, config] = await Promise.all([fetchPosts(), fetchConfig()]);
+  const [featuredRaw, newsRaw, videoRaw, config] = await Promise.all([
+    fetchPosts('featured=1'),
+    fetchPosts('limit=4'),
+    fetchPosts('video=1&limit=4'),
+    fetchConfig(),
+  ]);
 
-  const heroPosts = allPosts?.filter((p) => p.isFeatured).map(toHeroPost) ?? [];
-  const newsPosts    = allPosts?.map(toNewsPost);
-  const videoPosts   = allPosts?.filter((p) => !!p.videoUrl).map(toVideoPost);
+  const heroPosts  = featuredRaw?.map(toHeroPost) ?? [];
+  const newsPosts   = newsRaw?.map(toNewsPost);
+  const videoPosts  = videoRaw?.map(toVideoPost);
 
   const aboutConfig = config ? toAboutConfig(config) : undefined;
   const footerConfig = config ? toFooterConfig(config) : undefined;
@@ -147,7 +152,7 @@ export default async function HomePage() {
       
       <div className="page">
         <HeroSection posts={heroPosts} />
-        <NewsSection  posts={newsPosts} />
+        <NewsSection  posts={newsPosts ?? undefined} />
         <VideoSection videos={videoPosts} />
         <SongbookSection />
         <AboutSection config={aboutConfig} />
