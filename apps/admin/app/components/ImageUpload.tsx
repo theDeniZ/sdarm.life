@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life';
-const R2  = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
+const R2 = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
 
 function adminHeaders(): HeadersInit {
   return {
@@ -13,14 +13,12 @@ function adminHeaders(): HeadersInit {
 }
 
 type Props = {
-  value: string | null;       // R2 key already saved
+  value: string | null; // R2 key already saved
   onChange: (key: string) => void;
 };
 
 export default function ImageUpload({ value, onChange }: Props) {
-  const [preview, setPreview] = useState<string | null>(
-    value ? `${R2}/${value}` : null,
-  );
+  const [preview, setPreview] = useState<string | null>(value ? `${R2}/${value}` : null);
   const [status, setStatus] = useState<'idle' | 'uploading' | 'ok' | 'err'>('idle');
   const [drag, setDrag] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -59,17 +57,20 @@ export default function ImageUpload({ value, onChange }: Props) {
     <div
       className={`image-drop${drag ? ' drag-over' : ''}`}
       onClick={() => inputRef.current?.click()}
-      onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+      onDragOver={(e) => {
+        e.preventDefault();
+        setDrag(true);
+      }}
       onDragLeave={() => setDrag(false)}
-      onDrop={(e) => { e.preventDefault(); setDrag(false); onFiles(e.dataTransfer.files); }}
+      onDrop={(e) => {
+        e.preventDefault();
+        setDrag(false);
+        onFiles(e.dataTransfer.files);
+      }}
     >
-      {preview && (
-        <img src={preview} alt="preview" className="image-preview" />
-      )}
-      <div className="image-drop-label">
-        {status === 'uploading' ? 'Uploading…' : 'Drop image or click to browse'}
-      </div>
-      {status === 'ok'  && <div className="upload-status ok">Uploaded</div>}
+      {preview && <img src={preview} alt="preview" className="image-preview" />}
+      <div className="image-drop-label">{status === 'uploading' ? 'Uploading…' : 'Drop image or click to browse'}</div>
+      {status === 'ok' && <div className="upload-status ok">Uploaded</div>}
       {status === 'err' && <div className="upload-status err">Upload failed — try again</div>}
       <input
         ref={inputRef}

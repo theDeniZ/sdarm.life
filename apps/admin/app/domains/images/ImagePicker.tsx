@@ -5,22 +5,22 @@ import { API, R2, adminHeaders } from '../../lib/api';
 import type { ImageDto } from '@sdarm/types';
 
 type Props = {
-  value:    string | null;
+  value: string | null;
   onChange: (key: string | null) => void;
 };
 
 export default function ImagePicker({ value, onChange }: Props) {
-  const [libOpen, setLibOpen]           = useState(false);
-  const [preview, setPreview]           = useState<string | null>(value ? `${R2}/${value}` : null);
+  const [libOpen, setLibOpen] = useState(false);
+  const [preview, setPreview] = useState<string | null>(value ? `${R2}/${value}` : null);
   const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'ok' | 'err'>('idle');
-  const [drag, setDrag]                 = useState(false);
-  const [images, setImages]             = useState<Pick<ImageDto, 'key'>[]>([]);
-  const [libLoading, setLibLoading]     = useState(false);
+  const [drag, setDrag] = useState(false);
+  const [images, setImages] = useState<Pick<ImageDto, 'key'>[]>([]);
+  const [libLoading, setLibLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (value === null) setPreview(null);
-    else if (value)     setPreview(`${R2}/${value}`);
+    else if (value) setPreview(`${R2}/${value}`);
   }, [value]);
 
   useEffect(() => {
@@ -76,21 +76,30 @@ export default function ImagePicker({ value, onChange }: Props) {
       {preview && (
         <div className="image-picker-preview">
           <img src={preview} alt="preview" />
-          <button type="button" className="image-picker-clear" onClick={clear}>✕ Remove</button>
+          <button type="button" className="image-picker-clear" onClick={clear}>
+            ✕ Remove
+          </button>
         </div>
       )}
 
       <div
         className={`image-drop${drag ? ' drag-over' : ''}`}
         onClick={() => inputRef.current?.click()}
-        onDragOver={(e) => { e.preventDefault(); setDrag(true); }}
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDrag(true);
+        }}
         onDragLeave={() => setDrag(false)}
-        onDrop={(e) => { e.preventDefault(); setDrag(false); onFiles(e.dataTransfer.files); }}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDrag(false);
+          onFiles(e.dataTransfer.files);
+        }}
       >
         <div className="image-drop-label">
           {uploadStatus === 'uploading' ? 'Uploading…' : 'Drop image or click to browse'}
         </div>
-        {uploadStatus === 'ok'  && <div className="upload-status ok">Uploaded</div>}
+        {uploadStatus === 'ok' && <div className="upload-status ok">Uploaded</div>}
         {uploadStatus === 'err' && <div className="upload-status err">Upload failed — try again</div>}
         <input
           ref={inputRef}
@@ -112,9 +121,13 @@ export default function ImagePicker({ value, onChange }: Props) {
       {libOpen && (
         <div className="image-picker-library">
           {libLoading ? (
-            <div className="state-loading" style={{ padding: '16px' }}>Loading…</div>
+            <div className="state-loading" style={{ padding: '16px' }}>
+              Loading…
+            </div>
           ) : images.length === 0 ? (
-            <div className="state-empty" style={{ padding: '16px' }}>No images yet.</div>
+            <div className="state-empty" style={{ padding: '16px' }}>
+              No images yet.
+            </div>
           ) : (
             <div className="image-picker-grid">
               {images.map((img) => (

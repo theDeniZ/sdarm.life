@@ -6,15 +6,7 @@ import SongbookSection from './components/SongbookSection';
 import AboutSection from './components/AboutSection';
 import ProductsSection from './components/ProductsSection';
 import Footer from './components/Footer';
-import {
-  fetchPosts,
-  fetchConfig,
-  toHeroPost,
-  toNewsPost,
-  toVideoPost,
-  toAboutConfig,
-  toFooterConfig,
-} from './lib/api';
+import { fetchPosts, fetchConfig, toHeroPost, toNewsPost, toVideoPost, toAboutConfig, toFooterConfig } from './lib/api';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -27,11 +19,11 @@ export default async function HomePage() {
     fetchConfig(),
   ]);
 
-  const heroPosts  = featuredRaw?.map(toHeroPost) ?? [];
-  const newsPosts  = newsRaw?.map(toNewsPost);
+  const heroPosts = featuredRaw?.map(toHeroPost) ?? [];
+  const newsPosts = newsRaw?.map(toNewsPost);
   const videoPosts = videoRaw?.map(toVideoPost);
 
-  const aboutConfig  = config ? toAboutConfig(config)  : undefined;
+  const aboutConfig = config ? toAboutConfig(config) : undefined;
   const footerConfig = config ? toFooterConfig(config) : undefined;
 
   return (
@@ -39,7 +31,7 @@ export default async function HomePage() {
       <Navbar />
       <div className="page">
         <HeroSection posts={heroPosts} />
-        <NewsSection  posts={newsPosts ?? undefined} />
+        <NewsSection posts={newsPosts ?? undefined} />
         <VideoSection videos={videoPosts} />
         <SongbookSection />
         <AboutSection config={aboutConfig} />

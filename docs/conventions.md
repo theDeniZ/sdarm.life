@@ -43,31 +43,42 @@ No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
 
 ---
 
+## Code formatting
+
+**Prettier** (print width 120, single quotes, 2 spaces) and **ESLint** run automatically on file save (via VS Code). Both are configured in `.prettierrc.json` and `eslint.config.mjs` files.
+
+**Format all files at once:** `pnpm -r lint --fix`
+
+**Do not commit code with formatting errors.** ESLint will fail CI if formatting rules are violated.
+
+---
+
 ## Environment variables
 
 ### `apps/web`
 
-| Variable | Dev (`.env.local`) | Production fallback |
-|---|---|---|
-| `API_URL` | `http://localhost:8787/api/v1` | `https://api.sdarm.life/api/v1` |
-| `R2_URL` | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` |
+| Variable  | Dev (`.env.local`)                    | Production fallback             |
+| --------- | ------------------------------------- | ------------------------------- |
+| `API_URL` | `http://localhost:8787/api/v1`        | `https://api.sdarm.life/api/v1` |
+| `R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`     |
 
 Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — pass as props from the server component.
 
 ### `apps/admin`
 
-| Variable | Dev (`.env.local`) | Production |
-|---|---|---|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8787` | `https://api.sdarm.life` |
-| `NEXT_PUBLIC_R2_URL` | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` |
-| `NEXT_PUBLIC_CF_CLIENT_ID` | `dev` | random hex |
-| `NEXT_PUBLIC_CF_CLIENT_SECRET` | `dev` | random hex |
+| Variable                       | Dev (`.env.local`)                    | Production                  |
+| ------------------------------ | ------------------------------------- | --------------------------- |
+| `NEXT_PUBLIC_API_URL`          | `http://localhost:8787`               | `https://api.sdarm.life`    |
+| `NEXT_PUBLIC_R2_URL`           | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` |
+| `NEXT_PUBLIC_CF_CLIENT_ID`     | `dev`                                 | random hex                  |
+| `NEXT_PUBLIC_CF_CLIENT_SECRET` | `dev`                                 | random hex                  |
 
 `NEXT_PUBLIC_API_URL` has **no `/api/v1` suffix** — components append the full path themselves.
 
 ### `apps/api` (local dev only)
 
 `apps/api/.dev.vars` (gitignored, auto-loaded by `wrangler dev`):
+
 ```
 CF_CLIENT_ID=dev
 CF_CLIENT_SECRET=dev

@@ -86,12 +86,7 @@ export default function NewsSection({ posts = STATIC_NEWS }: NewsSectionProps) {
             </div>
           ))}
         </div>
-        <a
-          href="https://sdarm.org/category/news/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="red-link"
-        >
+        <a href="https://sdarm.org/category/news/" target="_blank" rel="noopener noreferrer" className="red-link">
           Mehr Artikel →
         </a>
       </div>

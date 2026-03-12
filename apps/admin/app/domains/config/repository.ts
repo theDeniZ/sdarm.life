@@ -9,9 +9,9 @@ export async function fetchConfig(): Promise<ConfigDto> {
 
 export async function saveConfigKey(key: string, value: string | null): Promise<void> {
   const res = await fetch(`${API}/api/v1/admin/config/${key}`, {
-    method:  'PUT',
+    method: 'PUT',
     headers: { 'Content-Type': 'application/json', ...adminHeaders() },
-    body:    JSON.stringify({ value: value || null }),
+    body: JSON.stringify({ value: value || null }),
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }

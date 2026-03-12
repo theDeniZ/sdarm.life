@@ -9,17 +9,10 @@ import { formatDate } from '../../lib/format';
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
-export default async function PostDetailPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
+export default async function PostDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const [post, allPosts] = await Promise.all([
-    fetchPost(slug),
-    fetchPosts('limit=5'),
-  ]);
+  const [post, allPosts] = await Promise.all([fetchPost(slug), fetchPosts('limit=5')]);
 
   if (!post) notFound();
 
@@ -34,7 +27,9 @@ export default async function PostDetailPage({
       <div className="page">
         {/* Hero */}
         <div className="hero post-hero">
-          <Link href="/" className="post-back">← Zurück</Link>
+          <Link href="/" className="post-back">
+            ← Zurück
+          </Link>
           <div className="hero-bg">
             <Image
               src={coverUrl}
@@ -98,14 +93,10 @@ export default async function PostDetailPage({
             <div className="news-grid">
               {others.map((p) => {
                 const imgUrl = r2url(p.coverKey) ?? FALLBACK_IMG;
-                const pMeta  = [formatDate(p.publishedAt), p.author].filter(Boolean).join(' · ');
+                const pMeta = [formatDate(p.publishedAt), p.author].filter(Boolean).join(' · ');
                 return (
                   <div key={p.id} className="news-card">
-                    <Link
-                      className="img16"
-                      href={`/posts/${p.slug}`}
-                      style={{ position: 'relative' }}
-                    >
+                    <Link className="img16" href={`/posts/${p.slug}`} style={{ position: 'relative' }}>
                       <Image
                         src={imgUrl}
                         alt={p.coverAlt ?? p.title}

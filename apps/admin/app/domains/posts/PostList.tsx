@@ -65,17 +65,17 @@ export default function PostList() {
                 <td>{post.author ?? '—'}</td>
                 <td>{fmtDate(post.publishedAt)}</td>
                 <td>
-                  <input
-                    type="checkbox"
-                    checked={post.isFeatured}
-                    onChange={() => handleToggleFeatured(post)}
-                  />
+                  <input type="checkbox" checked={post.isFeatured} onChange={() => handleToggleFeatured(post)} />
                 </td>
                 <td>{post.videoUrl ? '●' : ''}</td>
                 <td>
                   <div className="td-actions">
-                    <Link href={`/posts/${post.id}`} className="btn-ghost">Edit</Link>
-                    <button className="btn-danger" onClick={() => handleDelete(post)}>Delete</button>
+                    <Link href={`/posts/${post.id}`} className="btn-ghost">
+                      Edit
+                    </Link>
+                    <button className="btn-danger" onClick={() => handleDelete(post)}>
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>

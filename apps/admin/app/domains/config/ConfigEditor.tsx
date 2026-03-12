@@ -6,29 +6,36 @@ import ImagePicker from '../images/ImagePicker';
 import { fetchConfig, saveConfigKey } from './repository';
 
 const LABELS: Record<ConfigKey, string> = {
-  donation_url:    'Donation link',
-  hero_bg_key:     'Hero background image',
-  hero_bg_alt:     'Hero background image alt text',
-  about_text_1:    'About paragraph 1',
-  about_text_2:    'About paragraph 2',
+  donation_url: 'Donation link',
+  hero_bg_key: 'Hero background image',
+  hero_bg_alt: 'Hero background image alt text',
+  about_text_1: 'About paragraph 1',
+  about_text_2: 'About paragraph 2',
   about_image_key: 'About image',
   about_image_alt: 'About image alt text',
-  about_link_url:  'About "learn more" URL',
-  facebook_url:    'Facebook',
-  whatsapp_url:    'WhatsApp',
-  instagram_url:   'Instagram',
-  youtube_url:     'YouTube',
+  about_link_url: 'About "learn more" URL',
+  facebook_url: 'Facebook',
+  whatsapp_url: 'WhatsApp',
+  instagram_url: 'Instagram',
+  youtube_url: 'YouTube',
 };
 
 const SECTIONS: { label: string; keys: ConfigKey[] }[] = [
   { label: 'General', keys: ['hero_bg_key', 'hero_bg_alt', 'donation_url'] },
-  { label: 'About',   keys: ['about_text_1', 'about_text_2', 'about_image_key', 'about_image_alt', 'about_link_url'] },
-  { label: 'Footer',  keys: ['facebook_url', 'whatsapp_url', 'instagram_url', 'youtube_url'] },
+  { label: 'About', keys: ['about_text_1', 'about_text_2', 'about_image_key', 'about_image_alt', 'about_link_url'] },
+  { label: 'Footer', keys: ['facebook_url', 'whatsapp_url', 'instagram_url', 'youtube_url'] },
 ];
 
 const TEXTAREA_KEYS: ConfigKey[] = ['about_text_1', 'about_text_2'];
-const IMAGE_KEYS:    ConfigKey[] = ['about_image_key', 'hero_bg_key'];
-const URL_KEYS:      ConfigKey[] = ['donation_url', 'about_link_url', 'facebook_url', 'whatsapp_url', 'instagram_url', 'youtube_url'];
+const IMAGE_KEYS: ConfigKey[] = ['about_image_key', 'hero_bg_key'];
+const URL_KEYS: ConfigKey[] = [
+  'donation_url',
+  'about_link_url',
+  'facebook_url',
+  'whatsapp_url',
+  'instagram_url',
+  'youtube_url',
+];
 
 type Flash = 'ok' | 'err' | null;
 
@@ -60,10 +67,17 @@ function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initia
         {cardHeader}
         <ImagePicker
           value={value || null}
-          onChange={(key) => { setValue(key ?? ''); save(key ?? ''); }}
+          onChange={(key) => {
+            setValue(key ?? '');
+            save(key ?? '');
+          }}
         />
-        {flash === 'ok'  && <div className="save-flash">✓ saved</div>}
-        {flash === 'err' && <div className="save-flash" style={{ color: 'var(--red)' }}>Save failed</div>}
+        {flash === 'ok' && <div className="save-flash">✓ saved</div>}
+        {flash === 'err' && (
+          <div className="save-flash" style={{ color: 'var(--red)' }}>
+            Save failed
+          </div>
+        )}
       </div>
     );
   }
@@ -79,8 +93,12 @@ function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initia
           onChange={(e) => setValue(e.target.value)}
           onBlur={(e) => save(e.target.value)}
         />
-        {flash === 'ok'  && <div className="save-flash">✓ saved</div>}
-        {flash === 'err' && <div className="save-flash" style={{ color: 'var(--red)' }}>Save failed</div>}
+        {flash === 'ok' && <div className="save-flash">✓ saved</div>}
+        {flash === 'err' && (
+          <div className="save-flash" style={{ color: 'var(--red)' }}>
+            Save failed
+          </div>
+        )}
       </div>
     );
   }
@@ -95,15 +113,19 @@ function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initia
         onChange={(e) => setValue(e.target.value)}
         onBlur={(e) => save(e.target.value)}
       />
-      {flash === 'ok'  && <div className="save-flash">✓ saved</div>}
-      {flash === 'err' && <div className="save-flash" style={{ color: 'var(--red)' }}>Save failed</div>}
+      {flash === 'ok' && <div className="save-flash">✓ saved</div>}
+      {flash === 'err' && (
+        <div className="save-flash" style={{ color: 'var(--red)' }}>
+          Save failed
+        </div>
+      )}
     </div>
   );
 }
 
 export default function ConfigEditor() {
   const [values, setValues] = useState<Record<string, string> | null>(null);
-  const [error, setError]   = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchConfig()
@@ -111,7 +133,7 @@ export default function ConfigEditor() {
       .catch((e) => setError(String(e)));
   }, []);
 
-  if (error)   return <div className="state-error">{error}</div>;
+  if (error) return <div className="state-error">{error}</div>;
   if (!values) return <div className="state-loading">Loading…</div>;
 
   return (

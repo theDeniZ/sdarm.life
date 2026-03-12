@@ -23,7 +23,8 @@ const STATIC_PRODUCTS: Product[] = [
     bookTitle: 'Der Große Kampf',
     title: 'Der Große Kampf zwischen Christus und Satan',
     meta: 'Ellen G. White · Klassiker',
-    excerpt: 'Das umfassendste Werk über den Konflikt zwischen Gut und Böse — von der Zerstörung Jerusalems bis zur neuen Erde.',
+    excerpt:
+      'Das umfassendste Werk über den Konflikt zwischen Gut und Böse — von der Zerstörung Jerusalems bis zur neuen Erde.',
   },
   {
     id: '2',
@@ -90,16 +91,10 @@ export default function ProductsSection({ products = STATIC_PRODUCTS }: Products
                 <div className="p-meta">{p.meta}</div>
                 <div className="p-excerpt">{p.excerpt}</div>
                 <div className="p-actions">
-                  <button
-                    className="btn-read"
-                    onClick={() => p.readHref && window.open(p.readHref, '_blank')}
-                  >
+                  <button className="btn-read" onClick={() => p.readHref && window.open(p.readHref, '_blank')}>
                     Lesen
                   </button>
-                  <button
-                    className="btn-order"
-                    onClick={() => p.orderHref && window.open(p.orderHref, '_blank')}
-                  >
+                  <button className="btn-order" onClick={() => p.orderHref && window.open(p.orderHref, '_blank')}>
                     Bestellen
                   </button>
                 </div>
@@ -107,12 +102,7 @@ export default function ProductsSection({ products = STATIC_PRODUCTS }: Products
             </div>
           ))}
         </div>
-        <a
-          href="https://sdarm.org/publications/"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="red-link"
-        >
+        <a href="https://sdarm.org/publications/" target="_blank" rel="noopener noreferrer" className="red-link">
           Mehr Produkte → sdarm.org
         </a>
       </div>

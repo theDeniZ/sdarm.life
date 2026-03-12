@@ -7,7 +7,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.unsplash.com' },
       { protocol: 'https', hostname: 'upload.wikimedia.org' },
       { protocol: 'https', hostname: 'images.sdarm.life' },
-      { protocol: 'http',  hostname: 'localhost' },
+      { protocol: 'http', hostname: 'localhost' },
     ],
   },
 };

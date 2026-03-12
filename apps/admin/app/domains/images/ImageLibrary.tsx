@@ -13,7 +13,7 @@ type Usage = ImageDto['usedIn'][number];
 function usageLabel(u: Usage) {
   if (u.type === 'post_cover') return `Cover: ${u.label}`;
   if (u.type === 'post_thumb') return `Thumb: ${u.label}`;
-  if (u.type === 'config')     return `Config: ${u.label}`;
+  if (u.type === 'config') return `Config: ${u.label}`;
   return u.label;
 }
 
@@ -21,7 +21,7 @@ export default function ImageLibrary() {
   const [unusedOnly, setUnusedOnly] = useState(false);
   const { items, total, page, loading, setPage, reload } = usePaginatedList<ImageDto>(
     (p) => fetchImages(p, unusedOnly),
-    [unusedOnly],
+    [unusedOnly]
   );
 
   function toggleUnused() {
@@ -45,7 +45,11 @@ export default function ImageLibrary() {
         >
           {unusedOnly ? '✕ Clear filter' : 'Show unused only'}
         </button>
-        {!loading && <span className="pagination-total">{total} image{total !== 1 ? 's' : ''}</span>}
+        {!loading && (
+          <span className="pagination-total">
+            {total} image{total !== 1 ? 's' : ''}
+          </span>
+        )}
       </div>
 
       {loading ? (
@@ -60,20 +64,24 @@ export default function ImageLibrary() {
                 <img src={`${R2}/${img.key}`} alt={img.key} />
               </div>
               <div className="image-library-meta">
-                <span className="image-library-key" title={img.key}>{img.key}</span>
-                <span className="image-library-info">{fmtSize(img.size)} · {fmtDate(img.uploaded)}</span>
+                <span className="image-library-key" title={img.key}>
+                  {img.key}
+                </span>
+                <span className="image-library-info">
+                  {fmtSize(img.size)} · {fmtDate(img.uploaded)}
+                </span>
                 {img.usedIn.length > 0 ? (
                   <ul className="image-usage-list">
                     <li className="image-usage-item">{usageLabel(img.usedIn[0])}</li>
-                    {img.usedIn.length > 1 && (
-                      <li className="image-usage-item">+{img.usedIn.length - 1} more</li>
-                    )}
+                    {img.usedIn.length > 1 && <li className="image-usage-item">+{img.usedIn.length - 1} more</li>}
                   </ul>
                 ) : (
                   <span className="image-usage-unused">Unused</span>
                 )}
               </div>
-              <button className="btn-danger" onClick={() => handleDelete(img)}>Delete</button>
+              <button className="btn-danger" onClick={() => handleDelete(img)}>
+                Delete
+              </button>
             </div>
           ))}
         </div>

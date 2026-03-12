@@ -15,28 +15,16 @@ export default function Sidebar() {
         <span className="logo-admin">[admin]</span>
       </div>
       <nav className="sidebar-nav">
-        <Link
-          href="/config"
-          className={`sidebar-link${path.startsWith('/config') ? ' active' : ''}`}
-        >
+        <Link href="/config" className={`sidebar-link${path.startsWith('/config') ? ' active' : ''}`}>
           Config
         </Link>
-        <Link
-          href="/posts"
-          className={`sidebar-link${path.startsWith('/posts') ? ' active' : ''}`}
-        >
+        <Link href="/posts" className={`sidebar-link${path.startsWith('/posts') ? ' active' : ''}`}>
           Posts
         </Link>
-        <Link
-          href="/subscribers"
-          className={`sidebar-link${path.startsWith('/subscribers') ? ' active' : ''}`}
-        >
+        <Link href="/subscribers" className={`sidebar-link${path.startsWith('/subscribers') ? ' active' : ''}`}>
           Subscribers
         </Link>
-        <Link
-          href="/images"
-          className={`sidebar-link${path.startsWith('/images') ? ' active' : ''}`}
-        >
+        <Link href="/images" className={`sidebar-link${path.startsWith('/images') ? ' active' : ''}`}>
           Images
         </Link>
       </nav>

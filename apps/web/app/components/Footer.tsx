@@ -3,7 +3,6 @@
 import { useState } from 'react';
 import Link from 'next/link';
 
-
 export interface FooterConfig {
   donation_url?: string | null;
   facebook_url?: string | null;
@@ -13,8 +12,8 @@ export interface FooterConfig {
 }
 
 const FOOTER_LINKS = [
-  { label: 'Über uns',    href: '#ueber-uns' },
-  { label: 'Impressum',   href: '/impressum' },
+  { label: 'Über uns', href: '#ueber-uns' },
+  { label: 'Impressum', href: '/impressum' },
   { label: 'Datenschutz', href: '/datenschutz' },
 ];
 
@@ -24,11 +23,11 @@ interface FooterProps {
 }
 
 export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1' }: FooterProps) {
-  const donationUrl  = config?.donation_url  ?? '#';
-  const facebookUrl  = config?.facebook_url  ?? 'https://www.facebook.com/sdarmchurch';
-  const whatsappUrl  = config?.whatsapp_url  ?? '#';
-  const instagramUrl = config?.instagram_url ?? 'https://www.instagram.com/sdarmchurch';
-  const youtubeUrl   = config?.youtube_url   ?? 'https://www.youtube.com/sdarmchurch';
+  const donationUrl = config?.donation_url ?? '#';
+  const facebookUrl = config?.facebook_url ?? '#';
+  const whatsappUrl = config?.whatsapp_url ?? '#';
+  const instagramUrl = config?.instagram_url ?? '#';
+  const youtubeUrl = config?.youtube_url ?? '#';
   const [email, setEmail] = useState('');
   const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'conflict'>('idle');
 
@@ -36,15 +35,15 @@ export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1
     if (!email) return;
     setSubStatus('loading');
     try {
-      const res = await fetch(
-        `${apiUrl}/subscribe`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email }),
-        }
-      );
-      if (res.status === 409) { setSubStatus('conflict'); return; }
+      const res = await fetch(`${apiUrl}/subscribe`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      });
+      if (res.status === 409) {
+        setSubStatus('conflict');
+        return;
+      }
       if (!res.ok) throw new Error();
       setSubStatus('ok');
       setEmail('');
@@ -53,7 +52,7 @@ export default function Footer({ config, apiUrl = 'https://api.sdarm.life/api/v1
     }
   }
 
-return (
+  return (
     <footer>
       <div className="footer-top">
         {/* Logo */}
@@ -74,22 +73,20 @@ return (
               onKeyDown={(e) => e.key === 'Enter' && handleSubscribe()}
               disabled={subStatus === 'loading'}
             />
-            <button
-              type="button"
-              onClick={handleSubscribe}
-              disabled={subStatus === 'loading'}
-            >
+            <button type="button" onClick={handleSubscribe} disabled={subStatus === 'loading'}>
               {subStatus === 'loading' ? '…' : 'Subscribe'}
             </button>
           </div>
-          {subStatus === 'ok'       && <p className="f-sub-ok">Vielen Dank für Ihre Anmeldung!</p>}
+          {subStatus === 'ok' && <p className="f-sub-ok">Vielen Dank für Ihre Anmeldung!</p>}
           {subStatus === 'conflict' && <p className="f-sub-err">Diese E-Mail ist bereits registriert.</p>}
-          {subStatus === 'error'    && <p className="f-sub-err">Fehler. Bitte versuchen Sie es später.</p>}
+          {subStatus === 'error' && <p className="f-sub-err">Fehler. Bitte versuchen Sie es später.</p>}
         </div>
 
         {/* Donate */}
         <div className="f-don">
-          <a href={donationUrl} target="_blank" rel="noopener noreferrer" className="btn-donate">Donate</a>
+          <a href={donationUrl} target="_blank" rel="noopener noreferrer" className="btn-donate">
+            Donate
+          </a>
         </div>
       </div>
 
@@ -97,7 +94,9 @@ return (
         <ul className="f-nav">
           {FOOTER_LINKS.map(({ label, href }) => (
             <li key={href}>
-              <a href={href} rel="noopener noreferrer">{label}</a>
+              <a href={href} rel="noopener noreferrer">
+                {label}
+              </a>
             </li>
           ))}
         </ul>

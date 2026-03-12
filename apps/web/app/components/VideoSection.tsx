@@ -40,7 +40,13 @@ export default function VideoSection({ videos = STATIC_VIDEOS }: VideoSectionPro
         <div className="video-grid">
           {videos.map((v) => (
             <div key={v.id} className="video-card">
-              <a className="img16" href={v.href} target="_blank" rel="noopener noreferrer" style={{ position: 'relative' }}>
+              <a
+                className="img16"
+                href={v.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ position: 'relative' }}
+              >
                 <Image
                   src={v.imageUrl}
                   alt={v.imageAlt}

@@ -14,12 +14,14 @@ This project is configured to run in a VS Code Dev Container, providing a consis
 ## Quick Start
 
 ### Prerequisites
+
 - Docker Desktop (or similar OCI-compatible container runtime)
 - VS Code with Remote Containers extension
 
 ### Launch Dev Container
 
 1. **Open the project in VS Code**
+
    ```bash
    code /path/to/sdarm.life
    ```
@@ -47,7 +49,8 @@ pnpm --filter @sdarm/admin dev    # Next.js admin app (port 3001)
 pnpm --filter @sdarm/api dev      # Wrangler API worker (port 8787)
 
 # Linting & Building
-pnpm turbo lint      # Lint all packages
+pnpm turbo lint      # Lint all packages (ESLint with Prettier)
+pnpm turbo lint -- --fix  # Auto-fix linting and formatting issues
 pnpm turbo build     # Build all packages
 pnpm --filter ./packages build  # Build only packages (db, types)
 
@@ -57,10 +60,10 @@ pnpm --filter @sdarm/api test    # Run API tests with Vitest
 
 ## Port Mapping
 
-| Port | Service | URL |
-|------|---------|-----|
-| 3000 | Web App | http://localhost:3000 |
-| 3001 | Admin App | http://localhost:3001 |
+| Port | Service            | URL                   |
+| ---- | ------------------ | --------------------- |
+| 3000 | Web App            | http://localhost:3000 |
+| 3001 | Admin App          | http://localhost:3001 |
 | 8787 | Wrangler Dev (API) | http://localhost:8787 |
 
 ## Environment Files
@@ -72,6 +75,7 @@ The post-create hook scaffolds these files (you can customize after creation):
 - **`apps/admin/.env.local`** - Admin app environment variables
 
 For local Cloudflare integration, add your credentials to `apps/api/.dev.vars`:
+
 ```
 CF_CLIENT_ID=your_id
 CF_CLIENT_SECRET=your_secret
@@ -80,11 +84,14 @@ CF_CLIENT_SECRET=your_secret
 ## VS Code Extensions
 
 Pre-installed in the container:
-- **ESLint** - Linting
-- **Prettier** - Code formatting
+
+- **ESLint** - Code linting with Prettier plugin for formatting (120 char lines, single quotes, 2-space indent)
+- **Prettier** - Default formatter (auto-formats on save)
 - **Tailwind CSS IntelliSense** - Tailwind utilities
 - **Vitest Explorer** - Test runner UI
 - **GitHub Copilot** - (optional, sign in as needed)
+
+All formatting is configured in `.editorconfig`, `.prettierrc.json`, and `eslint.config.mjs` — no manual style choices needed.
 
 ## RTK Integration
 
@@ -139,6 +146,7 @@ rtk discover               # Find missed opportunities
 RTK config file: `~/.config/rtk/config.toml` (macOS: `~/Library/Application Support/rtk/config.toml`)
 
 Disable auto-rewrite for specific commands:
+
 ```toml
 [hooks]
 exclude_commands = ["curl", "wget"]
@@ -164,6 +172,7 @@ cargo uninstall rtk
 ## Troubleshooting
 
 ### Container won't build
+
 ```bash
 # Rebuild from scratch
 # In VS Code: Dev Containers: Rebuild Container
@@ -173,6 +182,7 @@ docker system prune -a
 ```
 
 ### pnpm permission issues
+
 ```bash
 # Inside container, reset pnpm:
 pnpm store prune
@@ -180,11 +190,14 @@ pnpm install
 ```
 
 ### Port conflicts
+
 If ports 3000, 3001, or 8787 are in use:
+
 1. Update port mappings in `devcontainer.json`
 2. Update individual `package.json` dev scripts (e.g., `--port 3002`)
 
 ### Slow initial build
+
 First-time setup installs Node modules for the monorepo. This usually takes 1-2 minutes depending on internet speed.
 
 ## Persistent SSH Keys

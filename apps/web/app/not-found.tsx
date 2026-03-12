@@ -20,11 +20,11 @@ async function fetchConfig(): Promise<ApiConfig | null> {
 
 function toFooterConfig(config: ApiConfig): FooterConfig {
   return {
-    donation_url:  config.donation_url  ?? undefined,
-    facebook_url:  config.facebook_url  ?? undefined,
-    whatsapp_url:  config.whatsapp_url  ?? undefined,
+    donation_url: config.donation_url ?? undefined,
+    facebook_url: config.facebook_url ?? undefined,
+    whatsapp_url: config.whatsapp_url ?? undefined,
     instagram_url: config.instagram_url ?? undefined,
-    youtube_url:   config.youtube_url   ?? undefined,
+    youtube_url: config.youtube_url ?? undefined,
   };
 }
 

@@ -11,7 +11,7 @@ import type { PostDto } from '@sdarm/types';
 
 export default function EditPostPage() {
   const { id } = useParams<{ id: string }>();
-  const [post, setPost]   = useState<PostDto | null>(null);
+  const [post, setPost] = useState<PostDto | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function EditPostPage() {
   }, [id]);
 
   if (error) return <div className="state-error">{error}</div>;
-  if (!post)  return <div className="state-loading">Loading…</div>;
+  if (!post) return <div className="state-loading">Loading…</div>;
 
   return (
     <>
@@ -31,17 +31,17 @@ export default function EditPostPage() {
       <PostForm
         id={post.id}
         initial={{
-          title:       post.title,
-          slug:        post.slug,
-          excerpt:     post.excerpt     ?? '',
-          body:        post.body        ?? '',
-          author:      post.author      ?? '',
+          title: post.title,
+          slug: post.slug,
+          excerpt: post.excerpt ?? '',
+          body: post.body ?? '',
+          author: post.author ?? '',
           publishedAt: toLocalDatetime(post.publishedAt),
-          videoUrl:    post.videoUrl    ?? '',
-          coverKey:    post.coverKey,
-          coverAlt:    post.coverAlt    ?? '',
-          thumbKey:    post.thumbKey,
-          isFeatured:  post.isFeatured,
+          videoUrl: post.videoUrl ?? '',
+          coverKey: post.coverKey,
+          coverAlt: post.coverAlt ?? '',
+          thumbKey: post.thumbKey,
+          isFeatured: post.isFeatured,
         }}
       />
     </>

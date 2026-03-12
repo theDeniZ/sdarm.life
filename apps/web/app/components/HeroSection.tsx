@@ -7,9 +7,9 @@ export interface HeroPost {
   title: string;
   meta: string;
   excerpt: string; // preview text — shown on the strip card
-  body: string;    // shown in the detail area above the strip
-  imageUrl: string;  // hero background
-  thumbUrl: string;  // strip card thumbnail (falls back to imageUrl if not set)
+  body: string; // shown in the detail area above the strip
+  imageUrl: string; // hero background
+  thumbUrl: string; // strip card thumbnail (falls back to imageUrl if not set)
   imageAlt: string;
   slug: string;
 }
@@ -30,74 +30,58 @@ const STATIC: HeroPost = {
 const INTERVAL = 5000;
 
 function isUnoptimized(url: string) {
-  return (
-    url.startsWith('https://upload.wikimedia.org') ||
-    url.startsWith('https://images.unsplash.com')
-  );
+  return url.startsWith('https://upload.wikimedia.org') || url.startsWith('https://images.unsplash.com');
 }
 
 export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
   const slides = posts?.length ? posts : [STATIC];
   const N = slides.length;
 
-  const [active, setActive]           = useState(0);
-  const [leaving, setLeaving]         = useState<number | null>(null);
-  const [shown, setShown]             = useState(0);
+  const [active, setActive] = useState(0);
+  const [leaving, setLeaving] = useState<number | null>(null);
+  const [shown, setShown] = useState(0);
   const [textVisible, setTextVisible] = useState(true);
 
-  const activeRef   = useRef(0);
-  const cardRefs    = useRef<(HTMLDivElement | null)[]>([]);
-  const stripRef    = useRef<HTMLDivElement>(null);
-  const autoRef     = useRef<ReturnType<typeof setInterval> | null>(null);
+  const activeRef = useRef(0);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const stripRef = useRef<HTMLDivElement>(null);
+  const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const leaveTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const textTimers  = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const textTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const goTo = useCallback(
-    (idx: number) => {
-      const prev = activeRef.current;
-      if (idx === prev) return;
-      activeRef.current = idx;
+  const goTo = useCallback((idx: number) => {
+    const prev = activeRef.current;
+    if (idx === prev) return;
+    activeRef.current = idx;
 
-      setLeaving(prev);
-      const lt = setTimeout(
-        () => setLeaving((lv) => (lv === prev ? null : lv)),
-        340,
-      );
-      leaveTimers.current.push(lt);
+    setLeaving(prev);
+    const lt = setTimeout(() => setLeaving((lv) => (lv === prev ? null : lv)), 340);
+    leaveTimers.current.push(lt);
 
-      setActive(idx);
+    setActive(idx);
 
-      // scroll the strip so the active card is centred
-      requestAnimationFrame(() => {
-        const wrap = stripRef.current;
-        const card = cardRefs.current[idx];
-        if (!wrap || !card) return;
-        const wrapRect = wrap.getBoundingClientRect();
-        const cardRect = card.getBoundingClientRect();
-        const target =
-          wrap.scrollLeft +
-          cardRect.left -
-          wrapRect.left -
-          (wrapRect.width - cardRect.width) / 2;
-        wrap.scrollTo({ left: target, behavior: 'smooth' });
-      });
+    // scroll the strip so the active card is centred
+    requestAnimationFrame(() => {
+      const wrap = stripRef.current;
+      const card = cardRefs.current[idx];
+      if (!wrap || !card) return;
+      const wrapRect = wrap.getBoundingClientRect();
+      const cardRect = card.getBoundingClientRect();
+      const target = wrap.scrollLeft + cardRect.left - wrapRect.left - (wrapRect.width - cardRect.width) / 2;
+      wrap.scrollTo({ left: target, behavior: 'smooth' });
+    });
 
-      setTextVisible(false);
-      const tt = setTimeout(() => {
-        setShown(idx);
-        setTextVisible(true);
-      }, 420);
-      textTimers.current.push(tt);
-    },
-    [],
-  );
+    setTextVisible(false);
+    const tt = setTimeout(() => {
+      setShown(idx);
+      setTextVisible(true);
+    }, 420);
+    textTimers.current.push(tt);
+  }, []);
 
   const resetAuto = useCallback(() => {
     if (autoRef.current) clearInterval(autoRef.current);
-    autoRef.current = setInterval(
-      () => goTo((activeRef.current + 1) % N),
-      INTERVAL,
-    );
+    autoRef.current = setInterval(() => goTo((activeRef.current + 1) % N), INTERVAL);
   }, [goTo, N]);
 
   useEffect(() => {
@@ -114,7 +98,7 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
       goTo(i);
       resetAuto();
     },
-    [goTo, resetAuto],
+    [goTo, resetAuto]
   );
 
   const post = slides[shown];
@@ -137,33 +121,25 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
 
         <div className="hero-text">
           <div className="hero-eye">Aktuell</div>
-          <div className={`hero-meta${textVisible ? '' : ' hero-fade'}`}>
-            {post.meta}
-          </div>
+          <div className={`hero-meta${textVisible ? '' : ' hero-fade'}`}>{post.meta}</div>
           <h1 className={textVisible ? '' : 'hero-fade'}>{post.title}</h1>
-          {post.body && (
-            <p className={`hero-sub${textVisible ? '' : ' hero-fade'}`}>
-              {post.body}
-            </p>
-          )}
+          {post.body && <p className={`hero-sub${textVisible ? '' : ' hero-fade'}`}>{post.body}</p>}
         </div>
       </div>
 
       <div className="hero-strip-wrap" ref={stripRef}>
         <div className="hero-strip">
           {slides.map((slide, i) => {
-            const cls = [
-              'hero-card',
-              active === i  ? 'active'  : '',
-              leaving === i ? 'leaving' : '',
-            ]
+            const cls = ['hero-card', active === i ? 'active' : '', leaving === i ? 'leaving' : '']
               .filter(Boolean)
               .join(' ');
 
             return (
               <div
                 key={slide.slug + i}
-                ref={(el) => { cardRefs.current[i] = el; }}
+                ref={(el) => {
+                  cardRefs.current[i] = el;
+                }}
                 className={cls}
                 onClick={() => handleClick(i)}
               >
@@ -179,16 +155,12 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
                 </div>
                 <div className="hero-card-vl" />
                 <div className="hero-card-vb" />
-                <div className="hero-card-num">
-                  {String(i + 1).padStart(2, '0')}
-                </div>
+                <div className="hero-card-num">{String(i + 1).padStart(2, '0')}</div>
                 <div className="hero-card-text">
                   <div className="hero-card-title">{slide.excerpt || slide.title}</div>
                 </div>
                 <div className="hero-card-prog">
-                  {active === i && (
-                    <div key={`fill-${active}`} className="hero-card-prog-fill" />
-                  )}
+                  {active === i && <div key={`fill-${active}`} className="hero-card-prog-fill" />}
                 </div>
               </div>
             );

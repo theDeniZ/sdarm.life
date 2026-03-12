@@ -36,17 +36,17 @@ export default function BgCanvas({ bgImageUrl }: BgCanvasProps) {
 
       // left fade
       const gl = ctx.createLinearGradient(0, 0, W * 0.22, 0);
-      gl.addColorStop(0,   WARM + '1)');
+      gl.addColorStop(0, WARM + '1)');
       gl.addColorStop(0.7, WARM + '0.5)');
-      gl.addColorStop(1,   WARM + '0)');
+      gl.addColorStop(1, WARM + '0)');
       ctx.fillStyle = gl;
       ctx.fillRect(0, 0, W * 0.22, H);
 
       // right fade
       const gr = ctx.createLinearGradient(W, 0, W * 0.78, 0);
-      gr.addColorStop(0,   WARM + '1)');
+      gr.addColorStop(0, WARM + '1)');
       gr.addColorStop(0.7, WARM + '0.5)');
-      gr.addColorStop(1,   WARM + '0)');
+      gr.addColorStop(1, WARM + '0)');
       ctx.fillStyle = gr;
       ctx.fillRect(W * 0.78, 0, W * 0.22, H);
 
@@ -98,11 +98,5 @@ export default function BgCanvas({ bgImageUrl }: BgCanvasProps) {
     };
   }, [bgImageUrl]);
 
-  return (
-    <canvas
-      ref={canvasRef}
-      id="bg-canvas"
-      aria-hidden="true"
-    />
-  );
+  return <canvas ref={canvasRef} id="bg-canvas" aria-hidden="true" />;
 }

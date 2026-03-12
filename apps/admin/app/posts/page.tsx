@@ -8,7 +8,9 @@ export default function PostsPage() {
     <>
       <div className="page-header">
         <h1>Posts</h1>
-        <Link href="/posts/new" className="btn-primary">+ New post</Link>
+        <Link href="/posts/new" className="btn-primary">
+          + New post
+        </Link>
       </div>
       <PostList />
     </>

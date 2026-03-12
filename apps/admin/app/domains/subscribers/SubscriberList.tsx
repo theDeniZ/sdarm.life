@@ -35,7 +35,9 @@ export default function SubscriberList() {
                 <td>{sub.email}</td>
                 <td>{fmtDate(sub.createdAt)}</td>
                 <td>
-                  <button className="btn-danger" onClick={() => handleRemove(sub)}>Remove</button>
+                  <button className="btn-danger" onClick={() => handleRemove(sub)}>
+                    Remove
+                  </button>
                 </td>
               </tr>
             ))}

@@ -4,10 +4,10 @@ import Link from 'next/link';
 
 const NAV_LINKS = [
   { label: 'Neuigkeiten', href: '/#neuigkeiten' },
-  { label: 'Video',       href: '/#video' },
-  { label: 'Liederbuch',  href: '/#liederbuch' },
-  { label: 'Über uns',    href: '/#ueber-uns' },
-  { label: 'Produkte',    href: '/#produkte' },
+  { label: 'Video', href: '/#video' },
+  { label: 'Liederbuch', href: '/#liederbuch' },
+  { label: 'Über uns', href: '/#ueber-uns' },
+  { label: 'Produkte', href: '/#produkte' },
 ];
 
 export default function Navbar() {

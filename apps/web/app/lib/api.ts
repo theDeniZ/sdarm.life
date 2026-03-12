@@ -7,7 +7,7 @@ import type { AboutConfig } from '../components/AboutSection';
 import type { FooterConfig } from '../components/Footer';
 
 export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
-export const R2  = process.env.R2_URL  ?? 'https://images.sdarm.life';
+export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
 export const FALLBACK_IMG = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=85&fit=crop';
 
 export function r2url(key: string | null): string | null {
@@ -83,20 +83,20 @@ export function toVideoPost(post: PostDto): VideoPost {
 
 export function toAboutConfig(config: ConfigDto): AboutConfig {
   return {
-    about_text_1:    config.about_text_1    ?? undefined,
-    about_text_2:    config.about_text_2    ?? undefined,
-    about_image_url: config.about_image_key ? r2url(config.about_image_key) ?? undefined : undefined,
+    about_text_1: config.about_text_1 ?? undefined,
+    about_text_2: config.about_text_2 ?? undefined,
+    about_image_url: config.about_image_key ? (r2url(config.about_image_key) ?? undefined) : undefined,
     about_image_alt: config.about_image_alt ?? undefined,
-    about_link_url:  config.about_link_url  ?? undefined,
+    about_link_url: config.about_link_url ?? undefined,
   };
 }
 
 export function toFooterConfig(config: ConfigDto): FooterConfig {
   return {
-    donation_url:  config.donation_url  ?? undefined,
-    facebook_url:  config.facebook_url  ?? undefined,
-    whatsapp_url:  config.whatsapp_url  ?? undefined,
+    donation_url: config.donation_url ?? undefined,
+    facebook_url: config.facebook_url ?? undefined,
+    whatsapp_url: config.whatsapp_url ?? undefined,
     instagram_url: config.instagram_url ?? undefined,
-    youtube_url:   config.youtube_url   ?? undefined,
+    youtube_url: config.youtube_url ?? undefined,
   };
 }

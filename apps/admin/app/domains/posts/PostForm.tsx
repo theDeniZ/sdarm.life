@@ -8,7 +8,7 @@ import { toLocalDatetime } from '../../lib/format';
 import type { PostFormData } from './types';
 
 type Props = {
-  id?:      number;
+  id?: number;
   initial?: Partial<PostFormData>;
 };
 
@@ -24,21 +24,21 @@ export default function PostForm({ id, initial = {} }: Props) {
   const isEdit = id !== undefined;
 
   const [form, setForm] = useState<PostFormData>({
-    title:       initial.title       ?? '',
-    slug:        initial.slug        ?? '',
-    excerpt:     initial.excerpt     ?? '',
-    body:        initial.body        ?? '',
-    author:      initial.author      ?? '',
+    title: initial.title ?? '',
+    slug: initial.slug ?? '',
+    excerpt: initial.excerpt ?? '',
+    body: initial.body ?? '',
+    author: initial.author ?? '',
     publishedAt: initial.publishedAt ?? toLocalDatetime(null),
-    videoUrl:    initial.videoUrl    ?? '',
-    coverKey:    initial.coverKey    ?? null,
-    coverAlt:    initial.coverAlt    ?? '',
-    thumbKey:    initial.thumbKey    ?? null,
-    isFeatured:  initial.isFeatured  ?? false,
+    videoUrl: initial.videoUrl ?? '',
+    coverKey: initial.coverKey ?? null,
+    coverAlt: initial.coverAlt ?? '',
+    thumbKey: initial.thumbKey ?? null,
+    isFeatured: initial.isFeatured ?? false,
   });
   const [slugLocked, setSlugLocked] = useState(isEdit);
-  const [saving, setSaving]         = useState(false);
-  const [error, setError]           = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   function set<K extends keyof PostFormData>(k: K, v: PostFormData[K]) {
     setForm((f) => ({ ...f, [k]: v }));
@@ -60,33 +60,33 @@ export default function PostForm({ id, initial = {} }: Props) {
     setError(null);
     try {
       const payload: UpdatePostPayload = {
-        title:       form.title,
-        slug:        form.slug,
-        excerpt:     form.excerpt     || null,
-        body:        form.body        || null,
-        author:      form.author      || null,
+        title: form.title,
+        slug: form.slug,
+        excerpt: form.excerpt || null,
+        body: form.body || null,
+        author: form.author || null,
         publishedAt: form.publishedAt || null,
-        videoUrl:    form.videoUrl    || null,
-        coverKey:    form.coverKey,
-        coverAlt:    form.coverAlt    || null,
-        thumbKey:    form.thumbKey,
-        isFeatured:  form.isFeatured,
+        videoUrl: form.videoUrl || null,
+        coverKey: form.coverKey,
+        coverAlt: form.coverAlt || null,
+        thumbKey: form.thumbKey,
+        isFeatured: form.isFeatured,
       };
       if (isEdit) {
         await updatePost(id, payload);
       } else {
         await createPost({
-          title:       form.title,
-          slug:        form.slug,
-          excerpt:     form.excerpt,
-          body:        form.body,
-          author:      form.author,
+          title: form.title,
+          slug: form.slug,
+          excerpt: form.excerpt,
+          body: form.body,
+          author: form.author,
           publishedAt: form.publishedAt,
-          videoUrl:    form.videoUrl,
-          coverKey:    form.coverKey,
-          coverAlt:    form.coverAlt,
-          thumbKey:    form.thumbKey,
-          isFeatured:  form.isFeatured,
+          videoUrl: form.videoUrl,
+          coverKey: form.coverKey,
+          coverAlt: form.coverAlt,
+          thumbKey: form.thumbKey,
+          isFeatured: form.isFeatured,
         });
       }
       router.push('/posts');
@@ -100,22 +100,12 @@ export default function PostForm({ id, initial = {} }: Props) {
     <form className="form-card" onSubmit={submit}>
       <div className="form-row">
         <label>Title *</label>
-        <input
-          type="text"
-          required
-          value={form.title}
-          onChange={(e) => onTitleChange(e.target.value)}
-        />
+        <input type="text" required value={form.title} onChange={(e) => onTitleChange(e.target.value)} />
       </div>
 
       <div className="form-row">
         <label>Slug *</label>
-        <input
-          type="text"
-          required
-          value={form.slug}
-          onChange={(e) => onSlugChange(e.target.value)}
-        />
+        <input type="text" required value={form.slug} onChange={(e) => onSlugChange(e.target.value)} />
       </div>
 
       <div className="form-row">
@@ -135,11 +125,7 @@ export default function PostForm({ id, initial = {} }: Props) {
 
       <div className="form-row">
         <label>Published at</label>
-        <input
-          type="datetime-local"
-          value={form.publishedAt}
-          onChange={(e) => set('publishedAt', e.target.value)}
-        />
+        <input type="datetime-local" value={form.publishedAt} onChange={(e) => set('publishedAt', e.target.value)} />
       </div>
 
       <div className="form-row">
@@ -164,16 +150,16 @@ export default function PostForm({ id, initial = {} }: Props) {
 
       <div className="form-row">
         <label className="checkbox-row">
-          <input
-            type="checkbox"
-            checked={form.isFeatured}
-            onChange={(e) => set('isFeatured', e.target.checked)}
-          />
+          <input type="checkbox" checked={form.isFeatured} onChange={(e) => set('isFeatured', e.target.checked)} />
           Featured
         </label>
       </div>
 
-      {error && <div className="state-error" style={{ padding: '8px 0' }}>{error}</div>}
+      {error && (
+        <div className="state-error" style={{ padding: '8px 0' }}>
+          {error}
+        </div>
+      )}
 
       <div className="form-actions">
         <button type="submit" className="btn-primary" disabled={saving}>

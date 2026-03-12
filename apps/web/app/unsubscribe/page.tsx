@@ -2,11 +2,7 @@ export const runtime = 'edge';
 
 const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 
-export default async function UnsubscribePage({
-  searchParams,
-}: {
-  searchParams: Promise<{ token?: string }>;
-}) {
+export default async function UnsubscribePage({ searchParams }: { searchParams: Promise<{ token?: string }> }) {
   const { token } = await searchParams;
 
   if (!token) {
@@ -29,11 +25,7 @@ export default async function UnsubscribePage({
 
   return (
     <main className="page unsubscribe-page">
-      {ok ? (
-        <p>Sie wurden erfolgreich abgemeldet.</p>
-      ) : (
-        <p>Der Link ist ungültig oder abgelaufen.</p>
-      )}
+      {ok ? <p>Sie wurden erfolgreich abgemeldet.</p> : <p>Der Link ist ungültig oder abgelaufen.</p>}
     </main>
   );
 }
