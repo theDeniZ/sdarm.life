@@ -1,4 +1,3 @@
-import BgCanvas from './components/BgCanvas';
 import Navbar from './components/Navbar';
 import HeroSection, { type HeroPost } from './components/HeroSection';
 import NewsSection, { type NewsPost } from './components/NewsSection';
@@ -94,7 +93,7 @@ function toNewsPost(post: ApiPost): NewsPost {
     author: post.author ?? '',
     imageUrl: r2url(post.coverKey) ?? FALLBACK_IMG,
     imageAlt: post.coverAlt ?? post.title,
-    href: `/${post.slug}`,
+    href: `/posts/${post.slug}`,
     hasVideo: !!post.videoUrl,
   };
 }
@@ -142,11 +141,8 @@ export default async function HomePage() {
   const aboutConfig = config ? toAboutConfig(config) : undefined;
   const footerConfig = config ? toFooterConfig(config) : undefined;
 
-  const bgImageUrl = config?.hero_bg_key ? r2url(config.hero_bg_key) : null;
-
   return (
     <>
-      <BgCanvas bgImageUrl={bgImageUrl} />
       <Navbar />
       
       <div className="page">

@@ -34,7 +34,7 @@ export default function ImpressumPage() {
 
       <h2>Verantwortlich für den Inhalt (§ 18 Abs. 2 MStV)</h2>
       <p>
-        Sergei Galuscinshi<br />
+        Serghei Galuscinshi<br />
         Eisenbahnstr. 6, D-65439 Flörsheim/M
       </p>
 

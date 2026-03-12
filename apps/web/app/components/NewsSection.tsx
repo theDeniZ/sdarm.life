@@ -1,4 +1,5 @@
 import Image from 'next/image';
+import Link from 'next/link';
 
 /**
  * Shape of a news post returned by GET /api/posts (Phase 4).
@@ -69,7 +70,7 @@ export default function NewsSection({ posts = STATIC_NEWS }: NewsSectionProps) {
         <div className="news-grid">
           {posts.map((post) => (
             <div key={post.id} className="news-card">
-              <a className="img16" href={post.href} target="_blank" rel="noopener noreferrer" style={{ position: 'relative' }}>
+              <Link className="img16" href={post.href} style={{ position: 'relative' }}>
                 <Image
                   src={post.imageUrl}
                   alt={post.imageAlt}
@@ -77,12 +78,7 @@ export default function NewsSection({ posts = STATIC_NEWS }: NewsSectionProps) {
                   style={{ objectFit: 'cover' }}
                   sizes="(max-width: 768px) 100vw, 50vw"
                 />
-                {post.hasVideo && (
-                  <div className="play-over">
-                    <div className="play-circle" />
-                  </div>
-                )}
-              </a>
+              </Link>
               <h3>{post.title}</h3>
               <div className="meta">
                 {post.date} · {post.author}

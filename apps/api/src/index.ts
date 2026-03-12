@@ -256,7 +256,7 @@ admin.post('/images/upload', async (c) => {
 	const key = `uploads/${crypto.randomUUID()}.${ext}`;
 
 	await c.env.IMAGES.put(key, file.stream(), {
-		httpMetadata: { contentType: file.type },
+		httpMetadata: { contentType: file.type, cacheControl: 'public, max-age=31536000, immutable' },
 	});
 
 	return c.json({ key });
