@@ -14,6 +14,7 @@ type PostData = {
   videoUrl: string;
   coverKey: string | null;
   coverAlt: string;
+  thumbKey: string | null;
   isFeatured: boolean;
 };
 
@@ -21,6 +22,7 @@ type Props = {
   id?: number;
   initial?: Partial<PostData>;
 };
+
 
 const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life';
 
@@ -56,6 +58,7 @@ export default function PostForm({ id, initial = {} }: Props) {
     videoUrl:    initial.videoUrl ?? '',
     coverKey:    initial.coverKey ?? null,
     coverAlt:    initial.coverAlt ?? '',
+    thumbKey:    initial.thumbKey ?? null,
     isFeatured:  initial.isFeatured ?? false,
   });
   const [slugLocked, setSlugLocked] = useState(isEdit);
@@ -91,6 +94,7 @@ export default function PostForm({ id, initial = {} }: Props) {
         videoUrl:    form.videoUrl || null,
         coverKey:    form.coverKey,
         coverAlt:    form.coverAlt || null,
+        thumbKey:    form.thumbKey,
         isFeatured:  form.isFeatured,
       };
       const res = await fetch(
@@ -179,10 +183,18 @@ export default function PostForm({ id, initial = {} }: Props) {
       </div>
 
       <div className="form-row">
-        <label>Cover image</label>
+        <label>Cover image (hero background)</label>
         <ImageUpload
           value={form.coverKey}
           onChange={(key) => set('coverKey', key)}
+        />
+      </div>
+
+      <div className="form-row">
+        <label>Thumbnail (strip card preview)</label>
+        <ImageUpload
+          value={form.thumbKey}
+          onChange={(key) => set('thumbKey', key)}
         />
       </div>
 

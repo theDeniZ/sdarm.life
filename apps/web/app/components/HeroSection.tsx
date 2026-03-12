@@ -8,7 +8,8 @@ export interface HeroPost {
   meta: string;
   excerpt: string; // preview text — shown on the strip card
   body: string;    // shown in the detail area above the strip
-  imageUrl: string;
+  imageUrl: string;  // hero background
+  thumbUrl: string;  // strip card thumbnail (falls back to imageUrl if not set)
   imageAlt: string;
   slug: string;
 }
@@ -19,6 +20,8 @@ const STATIC: HeroPost = {
   excerpt: '',
   body: '',
   imageUrl:
+    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg/1280px-Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg',
+  thumbUrl:
     'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg/1280px-Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg',
   imageAlt: 'Historisches Gemälde',
   slug: '#',
@@ -166,11 +169,11 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
               >
                 <div className="hero-card-img">
                   <Image
-                    src={slide.imageUrl}
+                    src={slide.thumbUrl}
                     alt={slide.imageAlt}
                     fill
                     style={{ objectFit: 'cover' }}
-                    unoptimized={isUnoptimized(slide.imageUrl)}
+                    unoptimized={isUnoptimized(slide.thumbUrl)}
                     priority={i === 0}
                   />
                 </div>

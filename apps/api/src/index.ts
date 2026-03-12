@@ -143,6 +143,7 @@ admin.post('/posts', async (c) => {
 		videoUrl?: string;
 		coverKey?: string;
 		coverAlt?: string;
+		thumbKey?: string;
 		isFeatured?: boolean;
 		publishedAt?: string;
 	}>();
@@ -158,6 +159,7 @@ admin.post('/posts', async (c) => {
 			videoUrl: body.videoUrl ?? null,
 			coverKey: body.coverKey ?? null,
 			coverAlt: body.coverAlt ?? null,
+			thumbKey: body.thumbKey ?? null,
 			isFeatured: body.isFeatured ?? false,
 			publishedAt: body.publishedAt ? new Date(body.publishedAt) : new Date(),
 		})
@@ -178,6 +180,7 @@ admin.patch('/posts/:id', async (c) => {
 		videoUrl: string | null;
 		coverKey: string | null;
 		coverAlt: string | null;
+		thumbKey: string | null;
 		isFeatured: boolean;
 		publishedAt: string | null;
 		deletedAt: string | null;
@@ -192,6 +195,7 @@ admin.patch('/posts/:id', async (c) => {
 	if (body.videoUrl !== undefined)  update.videoUrl = body.videoUrl;
 	if (body.coverKey !== undefined)  update.coverKey = body.coverKey;
 	if (body.coverAlt !== undefined)  update.coverAlt = body.coverAlt;
+	if (body.thumbKey !== undefined)  update.thumbKey = body.thumbKey;
 	if (body.isFeatured !== undefined) update.isFeatured = body.isFeatured;
 	if (body.publishedAt !== undefined) update.publishedAt = body.publishedAt ? new Date(body.publishedAt) : null;
 	if (body.deletedAt !== undefined) update.deletedAt = body.deletedAt ? new Date(body.deletedAt) : null;

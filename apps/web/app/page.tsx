@@ -23,6 +23,7 @@ interface ApiPost {
   videoUrl: string | null;
   coverKey: string | null;
   coverAlt: string | null;
+  thumbKey: string | null;
   isFeatured: boolean;
   publishedAt: string | null;
 }
@@ -79,6 +80,7 @@ function toHeroPost(post: ApiPost): HeroPost {
     excerpt: post.excerpt ?? '',
     body: post.body ?? '',
     imageUrl: r2url(post.coverKey) ?? FALLBACK_IMG,
+    thumbUrl: r2url(post.thumbKey) ?? r2url(post.coverKey) ?? FALLBACK_IMG,
     imageAlt: post.coverAlt ?? post.title,
     slug: post.slug,
   };

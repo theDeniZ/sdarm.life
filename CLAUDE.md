@@ -59,7 +59,7 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `CF_CLIEN
 
 ## Database schema (`packages/db/src/index.ts`)
 
-**`posts`** table: `id`, `title`, `slug` (unique), `excerpt`, `body`, `author`, `video_url`, `cover_key`, `cover_alt`, `is_featured` (boolean), `published_at`, `created_at`, `updated_at`, `deleted_at`
+**`posts`** table: `id`, `title`, `slug` (unique), `excerpt`, `body`, `author`, `video_url`, `cover_key`, `cover_alt`, `thumb_key`, `is_featured` (boolean), `published_at`, `created_at`, `updated_at`, `deleted_at`
 
 **`siteConfig`** table: `key` (PK), `value`, `updated_at`
 
@@ -211,7 +211,7 @@ All images use Next.js `<Image fill>` inside aspect-ratio containers. `next.conf
 - **Image preview after upload** — keep `URL.createObjectURL(file)` as preview; don't switch to R2 URL (local `.wrangler/state/` objects aren't on `images.sdarm.life`). R2 key is still stored correctly.
 - **`setupDevPlatform` in `next.config.ts`** — use `.then()`, not top-level `await` (Next.js 15 compiles config to CJS).
 - **`.dev.vars` vs `wrangler.jsonc`** — local secrets go in `apps/api/.dev.vars` (auto-loaded by Wrangler). The `dev.vars` field inside `wrangler.jsonc` is not valid.
-- **D1 migrations in CI** — must use `--remote` flag; without it wrangler defaults to local.
+- **D1 migrations** — Remote migrations run automatically via GitHub CI (`.github/workflows/ci.yml`) on every push to `main` using `--remote`. Local migrations are **not** run automatically and must be applied manually: `pnpm wrangler d1 migrations apply sdarm-db` (omit `--remote` for local). When adding a new migration, apply it locally yourself (or ask the agent to do it).
 - **`drizzle-orm` in `@sdarm/api`** — must be a direct dependency (not just in `@sdarm/db`); wrangler bundles per-package and won't hoist workspace deps.
 - **`@cloudflare/next-on-pages`** — requires `vercel@47.0.4` pinned as devDep (later versions break the build). Requires `nodejs_compat` flag set in Pages project settings.
 - **Next.js version** — both apps use **15.2.2** (not 16). Next.js 16 Turbopack fails inside `vercel build` in a monorepo.

@@ -27,6 +27,7 @@ export const posts = sqliteTable('posts', {
   videoUrl:    text('video_url'),
   coverKey:    text('cover_key'),
   coverAlt:    text('cover_alt'),
+  thumbKey:    text('thumb_key'),
   isFeatured:  integer('is_featured', { mode: 'boolean' }).notNull().default(false),
   publishedAt: integer('published_at', { mode: 'timestamp' }),
   createdAt:   integer('created_at',  { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),

@@ -17,6 +17,7 @@ type Post = {
   videoUrl: string | null;
   coverKey: string | null;
   coverAlt: string | null;
+  thumbKey: string | null;
   isFeatured: boolean;
 };
 
@@ -63,6 +64,7 @@ export default function EditPostPage() {
           videoUrl:    post.videoUrl ?? '',
           coverKey:    post.coverKey,
           coverAlt:    post.coverAlt ?? '',
+          thumbKey:    post.thumbKey,
           isFeatured:  post.isFeatured,
         }}
       />
