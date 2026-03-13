@@ -75,6 +75,14 @@ Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — 
 
 `NEXT_PUBLIC_API_URL` has **no `/api/v1` suffix** — components append the full path themselves.
 
+### `apps/songbook`
+
+| Variable  | Dev (`.env.local`)      | Production fallback |
+| --------- | ----------------------- | ------------------- |
+| `WEB_URL` | `http://localhost:3000` | `https://sdarm.life` |
+
+Server-only (no `NEXT_PUBLIC_` prefix).
+
 ### `apps/api` (local dev only)
 
 `apps/api/.dev.vars` (gitignored, auto-loaded by `wrangler dev`):

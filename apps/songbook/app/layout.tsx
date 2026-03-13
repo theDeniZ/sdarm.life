@@ -10,11 +10,12 @@ export const metadata: Metadata = {
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const songbooks = await fetchSongbooks();
+  const webUrl = process.env.WEB_URL ?? 'https://sdarm.life';
 
   return (
     <html lang="de">
       <body>
-        <SongbookNav songbooks={songbooks} />
+        <SongbookNav songbooks={songbooks} webUrl={webUrl} />
         {children}
       </body>
     </html>

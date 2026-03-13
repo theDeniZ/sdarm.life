@@ -4,14 +4,19 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { SongbookDto } from '@sdarm/types';
 
-export default function SongbookNav({ songbooks = [] }: { songbooks: SongbookDto[] }) {
+interface SongbookNavProps {
+  songbooks?: SongbookDto[];
+  webUrl?: string;
+}
+
+export default function SongbookNav({ songbooks = [], webUrl = 'https://sdarm.life' }: SongbookNavProps) {
   const pathname = usePathname();
 
   return (
     <nav className="top-nav">
-      <Link href="/" className="top-nav__brand">
+      <a href={webUrl} className="top-nav__brand">
         SDARM<span className="top-nav__brand-accent">.life</span>
-      </Link>
+      </a>
       {songbooks.map((sb) => {
         const href = `/songbooks/${sb.slug}`;
         const active = pathname.startsWith(href);
