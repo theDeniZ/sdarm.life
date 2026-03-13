@@ -136,3 +136,57 @@ Secrets are managed via `wrangler secret put` or the Cloudflare dashboard. They 
 | Auth | Cloudflare Access (admin) |
 | Monorepo | pnpm workspaces + Turborepo 2 |
 | Deployment | Cloudflare Git integration + GitHub Actions |
+
+---
+
+## MCP server
+
+The API exposes an OpenAPI spec at `https://api.sdarm.life/api/openapi.json`. You can connect any MCP-compatible AI client (Claude Desktop, Cursor, etc.) to it using [`openapi-mcp-server`](https://github.com/janwilmake/openapi-mcp-server) — no extra code required. Any new routes added to the API automatically appear as MCP tools.
+
+### Setup
+
+Add the following to your MCP client config (e.g. `~/.claude/claude_desktop_config.json` for Claude Desktop):
+
+```json
+{
+  "mcpServers": {
+    "sdarm-api": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "openapi-mcp-server",
+        "https://api.sdarm.life/api/openapi.json"
+      ]
+    }
+  }
+}
+```
+
+This exposes all **public** routes as MCP tools. To also enable **admin** routes (create/edit/delete posts, manage images, config, subscribers), add the auth headers:
+
+```json
+{
+  "mcpServers": {
+    "sdarm-api": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "openapi-mcp-server",
+        "https://api.sdarm.life/api/openapi.json"
+      ],
+      "env": {
+        "HEADER_CF-Access-Client-Id": "<CF_CLIENT_ID>",
+        "HEADER_CF-Access-Client-Secret": "<CF_CLIENT_SECRET>"
+      }
+    }
+  }
+}
+```
+
+> `CF_CLIENT_ID` and `CF_CLIENT_SECRET` are the same secrets used by the admin app. Contact the project owner if you need access.
+
+### How it works
+
+The API is built with [`@hono/zod-openapi`](https://github.com/honojs/middleware/tree/main/packages/zod-openapi), so every route is annotated with its input/output schema. `openapi-mcp-server` reads the live spec and generates one MCP tool per route. No wrapper code to write or maintain — new routes appear automatically.
+
+Interactive spec browser: `https://api.sdarm.life/api/ui`

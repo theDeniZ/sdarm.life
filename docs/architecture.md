@@ -69,6 +69,8 @@ export interface ListResponse<T> { items: T[]; total: number; }
 
 `apps/web` and `apps/admin` import from `@sdarm/types`. `apps/api` uses the same interfaces to type `c.json()` responses — enforcing the contract at the source.
 
+**Current state:** `apps/api/src/schemas.ts` holds Zod schemas (`PostSchema`, `ImageSchema`, `SubscriberSchema`, etc.) used by `@hono/zod-openapi` to generate the OpenAPI spec and validate requests at runtime. These schemas are the single source of truth for the API contract. When `packages/types` is created, its interfaces should be derived from these schemas via `z.infer<>` rather than written separately.
+
 ---
 
 ### API: domain-based routes + repositories
@@ -96,8 +98,9 @@ apps/api/src/
     subscribers.ts     — all DB queries for the subscribers table
   middleware/
     auth.ts            — CF Access header verification middleware
+  schemas.ts           — shared Zod schemas (PostSchema, ImageSchema, etc.) — source of truth for OpenAPI spec
   types.ts             — Bindings type, shared request body shapes
-  index.ts             — CORS, route mounting, export default app
+  index.ts             — CORS, route mounting, OpenAPI spec + Swagger UI, export default app
 ```
 
 **Repository pattern for Workers.** Repositories are plain modules exporting functions that take a `db` (Drizzle instance) as their first argument. No classes, no constructors — Workers have no persistent state between requests.

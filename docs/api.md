@@ -2,7 +2,10 @@
 
 Hono Worker at `api.sdarm.life`. All routes versioned under `/api/v1`.
 
-Source: `apps/api/src/index.ts` (target: `apps/api/src/routes/` — see [architecture.md](architecture.md)).
+Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
+
+**Swagger UI:** `GET /api/ui` — interactive docs, available in local dev and production.
+**OpenAPI spec:** `GET /api/openapi.json` — OpenAPI 3.1 JSON, auto-generated from route definitions.
 
 ## Public routes
 
@@ -53,6 +56,8 @@ All date fields are ISO strings (`string | null`) — Drizzle stores as integer 
 Target DTO types live in `packages/types` (`@sdarm/types`) — see [architecture.md](architecture.md).
 
 ## API coding conventions
+
+**All routes use `@hono/zod-openapi`.** Define routes with `createRoute()` + Zod schemas and register with `router.openapi()`. Never add undocumented routes with `router.get/post/...()` unless they are intentionally excluded from the spec (e.g. the local-dev R2 proxy). Shared response schemas live in `apps/api/src/schemas.ts`.
 
 **Routes are versioned under `/api/v1`.** Admin routes live under `/api/v1/admin/*` — always verify auth before any mutation.
 

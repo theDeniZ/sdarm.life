@@ -1,67 +1,140 @@
-import { Hono } from 'hono';
+import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../../types';
 import { getPostById, createPost, updatePost, softDeletePost } from '../../repositories/posts';
+import { ErrorSchema, OkSchema, PostSchema } from '../../schemas';
 
-const router = new Hono<{ Bindings: Bindings }>();
+const router = new OpenAPIHono<{ Bindings: Bindings }>();
 
-router.get('/:id', async (c) => {
-	const db   = drizzle(c.env.DB);
-	const id   = parseInt(c.req.param('id'), 10);
-	const post = await getPostById(db, id);
-	if (!post) return c.json({ error: 'Not found' }, 404);
-	return c.json(post);
+const IdParam = z.object({ id: z.coerce.number() });
+
+const CreatePostBody = z.object({
+  title: z.string(),
+  slug: z.string(),
+  excerpt: z.string().optional(),
+  body: z.string().optional(),
+  author: z.string().optional(),
+  videoUrl: z.string().optional(),
+  coverKey: z.string().optional(),
+  coverAlt: z.string().optional(),
+  thumbKey: z.string().optional(),
+  isFeatured: z.boolean().optional(),
+  publishedAt: z.string().optional(),
 });
 
-router.post('/', async (c) => {
-	const db   = drizzle(c.env.DB);
-	const body = await c.req.json<{
-		title: string;
-		slug: string;
-		excerpt?: string;
-		body?: string;
-		author?: string;
-		videoUrl?: string;
-		coverKey?: string;
-		coverAlt?: string;
-		thumbKey?: string;
-		isFeatured?: boolean;
-		publishedAt?: string;
-	}>();
-
-	const post = await createPost(db, body);
-	return c.json(post, 201);
+const UpdatePostBody = z.object({
+  title: z.string().optional(),
+  slug: z.string().optional(),
+  excerpt: z.string().nullable().optional(),
+  body: z.string().nullable().optional(),
+  author: z.string().nullable().optional(),
+  videoUrl: z.string().nullable().optional(),
+  coverKey: z.string().nullable().optional(),
+  coverAlt: z.string().nullable().optional(),
+  thumbKey: z.string().nullable().optional(),
+  isFeatured: z.boolean().optional(),
+  publishedAt: z.string().nullable().optional(),
+  deletedAt: z.string().nullable().optional(),
 });
 
-router.patch('/:id', async (c) => {
-	const db   = drizzle(c.env.DB);
-	const id   = parseInt(c.req.param('id'), 10);
-	const body = await c.req.json<Partial<{
-		title: string;
-		slug: string;
-		excerpt: string | null;
-		body: string | null;
-		author: string | null;
-		videoUrl: string | null;
-		coverKey: string | null;
-		coverAlt: string | null;
-		thumbKey: string | null;
-		isFeatured: boolean;
-		publishedAt: string | null;
-		deletedAt: string | null;
-	}>>();
-
-	const post = await updatePost(db, id, body);
-	if (!post) return c.json({ error: 'Not found' }, 404);
-	return c.json(post);
+const getPostRoute = createRoute({
+  method: 'get',
+  path: '/{id}',
+  tags: ['Admin / Posts'],
+  security: [{ cfAccess: [] }],
+  request: { params: IdParam },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: PostSchema } },
+      description: 'Single post by ID',
+    },
+    404: {
+      content: { 'application/json': { schema: ErrorSchema } },
+      description: 'Not found',
+    },
+  },
 });
 
-router.delete('/:id', async (c) => {
-	const db   = drizzle(c.env.DB);
-	const id   = parseInt(c.req.param('id'), 10);
-	const post = await softDeletePost(db, id);
-	if (!post) return c.json({ error: 'Not found' }, 404);
-	return c.json({ ok: true });
+const createPostRoute = createRoute({
+  method: 'post',
+  path: '/',
+  tags: ['Admin / Posts'],
+  security: [{ cfAccess: [] }],
+  request: {
+    body: { content: { 'application/json': { schema: CreatePostBody } }, required: true },
+  },
+  responses: {
+    201: {
+      content: { 'application/json': { schema: PostSchema } },
+      description: 'Created post',
+    },
+  },
+});
+
+const updatePostRoute = createRoute({
+  method: 'patch',
+  path: '/{id}',
+  tags: ['Admin / Posts'],
+  security: [{ cfAccess: [] }],
+  request: {
+    params: IdParam,
+    body: { content: { 'application/json': { schema: UpdatePostBody } }, required: true },
+  },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: PostSchema } },
+      description: 'Updated post',
+    },
+    404: {
+      content: { 'application/json': { schema: ErrorSchema } },
+      description: 'Not found',
+    },
+  },
+});
+
+const deletePostRoute = createRoute({
+  method: 'delete',
+  path: '/{id}',
+  tags: ['Admin / Posts'],
+  security: [{ cfAccess: [] }],
+  request: { params: IdParam },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: OkSchema } },
+      description: 'Soft-deleted',
+    },
+    404: {
+      content: { 'application/json': { schema: ErrorSchema } },
+      description: 'Not found',
+    },
+  },
+});
+
+router.openapi(getPostRoute, async (c) => {
+  const db = drizzle(c.env.DB);
+  const post = await getPostById(db, c.req.valid('param').id);
+  if (!post) return c.json({ error: 'Not found' }, 404);
+  return c.json(post, 200);
+});
+
+router.openapi(createPostRoute, async (c) => {
+  const db = drizzle(c.env.DB);
+  const post = await createPost(db, c.req.valid('json'));
+  return c.json(post, 201);
+});
+
+router.openapi(updatePostRoute, async (c) => {
+  const db = drizzle(c.env.DB);
+  const post = await updatePost(db, c.req.valid('param').id, c.req.valid('json'));
+  if (!post) return c.json({ error: 'Not found' }, 404);
+  return c.json(post, 200);
+});
+
+router.openapi(deletePostRoute, async (c) => {
+  const db = drizzle(c.env.DB);
+  const post = await softDeletePost(db, c.req.valid('param').id);
+  if (!post) return c.json({ error: 'Not found' }, 404);
+  return c.json({ ok: true as const }, 200);
 });
 
 export default router;
