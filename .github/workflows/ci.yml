@@ -49,6 +49,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sdarm/web pages:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: web-dist
+          path: apps/web/.vercel/output/static
 
   build-admin:
     needs: lint
@@ -65,8 +69,12 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sdarm/admin pages:build
         env:
-          NEXT_PUBLIC_CF_CLIENT_ID: dev
-          NEXT_PUBLIC_CF_CLIENT_SECRET: dev
+          NEXT_PUBLIC_CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
+          NEXT_PUBLIC_CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: admin-dist
+          path: apps/admin/.vercel/output/static
 
   build-songbook:
     needs: lint
@@ -82,6 +90,10 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sdarm/songbook pages:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: songbook-dist
+          path: apps/songbook/.vercel/output/static
 
   migrate:
     if: github.ref == 'refs/heads/main'
@@ -144,7 +156,6 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm turbo build --filter=@sdarm/api
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -156,17 +167,14 @@ jobs:
     needs: deploy-api
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/web pages:build
-      - run: npx wrangler pages deploy apps/web/.vercel/output/static --project-name=sdarm-web
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=sdarm-web
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -176,20 +184,14 @@ jobs:
     needs: deploy-api
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/admin pages:build
-        env:
-          NEXT_PUBLIC_CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          NEXT_PUBLIC_CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
-      - run: npx wrangler pages deploy apps/admin/.vercel/output/static --project-name=sdarm-admin
+      - uses: actions/download-artifact@v4
+        with:
+          name: admin-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=sdarm-admin
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -199,17 +201,14 @@ jobs:
     needs: deploy-api
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/songbook pages:build
-      - run: npx wrangler pages deploy apps/songbook/.vercel/output/static --project-name=sdarm-songbook
+      - uses: actions/download-artifact@v4
+        with:
+          name: songbook-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=sdarm-songbook
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
