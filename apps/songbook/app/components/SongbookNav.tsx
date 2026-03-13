@@ -9,7 +9,9 @@ export default function SongbookNav({ songbooks = [] }: { songbooks: SongbookDto
 
   return (
     <nav className="top-nav">
-      <span className="top-nav__brand">Songbooks</span>
+      <Link href="/" className="top-nav__brand">
+        SDARM<span className="top-nav__brand-accent">.life</span>
+      </Link>
       {songbooks.map((sb) => {
         const href = `/songbooks/${sb.slug}`;
         const active = pathname.startsWith(href);

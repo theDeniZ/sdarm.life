@@ -4,30 +4,28 @@
 
 | Component | Type | Notes |
 |---|---|---|
-| `layout.tsx` | Server (async) | Root layout — fetches config, renders `BgCanvas` once for all pages |
+| `layout.tsx` | Server | Root layout — imports `globals.css`, renders `<html>` + `<body>` shell |
 | `page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
 | `posts/[slug]/page.tsx` | Server (async) | Post detail page |
-| `BgCanvas` | **Client** | Canvas grayscale background — lives in `layout.tsx`, persists across navigations |
-| `Navbar` | **Client** | Sticky nav; all links use `/#section` hrefs for always-home anchors |
-| `HeroSection` | **Client** | Featured-posts strip carousel + static fallback |
-| `NewsSection` | Server | 2-col news grid; cards link to `/posts/[slug]` via `<Link>` |
-| `VideoSection` | Server | 2-col video grid |
-| `SongbookSection` | Server | Static search + song cards |
-| `AboutSection` | Server | 2-col about layout |
-| `ProductsSection` | **Client** | Book/product cards |
-| `Footer` | **Client** | Subscribe, donate, socials. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
+| `Navbar` | **Client** | Fixed nav; transparent → frosted glass on scroll. Gold underline hovers, sunset widget stub, hamburger icon |
+| `HeroSection` | **Client** | Featured-posts strip carousel with per-slide color tints, fog animation, deco-circle, side label counter |
+| `NewsSection` | **Client** | Editorial carousel — stacked images, side preview cards, prev/next arrows |
+| `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
+| `Footer` | **Client** | Dark theme — dot-grid, contact+subscribe column, nav links column. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
 
-`page.tsx` fetches in parallel: all featured posts, 4 news posts, 4 video posts, config — `cache: 'no-store'`. All return `null` on error → components fall back to static data silently.
+**Not rendered on home page** (files kept for future use): `VideoSection`, `SongbookSection`, `AboutSection`, `BgCanvas`.
 
-Data mappers: `toHeroPost`, `toNewsPost`, `toVideoPost`, `toAboutConfig`, `toFooterConfig`.
+`page.tsx` fetches in parallel: featured posts, 4 news posts, config — `cache: 'no-store'`. All return `null` on error → components fall back to static data silently.
+
+Data mappers: `toHeroPost`, `toNewsPost`, `toFooterConfig`.
 
 ### Post detail page (`posts/[slug]/page.tsx`)
 
-Server component with edge runtime. Fetches single post + up to 5 other posts in parallel.
+Server component with edge runtime. Fetches single post + up to 5 other posts + config in parallel.
 
-**Layout:** hero (cover image as full-bleed background + overlay + back button) → Inhalt section (body text) → Video section (if `videoUrl` set) → Weitere Beiträge grid (up to 4 other posts).
+**Layout:** `.post-hero` (cover image as full-bleed background + `.post-hero-overlay` gradient + back button) → `.post-section` with "Inhalt" label (body text) → `.post-section` with "Video" (if `videoUrl` set, play button overlay) → `.post-section` with "Weitere Beiträge" (`.post-grid` of `.post-card` items, responsive grid).
 
-CSS classes (in `globals.css`): `.post-hero`, `.post-back`, `.post-meta`, `.post-body`, `.post-more-title`. Reuses `.hero*`, `.section-block`, `.section-label`, `.video-card`, `.news-card`.
+CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overlay`, `.post-back`, `.post-meta`, `.post-section`, `.post-section-label`, `.post-body`, `.post-video`, `.post-video-card`, `.post-video-play`, `.post-more-title`, `.post-grid`, `.post-card`, `.post-card-img`, `.post-card-title`, `.post-card-meta`.
 
 ### HeroSection carousel
 
@@ -37,27 +35,41 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-back`, `.post-meta`, `.post
 
 | Field | Source | Used in |
 |---|---|---|
-| `title` | `posts.title` | Detail area (h1) |
-| `meta` | formatted date + author | Detail area |
-| `body` | `posts.body` | Detail area paragraph |
+| `title` | `posts.title` | Hero content h1 |
+| `meta` | formatted date + author | Side label eyebrow |
+| `body` | `posts.body` | Hero content paragraph |
 | `excerpt` | `posts.excerpt` | Strip card preview text (falls back to `title`) |
-| `imageUrl` | R2 cover key → URL | Hero background + card thumbnail |
+| `imageUrl` | R2 cover key → URL | Kept in type but not rendered (no photo hero bg) |
+| `thumbUrl` | R2 thumb key → URL | Strip card thumbnail via `<Image>` |
 | `imageAlt` | `posts.cover_alt` | Alt text |
-| `slug` | `posts.slug` | React key + link href |
+| `slug` | `posts.slug` | React key |
 
-**Layout:** `.hero` (full-bleed, dark background + overlay, text bottom-aligned) sits above `.hero-strip-wrap` (full-bleed dark strip). Both bleed via `margin-left: calc(-1 * var(--gl))` / `margin-right: calc(-1 * var(--gr))`.
+**Visual layers (bottom to top):** `.hero-base` (dark gradient) → `.hero-tint` (per-slide radial color tints, cross-fade on slide change) → `.fog` (animated pseudo-element blobs) → `.sculpture` (decorative radial glow) → `.deco-circle` (pulsing ring) → `.side-label` (eyebrow + counter) → `.hero-content` (title + subtitle) → `.strip-wrap` (card strip).
 
-**Behaviour:** 5 s auto-cycle, progress bar restarted via React `key`, hero text + background cross-fade (420 ms), strip scrolls horizontally on overflow. Card text slides in from right, exits left on `.leaving`.
+**Behaviour:** 5 s auto-cycle, progress bar restarted via React `key`, hero text cross-fade (420 ms), tints cross-fade (1.1 s). Strip cards use flex-grow animation with `.active` / `.leaving` classes. Card numbers use Bebas Neue font.
 
 **Admin note:** `excerpt` is labelled **"Preview Text"** in PostForm — it drives the strip card text, not a traditional excerpt.
 
-### `BgCanvas` placement
+### NewsSection editorial carousel
 
-`layout.tsx` fetches `hero_bg_key` from config and passes it to `BgCanvas`. Falls back to a static Unsplash URL. `BgCanvas` is **not** in individual pages — it lives in the layout so it persists across client-side navigations without redraw flicker.
+`'use client'` carousel. Receives news posts via `posts?: NewsPost[]`. Falls back to static data.
 
-- `BgCanvas` z-index must be `-1`. At `0` it covers page text.
-- Every page wrapper needs `.page { background: #fff }` to prevent canvas bleed through transparent sections.
+**`NewsPost` interface:** `id`, `title`, `date`, `author`, `body`, `imageUrl`, `imageAlt`, `href`.
+
+**Layout:** `.events-section` (dark `#141310` bg) → `.ev-viewport` containing: prev/next circle arrows, left/right `.ev-side` preview cards (clickable), `.ev-main` with stacked images (`.ev-img-top` + `.ev-img-bot`) and text panel (`.ev-text` with gold accent line, title, meta, description, "Mehr erfahren" button).
+
+Side previews hidden on mobile; images switch to side-by-side row layout.
+
+### ProductsSection editorial banner
+
+`'use client'` banner. Uses static `STATIC_PRODUCTS` data with `Product` interface: `id`, `imageUrl`, `imageAlt`, `category`, `tag`, `title`, `description`, `meta`, `href?`.
+
+**Layout:** `.prod-banner-stage` is a CSS grid with 3 columns: vertical category tabs (`.prod-cats`) | central image (`.prod-img-wrap`) | text panel (`.prod-text-panel`) + counter/arrows (`.prod-nav`). Clicking a category tab jumps to the first product in that category.
+
+### Layout notes
+
 - Never add `export const runtime = 'edge'` to `layout.tsx` — set it only on individual page files.
+- `layout.tsx` is minimal: imports `globals.css`, sets metadata, renders `<html><body>{children}</body></html>`. No data fetching.
 
 ---
 
@@ -117,7 +129,7 @@ Image fields render `<ImagePicker>`. Text-area fields render `<textarea>`. URL a
 
 **Client components cannot read server-only env vars** (`API_URL`, `R2_URL`). Pass them as props from the parent server component.
 
-**Internal links always use `<Link>`.** Plain `<a href>` triggers a full reload, remounts `BgCanvas`, causes background flicker.
+**Internal links always use `<Link>`.** Plain `<a href>` triggers a full page reload — use `next/link` for SPA navigation.
 
 ---
 

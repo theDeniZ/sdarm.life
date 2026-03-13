@@ -19,27 +19,27 @@ No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
 **Design tokens (CSS custom properties):**
 
 ```css
---red: #c0392b          /* accent */
---dark: #1a1a1a
---gray: #999
---mid: #555
---text: #2c2c2c
---light: #f7f5f2
---border: #e4dfd8
---warm-bg: #d8d2c8
---foot-bg: #ece8e2
---gl: 188px             /* left grid margin */
---gr: 144px             /* right grid margin */
---pw: 1152px            /* page width */
---r: 5px                /* border radius */
+/* apps/web — dark museum theme */
+--gold:    #c9a96e      /* accent */
+--dark:    #0c0b09      /* body background */
+--text:    #d6d0c8      /* body text */
+--muted:   #7a7470      /* secondary text */
+--border:  rgba(201,169,110,0.12)
+
+/* strip carousel */
+--hc-ease: cubic-bezier(0.76, 0, 0.24, 1)
+--hc-dur:  0.7s
+--hc-h:    134px
+--hc-grow: 34px
+
 /* admin only: */
 --sidebar-w: 220px
 --admin-bg: #f4f2ef
 ```
 
-**`.page { background: #fff }` is required** on every page wrapper — without it, `BgCanvas` bleeds through transparent sections.
+**Typography stack (web):** Cormorant Garamond (body), DM Serif Display (headings, italic), Playfair Display (logo, footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Loaded via `@import` in `globals.css`.
 
-**Layout bleeding** (full-width sections) uses `margin-left: calc(-1 * var(--gl))` / `margin-right: calc(-1 * var(--gr))`. Do not use ad hoc negative margins outside this pattern.
+**Full-width layout.** All sections are full-width (no `.page` wrapper, no grid margins). Section backgrounds span the viewport.
 
 ---
 

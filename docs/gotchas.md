@@ -3,12 +3,10 @@
 ## Next.js / React
 
 - **`fetch().json<T>()`** — generic `.json<T>()` is Cloudflare Workers-only. In Next.js always use `(await res.json()) as T`.
-- **`BgCanvas` z-index** — must be `-1`. At `0` it covers page text.
-- **`BgCanvas` in layout, not pages** — lives in `layout.tsx` so it persists across client-side navigations. Never add it to individual pages.
 - **`export const runtime = 'edge'` in layout breaks the build** — set it only on individual page files, never on `layout.tsx`.
-- **Internal navigation must use `<Link>`** — plain `<a href>` causes a full page reload, remounts `BgCanvas`, causes background flicker.
+- **Internal navigation must use `<Link>`** — plain `<a href>` causes a full page reload. Use `next/link` for SPA navigation.
 - **Passing server env vars to client components** — `apps/web` uses server-only env vars (`API_URL`, `R2_URL`). Pass them as props from the server component. Do not add `NEXT_PUBLIC_` prefixes. Example: `Footer` receives `apiUrl={process.env.API_URL}`.
-- **`.page { background: #fff }`** — required on every page wrapper to prevent canvas bleed through transparent sections.
+- **`BgCanvas` is no longer used on the home page** — removed during the dark theme redesign. The file still exists for potential future use. Do not re-add it to `layout.tsx`.
 
 ## Build / dependencies
 

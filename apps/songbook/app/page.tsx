@@ -13,14 +13,14 @@ export default async function HomePage() {
 
   return (
     <main className="page">
-      <h1 className="page-title">Songbooks</h1>
+      <h1 className="page-title">Liederbücher</h1>
       <div className="songbook-grid">
         {songbooks.map((sb) => (
           <Link key={sb.id} href={`/songbooks/${sb.slug}`} className="songbook-card">
             <div className="songbook-card__lang">{sb.language}</div>
             <div className="songbook-card__title">{sb.title}</div>
             <div className="songbook-card__meta">
-              {sb.songCount} songs{sb.description ? ` · ${sb.description}` : ''}
+              {sb.songCount} Lieder{sb.description ? ` · ${sb.description}` : ''}
             </div>
           </Link>
         ))}

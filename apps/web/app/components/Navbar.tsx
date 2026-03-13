@@ -1,81 +1,65 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 
-const NAV_LINKS = [
-  { label: 'Neuigkeiten', href: '/#neuigkeiten' },
-  { label: 'Video', href: '/#video' },
-  { label: 'Liederbuch', href: '/#liederbuch' },
-  { label: 'Über uns', href: '/#ueber-uns' },
-  { label: 'Produkte', href: '/#produkte' },
-];
+export default function Navbar({ songbookUrl = 'https://songs.sdarm.life' }: { songbookUrl?: string }) {
+  const [scrolled, setScrolled] = useState(false);
 
-export default function Navbar() {
+  const navLinks = [
+    { label: 'Neuigkeiten', href: '/#neuigkeiten' },
+    { label: 'Liederbuch', href: songbookUrl, external: true },
+    { label: 'Über uns', href: '/about' },
+    { label: 'Produkte', href: '/#produkte' },
+  ];
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 40);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
+
   return (
-    <nav>
-      <div className="nav-logo">
-        <Link href="/" className="logo-text">
-          <span className="red">sdarm</span>.life
-        </Link>
+    <nav className={scrolled ? 'scrolled' : ''}>
+      <Link href="/" className="nav-logo">
+        SDARM<span>.life</span>
+      </Link>
+
+      <div className="nav-links">
+        {navLinks.map(({ label, href, external }) =>
+          external ? (
+            <a key={href} href={href}>
+              {label}
+            </a>
+          ) : (
+            <Link key={href} href={href}>
+              {label}
+            </Link>
+          )
+        )}
       </div>
 
-      <ul className="nav-links">
-        {NAV_LINKS.map(({ label, href }) => (
-          <li key={href}>
-            <a href={href}>{label}</a>
-          </li>
-        ))}
-      </ul>
-
       <div className="nav-right">
-        {/* Language switcher — commented out
-        <div
-          className={`lang-sw${open ? ' open' : ''}`}
-          id="navLang"
-          ref={ref}
-        >
-          <button
-            className="lang-btn"
-            onClick={(e) => {
-              e.stopPropagation();
-              setOpen((v) => !v);
-            }}
-          >
-            {lang}
-          </button>
-          <div className="lang-drop">
-            {LANGS.map((l) => (
-              <a
-                key={l}
-                href="#"
-                className={l === lang ? 'active' : ''}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setLang(l);
-                  setOpen(false);
-                }}
-              >
-                {l}
-              </a>
-            ))}
+        {/* Sunset widget — stub */}
+        <div className="sunset-widget">
+          <span className="sunset-icon">🌅</span>
+          <div className="sunset-text">
+            Schabbat<strong>Freitag</strong>
           </div>
         </div>
-        */}
 
-        {/* Search button */}
-        <button className="search-btn" aria-label="Suche">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="7" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+        <button className="nav-search" aria-label="Suche">
+          <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.7">
+            <circle cx="7.5" cy="7.5" r="5" />
+            <line x1="11.5" y1="11.5" x2="16" y2="16" />
           </svg>
         </button>
+
+        <div className="nav-menu" aria-label="Menü">
+          <span />
+          <span />
+          <span />
+        </div>
       </div>
     </nav>
   );

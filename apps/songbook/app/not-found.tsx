@@ -2,9 +2,9 @@ export const runtime = 'edge';
 
 export default function NotFound() {
   return (
-    <main style={{ padding: '2rem', textAlign: 'center' }}>
-      <h1>404 — Not Found</h1>
-      <p>The page you are looking for does not exist.</p>
+    <main className="page" style={{ textAlign: 'center' }}>
+      <h1 className="page-title">404</h1>
+      <p className="page-subtitle">Die Seite wurde nicht gefunden.</p>
     </main>
   );
 }

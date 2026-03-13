@@ -6,10 +6,10 @@ import Image from 'next/image';
 export interface HeroPost {
   title: string;
   meta: string;
-  excerpt: string; // preview text — shown on the strip card
-  body: string; // shown in the detail area above the strip
-  imageUrl: string; // hero background
-  thumbUrl: string; // strip card thumbnail (falls back to imageUrl if not set)
+  excerpt: string;
+  body: string;
+  imageUrl: string;
+  thumbUrl: string;
   imageAlt: string;
   slug: string;
 }
@@ -26,6 +26,14 @@ const STATIC: HeroPost = {
   imageAlt: 'Historisches Gemälde',
   slug: '#',
 };
+
+const TINTS = [
+  'radial-gradient(ellipse at 62% 28%, rgba(90,62,28,0.32) 0%, transparent 58%), radial-gradient(ellipse at 15% 80%, rgba(40,22,8,0.45) 0%, transparent 50%)',
+  'radial-gradient(ellipse at 62% 28%, rgba(28,50,80,0.30) 0%, transparent 58%), radial-gradient(ellipse at 15% 80%, rgba(10,22,40,0.40) 0%, transparent 50%)',
+  'radial-gradient(ellipse at 62% 28%, rgba(70,40,18,0.28) 0%, transparent 58%), radial-gradient(ellipse at 15% 80%, rgba(30,14,6,0.40) 0%, transparent 50%)',
+  'radial-gradient(ellipse at 62% 28%, rgba(22,36,60,0.28) 0%, transparent 58%), radial-gradient(ellipse at 15% 80%, rgba(10,18,32,0.40) 0%, transparent 50%)',
+  'radial-gradient(ellipse at 62% 28%, rgba(55,32,14,0.28) 0%, transparent 58%), radial-gradient(ellipse at 15% 80%, rgba(28,12,4,0.38) 0%, transparent 50%)',
+];
 
 const INTERVAL = 5000;
 
@@ -60,7 +68,6 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
 
     setActive(idx);
 
-    // scroll the strip so the active card is centred
     requestAnimationFrame(() => {
       const wrap = stripRef.current;
       const card = cardRefs.current[idx];
@@ -104,69 +111,75 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
   const post = slides[shown];
 
   return (
-    <>
-      <div className="hero">
-        {/* Background image — same as active card, cross-fades with text */}
-        <div className={`hero-bg${textVisible ? '' : ' hero-bg--fade'}`}>
-          <Image
-            src={slides[shown].imageUrl}
-            alt=""
-            fill
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
-            unoptimized={isUnoptimized(slides[shown].imageUrl)}
-            priority
+    <div className="hero-outer">
+      <section className="hero">
+        <div className="hero-base" />
+
+        {slides.map((_, i) => (
+          <div
+            key={i}
+            className={`hero-tint${active === i ? ' visible' : ''}`}
+            style={{ background: TINTS[i % TINTS.length] }}
           />
-        </div>
-        <div className="hero-bg-overlay" />
+        ))}
 
-        <div className="hero-text">
-          <div className="hero-eye">Aktuell</div>
-          <div className={`hero-meta${textVisible ? '' : ' hero-fade'}`}>{post.meta}</div>
-          <h1 className={textVisible ? '' : 'hero-fade'}>{post.title}</h1>
-          {post.body && <p className={`hero-sub${textVisible ? '' : ' hero-fade'}`}>{post.body}</p>}
-        </div>
-      </div>
+        <div className="fog" />
+        <div className="sculpture" />
+        <div className="deco-circle" />
 
-      <div className="hero-strip-wrap" ref={stripRef}>
-        <div className="hero-strip">
-          {slides.map((slide, i) => {
-            const cls = ['hero-card', active === i ? 'active' : '', leaving === i ? 'leaving' : '']
-              .filter(Boolean)
-              .join(' ');
-
-            return (
-              <div
-                key={slide.slug + i}
-                ref={(el) => {
-                  cardRefs.current[i] = el;
-                }}
-                className={cls}
-                onClick={() => handleClick(i)}
-              >
-                <div className="hero-card-img">
-                  <Image
-                    src={slide.thumbUrl}
-                    alt={slide.imageAlt}
-                    fill
-                    style={{ objectFit: 'cover' }}
-                    unoptimized={isUnoptimized(slide.thumbUrl)}
-                    priority={i === 0}
-                  />
-                </div>
-                <div className="hero-card-vl" />
-                <div className="hero-card-vb" />
-                <div className="hero-card-num">{String(i + 1).padStart(2, '0')}</div>
-                <div className="hero-card-text">
-                  <div className="hero-card-title">{slide.excerpt || slide.title}</div>
-                </div>
-                <div className="hero-card-prog">
-                  {active === i && <div key={`fill-${active}`} className="hero-card-prog-fill" />}
-                </div>
-              </div>
-            );
-          })}
+        <div className="side-label">
+          <div className="side-lbl">{post.meta || 'Reformation'}</div>
+          <div className="side-cnt">
+            {String(active + 1).padStart(2, '0')} / {String(N).padStart(2, '0')}
+          </div>
         </div>
-      </div>
-    </>
+
+        <div className="hero-content">
+          <h1 className={`hero-title${textVisible ? '' : ' fade-out'}`}>{post.title}</h1>
+          {post.body && <p className={`hero-sub${textVisible ? '' : ' fade-out'}`}>{post.body}</p>}
+        </div>
+
+        <div className="strip-wrap" ref={stripRef}>
+          <div className="strip">
+            {slides.map((slide, i) => {
+              const cls = ['card', active === i ? 'active' : '', leaving === i ? 'leaving' : '']
+                .filter(Boolean)
+                .join(' ');
+
+              return (
+                <div
+                  key={slide.slug + i}
+                  ref={(el) => {
+                    cardRefs.current[i] = el;
+                  }}
+                  className={cls}
+                  onClick={() => handleClick(i)}
+                >
+                  <div className="card-img">
+                    <Image
+                      src={slide.thumbUrl}
+                      alt={slide.imageAlt}
+                      fill
+                      style={{ objectFit: 'cover' }}
+                      unoptimized={isUnoptimized(slide.thumbUrl)}
+                      priority={i === 0}
+                    />
+                  </div>
+                  <div className="card-vl" />
+                  <div className="card-vb" />
+                  <div className="card-num">{String(i + 1).padStart(2, '0')}</div>
+                  <div className="card-text">
+                    <div className="card-title">{slide.excerpt || slide.title}</div>
+                  </div>
+                  <div className="card-prog">
+                    {active === i && <div key={`fill-${active}`} className="card-prog-fill" />}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+    </div>
   );
 }
