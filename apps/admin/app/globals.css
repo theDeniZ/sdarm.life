@@ -639,3 +639,142 @@ tbody tr:hover td { background: var(--light); }
   color: var(--gray);
   font-size: 11px;
 }
+
+
+/* ── Songbooks / Songs ───────────────────────── */
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.filter-input {
+  flex: 1;
+  max-width: 320px;
+  padding: 8px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 13px;
+  font-family: 'Raleway', sans-serif;
+  color: var(--text);
+  background: #fff;
+  outline: none;
+  transition: border-color .18s;
+}
+
+.filter-input:focus { border-color: var(--red); }
+
+.section-heading {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--mid);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  margin: 28px 0 12px;
+}
+
+.part-block {
+  padding: 14px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.part-block:last-child { border-bottom: none; }
+
+.part-block--add {
+  padding-top: 16px;
+  margin-top: 4px;
+}
+
+.part-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+
+.part-controls select {
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 12px;
+  font-family: 'Raleway', sans-serif;
+  background: #fff;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.part-controls input[type="text"] {
+  flex: 1;
+  min-width: 120px;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 13px;
+  font-family: 'Raleway', sans-serif;
+  color: var(--text);
+}
+
+.part-controls input[type="number"] {
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 13px;
+  font-family: 'Raleway', sans-serif;
+  color: var(--text);
+}
+
+.part-lyrics {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  font-size: 13px;
+  font-family: monospace;
+  color: var(--text);
+  background: var(--light);
+  resize: vertical;
+  outline: none;
+  transition: border-color .18s;
+}
+
+.part-lyrics:focus { border-color: var(--red); background: #fff; }
+
+.sheet-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sheet-row:last-child { border-bottom: none; }
+
+.sheet-key {
+  flex: 1;
+  font-size: 12px;
+  color: var(--mid);
+  word-break: break-all;
+}
+
+.type-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .3px;
+  background: var(--light);
+  color: var(--mid);
+  white-space: nowrap;
+}

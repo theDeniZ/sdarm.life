@@ -27,6 +27,12 @@ export default function Sidebar() {
         <Link href="/images" className={`sidebar-link${path.startsWith('/images') ? ' active' : ''}`}>
           Images
         </Link>
+        <Link
+          href="/songbooks"
+          className={`sidebar-link${path.startsWith('/songbooks') || path.startsWith('/songs') ? ' active' : ''}`}
+        >
+          Songbooks
+        </Link>
       </nav>
     </aside>
   );
