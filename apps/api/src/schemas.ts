@@ -42,6 +42,68 @@ export const SubscriberSchema = z
 export const OkSchema = z.object({ ok: z.literal(true) });
 export const ErrorSchema = z.object({ error: z.string() });
 
+// ── Songbooks ─────────────────────────────────────────────────────────────────
+
+export const SongbookSchema = z
+  .object({
+    id: z.number(),
+    title: z.string(),
+    slug: z.string(),
+    language: z.string(),
+    description: z.string().nullable(),
+    coverKey: z.string().nullable(),
+    sortOrder: z.number(),
+    songCount: z.number(),
+  })
+  .openapi('Songbook');
+
+export const SongListItemSchema = z
+  .object({
+    id: z.number(),
+    number: z.number(),
+    title: z.string(),
+    author: z.string().nullable(),
+    copyright: z.string().nullable(),
+  })
+  .openapi('SongListItem');
+
+export const SongPartTypeSchema = z.enum(['verse', 'chorus', 'bridge', 'intro', 'outro', 'coda']);
+export const SongSheetTypeSchema = z.enum(['pdf', 'image']);
+
+export const SongPartSchema = z
+  .object({
+    id: z.number(),
+    type: SongPartTypeSchema,
+    label: z.string(),
+    sortOrder: z.number(),
+    lyrics: z.string(),
+  })
+  .openapi('SongPart');
+
+export const SongSheetSchema = z
+  .object({
+    id: z.number(),
+    key: z.string(),
+    type: SongSheetTypeSchema,
+    sortOrder: z.number(),
+  })
+  .openapi('SongSheet');
+
+export const SongSchema = z
+  .object({
+    id: z.number(),
+    number: z.number(),
+    title: z.string(),
+    author: z.string().nullable(),
+    copyright: z.string().nullable(),
+    songbook: z.object({ id: z.number(), title: z.string(), slug: z.string() }),
+    parts: z.array(SongPartSchema),
+    sheets: z.array(SongSheetSchema),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  })
+  .openapi('Song');
+
 export const PaginationQuery = z.object({
   limit: z.coerce.number().optional().openapi({ example: 20 }),
   offset: z.coerce.number().optional().openapi({ example: 0 }),

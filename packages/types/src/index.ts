@@ -35,3 +35,53 @@ export interface ListResponse<T> {
   items: T[];
   total: number;
 }
+
+export interface SongbookDto {
+  id: number;
+  title: string;
+  slug: string;
+  language: string;
+  description: string | null;
+  coverKey: string | null;
+  sortOrder: number;
+  songCount: number;
+}
+
+export interface SongListItemDto {
+  id: number;
+  number: number;
+  title: string;
+  author: string | null;
+  copyright: string | null;
+}
+
+export type SongPartType = 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda';
+export type SongSheetType = 'pdf' | 'image';
+
+export interface SongPartDto {
+  id: number;
+  type: SongPartType;
+  label: string;
+  sortOrder: number;
+  lyrics: string;
+}
+
+export interface SongSheetDto {
+  id: number;
+  key: string;
+  type: SongSheetType;
+  sortOrder: number;
+}
+
+export interface SongDto {
+  id: number;
+  number: number;
+  title: string;
+  author: string | null;
+  copyright: string | null;
+  songbook: { id: number; title: string; slug: string };
+  parts: SongPartDto[];
+  sheets: SongSheetDto[];
+  createdAt: string;
+  updatedAt: string;
+}

@@ -1,0 +1,83 @@
+{
+  "version": "6",
+  "dialect": "sqlite",
+  "id": "e13cf4c5-eacd-4cd0-9bf4-582a26e08f2d",
+  "prevId": "cd19a383-a421-4231-8bfe-39da4f827ae5",
+  "tables": {
+    "images": {
+      "name": "images",
+      "columns": {
+        "key": { "name": "key", "type": "text", "primaryKey": true, "notNull": true, "autoincrement": false },
+        "size": { "name": "size", "type": "integer", "primaryKey": false, "notNull": true, "autoincrement": false },
+        "uploaded_at": { "name": "uploaded_at", "type": "integer", "primaryKey": false, "notNull": true, "autoincrement": false }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "posts": {
+      "name": "posts",
+      "columns": {
+        "id": { "name": "id", "type": "integer", "primaryKey": true, "notNull": true, "autoincrement": true },
+        "title": { "name": "title", "type": "text", "primaryKey": false, "notNull": true, "autoincrement": false },
+        "slug": { "name": "slug", "type": "text", "primaryKey": false, "notNull": true, "autoincrement": false },
+        "excerpt": { "name": "excerpt", "type": "text", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "body": { "name": "body", "type": "text", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "author": { "name": "author", "type": "text", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "video_url": { "name": "video_url", "type": "text", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "cover_key": { "name": "cover_key", "type": "text", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "cover_alt": { "name": "cover_alt", "type": "text", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "thumb_key": { "name": "thumb_key", "type": "text", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "is_featured": { "name": "is_featured", "type": "integer", "primaryKey": false, "notNull": true, "autoincrement": false, "default": false },
+        "published_at": { "name": "published_at", "type": "integer", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "created_at": { "name": "created_at", "type": "integer", "primaryKey": false, "notNull": true, "autoincrement": false },
+        "updated_at": { "name": "updated_at", "type": "integer", "primaryKey": false, "notNull": true, "autoincrement": false },
+        "deleted_at": { "name": "deleted_at", "type": "integer", "primaryKey": false, "notNull": false, "autoincrement": false }
+      },
+      "indexes": {
+        "posts_slug_unique": { "name": "posts_slug_unique", "columns": ["slug"], "isUnique": true }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "site_config": {
+      "name": "site_config",
+      "columns": {
+        "key": { "name": "key", "type": "text", "primaryKey": true, "notNull": true, "autoincrement": false },
+        "value": { "name": "value", "type": "text", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "updated_at": { "name": "updated_at", "type": "integer", "primaryKey": false, "notNull": true, "autoincrement": false }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "subscribers": {
+      "name": "subscribers",
+      "columns": {
+        "id": { "name": "id", "type": "integer", "primaryKey": true, "notNull": true, "autoincrement": true },
+        "email": { "name": "email", "type": "text", "primaryKey": false, "notNull": true, "autoincrement": false },
+        "token": { "name": "token", "type": "text", "primaryKey": false, "notNull": true, "autoincrement": false },
+        "unsubscribed_at": { "name": "unsubscribed_at", "type": "integer", "primaryKey": false, "notNull": false, "autoincrement": false },
+        "created_at": { "name": "created_at", "type": "integer", "primaryKey": false, "notNull": true, "autoincrement": false }
+      },
+      "indexes": {
+        "subscribers_email_unique": { "name": "subscribers_email_unique", "columns": ["email"], "isUnique": true },
+        "subscribers_token_unique": { "name": "subscribers_token_unique", "columns": ["token"], "isUnique": true }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    }
+  },
+  "views": {},
+  "enums": {},
+  "_meta": { "schemas": {}, "tables": {}, "columns": {} },
+  "internal": { "indexes": {} }
+}

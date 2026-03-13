@@ -17,6 +17,10 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/images/*` | Proxy-serves R2 objects by key path (local dev only). |
 | `POST` | `/api/v1/subscribe` | Subscribe email. 409 if already subscribed (including unsubscribed). |
 | `GET` | `/api/v1/unsubscribe` | `?token=` — marks subscriber as unsubscribed. Idempotent. |
+| `GET` | `/api/v1/songbooks` | All songbooks ordered by `sort_order`, each with `songCount`. |
+| `GET` | `/api/v1/songbooks/:slug` | Songbook metadata + `songCount`. 404 if not found. |
+| `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number+title. `?limit=N&offset=N`. Returns `{ items, total }`. |
+| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays. 404 if not found. |
 
 ## Admin routes
 
@@ -35,6 +39,18 @@ Require `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers on every reque
 | `POST` | `/api/v1/admin/images/backfill` | One-time: syncs all R2 objects into `images` table. Returns `{ synced }`. |
 | `GET` | `/api/v1/admin/subscribers` | Active subscribers, newest first. `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `DELETE` | `/api/v1/admin/subscribers/:id` | Hard-delete subscriber. |
+| `POST` | `/api/v1/admin/songbooks` | Create songbook. |
+| `PATCH` | `/api/v1/admin/songbooks/:id` | Partial update. |
+| `DELETE` | `/api/v1/admin/songbooks/:id` | Hard-delete songbook. |
+| `GET` | `/api/v1/admin/songs/:id` | Song for edit (includes parts + sheets). |
+| `POST` | `/api/v1/admin/songs` | Create song. Body: `{ songbookId, number, title, author?, copyright? }`. |
+| `PATCH` | `/api/v1/admin/songs/:id` | Partial update (title, number, author, copyright). |
+| `DELETE` | `/api/v1/admin/songs/:id` | Hard-delete song + all its parts and sheets (R2 keys deleted too). |
+| `POST` | `/api/v1/admin/songs/:id/parts` | Add a part. Body: `{ type, label, sortOrder, lyrics }`. |
+| `PATCH` | `/api/v1/admin/songs/:id/parts/:partId` | Partial update a part. |
+| `DELETE` | `/api/v1/admin/songs/:id/parts/:partId` | Delete a part. |
+| `POST` | `/api/v1/admin/songs/:id/sheets/upload` | `multipart/form-data` (`file`, optional `type`). Accepts PDF and images (jpg, png, webp, gif). Stores under `sheets/{songId}/{uuid}.{ext}` in R2. |
+| `DELETE` | `/api/v1/admin/songs/:id/sheets/:sheetId` | Delete sheet from D1 + R2. |
 
 **Image usage** — `GET /admin/images` cross-references `posts` (`cover_key`, `thumb_key`) and `site_config` to compute `usedIn` per image. Each item: `{ key, size, uploaded, usedIn: { type, label }[] }`. `?unused=1` filters to images not referenced in either table.
 

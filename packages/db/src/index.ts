@@ -54,3 +54,44 @@ export const subscribers = sqliteTable('subscribers', {
   unsubscribedAt: integer('unsubscribed_at', { mode: 'timestamp' }),
   createdAt:      integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 });
+
+export const songbooks = sqliteTable('songbooks', {
+  id:          integer('id').primaryKey({ autoIncrement: true }),
+  title:       text('title').notNull(),
+  slug:        text('slug').notNull().unique(),
+  language:    text('language').notNull().default('ru'),
+  description: text('description'),
+  coverKey:    text('cover_key'),
+  sortOrder:   integer('sort_order').notNull().default(0),
+  createdAt:   integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt:   integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+export const songs = sqliteTable('songs', {
+  id:         integer('id').primaryKey({ autoIncrement: true }),
+  songbookId: integer('songbook_id').notNull().references(() => songbooks.id),
+  number:     integer('number').notNull(),
+  title:      text('title').notNull(),
+  author:     text('author'),
+  copyright:  text('copyright'),
+  createdAt:  integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt:  integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});
+
+export const songParts = sqliteTable('song_parts', {
+  id:        integer('id').primaryKey({ autoIncrement: true }),
+  songId:    integer('song_id').notNull().references(() => songs.id),
+  type:      text('type', { enum: ['verse', 'chorus', 'bridge', 'intro', 'outro', 'coda'] }).notNull(),
+  label:     text('label').notNull(),
+  sortOrder: integer('sort_order').notNull().default(0),
+  lyrics:    text('lyrics').notNull().default(''),
+});
+
+export const songSheets = sqliteTable('song_sheets', {
+  id:         integer('id').primaryKey({ autoIncrement: true }),
+  songId:     integer('song_id').notNull().references(() => songs.id),
+  key:        text('key').notNull(),
+  type:       text('type', { enum: ['pdf', 'image'] }).notNull(),
+  sortOrder:  integer('sort_order').notNull().default(0),
+  uploadedAt: integer('uploaded_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+});

@@ -65,6 +65,56 @@ export interface SubscriberDto {
 export type ConfigDto = Record<string, string | null>;
 
 export interface ListResponse<T> { items: T[]; total: number; }
+
+export interface SongbookDto {
+  id: number;
+  title: string;
+  slug: string;
+  language: string;
+  description: string | null;
+  coverKey: string | null;
+  sortOrder: number;
+  songCount: number;  // computed, not stored
+}
+
+export interface SongListItemDto {
+  id: number;
+  number: number;
+  title: string;
+  author: string | null;
+  copyright: string | null;
+}
+
+export type SongPartType = 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda';
+export type SongSheetType = 'pdf' | 'image';
+
+export interface SongPartDto {
+  id: number;
+  type: SongPartType;
+  label: string;
+  sortOrder: number;
+  lyrics: string;  // plain text; chords embedded inline as [G], [C], etc.
+}
+
+export interface SongSheetDto {
+  id: number;
+  key: string;  // R2 key, serve via images.sdarm.life/{key}
+  type: SongSheetType;
+  sortOrder: number;
+}
+
+export interface SongDto {
+  id: number;
+  number: number;
+  title: string;
+  author: string | null;
+  copyright: string | null;
+  songbook: { id: number; title: string; slug: string };
+  parts: SongPartDto[];
+  sheets: SongSheetDto[];
+  createdAt: string;
+  updatedAt: string;
+}
 ```
 
 `apps/web` and `apps/admin` import from `@sdarm/types`. `apps/api` uses the same interfaces to type `c.json()` responses — enforcing the contract at the source.

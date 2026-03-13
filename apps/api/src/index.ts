@@ -7,17 +7,20 @@ import postsRouter from './routes/posts';
 import configRouter from './routes/config';
 import imagesRouter from './routes/images';
 import subscribersRouter from './routes/subscribers';
+import songbooksRouter from './routes/songbooks';
+import songsRouter from './routes/songs';
 import adminPostsRouter from './routes/admin/posts';
 import adminConfigRouter from './routes/admin/config';
 import adminImagesRouter from './routes/admin/images';
 import adminSubscribersRouter from './routes/admin/subscribers';
+import adminSongbooksRouter from './routes/admin/songbooks';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 app.use(
 	'*',
 	cors({
-		origin: ['https://sdarm.life', 'https://admin.sdarm.life', 'http://localhost:3000', 'http://localhost:3001'],
+		origin: ['https://sdarm.life', 'https://admin.sdarm.life', 'https://songs.sdarm.life', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
 	}),
 );
 
@@ -29,6 +32,8 @@ v1.route('/posts', postsRouter);
 v1.route('/config', configRouter);
 v1.route('/images', imagesRouter);
 v1.route('', subscribersRouter); // /subscribe + /unsubscribe
+v1.route('/songbooks', songbooksRouter);
+v1.route('/songs', songsRouter);
 
 // ── Admin routes (auth-gated) ─────────────────────────────────────────────────
 admin.use('*', auth);
@@ -36,6 +41,7 @@ admin.route('/posts', adminPostsRouter);
 admin.route('/config', adminConfigRouter);
 admin.route('/images', adminImagesRouter);
 admin.route('/subscribers', adminSubscribersRouter);
+admin.route('', adminSongbooksRouter);
 
 v1.route('/admin', admin);
 app.route('/api/v1', v1);

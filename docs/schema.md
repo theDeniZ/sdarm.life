@@ -19,6 +19,21 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 **`subscribers`**
 `id`, `email` (unique), `token` (unique), `unsubscribed_at`, `created_at`
 
+**`songbooks`**
+`id`, `title`, `slug` (unique), `language` (default `'ru'`), `description`, `cover_key`, `sort_order`, `created_at`, `updated_at`
+
+**`songs`**
+`id`, `songbook_id` (FK → `songbooks.id`), `number`, `title`, `author`, `copyright`, `created_at`, `updated_at`
+
+**`song_parts`**
+`id`, `song_id` (FK → `songs.id`), `type` (`verse` | `chorus` | `bridge` | `intro` | `outro` | `coda`), `label`, `sort_order`, `lyrics`
+- `lyrics` is plain text; chord annotations are embedded inline (e.g. `[G]Amazing [C]grace`)
+
+**`song_sheets`**
+`id`, `song_id` (FK → `songs.id`), `key` (R2 object key under `sheets/{songId}/{uuid}.{ext}`), `type` (`pdf` | `image`), `sort_order`, `uploaded_at`
+- Stored in the same R2 bucket (`IMAGES` binding) as post cover images
+- Deleted from R2 on `DELETE /admin/songs/:id/sheets/:sheetId`
+
 ## Config keys
 
 `KNOWN_CONFIG_KEYS` is exported from `@sdarm/db` and is the single source of truth. Both `apps/api` and `apps/admin` import it — never hardcode config keys elsewhere.
