@@ -6,7 +6,7 @@ on:
     branches: [main]
 
 jobs:
-  ci:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -19,17 +19,73 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo lint
-      - run: pnpm turbo build --filter=!@sdarm/web --filter=!@sdarm/admin --filter=!@sdarm/songbook
+
+  build-api:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo build --filter=@sdarm/api
+
+  build-web:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sdarm/web pages:build
+
+  build-admin:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sdarm/admin pages:build
         env:
           NEXT_PUBLIC_CF_CLIENT_ID: dev
           NEXT_PUBLIC_CF_CLIENT_SECRET: dev
+
+  build-songbook:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sdarm/songbook pages:build
 
   migrate:
     if: github.ref == 'refs/heads/main'
-    needs: ci
+    needs: [build-api, build-web, build-admin, build-songbook]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +106,7 @@ jobs:
 
   sync-secrets:
     if: github.ref == 'refs/heads/main'
-    needs: migrate
+    needs: [build-api, build-web, build-admin, build-songbook]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
