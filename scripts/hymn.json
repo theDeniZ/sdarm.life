@@ -1,0 +1,84 @@
+{
+  "lang": "en",
+  "header": {
+    "title": "My Custom Hymnal",
+    "shortTitle": "Short Title (optional - used for mobile devices)"
+  },
+  "hymns": [
+    {
+      "num": "1",
+      "title": "Before Jehovah’s Awful Throne",
+      "topic": "Adoration",
+      "stanzas": {
+        "verses": [
+          [
+            "Before Jehovah’s awful throne,",
+            "Ye nations bow with sacred joy;",
+            "Know that the Lord is God alone;",
+            "He can create, and He destroy."
+          ],
+          [
+            "His sovereign power, without our aid,",
+            "Made us of clay, and formed us men;",
+            "And when like wandering sheep we strayed,",
+            "He brought us to His fold again."
+          ],
+          [
+            "We’ll crowd His gates with thankful songs,",
+            "High as the heavens our voices raise;",
+            "And earth, with her ten thousand tongues,",
+            "Shall fill His courts with sounding praise."
+          ],
+          [
+            "Wide as the world is His command,",
+            "Vast as Eternity His love;",
+            "Firm as a rock His truth shall stand,",
+            "When rolling years shall cease to move."
+          ]
+        ],
+        "refrain": []
+      }
+    },
+    {
+      "num": "2",
+      "title": "We Praise Thee, O God",
+      "topic": "Praise",
+      "stanzas": {
+        "verses": [
+          ["We praise Thee, O God,", "for the Son of Thy love,", "For Jesus who died and", "is now gone above."],
+          [
+            "We praise Thee, O God,",
+            "for Thy Spirit of light,",
+            "Who has shown us our Saviour,",
+            "and scattered our night."
+          ],
+          [
+            "All glory and praise",
+            "to the Lamb that was slain,",
+            "Who has borne all our sins,",
+            "and has cleansed every stain."
+          ],
+          ["Revive us again,", "fill each heart with Thy love;", "May each soul be rekindled", "with fire from above."]
+        ],
+        "refrain": [
+          "Hallelujah! Thine the glory,",
+          "Hallelujah! Amen,",
+          "Hallelujah! Thine the glory,",
+          "Revive us again."
+        ]
+      }
+    }
+  ],
+  "topics": [
+    {
+      "name": "Adoration",
+      "start": "1",
+      "end": "1"
+    },
+    {
+      "name": "Praise",
+      "start": "2",
+      "end": "2"
+    }
+  ]
+}

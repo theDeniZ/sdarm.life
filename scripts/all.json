@@ -1,0 +1,125 @@
+[
+  {
+    "lang": "es",
+    "hymnalId": "ha",
+    "fileName": "himnario-adventista.json",
+    "title": "Himnario Adventista",
+    "updatedTimestamp": 1639679541403,
+    "customHymnalInd": "N"
+  },
+  {
+    "lang": "es",
+    "hymnalId": "es-hr",
+    "fileName": "es-hr.json",
+    "title": "Himnario Reformista",
+    "updatedTimestamp": 1741218247061,
+    "customHymnalInd": "N"
+  },
+  {
+    "lang": "ru",
+    "hymnalId": "ru",
+    "fileName": "hymnal-ru.json",
+    "title": "Псалмы Сиона",
+    "updatedTimestamp": 1639679541603,
+    "customHymnalInd": "N"
+  },
+  {
+    "lang": "ro",
+    "hymnalId": "ic-ro",
+    "fileName": "imnuri-crestine.json",
+    "title": "Imnuri Creștine",
+    "updatedTimestamp": 1639679541671,
+    "customHymnalInd": "N",
+    "pdfAvailable": true
+  },
+  {
+    "lang": "nl",
+    "hymnalId": "nl-gz",
+    "fileName": "gezangen-zions.json",
+    "title": "Gezangen Zions",
+    "updatedTimestamp": 1723985819211,
+    "fullPdfUrl": "https://sdarm.org/files/publications/mobile/download/hymnals/pdf/nl-gz/Gezangen-Zions.pdf",
+    "customHymnalInd": "N",
+    "pdfAvailable": false
+  },
+  {
+    "lang": "pt",
+    "hymnalId": "lar-pt",
+    "fileName": "louvores-ao-rei.json",
+    "title": "Louvores ao Rei",
+    "updatedTimestamp": 1651582857000,
+    "fullPdfUrl": "https://sdarm.org/files/publications/mobile/download/hymnals/pdf/lar-pt/Louvores-ao-Rei.pdf",
+    "customHymnalInd": "N",
+    "pdfAvailable": true
+  },
+  {
+    "lang": "ta",
+    "hymnalId": "ta-tt",
+    "fileName": "ta-tt.json",
+    "title": "திருமறைத் திருப்பாடல்கள்",
+    "updatedTimestamp": 1651582941000,
+    "customHymnalInd": "N"
+  },
+  {
+    "lang": "ta",
+    "hymnalId": "ta-sig",
+    "fileName": "ta-sig.json",
+    "title": "சீயோன் இனிய கீதங்கள்",
+    "updatedTimestamp": 1651582941000,
+    "customHymnalInd": "N"
+  },
+  {
+    "lang": "en",
+    "hymnalId": "trm",
+    "fileName": "trm-hymnal.json",
+    "title": "There Rings a Melody",
+    "updatedTimestamp": 1651737635000,
+    "fullPdfUrl": "https://sdarm.org/files/publications/books/pdf/trm.pdf",
+    "customHymnalInd": "N",
+    "pdfAvailable": true
+  },
+  {
+    "lang": "rw",
+    "hymnalId": "rw",
+    "fileName": "hymnal-rw.json",
+    "title": "Indirimbo Zo Guhimbaza Imana",
+    "updatedTimestamp": 1653945011000,
+    "customHymnalInd": "N",
+    "audioAvailable": true
+  },
+  {
+    "lang": "fr",
+    "hymnalId": "hel-fr",
+    "fileName": "hymnes-et-louanges.json",
+    "title": "Hymnes et Louanges",
+    "updatedTimestamp": 1723676043548,
+    "customHymnalInd": "N"
+  },
+  {
+    "lang": "ta-ro",
+    "hymnalId": "ta-tt-ro",
+    "fileName": "ta-tt-ro.json",
+    "title": "Thirumaraith Thiruppaatalkal",
+    "updatedTimestamp": 1711929741000,
+    "customHymnalInd": "N"
+  },
+  {
+    "lang": "ta-ro",
+    "hymnalId": "ta-sig-ro",
+    "fileName": "ta-sig-ro.json",
+    "title": "Seeyoni Iniya Keethangal",
+    "updatedTimestamp": 1711929741000,
+    "customHymnalInd": "N"
+  },
+  {
+    "lang": "en",
+    "hymnalId": "rh",
+    "fileName": "reformation-hymnal-v2.json",
+    "title": "Reformation Hymnal",
+    "updatedTimestamp": 1736636910000,
+    "fullPdfUrl": "https://sdarm.org/files/publications/books/pdf/reformation_hymnal.pdf",
+    "customHymnalInd": "N",
+    "pdfAvailable": true,
+    "audioAvailable": true
+  }
+]
