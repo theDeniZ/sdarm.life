@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
 export const KNOWN_CONFIG_KEYS = [
   'donation_url',
@@ -76,7 +76,10 @@ export const songs = sqliteTable('songs', {
   copyright:  text('copyright'),
   createdAt:  integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt:  integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-});
+}, (t) => [
+  index('songs_songbook_id_idx').on(t.songbookId),
+  index('songs_songbook_id_number_idx').on(t.songbookId, t.number),
+]);
 
 export const songParts = sqliteTable('song_parts', {
   id:        integer('id').primaryKey({ autoIncrement: true }),
@@ -85,7 +88,9 @@ export const songParts = sqliteTable('song_parts', {
   label:     text('label').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
   lyrics:    text('lyrics').notNull().default(''),
-});
+}, (t) => [
+  index('song_parts_song_id_idx').on(t.songId),
+]);
 
 export const songSheets = sqliteTable('song_sheets', {
   id:         integer('id').primaryKey({ autoIncrement: true }),
@@ -94,4 +99,6 @@ export const songSheets = sqliteTable('song_sheets', {
   type:       text('type', { enum: ['pdf', 'image'] }).notNull(),
   sortOrder:  integer('sort_order').notNull().default(0),
   uploadedAt: integer('uploaded_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-});
+}, (t) => [
+  index('song_sheets_song_id_idx').on(t.songId),
+]);

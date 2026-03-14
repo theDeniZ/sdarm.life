@@ -57,7 +57,16 @@ export async function updateSongbook(
 }
 
 export async function deleteSongbook(db: DrizzleD1Database, id: number) {
+  const songIdSubquery = sql`(SELECT id FROM songs WHERE songbook_id = ${id})`;
+
+  const sheets = await db.select({ key: songSheets.key }).from(songSheets).where(sql`${songSheets.songId} IN ${songIdSubquery}`);
+  const sheetKeys = sheets.map((s) => s.key);
+
+  await db.delete(songSheets).where(sql`${songSheets.songId} IN ${songIdSubquery}`);
+  await db.delete(songParts).where(sql`${songParts.songId} IN ${songIdSubquery}`);
+  await db.delete(songs).where(eq(songs.songbookId, id));
   await db.delete(songbooks).where(eq(songbooks.id, id));
+  return sheetKeys;
 }
 
 // ── Songs ─────────────────────────────────────────────────────────────────────
@@ -142,7 +151,11 @@ export async function updateSong(
 }
 
 export async function deleteSong(db: DrizzleD1Database, id: number) {
+  const sheets = await db.select({ key: songSheets.key }).from(songSheets).where(eq(songSheets.songId, id));
+  await db.delete(songSheets).where(eq(songSheets.songId, id));
+  await db.delete(songParts).where(eq(songParts.songId, id));
   await db.delete(songs).where(eq(songs.id, id));
+  return sheets.map((s) => s.key);
 }
 
 // ── Song Parts ────────────────────────────────────────────────────────────────

@@ -85,7 +85,8 @@ router.openapi(
   }),
   async (c) => {
     const db = drizzle(c.env.DB);
-    await repo.deleteSongbook(db, c.req.valid('param').id);
+    const sheetKeys = await repo.deleteSongbook(db, c.req.valid('param').id);
+    await Promise.all(sheetKeys.map((key) => c.env.IMAGES.delete(key)));
     return c.json({ ok: true as const }, 200);
   },
 );
@@ -174,7 +175,8 @@ router.openapi(
   }),
   async (c) => {
     const db = drizzle(c.env.DB);
-    await repo.deleteSong(db, c.req.valid('param').id);
+    const sheetKeys = await repo.deleteSong(db, c.req.valid('param').id);
+    await Promise.all(sheetKeys.map((key) => c.env.IMAGES.delete(key)));
     return c.json({ ok: true as const }, 200);
   },
 );
