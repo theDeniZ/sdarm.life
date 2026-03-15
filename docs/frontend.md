@@ -9,13 +9,13 @@
 | `posts/[slug]/page.tsx` | Server (async) | Post detail page |
 | `Navbar` | **Client** | Fixed nav; transparent → frosted glass on scroll. Gold underline hovers, sunset widget stub, hamburger icon |
 | `HeroSection` | **Client** | Featured-posts strip carousel with per-slide color tints, fog animation, deco-circle, side label counter |
-| `NewsSection` | **Client** | Editorial carousel — stacked images, side preview cards, prev/next arrows |
+| `NewsSection` | **Client** | CSS-columns masonry grid with `IntersectionObserver` stagger fade-in |
 | `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
-| `Footer` | **Client** | Dark theme — dot-grid, contact+subscribe column, nav links column. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
+| `Footer` | **Client** | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, sunset clock. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
 
 **Not rendered on home page** (files kept for future use): `VideoSection`, `SongbookSection`, `AboutSection`, `BgCanvas`.
 
-`page.tsx` fetches in parallel: featured posts, 4 news posts, config — `cache: 'no-store'`. All return `null` on error → components fall back to static data silently.
+`page.tsx` fetches in parallel: featured posts, 8 news posts, config — `cache: 'no-store'`. All return `null` on error → components fall back to static data silently.
 
 Data mappers: `toHeroPost`, `toNewsPost`, `toFooterConfig`.
 
@@ -50,21 +50,56 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 
 **Admin note:** `excerpt` is labelled **"Preview Text"** in PostForm — it drives the strip card text, not a traditional excerpt.
 
-### NewsSection editorial carousel
+### NewsSection masonry gallery
 
-`'use client'` carousel. Receives news posts via `posts?: NewsPost[]`. Falls back to static data.
+`'use client'` masonry grid. Receives news posts via `posts?: NewsPost[]`. Falls back to static data. Returns `null` if array is empty.
 
 **`NewsPost` interface:** `id`, `title`, `date`, `author`, `body`, `imageUrl`, `imageAlt`, `href`.
 
-**Layout:** `.events-section` (dark `#141310` bg) → `.ev-viewport` containing: prev/next circle arrows, left/right `.ev-side` preview cards (clickable), `.ev-main` with stacked images (`.ev-img-top` + `.ev-img-bot`) and text panel (`.ev-text` with gold accent line, title, meta, description, "Mehr erfahren" button).
+**Layout:** `.events-section` (dark `#0e0d0b` bg) → `.neues-header` (eyebrow, `<h2>`, subtitle) → `.masonry-wrap` → `.masonry-grid` (CSS `columns`). Each post renders as a `<Link className="masonry-item ratio-*">` wrapping `.img-wrap` with `<Image fill>`.
 
-Side previews hidden on mobile; images switch to side-by-side row layout.
+**Aspect ratio cycle** (repeats via `i % 4`): `ratio-16-9` → `ratio-9-16` → `ratio-1-1` → `ratio-3-4`. Applied via CSS `aspect-ratio` on `.img-wrap`.
+
+**Stagger animation:** `IntersectionObserver` (threshold 0.08) adds `.is-visible` to each item with a 60 ms delay per index. Items start at `opacity: 0; transform: translateY(18px)` and transition to visible. Observer is re-created on `posts` change.
+
+**Hover:** image scales 1.04×, brightness/saturation restore, gold-tinted veil fades in via `::after`.
+
+**Columns:** 5 (desktop) → 4 (≤900px) → 2 (≤600px). Column order is top→bottom per column (CSS columns, not Masonry.js).
 
 ### ProductsSection editorial banner
 
 `'use client'` banner. Uses static `STATIC_PRODUCTS` data with `Product` interface: `id`, `imageUrl`, `imageAlt`, `category`, `tag`, `title`, `description`, `meta`, `href?`.
 
 **Layout:** `.prod-banner-stage` is a CSS grid with 3 columns: vertical category tabs (`.prod-cats`) | central image (`.prod-img-wrap`) | text panel (`.prod-text-panel`) + counter/arrows (`.prod-nav`). Clicking a category tab jumps to the first product in that category.
+
+### Footer sunset clock
+
+`'use client'`. 3-column CSS grid (`1fr 1fr 260px`). Props: `config?: FooterConfig`, `apiUrl?`, `songbookUrl?`.
+
+**Columns:**
+1. **Contact** — heading, social links (fb/wa/ig/yt), email subscribe form with status feedback
+2. **Nav** — navigation links (Neuigkeiten, Liederbuch, Über uns, Produkte, Impressum, Datenschutz)
+3. **Sunset clock** — SVG arc ring + countdown label
+
+**Sunset clock logic:**
+- On mount, fetches today + tomorrow sunrise/sunset from `https://api.sunrisesunset.io/json?lat=48.8922&lng=8.6944&timezone=Europe/Berlin`
+- Parses `"HH:MM AM/PM"` strings → milliseconds since midnight
+- Updates every 15 s via `setInterval`; SVG ring transition is `1s linear`
+- SVG ring: `r=76`, `CIRC ≈ 477.52px`, `strokeDashoffset = CIRC * (1 - progress)`
+- Location hardcoded: Pforzheim, Baden-Württemberg (no `site_config` key)
+
+**4 Sabbath-aware states** (determined by `new Date().getDay()` + time of day):
+
+| Condition | `label` | `timeVal` |
+|---|---|---|
+| Friday (dow=5), daytime | Bis Schabbat | today's sunset |
+| Saturday (dow=6) | Schabbat endet | today's sunset |
+| Any other day, daytime | Bis Sonnenuntergang | today's sunset |
+| Any day, nighttime | Bis Sonnenaufgang | tomorrow's sunrise |
+
+**Responsive:** tablet (≤900px) — clock spans `grid-column: 1 / 3`, row layout with clock left + text right; mobile (≤600px) — all columns stack, clock column-spans full width.
+
+**Fallback:** API fetch failure is silently swallowed; clock stays at `'–:––'` / `'…'` placeholder.
 
 ### Layout notes
 

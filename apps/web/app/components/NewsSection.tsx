@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -58,106 +58,62 @@ const STATIC_NEWS: NewsPost[] = [
   },
 ];
 
+const RATIO_CYCLE = ['ratio-16-9', 'ratio-9-16', 'ratio-1-1', 'ratio-3-4'] as const;
+
 function isUnoptimized(url: string) {
   return url.startsWith('https://upload.wikimedia.org') || url.startsWith('https://images.unsplash.com');
 }
 
 export default function NewsSection({ posts = STATIC_NEWS }: { posts?: NewsPost[] }) {
-  const [idx, setIdx] = useState(0);
-  const N = posts.length;
-  if (N === 0) return null;
-  const ev = posts[idx];
-  const left = posts[(idx - 1 + N) % N];
-  const right = posts[(idx + 1) % N];
+  const gridRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const grid = gridRef.current;
+    if (!grid) return;
+    const items = Array.from(grid.querySelectorAll<HTMLElement>('.masonry-item'));
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          const i = items.indexOf(entry.target as HTMLElement);
+          setTimeout(() => (entry.target as HTMLElement).classList.add('is-visible'), i * 60);
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.08 }
+    );
+    items.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [posts]);
+
+  if (posts.length === 0) return null;
 
   return (
     <section className="events-section" id="neuigkeiten">
-      <h2 className="events-title">Neuigkeiten</h2>
+      <div className="neues-header">
+        <div className="neues-eyebrow">Was uns bewegt</div>
+        <h2 className="neues-title">
+          Aktuelle <em>Neuigkeiten</em>
+        </h2>
+        <p className="neues-subtitle">Berichte, Reflexionen und Zeugnisse aus unserer Gemeinschaft</p>
+      </div>
 
-      <div className="ev-viewport">
-        <button className="ev-arrow prev" onClick={() => setIdx((idx - 1 + N) % N)} aria-label="Zurück">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <polyline points="9,2 4,7 9,12" />
-          </svg>
-        </button>
-
-        {/* Left side preview */}
-        <div className="ev-side left" onClick={() => setIdx((idx - 1 + N) % N)}>
-          <div className="ev-side-img">
-            <Image
-              src={left.imageUrl}
-              alt={left.imageAlt}
-              fill
-              style={{ objectFit: 'cover' }}
-              unoptimized={isUnoptimized(left.imageUrl)}
-            />
-          </div>
-          <div className="ev-side-label">{left.title}</div>
-        </div>
-
-        {/* Main */}
-        <div className="ev-main">
-          <div className="ev-images">
-            <div className="ev-img-top">
-              <div className="ev-bg">
+      <div className="masonry-wrap">
+        <div className="masonry-grid" ref={gridRef}>
+          {posts.map((post, i) => (
+            <Link key={post.id} href={post.href} className={`masonry-item ${RATIO_CYCLE[i % RATIO_CYCLE.length]}`}>
+              <div className="img-wrap">
                 <Image
-                  src={ev.imageUrl}
-                  alt={ev.imageAlt}
+                  src={post.imageUrl}
+                  alt={post.imageAlt}
                   fill
                   style={{ objectFit: 'cover' }}
-                  unoptimized={isUnoptimized(ev.imageUrl)}
+                  unoptimized={isUnoptimized(post.imageUrl)}
                 />
               </div>
-            </div>
-            <div className="ev-img-bot">
-              <div className="ev-bg">
-                <Image
-                  src={ev.imageUrl}
-                  alt=""
-                  fill
-                  style={{ objectFit: 'cover', objectPosition: 'bottom' }}
-                  unoptimized={isUnoptimized(ev.imageUrl)}
-                />
-              </div>
-            </div>
-          </div>
-          <div className="ev-text">
-            <div className="ev-line" />
-            <div className="ev-name">{ev.title}</div>
-            <div className="ev-meta">
-              {ev.date}
-              {ev.author ? ` · ${ev.author}` : ''}
-            </div>
-            {ev.body && <div className="ev-desc">{ev.body}</div>}
-            <Link href={ev.href} className="ev-btn">
-              Mehr erfahren
-              <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
-                <line x1="2" y1="8" x2="13" y2="8" />
-                <polyline points="9,4 13,8 9,12" />
-              </svg>
             </Link>
-          </div>
+          ))}
         </div>
-
-        {/* Right side preview */}
-        <div className="ev-side right" onClick={() => setIdx((idx + 1) % N)}>
-          <div className="ev-side-img">
-            <Image
-              src={right.imageUrl}
-              alt={right.imageAlt}
-              fill
-              style={{ objectFit: 'cover' }}
-              unoptimized={isUnoptimized(right.imageUrl)}
-            />
-          </div>
-          <div className="ev-side-label">{right.title}</div>
-        </div>
-
-        <button className="ev-arrow next" onClick={() => setIdx((idx + 1) % N)} aria-label="Weiter">
-          <svg viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.8">
-            <polyline points="5,2 10,7 5,12" />
-          </svg>
-        </button>
       </div>
     </section>
   );

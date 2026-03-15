@@ -11,7 +11,7 @@ export const dynamic = 'force-dynamic';
 export default async function HomePage() {
   const [featuredRaw, newsRaw, config] = await Promise.all([
     fetchPosts('featured=1'),
-    fetchPosts('limit=4'),
+    fetchPosts('limit=8'),
     fetchConfig(),
   ]);
 
