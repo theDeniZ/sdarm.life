@@ -24,3 +24,7 @@ export function parseChords(line: string): Token[] {
 export function hasChords(line: string): boolean {
   return /\[[A-G][^\]]*\]/.test(line);
 }
+
+export function stripChords(line: string): string {
+  return line.replace(/\[[A-G][^\]]*\]/g, '');
+}

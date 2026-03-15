@@ -1,4 +1,4 @@
-import { parseChords, hasChords } from '@/app/lib/chords';
+import { parseChords, hasChords, stripChords } from '@/app/lib/chords';
 
 interface Props {
   line: string;
@@ -6,9 +6,12 @@ interface Props {
 }
 
 export default function ChordLine({ line, showChords }: Props) {
-  if (!hasChords(line) || !showChords) {
-    // Plain line — no chord markup needed
+  if (!hasChords(line)) {
     return <div>{line || '\u00A0'}</div>;
+  }
+  if (!showChords) {
+    const stripped = stripChords(line);
+    return <div>{stripped || '\u00A0'}</div>;
   }
 
   const tokens = parseChords(line);

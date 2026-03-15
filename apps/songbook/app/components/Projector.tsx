@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { SongDto } from '@sdarm/types';
-import { partLabel } from '@/app/lib/format';
+import { partLabel, expandParts } from '@/app/lib/format';
 import ChordLine from './ChordLine';
 
 interface Props {
@@ -11,13 +11,14 @@ interface Props {
 }
 
 export default function Projector({ song, onClose }: Props) {
-  const parts = song.parts;
+  const parts = expandParts(song.parts);
+  // index 0 = title slide; 1..parts.length = song parts
+  const total = parts.length + 1;
   const [index, setIndex] = useState(0);
-  const [showChords, setShowChords] = useState(false);
   const [fontScale, setFontScale] = useState(1);
 
   const prev = useCallback(() => setIndex((i) => Math.max(0, i - 1)), []);
-  const next = useCallback(() => setIndex((i) => Math.min(parts.length - 1, i + 1)), [parts.length]);
+  const next = useCallback(() => setIndex((i) => Math.min(total - 1, i + 1)), [total]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -51,53 +52,73 @@ export default function Projector({ song, onClose }: Props) {
     };
   }, [next, prev]);
 
-  const part = parts[index];
+  const isTitleSlide = index === 0;
+  const part = isTitleSlide ? null : parts[index - 1];
   const lines = part ? part.lyrics.split('\n') : [];
+
+  // Precompute verse numbers for the expanded parts list
+  let verseCount = 0;
+  const verseNumbers = parts.map((p) => {
+    if (p.type === 'verse') return ++verseCount;
+    return null;
+  });
+
+  const bgSymbol = (() => {
+    if (isTitleSlide) return null;
+    const partIndex = index - 1;
+    if (part?.type === 'chorus') return 'Ref';
+    const vn = verseNumbers[partIndex];
+    return vn !== null ? String(vn) : null;
+  })();
 
   return (
     <div className="projector">
-      <div className="projector__header">
-        {song.number}. {song.title}
-      </div>
-      {part && <div className="projector__part-label">{partLabel(part.type, part.label)}</div>}
+      {!isTitleSlide && (
+        <div className="projector__header">
+          {song.number}. {song.title}
+        </div>
+      )}
+      {!isTitleSlide && part && <div className="projector__part-label">{partLabel(part.type, part.label)}</div>}
 
       <button className="projector__close" onClick={onClose} aria-label="Close projector">
         ✕
       </button>
 
-      <div className="projector__content" style={{ fontSize: `${fontScale}em` }}>
-        <div className="projector__lyrics">
-          {lines.map((line, i) => (
-            <ChordLine key={i} line={line} showChords={showChords} />
-          ))}
+      {bgSymbol && (
+        <div className="projector__bg-symbol" aria-hidden="true">
+          {bgSymbol}
         </div>
+      )}
+
+      <div className="projector__content" style={{ fontSize: `${fontScale}em` }}>
+        {isTitleSlide ? (
+          <div className="projector__title-slide">
+            <div className="projector__title-num">{song.number}</div>
+            <div className="projector__title-name">{song.title}</div>
+            {(song.author || song.copyright) && (
+              <div className="projector__title-meta">{[song.author, song.copyright].filter(Boolean).join(' · ')}</div>
+            )}
+          </div>
+        ) : (
+          <div className="projector__lyrics">
+            {lines.map((line, i) => (
+              <ChordLine key={i} line={line} showChords={false} />
+            ))}
+          </div>
+        )}
       </div>
 
       <nav className="projector__nav">
         <button className="projector__nav-btn" onClick={prev} disabled={index === 0} aria-label="Previous part">
           ‹
         </button>
-        <span className="projector__counter">
-          {index + 1} / {parts.length}
-        </span>
-        <button
-          className="projector__nav-btn"
-          onClick={next}
-          disabled={index === parts.length - 1}
-          aria-label="Next part"
-        >
+        <span className="projector__counter">{isTitleSlide ? '—' : `${index} / ${parts.length}`}</span>
+        <button className="projector__nav-btn" onClick={next} disabled={index === total - 1} aria-label="Next part">
           ›
         </button>
       </nav>
 
       <div className="projector__controls">
-        <button
-          className={`projector__ctrl-btn${showChords ? ' on' : ''}`}
-          onClick={() => setShowChords((v) => !v)}
-          title="Toggle chord display"
-        >
-          Chords
-        </button>
         <button
           className="projector__ctrl-btn"
           onClick={() => setFontScale((s) => Math.min(2, +(s + 0.15).toFixed(2)))}
