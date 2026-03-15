@@ -284,9 +284,9 @@ a { text-decoration: none; color: inherit; }
   position: fixed; inset: 0; background: #000; color: #fff;
   z-index: 1000; display: flex; flex-direction: column;
   justify-content: center; align-items: center;
-  padding: 80px 48px 96px; overflow: hidden;
+  padding: 5vh 5vw; overflow: hidden;
   /* base font size — .projector__content em scale multiplies this */
-  font-size: clamp(26px, 4.5vw, 54px);
+  font-size: clamp(30px, 5vw, 64px);
 }
 .projector__close {
   position: absolute; top: 16px; right: 20px;
@@ -296,39 +296,45 @@ a { text-decoration: none; color: inherit; }
 }
 .projector__close:hover { color: #fff; }
 
-.projector__header {
+.projector__logo {
   position: absolute; top: 18px; left: 24px;
-  font-family: 'Cormorant Garamond', serif; font-size: .55rem; font-weight: 300;
-  color: rgba(255,255,255,.3); line-height: 1.3;
+  font-family: 'Playfair Display', serif; font-size: 14px; font-weight: 400;
+  letter-spacing: .06em; color: #fff;
+  opacity: 0.35; pointer-events: none; z-index: 2; line-height: 1;
 }
-.projector__part-label {
-  position: absolute; top: 40px; left: 24px;
-  font-family: 'Oswald', sans-serif; font-size: .38rem; font-weight: 200;
-  letter-spacing: .14em; text-transform: uppercase;
-  color: rgba(255,255,255,.2);
+.projector__logo-accent { color: var(--gold); font-style: italic; }
+
+.projector__header {
+  position: absolute; top: 16px; left: 120px; right: 56px;
+  text-align: center;
+  font-family: 'DM Serif Display', serif; font-style: normal;
+  font-size: 18px; font-weight: 400;
+  color: rgba(255,255,255,.5); line-height: 1.3; z-index: 2;
 }
 
-/* Background symbol (verse number or "Ref") */
+/* Background symbol (verse number, "Ref", song number) */
 .projector__bg-symbol {
   position: absolute; right: 5vw; top: 50%; transform: translateY(-50%);
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 80vh; line-height: 1;
-  color: rgba(255,255,255,.05);
+  font-family: 'DM Serif Display', serif; font-style: italic;
+  font-size: min(80vh, 55vw); line-height: 1;
+  color: rgba(255,255,255,.1);
   pointer-events: none; user-select: none;
   white-space: nowrap; z-index: 0;
+  max-width: 90vw; overflow: hidden;
 }
+.projector__bg-symbol--center {
+  right: auto; left: 50%; transform: translate(-50%, -50%);
+}
+.projector__bg-symbol--upright { font-style: normal; }
 
 /* Title slide */
 .projector__title-slide {
   text-align: center;
 }
-.projector__title-num {
-  font-family: 'Bebas Neue', sans-serif; font-size: .8em;
-  color: var(--gold); letter-spacing: .06em; margin-bottom: .2em;
-}
 .projector__title-name {
   font-family: 'DM Serif Display', serif; font-size: 1em;
   font-weight: 400; line-height: 1.25; color: #fff;
+  letter-spacing: 0.04em;
 }
 .projector__title-meta {
   font-family: 'Cormorant Garamond', serif; font-size: .42em;
@@ -337,12 +343,19 @@ a { text-decoration: none; color: inherit; }
 }
 
 .projector__content {
-  text-align: center; max-width: 960px; width: 100%; position: relative; z-index: 1;
+  text-align: center; width: 100%; position: relative; z-index: 1;
 }
 .projector__lyrics {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1em;
-  line-height: 1.85; font-weight: 300;
+  line-height: 1.45; font-weight: 400;
+}
+
+/* Amen closing slide */
+.projector__amen-slide {
+  font-family: 'DM Serif Display', serif; font-style: italic;
+  font-size: 1em; color: #fff; text-align: center;
+  padding: 5vh 5vw;
 }
 
 /* chord tokens inside projector */
@@ -357,7 +370,7 @@ a { text-decoration: none; color: inherit; }
 .projector__content .chord-token { white-space: pre; }
 .projector__content .chord-token__word--plain {
   font-size: 1em; color: #fff;
-  line-height: 1.85; display: block;
+  line-height: 1.6; display: block;
 }
 
 .projector__nav {
@@ -381,19 +394,19 @@ a { text-decoration: none; color: inherit; }
 }
 
 .projector__controls {
-  position: absolute; bottom: 36px; right: 24px;
+  position: absolute; bottom: 28px; right: 24px;
   display: flex; gap: 8px;
 }
 .projector__ctrl-btn {
-  background: rgba(255,255,255,.05);
-  border: 1px solid rgba(201,169,110,.2);
-  color: rgba(220,210,195,.5);
-  font-family: 'Cormorant Garamond', serif; font-size: .78rem; font-weight: 300;
-  padding: 5px 10px; cursor: pointer;
-  transition: background .15s, color .15s;
+  background: rgba(255,255,255,.06);
+  border: 1px solid rgba(201,169,110,.25);
+  border-radius: 50%; width: 44px; height: 44px;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif; font-size: .85rem; font-weight: 400;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: background .15s, border-color .3s; line-height: 1; padding: 0;
 }
-.projector__ctrl-btn:hover { background: rgba(201,169,110,.1); color: var(--text); }
-.projector__ctrl-btn.on { background: rgba(201,169,110,.15); color: #fff; }
+.projector__ctrl-btn:hover { background: rgba(201,169,110,.1); border-color: var(--gold); }
 
 
 /* ── SHEET VIEWER ── */
@@ -437,9 +450,10 @@ a { text-decoration: none; color: inherit; }
   .top-nav__brand { font-size: .9rem; padding-right: 1rem; margin-right: .4rem; }
   .page { padding: 64px 1.2rem 3rem; }
   .song-header__title { font-size: 1.3rem; }
-  .projector { padding: 60px 16px 80px; font-size: clamp(20px, 6vw, 36px); }
+  .projector { padding: 5vh 5vw; font-size: clamp(22px, 6vw, 40px); }
   .projector__lyrics { font-size: 1em; }
   .projector__content .chord-token__word { font-size: 1em; }
+  .projector__header { left: 80px; font-size: 14px; }
   .search-input { width: 100%; }
   .song-list-header { flex-direction: column; align-items: flex-start; }
 }
