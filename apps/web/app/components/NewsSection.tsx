@@ -28,7 +28,7 @@ const STATIC_NEWS: NewsPost[] = [
   },
   {
     id: '2',
-    title: 'Musikgruppe gibt mächtige Aufführung von „Jesus Paid It All\"',
+    title: 'Musikgruppe gibt mächtige Aufführung von „Jesus Paid It All"',
     date: '23.01.2020',
     author: 'FaithPot',
     body: '',
