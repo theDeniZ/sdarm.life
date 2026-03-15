@@ -7,10 +7,11 @@ export default function Navbar({ songbookUrl = 'https://songs.sdarm.life' }: { s
   const [scrolled, setScrolled] = useState(false);
 
   const navLinks = [
-    { label: 'Neuigkeiten', href: '/#neuigkeiten' },
-    { label: 'Liederbuch', href: songbookUrl, external: true },
+    { label: 'Neues', href: '/#neuigkeiten' },
+    { label: 'Lieder', href: songbookUrl, external: true },
+    { label: 'Schätze', href: '/treasures' }, // todo: treasures.sdarm.life
     { label: 'Über uns', href: '/about' },
-    { label: 'Produkte', href: '/#produkte' },
+    { label: 'Kontakt', href: '/#kontakt' },
   ];
 
   useEffect(() => {
@@ -40,26 +41,12 @@ export default function Navbar({ songbookUrl = 'https://songs.sdarm.life' }: { s
       </div>
 
       <div className="nav-right">
-        {/* Sunset widget — stub */}
-        <div className="sunset-widget">
-          <span className="sunset-icon">🌅</span>
-          <div className="sunset-text">
-            Schabbat<strong>Freitag</strong>
-          </div>
-        </div>
-
         <button className="nav-search" aria-label="Suche">
           <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.7">
             <circle cx="7.5" cy="7.5" r="5" />
             <line x1="11.5" y1="11.5" x2="16" y2="16" />
           </svg>
         </button>
-
-        <div className="nav-menu" aria-label="Menü">
-          <span />
-          <span />
-          <span />
-        </div>
       </div>
     </nav>
   );

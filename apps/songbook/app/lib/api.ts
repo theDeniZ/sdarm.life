@@ -1,7 +1,7 @@
 import type { SongbookDto, SongListItemDto, SongDto, ListResponse } from '@sdarm/types';
 
-export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
-export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
+export const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life/api/v1';
+export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
 
 export function r2url(key: string | null): string | null {
   return key ? `${R2}/${key}` : null;

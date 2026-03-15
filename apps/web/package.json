@@ -13,6 +13,9 @@
   },
   "dependencies": {
     "@sdarm/types": "workspace:*",
+    "@types/masonry-layout": "^4.2.8",
+    "imagesloaded": "^5.0.0",
+    "masonry-layout": "^4.2.2",
     "next": "15.2.2",
     "react": "19.2.3",
     "react-dom": "19.2.3"

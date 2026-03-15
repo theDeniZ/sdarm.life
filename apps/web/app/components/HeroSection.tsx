@@ -56,6 +56,33 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const leaveTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const textTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const progRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rafRef = useRef<number | null>(null);
+  const progStartRef = useRef<number | null>(null);
+
+  function stopProg() {
+    if (rafRef.current !== null) {
+      cancelAnimationFrame(rafRef.current);
+      rafRef.current = null;
+    }
+    progRefs.current.forEach((el) => {
+      if (el) el.style.width = '0%';
+    });
+  }
+
+  function startProg(idx: number) {
+    stopProg();
+    const el = progRefs.current[idx];
+    if (!el) return;
+    const progEl = el;
+    progStartRef.current = performance.now();
+    function tick(now: number) {
+      const pct = Math.min(((now - progStartRef.current!) / INTERVAL) * 100, 100);
+      progEl.style.width = pct + '%';
+      if (pct < 100) rafRef.current = requestAnimationFrame(tick);
+    }
+    rafRef.current = requestAnimationFrame(tick);
+  }
 
   const goTo = useCallback((idx: number) => {
     const prev = activeRef.current;
@@ -67,6 +94,7 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
     leaveTimers.current.push(lt);
 
     setActive(idx);
+    startProg(idx);
 
     requestAnimationFrame(() => {
       const wrap = stripRef.current;
@@ -93,10 +121,12 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
 
   useEffect(() => {
     resetAuto();
+    startProg(0);
     return () => {
       if (autoRef.current) clearInterval(autoRef.current);
       leaveTimers.current.forEach(clearTimeout);
       textTimers.current.forEach(clearTimeout);
+      stopProg();
     };
   }, [resetAuto]);
 
@@ -171,9 +201,12 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
                   <div className="card-text">
                     <div className="card-title">{slide.excerpt || slide.title}</div>
                   </div>
-                  <div className="card-prog">
-                    {active === i && <div key={`fill-${active}`} className="card-prog-fill" />}
-                  </div>
+                  <div
+                    className="card-prog"
+                    ref={(el) => {
+                      progRefs.current[i] = el;
+                    }}
+                  />
                 </div>
               );
             })}

@@ -25,11 +25,8 @@ export default function SongReader({ parts }: { parts: SongPartDto[] }) {
       ))}
       {anyChords && (
         <div className="reader__toolbar">
-          <button
-            className={`reader__chord-btn${showChords ? ' on' : ''}`}
-            onClick={() => setShowChords((v) => !v)}
-          >
-            Аккорды
+          <button className={`reader__chord-btn${showChords ? ' on' : ''}`} onClick={() => setShowChords((v) => !v)}>
+            Chords
           </button>
         </div>
       )}

@@ -28,7 +28,7 @@ const STATIC_NEWS: NewsPost[] = [
   },
   {
     id: '2',
-    title: 'Musikgruppe gibt mächtige Aufführung von „Jesus Paid It All"',
+    title: 'Musikgruppe gibt mächtige Aufführung von „Jesus Paid It All\"',
     date: '23.01.2020',
     author: 'FaithPot',
     body: '',
@@ -70,20 +70,32 @@ export default function NewsSection({ posts = STATIC_NEWS }: { posts?: NewsPost[
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
-    const items = Array.from(grid.querySelectorAll<HTMLElement>('.masonry-item'));
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (!entry.isIntersecting) return;
-          const i = items.indexOf(entry.target as HTMLElement);
-          setTimeout(() => (entry.target as HTMLElement).classList.add('is-visible'), i * 60);
-          observer.unobserve(entry.target);
+
+    let msnry: { destroy?: () => void } | null = null;
+
+    Promise.all([import('masonry-layout'), import('imagesloaded')]).then(([MasonryModule, imagesLoadedModule]) => {
+      const Masonry = MasonryModule.default;
+      const imagesLoaded = imagesLoadedModule.default;
+
+      imagesLoaded(grid, () => {
+        msnry = new Masonry(grid, {
+          itemSelector: '.masonry-item',
+          columnWidth: '.masonry-item',
+          gutter: '.gutter-sizer',
+          percentPosition: true,
+          fitWidth: true,
         });
-      },
-      { threshold: 0.08 }
-    );
-    items.forEach((el) => observer.observe(el));
-    return () => observer.disconnect();
+
+        const items = Array.from(grid.querySelectorAll<HTMLElement>('.masonry-item'));
+        items.forEach((el, i) => {
+          setTimeout(() => el.classList.add('is-visible'), i * 55);
+        });
+      });
+    });
+
+    return () => {
+      msnry?.destroy?.();
+    };
   }, [posts]);
 
   if (posts.length === 0) return null;
@@ -91,15 +103,16 @@ export default function NewsSection({ posts = STATIC_NEWS }: { posts?: NewsPost[
   return (
     <section className="events-section" id="neuigkeiten">
       <div className="neues-header">
-        <div className="neues-eyebrow">Was uns bewegt</div>
+        <div className="neues-eyebrow">Aktuelles &amp; Einblicke</div>
         <h2 className="neues-title">
-          Aktuelle <em>Neuigkeiten</em>
+          Was uns <em>bewegt</em>
         </h2>
-        <p className="neues-subtitle">Berichte, Reflexionen und Zeugnisse aus unserer Gemeinschaft</p>
+        <p className="neues-subtitle">Bilder aus unserem Gemeindeleben — Momente, die Glauben sichtbar machen.</p>
       </div>
 
       <div className="masonry-wrap">
         <div className="masonry-grid" ref={gridRef}>
+          <div className="gutter-sizer" />
           {posts.map((post, i) => (
             <Link key={post.id} href={post.href} className={`masonry-item ${RATIO_CYCLE[i % RATIO_CYCLE.length]}`}>
               <div className="img-wrap">
