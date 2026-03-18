@@ -22,5 +22,11 @@
 			"binding": "IMAGES",
 			"bucket_name": "sdarm-images"
 		}
+	],
+	"kv_namespaces": [
+		{
+			"binding": "KV",
+			"id": "f5ccbc653cc746898fd1e0be864310da"
+		}
 	]
 }

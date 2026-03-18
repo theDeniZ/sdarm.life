@@ -1,7 +1,5 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../types';
-import { getAllConfig } from '../repositories/config';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -22,9 +20,8 @@ const getConfigRoute = createRoute({
 });
 
 router.openapi(getConfigRoute, async (c) => {
-  const db = drizzle(c.env.DB);
-  const config = await getAllConfig(db);
-  return c.json(config, 200);
+  const config = await c.env.KV.get<Record<string, string | null>>('config', 'json');
+  return c.json(config ?? {}, 200);
 });
 
 export default router;

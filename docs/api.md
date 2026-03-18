@@ -13,7 +13,7 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 |---|---|---|
 | `GET` | `/api/v1/posts` | Active posts. `?featured=1`, `?video=1`, `?limit=N`, `?offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/posts/:slug` | Single post by slug. 404 if deleted. |
-| `GET` | `/api/v1/config` | All `site_config` rows as `{ key: value }` map. |
+| `GET` | `/api/v1/config` | All config as `{ key: value }` map (reads from Workers KV). |
 | `GET` | `/api/v1/images/*` | Proxy-serves R2 objects by key path (local dev only). |
 | `POST` | `/api/v1/subscribe` | Subscribe email. 409 if already subscribed (including unsubscribed). |
 | `GET` | `/api/v1/unsubscribe` | `?token=` — marks subscriber as unsubscribed. Idempotent. |
@@ -32,7 +32,7 @@ Require `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers on every reque
 | `POST` | `/api/v1/admin/posts` | Create post. |
 | `PATCH` | `/api/v1/admin/posts/:id` | Partial update (any field). |
 | `DELETE` | `/api/v1/admin/posts/:id` | Soft-delete: sets `deleted_at = now()`. |
-| `PUT` | `/api/v1/admin/config/:key` | Upsert site_config key. 400 if unknown key. |
+| `PUT` | `/api/v1/admin/config/:key` | Upsert config key in Workers KV. 400 if unknown key. |
 | `GET` | `/api/v1/admin/images` | List images from D1 with usage info. `?limit=N&offset=N&unused=1`. Returns `{ items, total }`. |
 | `DELETE` | `/api/v1/admin/images?key=` | Delete from R2 + D1. |
 | `POST` | `/api/v1/admin/images/upload` | `multipart/form-data` → R2 + D1 → returns `{ key }`. |

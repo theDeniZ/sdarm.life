@@ -7,8 +7,10 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 **`posts`**
 `id`, `title`, `slug` (unique), `excerpt`, `body`, `author`, `video_url`, `cover_key`, `cover_alt`, `thumb_key`, `is_featured` (boolean), `published_at`, `created_at`, `updated_at`, `deleted_at`
 
-**`site_config`**
+**`site_config`** *(deprecated — config now stored in Workers KV)*
 `key` (PK), `value`, `updated_at`
+- **No longer read or written by the application.** Config is stored as a single JSON object in Workers KV under the key `config`.
+- The D1 table remains as a backup but is dormant. The Drizzle schema export (`siteConfig`) is kept to avoid a breaking change in `@sdarm/db`.
 
 **`images`**
 `key` (PK — R2 object key), `size` (bytes), `uploaded_at`

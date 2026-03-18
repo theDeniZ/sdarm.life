@@ -8,6 +8,8 @@
 
 **D1 is canonical; R2 is a blob store.** All image existence/metadata queries hit D1. R2 is write-only from the API perspective. Never query R2 to enumerate images.
 
+**Site config lives in Workers KV.** All config key-value pairs are stored as a single JSON object under the KV key `config`. The D1 `site_config` table is dormant (kept as backup, not read or written).
+
 ---
 
 ## Target structure (migration goal)

@@ -1,8 +1,6 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
-import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../../types';
 import { KNOWN_CONFIG_KEYS } from '@sdarm/db';
-import { upsertConfig } from '../../repositories/config';
 import { ErrorSchema, OkSchema } from '../../schemas';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -32,10 +30,13 @@ const upsertConfigRoute = createRoute({
 });
 
 router.openapi(upsertConfigRoute, async (c) => {
-  const db = drizzle(c.env.DB);
   const { key } = c.req.valid('param');
   const { value } = c.req.valid('json');
-  await upsertConfig(db, key, value);
+
+  const config = (await c.env.KV.get<Record<string, string | null>>('config', 'json')) ?? {};
+  config[key] = value;
+  await c.env.KV.put('config', JSON.stringify(config));
+
   return c.json({ ok: true as const }, 200);
 });
 

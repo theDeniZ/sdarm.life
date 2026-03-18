@@ -89,7 +89,7 @@ const backfillRoute = createRoute({
 router.openapi(listImagesRoute, async (c) => {
   const db = drizzle(c.env.DB);
   const { limit, offset, unused } = c.req.valid('query');
-  const result = await listImages(db, {
+  const result = await listImages(db, c.env.KV, {
     limit: limit ?? 24,
     offset: offset ?? 0,
     unusedOnly: unused === '1',

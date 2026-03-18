@@ -1,18 +1,18 @@
 import { drizzle } from 'drizzle-orm/d1';
-import { images, posts, siteConfig } from '@sdarm/db';
+import { images, posts } from '@sdarm/db';
 import { isNull, eq, desc, count, notInArray } from 'drizzle-orm';
 
 type DB = ReturnType<typeof drizzle>;
 
-export async function listImages(db: DB, opts: {
+export async function listImages(db: DB, kv: KVNamespace, opts: {
 	limit?: number;
 	offset?: number;
 	unusedOnly?: boolean;
 }) {
-	const [postRows, configRows] = await Promise.all([
+	const [postRows, config] = await Promise.all([
 		db.select({ title: posts.title, coverKey: posts.coverKey, thumbKey: posts.thumbKey })
 			.from(posts).where(isNull(posts.deletedAt)),
-		db.select().from(siteConfig),
+		kv.get<Record<string, string | null>>('config', 'json'),
 	]);
 
 	const usage = new Map<string, { type: string; label: string }[]>();
@@ -25,8 +25,10 @@ export async function listImages(db: DB, opts: {
 		addUsage(p.coverKey, 'post_cover', p.title);
 		addUsage(p.thumbKey, 'post_thumb', p.title);
 	}
-	for (const cfg of configRows) {
-		addUsage(cfg.value, 'config', cfg.key);
+	if (config) {
+		for (const [k, v] of Object.entries(config)) {
+			addUsage(v, 'config', k);
+		}
 	}
 
 	const usedKeys = [...usage.keys()];
