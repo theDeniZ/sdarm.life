@@ -323,8 +323,22 @@ export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 export const R2  = process.env.R2_URL  ?? 'https://images.sdarm.life';
 export const FALLBACK_IMG = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=85&fit=crop';
 
-export function r2url(key: string | null): string | null {
-  return key ? `${R2}/${key}` : null;
+export interface ImageTransform {
+  w?: number;
+  h?: number;
+  q?: number;
+}
+
+export function r2url(key: string | null, opts?: ImageTransform): string | null {
+  if (!key) return null;
+  const base = `${R2}/${key}`;
+  // Transforms only work on the production CDN, not localhost
+  // Set R2_TRANSFORMS=false to disable as emergency kill switch
+  if (!opts || !TRANSFORMS_ENABLED || R2.includes('localhost')) return base;
+  const params = [opts.w && `w=${opts.w}`, opts.h && `h=${opts.h}`, `f=auto`, `q=${opts.q ?? 80}`]
+    .filter(Boolean)
+    .join(',');
+  return `${R2}/cdn-cgi/image/${params}/${key}`;
 }
 ```
 

@@ -3,8 +3,22 @@ import type { SongbookDto, SongListItemDto, SongDto, ListResponse } from '@sdarm
 export const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life/api/v1';
 export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
 
-export function r2url(key: string | null): string | null {
-  return key ? `${R2}/${key}` : null;
+export interface ImageTransform {
+  w?: number;
+  h?: number;
+  q?: number;
+}
+
+const TRANSFORMS_ENABLED = process.env.R2_TRANSFORMS !== 'false';
+
+export function r2url(key: string | null, opts?: ImageTransform): string | null {
+  if (!key) return null;
+  const base = `${R2}/${key}`;
+  if (!opts || !TRANSFORMS_ENABLED || R2.includes('localhost')) return base;
+  const params = [opts.w && `w=${opts.w}`, opts.h && `h=${opts.h}`, `f=auto`, `q=${opts.q ?? 80}`]
+    .filter(Boolean)
+    .join(',');
+  return `${R2}/cdn-cgi/image/${params}/${key}`;
 }
 
 export async function fetchSongbooks(): Promise<SongbookDto[]> {

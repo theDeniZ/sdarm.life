@@ -57,12 +57,15 @@ No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
 
 ### `apps/web`
 
-| Variable  | Dev (`.env.local`)                    | Production fallback             |
-| --------- | ------------------------------------- | ------------------------------- |
-| `API_URL` | `http://localhost:8787/api/v1`        | `https://api.sdarm.life/api/v1` |
-| `R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`     |
+| Variable        | Dev (`.env.local`)                    | Production fallback             |
+| --------------- | ------------------------------------- | ------------------------------- |
+| `API_URL`       | `http://localhost:8787/api/v1`        | `https://api.sdarm.life/api/v1` |
+| `R2_URL`        | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`     |
+| `R2_TRANSFORMS` | *(not set)*                           | *(not set — enabled by default)* |
 
 Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — pass as props from the server component.
+
+`R2_TRANSFORMS` is an emergency kill switch. Set to `false` to disable Cloudflare Image Transformations and serve raw R2 URLs. Leave unset for normal operation.
 
 ### `apps/admin`
 
@@ -77,11 +80,12 @@ Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — 
 
 ### `apps/songbook`
 
-| Variable  | Dev (`.env.local`)      | Production fallback |
-| --------- | ----------------------- | ------------------- |
-| `WEB_URL` | `http://localhost:3000` | `https://sdarm.life` |
+| Variable        | Dev (`.env.local`)      | Production fallback              |
+| --------------- | ----------------------- | -------------------------------- |
+| `WEB_URL`       | `http://localhost:3000` | `https://sdarm.life`             |
+| `R2_TRANSFORMS` | *(not set)*             | *(not set — enabled by default)* |
 
-Server-only (no `NEXT_PUBLIC_` prefix).
+Server-only (no `NEXT_PUBLIC_` prefix). `R2_TRANSFORMS` — same kill switch as `apps/web`.
 
 ### `apps/api` (local dev only)
 

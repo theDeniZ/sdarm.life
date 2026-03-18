@@ -20,7 +20,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
 
   if (!post) notFound();
 
-  const coverUrl = r2url(post.coverKey) ?? FALLBACK_IMG;
+  const coverUrl = r2url(post.coverKey, { w: 1200, q: 85 }) ?? FALLBACK_IMG;
   const meta = [formatDate(post.publishedAt), post.author].filter(Boolean).join(' · ');
   const others = (allPosts ?? []).filter((p) => p.slug !== slug).slice(0, 4);
   const footerConfig = config ? toFooterConfig(config) : undefined;
@@ -89,7 +89,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
           <div className="post-more-title">Weitere Beiträge</div>
           <div className="post-grid">
             {others.map((p) => {
-              const imgUrl = r2url(p.coverKey) ?? FALLBACK_IMG;
+              const imgUrl = r2url(p.coverKey, { w: 400, h: 300 }) ?? FALLBACK_IMG;
               const pMeta = [formatDate(p.publishedAt), p.author].filter(Boolean).join(' · ');
               return (
                 <Link key={p.id} href={`/posts/${p.slug}`} className="post-card">

@@ -184,6 +184,30 @@ All images use Next.js `<Image fill>` inside aspect-ratio containers. `next.conf
 
 `unoptimized` is set only on static fallback Wikimedia/Unsplash URLs — not on R2-hosted images.
 
+### Cloudflare Image Transformations
+
+R2 images are served through Cloudflare Image Transformations in production. `r2url()` in both `apps/web` and `apps/songbook` accepts an optional `ImageTransform` parameter (`{ w?, h?, q? }`) and produces `/cdn-cgi/image/w=...,f=auto,q=80/{key}` URLs.
+
+**Behaviour by environment:**
+- **Production** (`R2` points to `images.sdarm.life`): transforms are applied, serving WebP/AVIF automatically via `f=auto`
+- **Local dev** (`R2` includes `localhost`): transforms are skipped — `/cdn-cgi/image/` is not supported locally
+
+**Transform sizes used across call sites:**
+
+| Context | Transform |
+|---|---|
+| Hero cover / post detail cover | `w: 1200, q: 85` |
+| News cards | `w: 600, h: 400` |
+| Related post cards | `w: 400, h: 300` |
+| Hero strip thumbnails | `w: 300, h: 200` |
+| About page image | `w: 800` |
+| Songbook sheet images | `w: 1200, q: 90` |
+| Songbook sheet PDFs | no transform |
+
+**Kill switch:** Set `R2_TRANSFORMS=false` env var to disable transforms and serve raw R2 URLs. Only needed if Image Transformations is disabled at the Cloudflare account level (which would cause `/cdn-cgi/image/` to return 403).
+
+**Do not transform external URLs.** `FALLBACK_IMG` (Unsplash) and other external URLs are never passed through `r2url()` with transforms — they use their own query-string sizing.
+
 After upload, use `URL.createObjectURL(file)` for preview. Do not switch to the R2 URL — wrangler local state is not served at `images.sdarm.life`. The R2 key is stored correctly regardless.
 
 Direct R2 operations (wrangler, CF dashboard) bypass the `images` table. Any upload/delete outside the admin API requires a manual backfill (`POST /admin/images/backfill`).

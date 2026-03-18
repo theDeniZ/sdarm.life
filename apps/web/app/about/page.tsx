@@ -27,7 +27,7 @@ export default async function AboutPage() {
 
   const text1 = config?.about_text_1 ?? STATIC.text1;
   const text2 = config?.about_text_2 ?? STATIC.text2;
-  const imageUrl = (config?.about_image_key ? r2url(config.about_image_key) : null) ?? STATIC.imageUrl;
+  const imageUrl = (config?.about_image_key ? r2url(config.about_image_key, { w: 800 }) : null) ?? STATIC.imageUrl;
   const imageAlt = config?.about_image_alt ?? STATIC.imageAlt;
   const linkUrl = config?.about_link_url ?? STATIC.linkUrl;
 

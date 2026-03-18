@@ -9,8 +9,22 @@ export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
 export const SONGBOOK_URL = process.env.SONGBOOK_URL ?? 'https://songs.sdarm.life';
 export const FALLBACK_IMG = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=85&fit=crop';
 
-export function r2url(key: string | null): string | null {
-  return key ? `${R2}/${key}` : null;
+export interface ImageTransform {
+  w?: number;
+  h?: number;
+  q?: number;
+}
+
+const TRANSFORMS_ENABLED = process.env.R2_TRANSFORMS !== 'false';
+
+export function r2url(key: string | null, opts?: ImageTransform): string | null {
+  if (!key) return null;
+  const base = `${R2}/${key}`;
+  if (!opts || !TRANSFORMS_ENABLED || R2.includes('localhost')) return base;
+  const params = [opts.w && `w=${opts.w}`, opts.h && `h=${opts.h}`, `f=auto`, `q=${opts.q ?? 80}`]
+    .filter(Boolean)
+    .join(',');
+  return `${R2}/cdn-cgi/image/${params}/${key}`;
 }
 
 export async function fetchPosts(params: string): Promise<PostDto[] | null> {
@@ -49,8 +63,8 @@ export function toHeroPost(post: PostDto): HeroPost {
     meta: `${formatDate(post.publishedAt)}${post.author ? ` · ${post.author}` : ''}`,
     excerpt: post.excerpt ?? '',
     body: post.body ?? '',
-    imageUrl: r2url(post.coverKey) ?? FALLBACK_IMG,
-    thumbUrl: r2url(post.thumbKey) ?? r2url(post.coverKey) ?? FALLBACK_IMG,
+    imageUrl: r2url(post.coverKey, { w: 1200, q: 85 }) ?? FALLBACK_IMG,
+    thumbUrl: r2url(post.thumbKey, { w: 300, h: 200 }) ?? r2url(post.coverKey, { w: 300, h: 200 }) ?? FALLBACK_IMG,
     imageAlt: post.coverAlt ?? post.title,
     slug: post.slug,
   };
@@ -63,7 +77,7 @@ export function toNewsPost(post: PostDto): NewsPost {
     date: formatDate(post.publishedAt),
     author: post.author ?? '',
     body: post.excerpt ?? post.body ?? '',
-    imageUrl: r2url(post.coverKey) ?? FALLBACK_IMG,
+    imageUrl: r2url(post.coverKey, { w: 600, h: 400 }) ?? FALLBACK_IMG,
     imageAlt: post.coverAlt ?? post.title,
     href: `/posts/${post.slug}`,
   };

@@ -13,7 +13,7 @@ export default function SheetViewer({ sheets }: { sheets: SongSheetDto[] }) {
 
   const active = sheets.find((s) => s.id === selectedId) ?? null;
   // URL is only resolved when a sheet is selected — actual file loads lazily on demand
-  const url = active ? r2url(active.key) : null;
+  const url = active ? r2url(active.key, active.type === 'image' ? { w: 1200, q: 90 } : undefined) : null;
 
   return (
     <div className="sheet-viewer">
