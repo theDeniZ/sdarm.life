@@ -33,7 +33,9 @@ export const posts = sqliteTable('posts', {
   createdAt:   integer('created_at',  { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt:   integer('updated_at',  { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   deletedAt:   integer('deleted_at',  { mode: 'timestamp' }),
-});
+}, (t) => [
+  index('posts_active_listing_idx').on(t.deletedAt, t.isFeatured, t.publishedAt),
+]);
 
 export const siteConfig = sqliteTable('site_config', {
   key:       text('key').primaryKey(),
@@ -45,7 +47,9 @@ export const images = sqliteTable('images', {
   key:        text('key').primaryKey(),
   size:       integer('size').notNull(),
   uploadedAt: integer('uploaded_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-});
+}, (t) => [
+  index('images_uploaded_at_idx').on(t.uploadedAt),
+]);
 
 export const subscribers = sqliteTable('subscribers', {
   id:             integer('id').primaryKey({ autoIncrement: true }),
@@ -53,7 +57,9 @@ export const subscribers = sqliteTable('subscribers', {
   token:          text('token').notNull().unique(),
   unsubscribedAt: integer('unsubscribed_at', { mode: 'timestamp' }),
   createdAt:      integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-});
+}, (t) => [
+  index('subscribers_created_at_idx').on(t.createdAt),
+]);
 
 export const songbooks = sqliteTable('songbooks', {
   id:          integer('id').primaryKey({ autoIncrement: true }),
@@ -65,7 +71,9 @@ export const songbooks = sqliteTable('songbooks', {
   sortOrder:   integer('sort_order').notNull().default(0),
   createdAt:   integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt:   integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-});
+}, (t) => [
+  index('songbooks_sort_order_title_idx').on(t.sortOrder, t.title),
+]);
 
 export const songs = sqliteTable('songs', {
   id:         integer('id').primaryKey({ autoIncrement: true }),
