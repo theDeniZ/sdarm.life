@@ -9,6 +9,7 @@ export default function Navbar({ songbookUrl = 'https://songs.sdarm.life' }: { s
   const navLinks = [
     { label: 'Neues', href: '/#neuigkeiten' },
     { label: 'Lieder', href: songbookUrl, external: true },
+    { label: 'Events', href: '/events' }, // todo: treasures.sdarm.life
     { label: 'Schätze', href: '/treasures' }, // todo: treasures.sdarm.life
     { label: 'Über uns', href: '/about' },
     { label: 'Kontakt', href: '/#kontakt' },

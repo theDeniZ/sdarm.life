@@ -33,8 +33,8 @@ interface ClockState {
 }
 
 const CIRC = 2 * Math.PI * 76;
-const LAT = 48.8922;
-const LNG = 8.6944;
+const DEFAULT_LAT = 48.8922;
+const DEFAULT_LNG = 8.6944;
 const TZ = 'Europe/Berlin';
 
 function parseTimeToMs(timeStr: string): number {
@@ -66,41 +66,103 @@ function nowMs(): number {
 }
 
 function computeClock(sun: SunData, now: number, dow: number): ClockState {
-  const { todaySunrise, todaySunset, tomorrowSunrise } = sun;
-  const isNight = now >= todaySunset || now < todaySunrise;
-  const sunDay = dow === 5 ? 'Freitag' : dow === 6 ? 'Samstag' : '';
+  const DAY_MS = 86400000;
 
-  if (dow === 5 || dow === 6) {
-    const label = dow === 5 ? 'Bis Schabbat' : 'Schabbat endet';
-    const diff = Math.max(0, todaySunset - now);
-    const dayLen = todaySunset - todaySunrise;
-    const progress = Math.min(1, Math.max(0, (now - todaySunrise) / dayLen));
-    return { label, sublabel: fmtRemaining(diff), timeVal: msToHHMM(todaySunset), progress, sunDay };
-  }
+  const { todaySunrise, todaySunset, tomorrowSunrise, tomorrowSunset } = sun;
 
-  if (!isNight) {
-    const diff = Math.max(0, todaySunset - now);
-    const dayLen = todaySunset - todaySunrise;
-    const progress = Math.min(1, Math.max(0, (now - todaySunrise) / dayLen));
+  const isFriday = dow === 5;
+  const isSaturday = dow === 6;
+
+  const isBeforeSunrise = now < todaySunrise;
+  const isAfterSunset = now >= todaySunset;
+  const isNight = isAfterSunset || isBeforeSunrise;
+
+  const sunDay = isFriday ? 'Freitag' : isSaturday ? 'Samstag' : '';
+
+  // Helper: consistent countdown progress (1 → 0)
+  const calcProgress = (remaining: number, total: number) => Math.min(1, Math.max(0, remaining / total));
+
+  // ---------- 🕯️ BEFORE SHABBAT (Friday before sunset)
+  if (isFriday && !isAfterSunset) {
+    const total = todaySunset - todaySunrise;
+    const remaining = Math.max(0, todaySunset - now);
+
     return {
-      label: 'Bis Sonnenuntergang',
-      sublabel: fmtRemaining(diff),
+      label: 'Bis Schabbat',
+      sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(todaySunset),
-      progress,
+      progress: calcProgress(remaining, total),
       sunDay,
     };
   }
 
-  const nightLen = 86400000 - todaySunset + tomorrowSunrise;
-  const nightElap = now >= todaySunset ? now - todaySunset : 86400000 - todaySunset + now;
-  const progress = Math.min(1, Math.max(0, nightElap / nightLen));
-  const diff = now >= todaySunset ? 86400000 - now + tomorrowSunrise : Math.max(0, tomorrowSunrise - now);
+  // ---------- 🕯️ DURING SHABBAT (Friday sunset → Saturday sunset)
+  if ((isFriday && isAfterSunset) || (isSaturday && !isAfterSunset)) {
+    let start: number;
+    let end: number;
+
+    if (isFriday) {
+      start = todaySunset;
+      end = tomorrowSunset;
+    } else {
+      // Saturday → Shabbat started yesterday
+      start = todaySunset - DAY_MS;
+      end = todaySunset;
+    }
+
+    const total = end - start;
+
+    const remaining = now <= end ? end - now : 0;
+
+    return {
+      label: 'Schabbat endet',
+      sublabel: fmtRemaining(remaining),
+      timeVal: msToHHMM(end),
+      progress: calcProgress(remaining, total),
+      sunDay,
+    };
+  }
+
+  // ---------- 🌅 DAYTIME (normal days)
+  if (!isNight) {
+    const total = todaySunset - todaySunrise;
+    const remaining = Math.max(0, todaySunset - now);
+
+    return {
+      label: 'Bis Sonnenuntergang',
+      sublabel: fmtRemaining(remaining),
+      timeVal: msToHHMM(todaySunset),
+      progress: calcProgress(remaining, total),
+      sunDay,
+    };
+  }
+
+  // ---------- 🌙 NIGHTTIME
+  const total = DAY_MS - todaySunset + tomorrowSunrise;
+
+  const remaining = isAfterSunset ? DAY_MS - now + tomorrowSunrise : Math.max(0, tomorrowSunrise - now);
+
   return {
     label: 'Bis Sonnenaufgang',
-    sublabel: fmtRemaining(diff),
+    sublabel: fmtRemaining(remaining),
     timeVal: msToHHMM(tomorrowSunrise),
-    progress,
+    progress: calcProgress(remaining, total),
     sunDay,
+  };
+}
+
+async function fetchSunData(lat: number, lng: number): Promise<SunData> {
+  const base = `https://api.sunrisesunset.io/json?lat=${lat}&lng=${lng}&timezone=${TZ}`;
+  const [todayRes, tomorrowRes] = await Promise.all([fetch(`${base}&date=today`), fetch(`${base}&date=tomorrow`)]);
+  const [todayData, tomorrowData] = await Promise.all([
+    todayRes.json() as Promise<{ results: { sunrise: string; sunset: string } }>,
+    tomorrowRes.json() as Promise<{ results: { sunrise: string; sunset: string } }>,
+  ]);
+  return {
+    todaySunrise: parseTimeToMs(todayData.results.sunrise),
+    todaySunset: parseTimeToMs(todayData.results.sunset),
+    tomorrowSunrise: parseTimeToMs(tomorrowData.results.sunrise),
+    tomorrowSunset: parseTimeToMs(tomorrowData.results.sunset),
   };
 }
 
@@ -110,42 +172,20 @@ export default function Footer({
   songbookUrl = 'https://songs.sdarm.life',
 }: FooterProps) {
   const facebookUrl = config?.facebook_url ?? '#';
-  const whatsappUrl = config?.whatsapp_url ?? '#';
   const instagramUrl = config?.instagram_url ?? '#';
   const youtubeUrl = config?.youtube_url ?? '#';
+
   const [email, setEmail] = useState('');
   const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'conflict'>('idle');
   const [sunData, setSunData] = useState<SunData | null>(null);
-  const [clock, setClock] = useState<ClockState>({
-    label: 'Untergang',
-    sublabel: '…',
-    timeVal: '–:––',
-    progress: 0,
-  });
+  const [locationName, setLocationName] = useState('Pforzheim, Baden-Württemberg');
+  const [locationInput, setLocationInput] = useState('');
+  const [clock, setClock] = useState<ClockState>({ label: 'Untergang', sublabel: '…', timeVal: '–:––', progress: 0 });
 
   useEffect(() => {
-    async function fetchSun() {
-      try {
-        const base = `https://api.sunrisesunset.io/json?lat=${LAT}&lng=${LNG}&timezone=${TZ}`;
-        const [todayRes, tomorrowRes] = await Promise.all([
-          fetch(`${base}&date=today`),
-          fetch(`${base}&date=tomorrow`),
-        ]);
-        const [todayData, tomorrowData] = await Promise.all([
-          todayRes.json() as Promise<{ results: { sunrise: string; sunset: string } }>,
-          tomorrowRes.json() as Promise<{ results: { sunrise: string; sunset: string } }>,
-        ]);
-        setSunData({
-          todaySunrise: parseTimeToMs(todayData.results.sunrise),
-          todaySunset: parseTimeToMs(todayData.results.sunset),
-          tomorrowSunrise: parseTimeToMs(tomorrowData.results.sunrise),
-          tomorrowSunset: parseTimeToMs(tomorrowData.results.sunset),
-        });
-      } catch {
-        // silently fail
-      }
-    }
-    fetchSun();
+    fetchSunData(DEFAULT_LAT, DEFAULT_LNG)
+      .then(setSunData)
+      .catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -181,54 +221,73 @@ export default function Footer({
     }
   }
 
+  async function handleLocationChange(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (!locationInput.trim()) return;
+    try {
+      const geo = await fetch(
+        `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(locationInput)}&countrycodes=de&format=jsonv2&limit=1&addressdetails=1`
+      );
+      const results = (await geo.json()) as { lat: string; lon: string; display_name: string }[];
+      if (!results.length) return;
+      const { lat, lon, display_name } = results[0];
+      const data = await fetchSunData(Number(lat), Number(lon));
+      setSunData(data);
+      setLocationName(display_name.split(',').slice(0, 2).join(',').trim());
+      setLocationInput('');
+    } catch {
+      // silently fail
+    }
+  }
+
   const dashOffset = CIRC * (1 - clock.progress);
 
   return (
     <footer className="site-footer">
       <div className="footer-map" />
-      <div className="footer-map-tip">
-        Wir freuen uns,
-        <br />
-        dich hier zu sehen!
-      </div>
 
       <div className="footer-inner-wrap">
         {/* Column 1: contact + subscribe */}
         <div className="footer-contact">
-          <div className="footer-eyebrow">Kontakt</div>
           <h3 className="footer-heading">
-            In Kontakt <em>bleiben</em>
+            In <em>Kontakt</em> bleiben
           </h3>
           <div className="footer-info">
             Reformierte Adventisten
             <br />
             Deutschland &amp; Österreich
+            <br />
+            <br />
+            <a href="mailto:info@sdarm.life">info@sdarm.life</a>
           </div>
+
           <div className="footer-social">
-            <a href={facebookUrl} title="Facebook" target="_blank" rel="noopener noreferrer">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-              </svg>
-            </a>
-            <a href={whatsappUrl} title="WhatsApp" target="_blank" rel="noopener noreferrer">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
-              </svg>
-            </a>
-            <a href={instagramUrl} title="Instagram" target="_blank" rel="noopener noreferrer">
+            <a href={instagramUrl} title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <rect x="2" y="2" width="20" height="20" rx="5" />
                 <circle cx="12" cy="12" r="4" />
                 <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
               </svg>
             </a>
-            <a href={youtubeUrl} title="YouTube" target="_blank" rel="noopener noreferrer">
+            <a href={youtubeUrl} title="YouTube" aria-label="YouTube" target="_blank" rel="noopener noreferrer">
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46a2.78 2.78 0 00-1.95 1.96A29 29 0 001 12a29 29 0 00.46 5.58A2.78 2.78 0 003.41 19.6C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.95A29 29 0 0023 12a29 29 0 00-.46-5.58z" />
                 <polygon points="9.75,15.02 15.5,12 9.75,8.98 9.75,15.02" fill="currentColor" stroke="none" />
               </svg>
             </a>
+            <a href="#" title="Telegram" aria-label="Telegram">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M22 2L11 13" />
+                <path d="M22 2L15 22 11 13 2 9l20-7z" />
+              </svg>
+            </a>
+            <a href={facebookUrl} title="Facebook" aria-label="Facebook" target="_blank" rel="noopener noreferrer">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
+              </svg>
+            </a>
           </div>
+
           <div className="footer-form-label">Newsletter</div>
           <form
             className="footer-form"
@@ -240,7 +299,7 @@ export default function Footer({
             <input
               className="footer-input"
               type="email"
-              placeholder="E-Mail für Newsletter"
+              placeholder="E-Mail-Adresse"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={subStatus === 'loading'}
@@ -256,12 +315,13 @@ export default function Footer({
 
         {/* Column 2: nav links */}
         <div className="footer-nav">
-          <div className="footer-nav-title">Navigation</div>
           <div className="footer-nav-links">
-            <Link href="/#neuigkeiten">Neuigkeiten</Link>
-            <a href={songbookUrl}>Liederbuch</a>
-            <Link href="/about">Über uns</Link>
+            <Link href="/#neuigkeiten">Neues</Link>
+            <Link href={songbookUrl}>Lieder</Link>
+            <Link href="/#neuigkeiten">Events</Link>
             <Link href="/schaetze">Schätze</Link>
+            <Link href="/about">Über uns</Link>
+            <Link href="#kontakt">Kontakt</Link>
             <Link href="/impressum">Impressum</Link>
             <Link href="/datenschutz">Datenschutz</Link>
           </div>
@@ -282,15 +342,28 @@ export default function Footer({
               />
             </svg>
             <div className="sunset-clock-inner">
-              <div className="sunset-time-label">Untergang</div>
-              <div className="sunset-time-value">{clock.timeVal}</div>
-              <div className="sunset-countdown">{clock.sublabel}</div>
+              <div className="sunset-time-label">{clock.label}</div>
+              <div className="sunset-time-value">{clock.sublabel}</div>
             </div>
           </div>
           <div className="sunset-footer-text">
             <div className="sunset-footer-label">{clock.label}</div>
             {clock.sunDay && <div className="sunset-footer-day">{clock.sunDay}</div>}
-            <div className="sunset-footer-location">Pforzheim, Baden-Württemberg</div>
+            <div className="sunset-footer-location">{locationName}</div>
+            <form className="sunset-location-form" onSubmit={handleLocationChange}>
+              <input
+                type="text"
+                className="sunset-location-input"
+                placeholder="Stadt oder PLZ"
+                autoComplete="off"
+                spellCheck={false}
+                value={locationInput}
+                onChange={(e) => setLocationInput(e.target.value)}
+              />
+              <button type="submit" className="sunset-location-btn" aria-label="Standort aktualisieren">
+                →
+              </button>
+            </form>
           </div>
         </div>
       </div>

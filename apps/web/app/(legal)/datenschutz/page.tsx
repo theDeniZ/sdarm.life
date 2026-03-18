@@ -1,7 +1,6 @@
 export const runtime = 'edge';
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Datenschutzerklärung – sdarm.life',
@@ -10,9 +9,6 @@ export const metadata: Metadata = {
 export default function DatenschutzPage() {
   return (
     <main className="page legal-page">
-      <Link href="/" className="legal-back">
-        ← Zurück zur Startseite
-      </Link>
       <h1>Datenschutzerklärung</h1>
 
       <h2>Verantwortlicher</h2>

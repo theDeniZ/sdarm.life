@@ -1,7 +1,6 @@
 export const runtime = 'edge';
 
 import type { Metadata } from 'next';
-import Link from 'next/link';
 
 export const metadata: Metadata = {
   title: 'Impressum – sdarm.life',
@@ -10,9 +9,6 @@ export const metadata: Metadata = {
 export default function ImpressumPage() {
   return (
     <main className="page legal-page">
-      <Link href="/" className="legal-back">
-        ← Zurück zur Startseite
-      </Link>
       <h1>Impressum</h1>
 
       <h2>Angaben gemäß § 5 TMG</h2>
