@@ -3,6 +3,7 @@ import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
 import type { Bindings } from './types';
 import { auth } from './middleware/auth';
+import { cached } from './middleware/cache';
 import postsRouter from './routes/posts';
 import configRouter from './routes/config';
 import imagesRouter from './routes/images';
@@ -27,12 +28,20 @@ app.use(
 const v1 = new OpenAPIHono<{ Bindings: Bindings }>();
 const admin = new OpenAPIHono<{ Bindings: Bindings }>();
 
-// ── Public routes ─────────────────────────────────────────────────────────────
+// ── Public routes (with caching) ─────────────────────────────────────────────
+v1.use('/posts', cached(300)); // 5 min — post lists
+v1.use('/posts/*', cached(3600)); // 1 hour — individual posts
 v1.route('/posts', postsRouter);
-v1.route('/config', configRouter);
+
+v1.route('/config', configRouter); // No cache — handled by KV
 v1.route('/images', imagesRouter);
 v1.route('', subscribersRouter); // /subscribe + /unsubscribe
+
+v1.use('/songbooks', cached(3600)); // 1 hour — songbook list
+v1.use('/songbooks/*', cached(3600)); // 1 hour — songbook detail + songs
 v1.route('/songbooks', songbooksRouter);
+
+v1.use('/songs/*', cached(3600)); // 1 hour — individual songs
 v1.route('/songs', songsRouter);
 
 // ── Admin routes (auth-gated) ─────────────────────────────────────────────────

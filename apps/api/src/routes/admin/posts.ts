@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../../types';
 import { getPostById, createPost, updatePost, softDeletePost } from '../../repositories/posts';
 import { ErrorSchema, OkSchema, PostSchema } from '../../schemas';
+import { purgeCache } from '../../middleware/cache';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -120,6 +121,13 @@ router.openapi(getPostRoute, async (c) => {
 router.openapi(createPostRoute, async (c) => {
   const db = drizzle(c.env.DB);
   const post = await createPost(db, c.req.valid('json'));
+  const origin = new URL(c.req.url).origin;
+  purgeCache(c.executionCtx, origin, [
+    '/api/v1/posts',
+    '/api/v1/posts?featured=1',
+    '/api/v1/posts?limit=8',
+    '/api/v1/posts?limit=5',
+  ]);
   return c.json(post, 201);
 });
 
@@ -127,6 +135,14 @@ router.openapi(updatePostRoute, async (c) => {
   const db = drizzle(c.env.DB);
   const post = await updatePost(db, c.req.valid('param').id, c.req.valid('json'));
   if (!post) return c.json({ error: 'Not found' }, 404);
+  const origin = new URL(c.req.url).origin;
+  purgeCache(c.executionCtx, origin, [
+    '/api/v1/posts',
+    '/api/v1/posts?featured=1',
+    '/api/v1/posts?limit=8',
+    '/api/v1/posts?limit=5',
+    `/api/v1/posts/${post.slug}`,
+  ]);
   return c.json(post, 200);
 });
 
@@ -134,6 +150,14 @@ router.openapi(deletePostRoute, async (c) => {
   const db = drizzle(c.env.DB);
   const post = await softDeletePost(db, c.req.valid('param').id);
   if (!post) return c.json({ error: 'Not found' }, 404);
+  const origin = new URL(c.req.url).origin;
+  purgeCache(c.executionCtx, origin, [
+    '/api/v1/posts',
+    '/api/v1/posts?featured=1',
+    '/api/v1/posts?limit=8',
+    '/api/v1/posts?limit=5',
+    `/api/v1/posts/${post.slug}`,
+  ]);
   return c.json({ ok: true as const }, 200);
 });
 

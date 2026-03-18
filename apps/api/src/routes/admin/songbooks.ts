@@ -14,6 +14,7 @@ import {
   SongSheetTypeSchema,
 } from '../../schemas';
 import * as repo from '../../repositories/songs';
+import { purgeCache } from '../../middleware/cache';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -42,6 +43,8 @@ router.openapi(
   async (c) => {
     const db = drizzle(c.env.DB);
     const book = await repo.createSongbook(db, c.req.valid('json'));
+    const origin = new URL(c.req.url).origin;
+    purgeCache(c.executionCtx, origin, ['/api/v1/songbooks']);
     return c.json({ ...book, songCount: 0 }, 201);
   },
 );
@@ -68,6 +71,8 @@ router.openapi(
     if (!existing) return c.json({ error: 'Not found' }, 404);
     const book = await repo.updateSongbook(db, c.req.valid('param').id, c.req.valid('json'));
     if (!book) return c.json({ error: 'Not found' }, 404);
+    const origin = new URL(c.req.url).origin;
+    purgeCache(c.executionCtx, origin, ['/api/v1/songbooks', `/api/v1/songbooks/${book.slug}`]);
     return c.json({ ...book, songCount: existing.songCount }, 200);
   },
 );
@@ -85,8 +90,14 @@ router.openapi(
   }),
   async (c) => {
     const db = drizzle(c.env.DB);
-    const sheetKeys = await repo.deleteSongbook(db, c.req.valid('param').id);
+    const id = c.req.valid('param').id;
+    const book = await repo.getSongbookById(db, id);
+    const sheetKeys = await repo.deleteSongbook(db, id);
     await Promise.all(sheetKeys.map((key) => c.env.IMAGES.delete(key)));
+    const origin = new URL(c.req.url).origin;
+    const paths = ['/api/v1/songbooks'];
+    if (book) paths.push(`/api/v1/songbooks/${book.slug}`, `/api/v1/songbooks/${book.slug}/songs`);
+    purgeCache(c.executionCtx, origin, paths);
     return c.json({ ok: true as const }, 200);
   },
 );
@@ -135,7 +146,10 @@ router.openapi(
   async (c) => {
     const db = drizzle(c.env.DB);
     const song = await repo.createSong(db, c.req.valid('json'));
-    return c.json((await repo.getSongById(db, song.id))!, 201);
+    const full = (await repo.getSongById(db, song.id))!;
+    const origin = new URL(c.req.url).origin;
+    purgeCache(c.executionCtx, origin, [`/api/v1/songbooks/${full.songbook.slug}/songs`]);
+    return c.json(full, 201);
   },
 );
 
@@ -158,7 +172,13 @@ router.openapi(
     const db = drizzle(c.env.DB);
     const updated = await repo.updateSong(db, c.req.valid('param').id, c.req.valid('json'));
     if (!updated) return c.json({ error: 'Not found' }, 404);
-    return c.json((await repo.getSongById(db, updated.id))!, 200);
+    const full = (await repo.getSongById(db, updated.id))!;
+    const origin = new URL(c.req.url).origin;
+    purgeCache(c.executionCtx, origin, [
+      `/api/v1/songs/${full.id}`,
+      `/api/v1/songbooks/${full.songbook.slug}/songs`,
+    ]);
+    return c.json(full, 200);
   },
 );
 
@@ -175,8 +195,14 @@ router.openapi(
   }),
   async (c) => {
     const db = drizzle(c.env.DB);
-    const sheetKeys = await repo.deleteSong(db, c.req.valid('param').id);
+    const id = c.req.valid('param').id;
+    const song = await repo.getSongById(db, id);
+    const sheetKeys = await repo.deleteSong(db, id);
     await Promise.all(sheetKeys.map((key) => c.env.IMAGES.delete(key)));
+    const origin = new URL(c.req.url).origin;
+    const paths = [`/api/v1/songs/${id}`];
+    if (song) paths.push(`/api/v1/songbooks/${song.songbook.slug}/songs`);
+    purgeCache(c.executionCtx, origin, paths);
     return c.json({ ok: true as const }, 200);
   },
 );
@@ -206,7 +232,13 @@ router.openapi(
   }),
   async (c) => {
     const db = drizzle(c.env.DB);
-    const part = await repo.createSongPart(db, { songId: c.req.valid('param').id, ...c.req.valid('json') });
+    const songId = c.req.valid('param').id;
+    const part = await repo.createSongPart(db, { songId, ...c.req.valid('json') });
+    const song = await repo.getSongById(db, songId);
+    if (song) {
+      const origin = new URL(c.req.url).origin;
+      purgeCache(c.executionCtx, origin, [`/api/v1/songs/${songId}`]);
+    }
     return c.json(part, 201);
   },
 );
@@ -230,6 +262,8 @@ router.openapi(
     const db = drizzle(c.env.DB);
     const part = await repo.updateSongPart(db, c.req.valid('param').partId, c.req.valid('json'));
     if (!part) return c.json({ error: 'Not found' }, 404);
+    const origin = new URL(c.req.url).origin;
+    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`]);
     return c.json(part, 200);
   },
 );
@@ -248,6 +282,8 @@ router.openapi(
   async (c) => {
     const db = drizzle(c.env.DB);
     await repo.deleteSongPart(db, c.req.valid('param').partId);
+    const origin = new URL(c.req.url).origin;
+    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`]);
     return c.json({ ok: true as const }, 200);
   },
 );
@@ -300,6 +336,8 @@ router.openapi(uploadSheetRoute, async (c) => {
   });
 
   const sheet = await repo.createSongSheet(db, { songId, key, type, sortOrder: 0 });
+  const origin = new URL(c.req.url).origin;
+  purgeCache(c.executionCtx, origin, [`/api/v1/songs/${songId}`]);
   return c.json(sheet, 201);
 });
 
@@ -320,6 +358,8 @@ router.openapi(
     const sheet = await repo.deleteSongSheet(db, c.req.valid('param').sheetId);
     if (!sheet) return c.json({ error: 'Not found' }, 404);
     await c.env.IMAGES.delete(sheet.key);
+    const origin = new URL(c.req.url).origin;
+    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`]);
     return c.json({ ok: true as const }, 200);
   },
 );
