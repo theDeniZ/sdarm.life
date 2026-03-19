@@ -1,3 +1,4 @@
+import { Hono } from 'hono';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
@@ -15,18 +16,27 @@ import adminConfigRouter from './routes/admin/config';
 import adminImagesRouter from './routes/admin/images';
 import adminSubscribersRouter from './routes/admin/subscribers';
 import adminSongbooksRouter from './routes/admin/songbooks';
+import adminApiKeysRouter from './routes/admin/api-keys';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
 app.use(
 	'*',
 	cors({
-		origin: ['https://sdarm.life', 'https://admin.sdarm.life', 'https://songs.sdarm.life', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:3002'],
+		origin: [
+			'https://sdarm.life',
+			'https://admin.sdarm.life',
+			'https://songs.sdarm.life',
+			'http://localhost:3000',
+			'http://localhost:3001',
+			'http://localhost:3002',
+		],
 	}),
 );
 
 const v1 = new OpenAPIHono<{ Bindings: Bindings }>();
 const admin = new OpenAPIHono<{ Bindings: Bindings }>();
+const apiKeysApp = new Hono<{ Bindings: Bindings }>();
 
 // ── Public routes (with caching) ─────────────────────────────────────────────
 v1.use('/posts', cached(300)); // 5 min — post lists
@@ -56,11 +66,10 @@ v1.route('/admin', admin);
 app.route('/api/v1', v1);
 
 // ── OpenAPI spec + Swagger UI ─────────────────────────────────────────────────
-app.openAPIRegistry.registerComponent('securitySchemes', 'cfAccess', {
-	type: 'apiKey',
-	in: 'header',
-	name: 'CF-Access-Client-Id',
-	description: 'Cloudflare Access Client ID. Also requires CF-Access-Client-Secret header.',
+app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
+	type: 'http',
+	scheme: 'bearer',
+	description: 'API key issued via the admin API Keys management page.',
 });
 
 app.doc('/api/openapi.json', {
@@ -69,5 +78,10 @@ app.doc('/api/openapi.json', {
 });
 
 app.get('/api/ui', swaggerUI({ url: '/api/openapi.json' }));
+
+// ── API Keys route (excluded from Swagger docs) ──────────────────────────────
+apiKeysApp.use('*', auth);
+apiKeysApp.route('', adminApiKeysRouter);
+app.route('/api/v1/admin/api-keys', apiKeysApp);
 
 export default app;

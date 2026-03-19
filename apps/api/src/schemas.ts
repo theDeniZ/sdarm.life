@@ -42,6 +42,16 @@ export const SubscriberSchema = z
 export const OkSchema = z.object({ ok: z.literal(true) });
 export const ErrorSchema = z.object({ error: z.string() });
 
+export const ApiKeySchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    prefix: z.string(),
+    createdAt: z.string(),
+    revokedAt: z.string().nullable(),
+  })
+  .openapi('ApiKey');
+
 // ── Songbooks ─────────────────────────────────────────────────────────────────
 
 export const SongbookSchema = z

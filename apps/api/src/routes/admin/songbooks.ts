@@ -34,7 +34,7 @@ router.openapi(
     method: 'post',
     path: '/songbooks',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: { body: { content: { 'application/json': { schema: SongbookBody } }, required: true } },
     responses: {
       201: { content: { 'application/json': { schema: SongbookSchema } }, description: 'Created' },
@@ -54,7 +54,7 @@ router.openapi(
     method: 'patch',
     path: '/songbooks/{id}',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: {
       params: z.object({ id: z.coerce.number() }),
       body: { content: { 'application/json': { schema: SongbookBody.partial() } }, required: true },
@@ -82,7 +82,7 @@ router.openapi(
     method: 'delete',
     path: '/songbooks/{id}',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: { params: z.object({ id: z.coerce.number() }) },
     responses: {
       200: { content: { 'application/json': { schema: OkSchema } }, description: 'Deleted' },
@@ -117,7 +117,7 @@ router.openapi(
     method: 'get',
     path: '/songs/{id}',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: { params: z.object({ id: z.coerce.number() }) },
     responses: {
       200: { content: { 'application/json': { schema: SongSchema } }, description: 'Song for editing' },
@@ -137,7 +137,7 @@ router.openapi(
     method: 'post',
     path: '/songs',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: { body: { content: { 'application/json': { schema: SongBody } }, required: true } },
     responses: {
       201: { content: { 'application/json': { schema: SongSchema } }, description: 'Created' },
@@ -158,7 +158,7 @@ router.openapi(
     method: 'patch',
     path: '/songs/{id}',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: {
       params: z.object({ id: z.coerce.number() }),
       body: { content: { 'application/json': { schema: SongBody.omit({ songbookId: true }).partial() } }, required: true },
@@ -187,7 +187,7 @@ router.openapi(
     method: 'delete',
     path: '/songs/{id}',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: { params: z.object({ id: z.coerce.number() }) },
     responses: {
       200: { content: { 'application/json': { schema: OkSchema } }, description: 'Deleted' },
@@ -221,7 +221,7 @@ router.openapi(
     method: 'post',
     path: '/songs/{id}/parts',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: {
       params: z.object({ id: z.coerce.number() }),
       body: { content: { 'application/json': { schema: PartBody } }, required: true },
@@ -248,7 +248,7 @@ router.openapi(
     method: 'patch',
     path: '/songs/{id}/parts/{partId}',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: {
       params: z.object({ id: z.coerce.number(), partId: z.coerce.number() }),
       body: { content: { 'application/json': { schema: PartBody.partial() } }, required: true },
@@ -273,7 +273,7 @@ router.openapi(
     method: 'delete',
     path: '/songs/{id}/parts/{partId}',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: { params: z.object({ id: z.coerce.number(), partId: z.coerce.number() }) },
     responses: {
       200: { content: { 'application/json': { schema: OkSchema } }, description: 'Part deleted' },
@@ -294,7 +294,7 @@ const uploadSheetRoute = createRoute({
   method: 'post',
   path: '/songs/{id}/sheets/upload',
   tags: ['Admin / Songbooks'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: {
     params: z.object({ id: z.coerce.number() }),
     body: {
@@ -346,7 +346,7 @@ router.openapi(
     method: 'delete',
     path: '/songs/{id}/sheets/{sheetId}',
     tags: ['Admin / Songbooks'],
-    security: [{ cfAccess: [] }],
+    security: [{ bearerAuth: [] }],
     request: { params: z.object({ id: z.coerce.number(), sheetId: z.coerce.number() }) },
     responses: {
       200: { content: { 'application/json': { schema: OkSchema } }, description: 'Sheet deleted' },

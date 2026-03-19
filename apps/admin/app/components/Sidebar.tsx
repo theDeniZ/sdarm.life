@@ -33,6 +33,9 @@ export default function Sidebar() {
         >
           Songbooks
         </Link>
+        <Link href="/api-keys" className={`sidebar-link${path.startsWith('/api-keys') ? ' active' : ''}`}>
+          API Keys
+        </Link>
       </nav>
     </aside>
   );

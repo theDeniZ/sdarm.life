@@ -3,8 +3,7 @@ export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
 
 export function adminHeaders(): HeadersInit {
   return {
-    'CF-Access-Client-Id': process.env.NEXT_PUBLIC_CF_CLIENT_ID ?? '',
-    'CF-Access-Client-Secret': process.env.NEXT_PUBLIC_CF_CLIENT_SECRET ?? '',
+    Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_KEY ?? ''}`,
   };
 }
 

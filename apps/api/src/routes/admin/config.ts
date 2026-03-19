@@ -9,7 +9,7 @@ const upsertConfigRoute = createRoute({
   method: 'put',
   path: '/{key}',
   tags: ['Admin / Config'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: {
     params: z.object({ key: z.enum(KNOWN_CONFIG_KEYS) }),
     body: {

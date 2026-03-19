@@ -1,11 +1,32 @@
 import type { MiddlewareHandler } from 'hono';
 import type { Bindings } from '../types';
 
+async function hashKey(key: string): Promise<string> {
+	const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
+	return Array.from(new Uint8Array(buf))
+		.map((b) => b.toString(16).padStart(2, '0'))
+		.join('');
+}
+
 export const auth: MiddlewareHandler<{ Bindings: Bindings }> = async (c, next) => {
-	const id = c.req.header('CF-Access-Client-Id');
-	const secret = c.req.header('CF-Access-Client-Secret');
-	if (!id || !secret || id !== c.env.CF_CLIENT_ID || secret !== c.env.CF_CLIENT_SECRET) {
-		return c.json({ error: 'Unauthorized' }, 401);
+	const header = c.req.header('Authorization');
+	const key = header?.startsWith('Bearer ') ? header.slice(7) : null;
+	if (!key) return c.json({ error: 'Unauthorized' }, 401);
+
+	const hash = await hashKey(key);
+
+	// Check KV-managed keys first
+	const kvEntry = await c.env.KV.get(`apikey:${hash}`);
+	if (kvEntry) {
+		await next();
+		return;
 	}
-	await next();
+
+	// Fallback: bootstrap env key (plain string compare, same data in-flight over HTTPS)
+	if (c.env.API_KEY && key === c.env.API_KEY) {
+		await next();
+		return;
+	}
+
+	return c.json({ error: 'Unauthorized' }, 401);
 };

@@ -69,12 +69,11 @@ Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — 
 
 ### `apps/admin`
 
-| Variable                       | Dev (`.env.local`)                    | Production                  |
-| ------------------------------ | ------------------------------------- | --------------------------- |
-| `NEXT_PUBLIC_API_URL`          | `http://localhost:8787`               | `https://api.sdarm.life`    |
-| `NEXT_PUBLIC_R2_URL`           | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` |
-| `NEXT_PUBLIC_CF_CLIENT_ID`     | `dev`                                 | random hex                  |
-| `NEXT_PUBLIC_CF_CLIENT_SECRET` | `dev`                                 | random hex                  |
+| Variable              | Dev (`.env.local`)                    | Production                  |
+| --------------------- | ------------------------------------- | --------------------------- |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:8787`               | `https://api.sdarm.life`    |
+| `NEXT_PUBLIC_R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` |
+| `NEXT_PUBLIC_API_KEY` | `dev`                                 | managed API key             |
 
 `NEXT_PUBLIC_API_URL` has **no `/api/v1` suffix** — components append the full path themselves.
 
@@ -92,8 +91,7 @@ Server-only (no `NEXT_PUBLIC_` prefix). `R2_TRANSFORMS` — same kill switch as 
 `apps/api/.dev.vars` (gitignored, auto-loaded by `wrangler dev`):
 
 ```
-CF_CLIENT_ID=dev
-CF_CLIENT_SECRET=dev
+API_KEY=dev
 ```
 
 Never put secrets in `wrangler.jsonc`.

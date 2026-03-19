@@ -10,7 +10,7 @@ const listSubscribersRoute = createRoute({
   method: 'get',
   path: '/',
   tags: ['Admin / Subscribers'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: { query: PaginationQuery },
   responses: {
     200: {
@@ -24,7 +24,7 @@ const deleteSubscriberRoute = createRoute({
   method: 'delete',
   path: '/{id}',
   tags: ['Admin / Subscribers'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: { params: z.object({ id: z.coerce.number() }) },
   responses: {
     200: {

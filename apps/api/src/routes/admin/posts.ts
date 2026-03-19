@@ -42,7 +42,7 @@ const getPostRoute = createRoute({
   method: 'get',
   path: '/{id}',
   tags: ['Admin / Posts'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: { params: IdParam },
   responses: {
     200: {
@@ -60,7 +60,7 @@ const createPostRoute = createRoute({
   method: 'post',
   path: '/',
   tags: ['Admin / Posts'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: {
     body: { content: { 'application/json': { schema: CreatePostBody } }, required: true },
   },
@@ -76,7 +76,7 @@ const updatePostRoute = createRoute({
   method: 'patch',
   path: '/{id}',
   tags: ['Admin / Posts'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: {
     params: IdParam,
     body: { content: { 'application/json': { schema: UpdatePostBody } }, required: true },
@@ -97,7 +97,7 @@ const deletePostRoute = createRoute({
   method: 'delete',
   path: '/{id}',
   tags: ['Admin / Posts'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: { params: IdParam },
   responses: {
     200: {

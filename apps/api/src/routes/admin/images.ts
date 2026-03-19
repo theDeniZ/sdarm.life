@@ -10,7 +10,7 @@ const listImagesRoute = createRoute({
   method: 'get',
   path: '/',
   tags: ['Admin / Images'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: {
     query: PaginationQuery.extend({
       unused: z.enum(['0', '1']).optional().openapi({ description: 'Show only images not referenced anywhere' }),
@@ -28,7 +28,7 @@ const deleteImageRoute = createRoute({
   method: 'delete',
   path: '/',
   tags: ['Admin / Images'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: {
     query: z.object({ key: z.string() }),
   },
@@ -48,7 +48,7 @@ const uploadImageRoute = createRoute({
   method: 'post',
   path: '/upload',
   tags: ['Admin / Images'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   request: {
     body: {
       content: {
@@ -77,7 +77,7 @@ const backfillRoute = createRoute({
   method: 'post',
   path: '/backfill',
   tags: ['Admin / Images'],
-  security: [{ cfAccess: [] }],
+  security: [{ bearerAuth: [] }],
   responses: {
     200: {
       content: { 'application/json': { schema: z.object({ synced: z.number() }) } },

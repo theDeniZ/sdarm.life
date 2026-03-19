@@ -51,6 +51,9 @@ Require `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers on every reque
 | `DELETE` | `/api/v1/admin/songs/:id/parts/:partId` | Delete a part. |
 | `POST` | `/api/v1/admin/songs/:id/sheets/upload` | `multipart/form-data` (`file`, optional `type`). Accepts PDF and images (jpg, png, webp, gif). Stores under `sheets/{songId}/{uuid}.{ext}` in R2. |
 | `DELETE` | `/api/v1/admin/songs/:id/sheets/:sheetId` | Delete sheet from D1 + R2. |
+| `GET` | `/api/v1/admin/api-keys` | List all API keys (active + revoked). |
+| `POST` | `/api/v1/admin/api-keys` | Create key. Body: `{ name }`. Returns `{ key, apiKey }` — plaintext shown once. |
+| `DELETE` | `/api/v1/admin/api-keys/:id` | Revoke key — removes from KV, marks revoked in index. |
 
 **Image usage** — `GET /admin/images` cross-references `posts` (`cover_key`, `thumb_key`) and `site_config` to compute `usedIn` per image. Each item: `{ key, size, uploaded, usedIn: { type, label }[] }`. `?unused=1` filters to images not referenced in either table.
 
@@ -58,10 +61,21 @@ Require `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers on every reque
 
 ## Auth model
 
-- `CF_CLIENT_ID` / `CF_CLIENT_SECRET` are plain random hex strings (not CF Access service tokens)
-- Stored as GitHub Actions secrets; synced to Worker via `sync-secrets` CI job on every push to `main`
-- Same values set as `NEXT_PUBLIC_CF_CLIENT_ID/SECRET` env vars in the admin Pages project
-- Local dev: both set to `dev`/`dev` in `apps/api/.dev.vars` and `apps/admin/.env.local`
+Admin routes require `Authorization: Bearer <key>` on every request.
+
+**Key verification (Worker middleware, `middleware/auth.ts`):**
+1. SHA-256 hash the incoming key
+2. Look up `apikey:{hash}` in Workers KV — if found, allow
+3. Fallback: compare raw key to `env.API_KEY` (bootstrap env secret) — if matches, allow
+4. Otherwise 401
+
+**Key storage (KV):**
+- Active key: `apikey:{sha256hex}` → `{ id, name, prefix }` — hot-path lookup, deleted on revoke
+- Index: `apikeys:index` → JSON array of all keys (including revoked) — used by management UI
+
+**Key management:** `GET/POST/DELETE /api/v1/admin/api-keys` — list, create (returns plaintext once), revoke. These routes are mounted outside the OpenAPI spec (no Swagger docs).
+
+**Bootstrap:** `API_KEY` Worker secret + `NEXT_PUBLIC_API_KEY` admin Pages env var. Synced via `sync-secrets` CI job. Local dev: both set to `dev` in `apps/api/.dev.vars` and `apps/admin/.env.local`.
 
 ## Response contract
 

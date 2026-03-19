@@ -69,8 +69,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @sdarm/admin pages:build
         env:
-          NEXT_PUBLIC_CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          NEXT_PUBLIC_CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          NEXT_PUBLIC_API_KEY: ${{ secrets.API_KEY }}
       - uses: actions/upload-artifact@v4
         with:
           name: admin-dist
@@ -136,11 +135,9 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/api
           secrets: |
-            CF_CLIENT_ID
-            CF_CLIENT_SECRET
+            API_KEY
         env:
-          CF_CLIENT_ID: ${{ secrets.CF_CLIENT_ID }}
-          CF_CLIENT_SECRET: ${{ secrets.CF_CLIENT_SECRET }}
+          API_KEY: ${{ secrets.API_KEY }}
 
   deploy-api:
     if: github.ref == 'refs/heads/main'
