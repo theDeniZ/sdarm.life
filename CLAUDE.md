@@ -9,6 +9,8 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | `@sdarm/web` | `sdarm.life` | Next.js 15 public site |
 | `@sdarm/admin` | `admin.sdarm.life` | Next.js 15 admin UI |
 | `@sdarm/api` | `api.sdarm.life` | Hono Cloudflare Worker |
+| `@sdarm/events` | `events.sdarm.life` | Next.js 15 events landing page |
+| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 15 analog treasures site |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
 | `@sdarm/types` | — | Shared API response DTO interfaces |
 | `@sdarm/ui` | — | Shared React components + dark museum CSS design system |
@@ -25,6 +27,8 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | Worker | `sdarm-api` |
 | Pages (web) | `sdarm-web` |
 | Pages (admin) | `sdarm-admin` |
+| Pages (events) | `sdarm-events` |
+| Pages (treasures) | `sdarm-treasures` |
 
 Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV namespace), `CF_CLIENT_ID` (secret), `CF_CLIENT_SECRET` (secret).
 
@@ -36,6 +40,8 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 | `admin.sdarm.life` | `apps/admin` | Cloudflare Access (Google login, email allowlist) |
 | `api.sdarm.life` | `apps/api` | Public GETs; `/admin/*` requires header secrets |
 | `images.sdarm.life` | R2 public bucket | Public |
+| `events.sdarm.life` | `apps/events` | Public |
+| `treasures.sdarm.life` | `apps/treasures` | Public |
 
 @docs/schema.md
 @docs/api.md

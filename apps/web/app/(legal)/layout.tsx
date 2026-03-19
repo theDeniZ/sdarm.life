@@ -1,12 +1,11 @@
-import Footer from '../components/Footer';
-import Navbar from '../components/Navbar';
+import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 
 export default function LegalLayout({ children }: { children: React.ReactNode }) {
   return (
     <>
-      <Navbar />
+      <ConnectedNavbar />
       {children}
-      <Footer apiUrl={process.env.API_URL ?? 'https://api.sdarm.life/api/v1'} />
+      <ConnectedFooter />
     </>
   );
 }

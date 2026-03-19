@@ -94,9 +94,47 @@ jobs:
           name: songbook-dist
           path: apps/songbook/.vercel/output/static
 
+  build-events:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sdarm/events pages:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: events-dist
+          path: apps/events/.vercel/output/static
+
+  build-treasures:
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sdarm/treasures pages:build
+      - uses: actions/upload-artifact@v4
+        with:
+          name: treasures-dist
+          path: apps/treasures/.vercel/output/static
+
   migrate:
     if: github.ref == 'refs/heads/main'
-    needs: [build-api, build-web, build-admin, build-songbook]
+    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -117,7 +155,7 @@ jobs:
 
   sync-secrets:
     if: github.ref == 'refs/heads/main'
-    needs: [build-api, build-web, build-admin, build-songbook]
+    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -206,6 +244,40 @@ jobs:
           name: songbook-dist
           path: dist
       - run: npx wrangler pages deploy dist --project-name=sdarm-songbook
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-events:
+    if: github.ref == 'refs/heads/main'
+    needs: deploy-api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: events-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=sdarm-events
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-treasures:
+    if: github.ref == 'refs/heads/main'
+    needs: deploy-api
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: treasures-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=sdarm-treasures
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

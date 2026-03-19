@@ -1,9 +1,8 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import Navbar from '../../components/Navbar';
-import Footer from '../../components/Footer';
-import { fetchPost, fetchPosts, fetchConfig, r2url, toFooterConfig, FALLBACK_IMG, SONGBOOK_URL } from '../../lib/api';
+import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
+import { fetchPost, fetchPosts, r2url, FALLBACK_IMG } from '../../lib/api';
 import { formatDate } from '../../lib/format';
 
 export const runtime = 'edge';
@@ -16,18 +15,17 @@ function isUnoptimized(url: string) {
 export default async function PostDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
 
-  const [post, allPosts, config] = await Promise.all([fetchPost(slug), fetchPosts('limit=5'), fetchConfig()]);
+  const [post, allPosts] = await Promise.all([fetchPost(slug), fetchPosts('limit=5')]);
 
   if (!post) notFound();
 
   const coverUrl = r2url(post.coverKey, { w: 1200, q: 85 }) ?? FALLBACK_IMG;
   const meta = [formatDate(post.publishedAt), post.author].filter(Boolean).join(' · ');
   const others = (allPosts ?? []).filter((p) => p.slug !== slug).slice(0, 4);
-  const footerConfig = config ? toFooterConfig(config) : undefined;
 
   return (
     <>
-      <Navbar songbookUrl={SONGBOOK_URL} />
+      <ConnectedNavbar />
 
       {/* Hero */}
       <div className="post-hero">
@@ -114,7 +112,7 @@ export default async function PostDetailPage({ params }: { params: Promise<{ slu
         </div>
       )}
 
-      <Footer config={footerConfig} apiUrl={process.env.API_URL} songbookUrl={SONGBOOK_URL} />
+      <ConnectedFooter />
     </>
   );
 }

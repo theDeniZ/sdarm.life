@@ -1,28 +1,25 @@
-import Navbar from './components/Navbar';
+import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import HeroSection from './components/HeroSection';
 import NewsSection from './components/NewsSection';
 import ScriptureVerseSection from './components/ScriptureVerseSection';
 import UberUnsSection from './components/UberUnsSection';
-import Footer from './components/Footer';
-import { fetchPosts, fetchConfig, toHeroPost, toFooterConfig, SONGBOOK_URL } from './lib/api';
+import { fetchPosts, toHeroPost } from './lib/api';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const [featuredRaw, config] = await Promise.all([fetchPosts('featured=1'), fetchConfig()]);
-
+  const featuredRaw = await fetchPosts('featured=1');
   const heroPosts = featuredRaw?.map(toHeroPost) ?? [];
-  const footerConfig = config ? toFooterConfig(config) : undefined;
 
   return (
     <>
-      <Navbar songbookUrl={SONGBOOK_URL} />
+      <ConnectedNavbar />
       <HeroSection posts={heroPosts} />
       <NewsSection />
       <ScriptureVerseSection />
       <UberUnsSection />
-      <Footer config={footerConfig} apiUrl={process.env.API_URL} songbookUrl={SONGBOOK_URL} />
+      <ConnectedFooter />
     </>
   );
 }

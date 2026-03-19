@@ -1,0 +1,24 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Serif+Display:ital@0;1&family=Bebas+Neue&family=Oswald:wght@200;300&display=swap');
+
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --gold:   #c9a96e;
+  --dark:   #0c0b09;
+  --text:   #d6d0c8;
+  --muted:  #7a7470;
+  --border: rgba(201,169,110,0.12);
+}
+
+html, body { height: 100%; }
+
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a { text-decoration: none; color: inherit; }

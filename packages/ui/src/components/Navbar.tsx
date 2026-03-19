@@ -1,18 +1,27 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import Link from 'next/link';
 
-export default function Navbar({ songbookUrl = 'https://songs.sdarm.life' }: { songbookUrl?: string }) {
+export default function Navbar({
+  webUrl = 'https://sdarm.life',
+  songbookUrl = 'https://songs.sdarm.life',
+  eventsUrl = 'https://events.sdarm.life',
+  treasuresUrl = 'https://treasures.sdarm.life',
+}: {
+  webUrl?: string;
+  songbookUrl?: string;
+  eventsUrl?: string;
+  treasuresUrl?: string;
+}) {
   const [scrolled, setScrolled] = useState(false);
 
   const navLinks = [
-    { label: 'Neues', href: '/#neuigkeiten' },
+    { label: 'Neues', href: `${webUrl}/#neuigkeiten`, external: true },
     { label: 'Lieder', href: songbookUrl, external: true },
-    { label: 'Events', href: '/events' },
-    { label: 'Schätze', href: '/treasures' },
-    { label: 'Über uns', href: '/about' },
-    { label: 'Kontakt', href: '/#kontakt' },
+    { label: 'Events', href: eventsUrl, external: true },
+    { label: 'Schätze', href: treasuresUrl, external: true },
+    { label: 'Über uns', href: `${webUrl}/about`, external: true },
+    { label: 'Kontakt', href: `${webUrl}/#kontakt`, external: true },
   ];
 
   useEffect(() => {
@@ -23,22 +32,16 @@ export default function Navbar({ songbookUrl = 'https://songs.sdarm.life' }: { s
 
   return (
     <nav className={scrolled ? 'scrolled' : ''}>
-      <Link href="/" className="nav-logo">
+      <a href={webUrl} className="nav-logo">
         SDARM<span>.life</span>
-      </Link>
+      </a>
 
       <div className="nav-links">
-        {navLinks.map(({ label, href, external }) =>
-          external ? (
-            <a key={href} href={href}>
-              {label}
-            </a>
-          ) : (
-            <Link key={href} href={href}>
-              {label}
-            </Link>
-          )
-        )}
+        {navLinks.map(({ label, href }) => (
+          <a key={href} href={href}>
+            {label}
+          </a>
+        ))}
       </div>
 
       <div className="nav-right">

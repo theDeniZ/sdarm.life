@@ -1,8 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
-import { fetchConfig, r2url, toFooterConfig, SONGBOOK_URL } from '../lib/api';
+import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
+import { fetchConfig, r2url } from '../lib/api';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -23,7 +22,6 @@ function isUnoptimized(url: string) {
 
 export default async function AboutPage() {
   const config = await fetchConfig();
-  const footerConfig = config ? toFooterConfig(config) : undefined;
 
   const text1 = config?.about_text_1 ?? STATIC.text1;
   const text2 = config?.about_text_2 ?? STATIC.text2;
@@ -33,7 +31,7 @@ export default async function AboutPage() {
 
   return (
     <>
-      <Navbar songbookUrl={SONGBOOK_URL} />
+      <ConnectedNavbar />
 
       <div className="about-hero">
         <Link href="/" className="post-back">
@@ -72,7 +70,7 @@ export default async function AboutPage() {
         </div>
       </div>
 
-      <Footer config={footerConfig} apiUrl={process.env.API_URL} songbookUrl={SONGBOOK_URL} />
+      <ConnectedFooter />
     </>
   );
 }

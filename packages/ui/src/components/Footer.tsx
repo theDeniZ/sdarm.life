@@ -14,7 +14,10 @@ export interface FooterConfig {
 interface FooterProps {
   config?: FooterConfig;
   apiUrl?: string;
+  webUrl?: string;
   songbookUrl?: string;
+  eventsUrl?: string;
+  treasuresUrl?: string;
 }
 
 interface SunData {
@@ -159,7 +162,10 @@ async function fetchSunData(lat: number, lng: number): Promise<SunData> {
 export default function Footer({
   config,
   apiUrl = 'https://api.sdarm.life/api/v1',
+  webUrl = 'https://sdarm.life',
   songbookUrl = 'https://songs.sdarm.life',
+  eventsUrl = 'https://events.sdarm.life',
+  treasuresUrl = 'https://treasures.sdarm.life',
 }: FooterProps) {
   const facebookUrl = config?.facebook_url ?? '#';
   const instagramUrl = config?.instagram_url ?? '#';
@@ -306,14 +312,14 @@ export default function Footer({
         {/* Column 2: nav links */}
         <div className="footer-nav">
           <div className="footer-nav-links">
-            <Link href="/#neuigkeiten">Neues</Link>
+            <Link href={`${webUrl}/#neuigkeiten`}>Neues</Link>
             <Link href={songbookUrl}>Lieder</Link>
-            <Link href="/events">Events</Link>
-            <Link href="/treasures">Schätze</Link>
-            <Link href="/about">Über uns</Link>
-            <Link href="#kontakt">Kontakt</Link>
-            <Link href="/impressum">Impressum</Link>
-            <Link href="/datenschutz">Datenschutz</Link>
+            <Link href={eventsUrl}>Events</Link>
+            <Link href={treasuresUrl}>Schätze</Link>
+            <Link href={`${webUrl}/about`}>Über uns</Link>
+            <Link href={`${webUrl}/#kontakt`}>Kontakt</Link>
+            <Link href={`${webUrl}/impressum`}>Impressum</Link>
+            <Link href={`${webUrl}/datenschutz`}>Datenschutz</Link>
           </div>
         </div>
 
