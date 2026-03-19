@@ -1,7 +1,6 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Image from 'next/image';
 
 export interface HeroPost {
   title: string;
@@ -35,10 +34,22 @@ const TINTS = [
   'radial-gradient(ellipse at 62% 28%, rgba(55,32,14,0.28) 0%, transparent 58%), radial-gradient(ellipse at 15% 80%, rgba(28,12,4,0.38) 0%, transparent 50%)',
 ];
 
+const THUMB_COLORS = [
+  'rgba(120,88,40,.55)',
+  'rgba(40,60,100,.55)',
+  'rgba(100,60,20,.55)',
+  'rgba(30,50,90,.55)',
+  'rgba(90,50,15,.55)',
+];
+
 const INTERVAL = 5000;
 
-function isUnoptimized(url: string) {
-  return url.startsWith('https://upload.wikimedia.org') || url.startsWith('https://images.unsplash.com');
+function nextSabbath(): string {
+  const d = new Date();
+  const day = d.getDay();
+  const daysUntil = day === 6 ? 7 : 6 - day;
+  d.setDate(d.getDate() + daysUntil);
+  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
 }
 
 export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
@@ -46,66 +57,18 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
   const N = slides.length;
 
   const [active, setActive] = useState(0);
-  const [leaving, setLeaving] = useState<number | null>(null);
   const [shown, setShown] = useState(0);
   const [textVisible, setTextVisible] = useState(true);
 
   const activeRef = useRef(0);
-  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const stripRef = useRef<HTMLDivElement>(null);
   const autoRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const leaveTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const textTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  const progRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const rafRef = useRef<number | null>(null);
-  const progStartRef = useRef<number | null>(null);
-
-  function stopProg() {
-    if (rafRef.current !== null) {
-      cancelAnimationFrame(rafRef.current);
-      rafRef.current = null;
-    }
-    progRefs.current.forEach((el) => {
-      if (el) el.style.width = '0%';
-    });
-  }
-
-  function startProg(idx: number) {
-    stopProg();
-    const el = progRefs.current[idx];
-    if (!el) return;
-    const progEl = el;
-    progStartRef.current = performance.now();
-    function tick(now: number) {
-      const pct = Math.min(((now - progStartRef.current!) / INTERVAL) * 100, 100);
-      progEl.style.width = pct + '%';
-      if (pct < 100) rafRef.current = requestAnimationFrame(tick);
-    }
-    rafRef.current = requestAnimationFrame(tick);
-  }
 
   const goTo = useCallback((idx: number) => {
     const prev = activeRef.current;
     if (idx === prev) return;
     activeRef.current = idx;
-
-    setLeaving(prev);
-    const lt = setTimeout(() => setLeaving((lv) => (lv === prev ? null : lv)), 340);
-    leaveTimers.current.push(lt);
-
     setActive(idx);
-    startProg(idx);
-
-    requestAnimationFrame(() => {
-      const wrap = stripRef.current;
-      const card = cardRefs.current[idx];
-      if (!wrap || !card) return;
-      const wrapRect = wrap.getBoundingClientRect();
-      const cardRect = card.getBoundingClientRect();
-      const target = wrap.scrollLeft + cardRect.left - wrapRect.left - (wrapRect.width - cardRect.width) / 2;
-      wrap.scrollTo({ left: target, behavior: 'smooth' });
-    });
-
     setTextVisible(false);
     const tt = setTimeout(() => {
       setShown(idx);
@@ -121,12 +84,9 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
 
   useEffect(() => {
     resetAuto();
-    startProg(0);
     return () => {
       if (autoRef.current) clearInterval(autoRef.current);
-      leaveTimers.current.forEach(clearTimeout);
       textTimers.current.forEach(clearTimeout);
-      stopProg();
     };
   }, [resetAuto]);
 
@@ -158,58 +118,53 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
         <div className="deco-circle" />
 
         <div className="side-label">
-          <div className="side-lbl">{post.meta || 'Reformation'}</div>
-          <div className="side-cnt">
+          <div className="lbl">{post.meta || 'Reformation'}</div>
+          <div className="cnt">
             {String(active + 1).padStart(2, '0')} / {String(N).padStart(2, '0')}
           </div>
         </div>
 
         <div className="hero-content">
+          <div className="hero-eyebrow">{post.meta}</div>
           <h1 className={`hero-title${textVisible ? '' : ' fade-out'}`}>{post.title}</h1>
           {post.body && <p className={`hero-sub${textVisible ? '' : ' fade-out'}`}>{post.body}</p>}
         </div>
 
-        <div className="strip-wrap" ref={stripRef}>
-          <div className="strip">
-            {slides.map((slide, i) => {
-              const cls = ['card', active === i ? 'active' : '', leaving === i ? 'leaving' : '']
-                .filter(Boolean)
-                .join(' ');
-
-              return (
+        <div className="hero-events-list" style={{ gridTemplateColumns: `${slides.map(() => '1fr').join(' ')} 220px` }}>
+          {slides.map((slide, i) => (
+            <div
+              key={slide.slug + i}
+              className={`hev-item${active === i ? ' active' : ''}`}
+              onClick={() => handleClick(i)}
+            >
+              <div className="hev-thumb">
                 <div
-                  key={slide.slug + i}
-                  ref={(el) => {
-                    cardRefs.current[i] = el;
+                  className="hev-thumb-inner"
+                  style={{
+                    background: `radial-gradient(ellipse at 60% 30%, ${THUMB_COLORS[i % THUMB_COLORS.length]} 0%, rgba(8,6,3,1) 75%)`,
                   }}
-                  className={cls}
-                  onClick={() => handleClick(i)}
+                />
+                <svg
+                  className="hev-thumb-icon"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="rgba(201,169,110,.45)"
+                  strokeWidth="1.2"
                 >
-                  <div className="card-img">
-                    <Image
-                      src={slide.thumbUrl}
-                      alt={slide.imageAlt}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      unoptimized={isUnoptimized(slide.thumbUrl)}
-                      priority={i === 0}
-                    />
-                  </div>
-                  <div className="card-vl" />
-                  <div className="card-vb" />
-                  <div className="card-num">{String(i + 1).padStart(2, '0')}</div>
-                  <div className="card-text">
-                    <div className="card-title">{slide.excerpt || slide.title}</div>
-                  </div>
-                  <div
-                    className="card-prog"
-                    ref={(el) => {
-                      progRefs.current[i] = el;
-                    }}
-                  />
-                </div>
-              );
-            })}
+                  <path d="M12 20h9" />
+                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
+                </svg>
+              </div>
+              <div className="hev-text">
+                <div className="hev-lbl">{slide.meta}</div>
+                <div className="hev-title">{slide.title}</div>
+                {slide.excerpt && <div className="hev-desc">{slide.excerpt}</div>}
+              </div>
+            </div>
+          ))}
+          <div className="hev-item hev-item--date">
+            <div className="hev-date-big">{nextSabbath()}</div>
+            <div className="hev-date-sub">Nächster Gottesdienst</div>
           </div>
         </div>
       </section>

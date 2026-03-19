@@ -1,6 +1,7 @@
 import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import NewsSection from './components/NewsSection';
+import ScriptureVerseSection from './components/ScriptureVerseSection';
 import UberUnsSection from './components/UberUnsSection';
 import Footer from './components/Footer';
 import { fetchPosts, fetchConfig, toHeroPost, toFooterConfig, SONGBOOK_URL } from './lib/api';
@@ -19,6 +20,7 @@ export default async function HomePage() {
       <Navbar songbookUrl={SONGBOOK_URL} />
       <HeroSection posts={heroPosts} />
       <NewsSection />
+      <ScriptureVerseSection />
       <UberUnsSection />
       <Footer config={footerConfig} apiUrl={process.env.API_URL} songbookUrl={SONGBOOK_URL} />
     </>
