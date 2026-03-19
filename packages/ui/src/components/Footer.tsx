@@ -308,8 +308,8 @@ export default function Footer({
           <div className="footer-nav-links">
             <Link href="/#neuigkeiten">Neues</Link>
             <Link href={songbookUrl}>Lieder</Link>
-            <Link href="/#neuigkeiten">Events</Link>
-            <Link href="/schaetze">Schätze</Link>
+            <Link href="/events">Events</Link>
+            <Link href="/treasures">Schätze</Link>
             <Link href="/about">Über uns</Link>
             <Link href="#kontakt">Kontakt</Link>
             <Link href="/impressum">Impressum</Link>
