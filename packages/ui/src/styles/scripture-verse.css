@@ -1,0 +1,121 @@
+/* ─── SCRIPTURE VERSE SECTION ─── */
+.scripture-verse {
+  background: #070605;
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+}
+.scripture-verse::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 35%;
+  background: radial-gradient(ellipse 80% 100% at 0% 50%, rgba(201, 169, 110, 0.055) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.scripture-verse-inner {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: stretch;
+  padding: 2.4rem 5vw 2.4rem 0;
+}
+
+.scripture-verse-accent {
+  flex-shrink: 0;
+  width: 5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0.2rem;
+}
+
+.scripture-verse-bar {
+  width: 1px;
+  flex: 1;
+  background: linear-gradient(to bottom, rgba(201, 169, 110, 0.65) 0%, rgba(201, 169, 110, 0.06) 85%, transparent 100%);
+  margin-bottom: 0.3rem;
+  min-height: 2rem;
+  transition: background 0.3s ease;
+}
+
+.scripture-verse-glyph {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: 5.5rem;
+  line-height: 0.6;
+  color: rgba(201, 169, 110, 0.5);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg) translateX(-0.06em);
+  user-select: none;
+  pointer-events: none;
+  text-shadow: 0 0 50px rgba(201, 169, 110, 0.15);
+  padding-bottom: 0.8rem;
+}
+
+.scripture-verse-body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.9rem;
+}
+
+.scripture-verse-eyebrow {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.55rem;
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.38);
+}
+
+.scripture-verse-text {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: clamp(1.05rem, 2vw, 1.5rem);
+  color: rgba(228, 218, 202, 0.88);
+  line-height: 1.62;
+  letter-spacing: -0.005em;
+  margin: 0;
+  transition: color 0.3s ease;
+}
+
+.scripture-verse-ref {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.6rem;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.55);
+}
+
+.scripture-verse-link {
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.scripture-verse-link:hover .scripture-verse-text {
+  color: rgba(235, 225, 210, 0.95);
+}
+.scripture-verse-link:hover .scripture-verse-bar {
+  background: linear-gradient(
+    to bottom,
+    rgba(201, 169, 110, 0.9) 0%,
+    rgba(201, 169, 110, 0.1) 85%,
+    transparent 100%
+  );
+}
+
+@media (max-width: 900px) {
+  .scripture-verse-inner { padding: 2rem 3vw 2rem 0; }
+  .scripture-verse-accent { width: 3.8rem; }
+}
+@media (max-width: 600px) {
+  .scripture-verse-inner { padding: 1.8rem 1.4rem 1.8rem 0; }
+  .scripture-verse-accent { width: 3rem; }
+  .scripture-verse-glyph { font-size: 4rem; }
+}

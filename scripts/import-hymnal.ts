@@ -4,8 +4,7 @@
  *
  * Usage:
  *   npx tsx scripts/import-hymnal.ts \
- *     --client-id <CF_CLIENT_ID> \
- *     --client-secret <CF_CLIENT_SECRET> \
+ *     --api-key <API_KEY> \
  *     --file imnuri.json \
  *     [--api-url https://api.sdarm.life] \
  *     [--dry-run]
@@ -18,8 +17,7 @@ import { parseArgs } from 'util';
 
 const { values } = parseArgs({
   options: {
-    'client-id': { type: 'string' },
-    'client-secret': { type: 'string' },
+    'api-key': { type: 'string' },
     file: { type: 'string' },
     'api-url': { type: 'string', default: 'https://api.sdarm.life' },
     'dry-run': { type: 'boolean', default: false },
@@ -32,12 +30,11 @@ if (values.help) {
   console.log(`
 Usage:
   npx tsx scripts/import-hymnal.ts \\
-    --client-id <id> --client-secret <secret> --file <path.json> \\
+    --api-key <key> --file <path.json> \\
     [--api-url https://api.sdarm.life] [--dry-run]
 
 Options:
-  --client-id      CF-Access-Client-Id header value (required)
-  --client-secret  CF-Access-Client-Secret header value (required)
+  --api-key        API key (Bearer token) for admin API access (required)
   --file           Path to hymnal JSON file (required)
   --api-url        API base URL (default: https://api.sdarm.life)
   --dry-run        Parse and validate without sending requests
@@ -45,14 +42,13 @@ Options:
   process.exit(0);
 }
 
-const clientId = values['client-id'];
-const clientSecret = values['client-secret'];
+const apiKey = values['api-key'];
 const filePath = values.file;
 const apiUrl = values['api-url']!;
 const dryRun = values['dry-run']!;
 
-if (!clientId || !clientSecret || !filePath) {
-  console.error('Error: --client-id, --client-secret, and --file are required. Use --help for usage.');
+if (!apiKey || !filePath) {
+  console.error('Error: --api-key and --file are required. Use --help for usage.');
   process.exit(1);
 }
 
@@ -79,8 +75,7 @@ interface Hymn {
 function adminHeaders(): Record<string, string> {
   return {
     'Content-Type': 'application/json',
-    'CF-Access-Client-Id': clientId!,
-    'CF-Access-Client-Secret': clientSecret!,
+    Authorization: `Bearer ${apiKey}`,
   };
 }
 

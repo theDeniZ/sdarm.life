@@ -7,8 +7,7 @@
  *
  * Usage:
  *   npx tsx scripts/import-songs-txt.ts \
- *     --client-id <CF_CLIENT_ID> \
- *     --client-secret <CF_CLIENT_SECRET> \
+ *     --api-key <API_KEY> \
  *     --file songs.txt \
  *     --title "Zions Lieder" \
  *     --slug zions-lieder \
@@ -24,8 +23,7 @@ import { parseArgs } from 'util';
 
 const { values } = parseArgs({
   options: {
-    'client-id': { type: 'string' },
-    'client-secret': { type: 'string' },
+    'api-key': { type: 'string' },
     file: { type: 'string' },
     title: { type: 'string' },
     slug: { type: 'string' },
@@ -41,13 +39,12 @@ if (values.help) {
   console.log(`
 Usage:
   npx tsx scripts/import-songs-txt.ts \\
-    --client-id <id> --client-secret <secret> --file <path.txt> \\
+    --api-key <key> --file <path.txt> \\
     --title "Songbook Title" --slug songbook-slug --language de \\
     [--api-url https://api.sdarm.life] [--dry-run]
 
 Options:
-  --client-id      CF-Access-Client-Id header value (required)
-  --client-secret  CF-Access-Client-Secret header value (required)
+  --api-key        API key (Bearer token) for admin API access (required)
   --file           Path to songs.txt file (required)
   --title          Songbook title (required)
   --slug           Songbook slug (required)
@@ -58,8 +55,7 @@ Options:
   process.exit(0);
 }
 
-const clientId = values['client-id'];
-const clientSecret = values['client-secret'];
+const apiKey = values['api-key'];
 const filePath = values.file;
 const bookTitle = values.title;
 const bookSlug = values.slug;
@@ -67,8 +63,8 @@ const language = values.language!;
 const apiUrl = values['api-url']!;
 const dryRun = values['dry-run']!;
 
-if (!clientId || !clientSecret || !filePath || !bookTitle || !bookSlug) {
-  console.error('Error: --client-id, --client-secret, --file, --title, and --slug are required. Use --help for usage.');
+if (!apiKey || !filePath || !bookTitle || !bookSlug) {
+  console.error('Error: --api-key, --file, --title, and --slug are required. Use --help for usage.');
   process.exit(1);
 }
 
@@ -200,8 +196,7 @@ function parseSongs(text: string): ParsedSong[] {
 function adminHeaders(): Record<string, string> {
   return {
     'Content-Type': 'application/json',
-    'CF-Access-Client-Id': clientId!,
-    'CF-Access-Client-Secret': clientSecret!,
+    Authorization: `Bearer ${apiKey}`,
   };
 }
 

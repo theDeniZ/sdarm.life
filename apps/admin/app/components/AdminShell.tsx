@@ -1,12 +1,12 @@
 'use client';
 
-import Sidebar from './Sidebar';
+import AdminNav from './AdminNav';
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="admin-shell">
-      <Sidebar />
+    <>
+      <AdminNav />
       <main className="admin-main">{children}</main>
-    </div>
+    </>
   );
 }

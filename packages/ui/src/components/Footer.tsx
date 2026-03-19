@@ -88,7 +88,7 @@ function computeClock(sun: SunData, now: number, dow: number): ClockState {
     const total = todaySunset - todaySunrise;
     const remaining = Math.max(0, todaySunset - now);
     return {
-      label: 'Bis Schabbat',
+      label: 'Bis Sabbat',
       sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(todaySunset),
       progress: calcProgress(remaining, total),
@@ -112,7 +112,7 @@ function computeClock(sun: SunData, now: number, dow: number): ClockState {
     const remaining = now <= end ? end - now : 0;
 
     return {
-      label: 'Schabbat endet',
+      label: 'Sabbat endet',
       sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(end),
       progress: calcProgress(remaining, total),

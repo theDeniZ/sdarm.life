@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@sdarm/types": "workspace:*",
+    "@sdarm/ui": "workspace:*",
     "next": "15.2.2",
     "react": "19.2.3",
     "react-dom": "19.2.3"

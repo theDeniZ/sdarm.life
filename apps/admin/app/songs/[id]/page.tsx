@@ -15,7 +15,7 @@ export default async function SongPage({ params }: { params: Promise<{ id: strin
           <h1>
             #{song.number} {song.title}
           </h1>
-          <div style={{ fontSize: 12, color: 'var(--gray)', marginTop: 2 }}>{song.songbook.title}</div>
+          <div style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>{song.songbook.title}</div>
         </div>
         <Link href={`/songbooks/${song.songbook.id}/songs`} className="btn-ghost">
           ← Songs

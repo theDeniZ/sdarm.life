@@ -5,3 +5,7 @@ export { default as ConnectedFooter } from './components/ConnectedFooter';
 export { default as ConnectedNavbar } from './components/ConnectedNavbar';
 export { default as Pagination } from './components/Pagination';
 export { default as ComingSoon } from './components/ComingSoon';
+export { default as PageHero } from './components/PageHero';
+export type { PageHeroProps } from './components/PageHero';
+export { default as ScriptureVerseSection } from './components/ScriptureVerseSection';
+export type { ScriptureVerseSectionProps } from './components/ScriptureVerseSection';

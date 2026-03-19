@@ -1,23 +1,37 @@
 import { notFound } from 'next/navigation';
-import Link from 'next/link';
-import { fetchSong, fetchSongbook } from '@/app/lib/api';
-import SongView from '@/app/components/SongView';
+import { fetchSong, fetchSongbook, fetchSongs } from '@/app/lib/api';
+import ReaderLayout from '@/app/components/ReaderLayout';
+import ProjectorOnly from '@/app/components/ProjectorOnly';
 
 export const runtime = 'edge';
 
-export default async function SongPage({ params }: { params: Promise<{ slug: string; id: string }> }) {
+export default async function SongPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ slug: string; id: string }>;
+  searchParams: Promise<{ projector?: string }>;
+}) {
   const { slug, id } = await params;
-  // Fetch full SongDto (all parts + sheet metadata) and songbook in parallel — one request total
-  const [song, songbook] = await Promise.all([fetchSong(id), fetchSongbook(slug)]);
+  const sp = await searchParams;
+  const [song, songbook, initialSongs] = await Promise.all([
+    fetchSong(id),
+    fetchSongbook(slug),
+    fetchSongs(slug, { limit: 50, offset: 0 }),
+  ]);
   if (!song || !songbook) notFound();
-
+  if (sp.projector === '1') {
+    return <ProjectorOnly song={song} />;
+  }
   return (
-    <main className="page">
-      <Link href={`/songbooks/${slug}`} className="back-link">
-        ← {songbook.title}
-      </Link>
-      {/* All parts already in song prop — SongView switches modes without any further requests */}
-      <SongView song={song} />
-    </main>
+    <div className="reader-wrap">
+      <ReaderLayout
+        songbook={songbook}
+        song={song}
+        initialSongs={initialSongs}
+        slug={slug}
+        apiUrl={process.env.API_URL}
+      />
+    </div>
   );
 }

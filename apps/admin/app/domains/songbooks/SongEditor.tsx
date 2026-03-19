@@ -282,7 +282,7 @@ export default function SongEditor({ song }: Props) {
               onChange={handleUploadSheet}
               disabled={uploading}
             />
-            {uploading && <span style={{ fontSize: 12, color: 'var(--gray)' }}>Uploading…</span>}
+            {uploading && <span style={{ fontSize: 12, color: 'var(--muted)' }}>Uploading…</span>}
           </div>
         </div>
 

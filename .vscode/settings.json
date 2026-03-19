@@ -1,4 +1,7 @@
 {
   "claudeCode.allowDangerouslySkipPermissions": true,
-  "claudeCode.useTerminal": false
+  "claudeCode.useTerminal": false,
+  "[css]": {
+    "editor.formatOnSave": false
+  }
 }

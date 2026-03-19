@@ -40,7 +40,7 @@ export default function ImageLibrary() {
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
         <button
           className={`btn-ghost${unusedOnly ? ' active' : ''}`}
-          style={unusedOnly ? { borderColor: 'var(--red)', color: 'var(--red)' } : undefined}
+          style={unusedOnly ? { borderColor: 'var(--gold)', color: 'var(--gold)' } : undefined}
           onClick={toggleUnused}
         >
           {unusedOnly ? '✕ Clear filter' : 'Show unused only'}

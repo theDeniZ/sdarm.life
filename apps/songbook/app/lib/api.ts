@@ -1,7 +1,7 @@
 import type { SongbookDto, SongListItemDto, SongDto, ListResponse } from '@sdarm/types';
 
-export const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life/api/v1';
-export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
+export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
+export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
 
 export interface ImageTransform {
   w?: number;
@@ -44,14 +44,16 @@ export async function fetchSongbook(slug: string): Promise<SongbookDto | null> {
 
 export async function fetchSongs(
   slug: string,
-  opts: { q?: string; limit?: number; offset?: number }
+  opts: { q?: string; limit?: number; offset?: number },
+  baseUrl?: string
 ): Promise<ListResponse<SongListItemDto>> {
+  const api = baseUrl ?? API;
   try {
     const params = new URLSearchParams();
     if (opts.q) params.set('q', opts.q);
     if (opts.limit != null) params.set('limit', String(opts.limit));
     if (opts.offset != null) params.set('offset', String(opts.offset));
-    const res = await fetch(`${API}/songbooks/${slug}/songs?${params}`, { cache: 'no-store' });
+    const res = await fetch(`${api}/songbooks/${slug}/songs?${params}`, { cache: 'no-store' });
     if (!res.ok) return { items: [], total: 0 };
     return (await res.json()) as ListResponse<SongListItemDto>;
   } catch {
@@ -59,9 +61,10 @@ export async function fetchSongs(
   }
 }
 
-export async function fetchSong(id: string): Promise<SongDto | null> {
+export async function fetchSong(id: string, baseUrl?: string): Promise<SongDto | null> {
+  const api = baseUrl ?? API;
   try {
-    const res = await fetch(`${API}/songs/${id}`, { cache: 'no-store' });
+    const res = await fetch(`${api}/songs/${id}`, { cache: 'no-store' });
     if (!res.ok) return null;
     return (await res.json()) as SongDto;
   } catch {

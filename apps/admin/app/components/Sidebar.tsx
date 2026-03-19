@@ -3,6 +3,15 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+const NAV_LINKS = [
+  { href: '/config', label: 'Config' },
+  { href: '/posts', label: 'Posts' },
+  { href: '/subscribers', label: 'Subscribers' },
+  { href: '/images', label: 'Images' },
+  { href: '/songbooks', label: 'Songbooks', alsoActive: '/songs' },
+  { href: '/api-keys', label: 'API Keys' },
+];
+
 export default function Sidebar() {
   const path = usePathname();
 
@@ -10,32 +19,19 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="sidebar-logo">
         <span className="logo-text">
-          sdarm<span className="red">.</span>life
+          SDARM<span className="accent">.life</span>
         </span>
-        <span className="logo-admin">[admin]</span>
+        <span className="logo-admin">Administration</span>
       </div>
       <nav className="sidebar-nav">
-        <Link href="/config" className={`sidebar-link${path.startsWith('/config') ? ' active' : ''}`}>
-          Config
-        </Link>
-        <Link href="/posts" className={`sidebar-link${path.startsWith('/posts') ? ' active' : ''}`}>
-          Posts
-        </Link>
-        <Link href="/subscribers" className={`sidebar-link${path.startsWith('/subscribers') ? ' active' : ''}`}>
-          Subscribers
-        </Link>
-        <Link href="/images" className={`sidebar-link${path.startsWith('/images') ? ' active' : ''}`}>
-          Images
-        </Link>
-        <Link
-          href="/songbooks"
-          className={`sidebar-link${path.startsWith('/songbooks') || path.startsWith('/songs') ? ' active' : ''}`}
-        >
-          Songbooks
-        </Link>
-        <Link href="/api-keys" className={`sidebar-link${path.startsWith('/api-keys') ? ' active' : ''}`}>
-          API Keys
-        </Link>
+        {NAV_LINKS.map(({ href, label, alsoActive }) => {
+          const active = path.startsWith(href) || (alsoActive ? path.startsWith(alsoActive) : false);
+          return (
+            <Link key={href} href={href} className={`sidebar-link${active ? ' active' : ''}`}>
+              {label}
+            </Link>
+          );
+        })}
       </nav>
     </aside>
   );
