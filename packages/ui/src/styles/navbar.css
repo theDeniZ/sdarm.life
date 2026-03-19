@@ -1,0 +1,97 @@
+/* ═══ NAV ═══ */
+nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.3rem 2.8rem;
+  background: transparent;
+  transition:
+    background 0.7s ease,
+    backdrop-filter 0.7s ease;
+}
+nav.scrolled {
+  background: rgba(9, 8, 6, 0.52);
+  backdrop-filter: blur(16px);
+}
+.nav-logo {
+  font-family: 'Playfair Display', serif;
+  font-weight: 400;
+  font-size: 1.15rem;
+  letter-spacing: 0.06em;
+  color: #fff;
+}
+.nav-logo span {
+  color: var(--gold);
+  font-style: italic;
+}
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 2.4rem;
+}
+.nav-links a {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 300;
+  font-size: 1rem;
+  letter-spacing: 0.12em;
+  color: rgba(210, 200, 185, 0.7);
+  text-decoration: none;
+  transition: color 0.4s;
+  position: relative;
+  text-transform: uppercase;
+}
+.nav-links a:hover {
+  color: var(--gold);
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.nav-search {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px 6px;
+  color: rgba(220, 210, 195, 0.72);
+  transition: color 0.3s;
+  display: flex;
+  align-items: center;
+}
+.nav-search:hover {
+  color: #fff;
+}
+.nav-search svg {
+  width: 16px;
+  height: 16px;
+}
+
+@media (max-width: 900px) {
+  nav {
+    gap: 1.6rem;
+    padding: 1rem 1.5rem;
+  }
+  .nav-links {
+    gap: 1.4rem;
+  }
+  .nav-links a {
+    font-size: 0.88rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .nav-links {
+    display: none;
+  }
+  nav {
+    padding: 0.9rem 1.2rem;
+  }
+}

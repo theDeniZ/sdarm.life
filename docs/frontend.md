@@ -4,14 +4,14 @@
 
 | Component | Type | Notes |
 |---|---|---|
-| `layout.tsx` | Server | Root layout — imports `globals.css`, renders `<html>` + `<body>` shell |
+| `layout.tsx` | Server | Root layout — imports `@sdarm/ui/src/styles/index.css` then `./globals.css`, renders `<html>` + `<body>` shell |
 | `page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
 | `posts/[slug]/page.tsx` | Server (async) | Post detail page |
-| `Navbar` | **Client** | Fixed nav; transparent → frosted glass on scroll. Gold underline hovers, sunset widget stub, hamburger icon |
+| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Re-exported from `packages/ui`. |
 | `HeroSection` | **Client** | Featured-posts strip carousel with per-slide color tints, fog animation, deco-circle, side label counter |
 | `NewsSection` | **Client** | CSS-columns masonry grid with `IntersectionObserver` stagger fade-in |
 | `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
-| `Footer` | **Client** | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, sunset clock. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
+| `Footer` | **Client** (`@sdarm/ui`) | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, sunset clock. Re-exported from `packages/ui`. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
 
 **Not rendered on home page** (files kept for future use): `VideoSection`, `SongbookSection`, `AboutSection`, `BgCanvas`.
 
@@ -104,7 +104,7 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 ### Layout notes
 
 - Never add `export const runtime = 'edge'` to `layout.tsx` — set it only on individual page files.
-- `layout.tsx` is minimal: imports `globals.css`, sets metadata, renders `<html><body>{children}</body></html>`. No data fetching.
+- `layout.tsx` is minimal: imports `@sdarm/ui/src/styles/index.css` (design tokens + Navbar/Footer CSS) then `./globals.css` (app-specific styles), sets metadata, renders `<html><body>{children}</body></html>`. No data fetching.
 
 ---
 

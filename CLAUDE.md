@@ -10,6 +10,8 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | `@sdarm/admin` | `admin.sdarm.life` | Next.js 15 admin UI |
 | `@sdarm/api` | `api.sdarm.life` | Hono Cloudflare Worker |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
+| `@sdarm/types` | — | Shared API response DTO interfaces |
+| `@sdarm/ui` | — | Shared React components + dark museum CSS design system |
 
 **Tooling:** pnpm workspaces + Turborepo 2. Build: `pnpm turbo build`.
 

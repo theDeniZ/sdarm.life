@@ -23,11 +23,13 @@ API response shapes (`PostDto`, `ImageDto`, etc.) are currently redefined in bot
 **Separation of concerns:**
 - `@sdarm/db` — Drizzle schema definitions (DB layer). Types have `Date` objects and internal fields.
 - `@sdarm/types` — HTTP response types (API contract layer). Types have ISO strings and only publicly surfaced fields.
+- `@sdarm/ui` — Shared React components and the dark museum CSS design system used by all public-facing apps.
 
 ```
 packages/
   db/      — @sdarm/db   : Drizzle schema, migrations, KNOWN_CONFIG_KEYS
   types/   — @sdarm/types: Shared DTO interfaces for API responses
+  ui/      — @sdarm/ui   : Navbar, Footer, Pagination + CSS design system
 ```
 
 ```ts
@@ -122,6 +124,54 @@ export interface SongDto {
 `apps/web` and `apps/admin` import from `@sdarm/types`. `apps/api` uses the same interfaces to type `c.json()` responses — enforcing the contract at the source.
 
 **Current state:** `apps/api/src/schemas.ts` holds Zod schemas (`PostSchema`, `ImageSchema`, `SubscriberSchema`, etc.) used by `@hono/zod-openapi` to generate the OpenAPI spec and validate requests at runtime. These schemas are the single source of truth for the API contract. When `packages/types` is created, its interfaces should be derived from these schemas via `z.infer<>` rather than written separately.
+
+---
+
+### Shared UI: `packages/ui`
+
+React components and the dark museum CSS design system used by all public-facing apps (`web`, `songbook`, and any future apps).
+
+```
+packages/ui/src/
+  components/
+    Navbar.tsx       — fixed nav; transparent → frosted glass on scroll
+    Footer.tsx       — 3-col: contact+subscribe, nav links, sunset clock
+    Pagination.tsx   — generic offset pagination (styling left to consumer)
+  styles/
+    tokens.css       — Google Fonts import, CSS custom properties, base reset
+    navbar.css       — nav component styles + responsive breakpoints
+    footer.css       — footer + sunset clock styles + responsive breakpoints
+    index.css        — @imports all three (single entry point)
+  index.ts           — re-exports all components + FooterConfig type
+```
+
+**How to use in a new app:**
+
+```ts
+// layout.tsx
+import '@sdarm/ui/src/styles/index.css'; // dark museum theme
+```
+
+```ts
+// any component
+import { Navbar, Footer } from '@sdarm/ui';
+import type { FooterConfig } from '@sdarm/ui';
+```
+
+**CSS design tokens** (set in `tokens.css`, available via `var()` everywhere after the import):
+
+| Token | Value | Use |
+|---|---|---|
+| `--gold` | `#c9a96e` | Accent colour |
+| `--dark` | `#0c0b09` | Body background |
+| `--text` | `#d6d0c8` | Body text |
+| `--muted` | `#7a7470` | Secondary text |
+| `--border` | `rgba(201,169,110,0.12)` | Subtle separator |
+| `--hc-ease` | `cubic-bezier(0.76,0,0.24,1)` | Strip carousel easing |
+
+**Pagination CSS is not included** — it uses admin-specific variables (`--red`, `--border` from admin theme). The `Pagination` component is shared but consumers style it via their own globals.
+
+**Peer dependencies:** `next >=15`, `react >=19` — all current apps already satisfy these.
 
 ---
 

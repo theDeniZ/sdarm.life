@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import '@sdarm/ui/src/styles/index.css';
 import './globals.css';
 
 export const metadata: Metadata = {
