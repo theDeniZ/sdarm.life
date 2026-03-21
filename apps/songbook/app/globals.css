@@ -1176,6 +1176,9 @@ a {
   .reader-content .song-part__lyrics {
     text-align: center;
   }
+  .reader-content .chord-line {
+    justify-content: center;
+  }
   .reader-content .mode-bar {
     justify-content: center;
   }

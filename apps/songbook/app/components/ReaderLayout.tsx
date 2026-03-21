@@ -57,8 +57,8 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
   const pages = Math.ceil(total / LIMIT);
 
   function navigateTo(id: number) {
-    if (id === currentSong.id) return;
     if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
+    if (id === currentSong.id) return;
     setSongLoading(true);
     window.history.pushState(null, '', `/${locale}/songbooks/${slug}/${id}`);
     fetchSong(String(id), apiUrl).then((s) => {
