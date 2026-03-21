@@ -209,7 +209,7 @@ jobs:
         with:
           name: web-dist
           path: dist
-      - run: npx wrangler pages deploy dist --project-name=sdarm-web
+      - run: npx wrangler pages deploy dist --project-name=web-sdarm-life
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -226,7 +226,7 @@ jobs:
         with:
           name: admin-dist
           path: dist
-      - run: npx wrangler pages deploy dist --project-name=sdarm-admin
+      - run: npx wrangler pages deploy dist --project-name=admin-sdarm-life
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -243,7 +243,7 @@ jobs:
         with:
           name: songbook-dist
           path: dist
-      - run: npx wrangler pages deploy dist --project-name=sdarm-songbook
+      - run: npx wrangler pages deploy dist --project-name=songs-sdarm-life
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -260,7 +260,7 @@ jobs:
         with:
           name: events-dist
           path: dist
-      - run: npx wrangler pages deploy dist --project-name=sdarm-events
+      - run: npx wrangler pages deploy dist --project-name=events-sdarm-life
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -277,7 +277,7 @@ jobs:
         with:
           name: treasures-dist
           path: dist
-      - run: npx wrangler pages deploy dist --project-name=sdarm-treasures
+      - run: npx wrangler pages deploy dist --project-name=treasures-sdarm-life
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
