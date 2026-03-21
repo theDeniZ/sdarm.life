@@ -1,0 +1,217 @@
+{
+  "common": {
+    "nav": {
+      "news": "News",
+      "songs": "Songs",
+      "events": "Events",
+      "treasures": "Treasures",
+      "about": "About us",
+      "contact": "Contact",
+      "imprint": "Imprint",
+      "privacy": "Privacy",
+      "searchAria": "Search"
+    },
+    "footer": {
+      "stayInTouch": "Stay in <em>touch</em>",
+      "orgName": "Reformed Adventists",
+      "orgRegion": "Germany & Austria",
+      "newsletter": "Newsletter",
+      "emailPlaceholder": "Email address",
+      "subscribeSuccess": "Thank you for subscribing!",
+      "subscribeDuplicate": "This email is already registered.",
+      "subscribeError": "Error. Please try again later.",
+      "locationPlaceholder": "City or ZIP",
+      "locationUpdateAria": "Update location",
+      "copyright": "© {year} SDARM.life — Seventh Day Adventist Reform Movement",
+      "allRightsReserved": "All rights reserved"
+    },
+    "clock": {
+      "friday": "Friday",
+      "saturday": "Saturday",
+      "untilSabbath": "Until Sabbath",
+      "sabbathEnds": "Sabbath ends",
+      "untilSunset": "Until sunset",
+      "untilSunrise": "Until sunrise",
+      "defaultLocation": "Pforzheim, Baden-Württemberg",
+      "sunset": "Sunset"
+    },
+    "comingSoon": "Coming soon",
+    "back": "← Back",
+    "notFound": {
+      "title": "Page not found",
+      "description": "The requested page does not exist.",
+      "home": "Go to home"
+    },
+    "langSwitchAria": "Switch to {lang}"
+  },
+  "web": {
+    "metadata": {
+      "description": "Seventh Day Adventist Reform Movement in Germany"
+    },
+    "hero": {
+      "fallbackTitle": "The Reformation and its consequences for Germany and the whole world",
+      "fallbackAlt": "Historical painting",
+      "fallbackLabel": "Reformation",
+      "nextService": "Next service"
+    },
+    "post": {
+      "content": "Content",
+      "video": "Video",
+      "morePosts": "More posts"
+    },
+    "about": {
+      "title": "About us",
+      "subtitle": "Seventh Day Adventist Reform Movement in Germany & Austria",
+      "learnMore": "Learn more → sdarm.org",
+      "fallbackText1": "sdarm.life is the local online presence of the Seventh Day Adventist Reform Movement in Germany — part of the worldwide community at sdarm.org.",
+      "fallbackText2": "Our community was founded as a place of spiritual renewal — for people who take biblical truth, the Sabbath, and the message of the Reformation seriously.",
+      "fallbackImageAlt": "Community praying"
+    },
+    "uberUns": {
+      "eyebrow": "Who we are",
+      "title": "About <em>us</em>",
+      "faithTitle": "Our Foundation of Faith",
+      "faithText": "We believe in the complete authority of the Holy Scriptures as the foundation of all doctrine and life. The Bible is our only standard for faith and practice — unchanging and timeless.",
+      "sabbathTitle": "The Seventh Day",
+      "sabbathText": "We observe the biblical Sabbath — the seventh day of the week — as a holy day of rest, as God established at Creation and commanded in the Ten Commandments.",
+      "communityTitle": "Community & Reformation",
+      "communityText": "As a reform movement within Adventism, we are committed to a complete return to the principles of the Bible — in doctrine, lifestyle, and worship.",
+      "worshipTitle": "Worship & Devotion",
+      "worshipText": "At the center of our lives is the worship of God — in spirit and in truth, following the example of the Holy Scriptures and the early Christian church.",
+      "healthTitle": "Health & Nature",
+      "healthText": "We cultivate a lifestyle that honours the body as the temple of God — natural nutrition, exercise, and temperance as part of holistic Christian living.",
+      "prophecyTitle": "Prophecy & End Times",
+      "prophecyText": "Biblical prophecies guide our community. We live in expectation of Christ's soon return and prepare ourselves and others for it.",
+      "prayerTitle": "Prayer & Devotion",
+      "prayerText": "Personal prayer and daily Bible study are the cornerstones of our spiritual life. In stillness we encounter the living God.",
+      "cta": "Learn more about us"
+    },
+    "products": {
+      "title": "Latest Products",
+      "viewNow": "View now",
+      "prevAria": "Previous",
+      "nextAria": "Next",
+      "items": {
+        "1": {
+          "imageAlt": "The Great Controversy",
+          "category": "Books",
+          "tag": "Classic",
+          "title": "The Great Controversy Between Christ and Satan",
+          "description": "The most comprehensive work on the conflict between good and evil — from the destruction of Jerusalem to the new earth.",
+          "meta": "Ellen G. White · Classic"
+        },
+        "2": {
+          "imageAlt": "Steps to Christ",
+          "category": "Books",
+          "tag": "Worldwide Bestseller",
+          "title": "Steps to Christ — The Path to Personal Fellowship with God",
+          "description": "The most widely read book by Ellen White — a clear, compassionate path to a living faith.",
+          "meta": "Ellen G. White · Worldwide Bestseller"
+        }
+      }
+    },
+    "unsubscribe": {
+      "invalidLink": "Invalid link.",
+      "success": "You have been successfully unsubscribed.",
+      "error": "The link is invalid or has expired."
+    },
+    "legal": {
+      "courtesyNote": "This is a courtesy translation. The legally binding version is the German original.",
+      "impressum": {
+        "title": "Legal Notice",
+        "metaTitle": "Legal Notice – sdarm.life",
+        "section1Title": "Information according to § 5 TMG",
+        "section1Body": "Community of Seventh Day Adventist Reform Movement e.\u00a0V.\nEisenbahnstr. 6\nD-65439 Flörsheim/M",
+        "section2Title": "Contact",
+        "section3Title": "Register of Associations",
+        "section3Body": "Registration court: Amtsgericht Wiesbaden\nRegistration number: VR 6992",
+        "section4Title": "Responsible for content (§ 18 Abs. 2 MStV)",
+        "section4Body": "Serghei Galuscinshi\nEisenbahnstr. 6, D-65439 Flörsheim/M",
+        "section5Title": "Parent Organisation",
+        "section5Body": "General Conference of SDA-RM"
+      },
+      "datenschutz": {
+        "title": "Privacy Policy",
+        "metaTitle": "Privacy Policy – sdarm.life",
+        "section1Title": "Data Controller",
+        "section1Body": "Community of Seventh Day Adventist Reform Movement e.\u00a0V.\nEisenbahnstr. 6, D-65439 Flörsheim/M",
+        "section2Title": "Newsletter",
+        "section2Body": "When you subscribe to our newsletter, we store your email address and the time of registration. Processing is based on your consent pursuant to Art. 6(1)(a) GDPR. You may revoke your subscription at any time using the unsubscribe link in each newsletter email.",
+        "section3Title": "Cookies",
+        "section3Body": "This website does not set its own cookies. Cloudflare, as a technical service provider, may set a functionally necessary cookie (__cf_bm) for protection against automated access. This cookie does not require consent (Art.\u00a06(1)(f) GDPR).",
+        "section4Title": "Hosting & Analytics",
+        "section4Body": "This website is hosted via Cloudflare Pages. Cloudflare may process technical access data (e.g. IP address, time of access). Website statistics are collected via Cloudflare Web Analytics — cookie-free, without user profiles and without personal data.",
+        "cloudflarePrivacy": "Cloudflare Privacy Policy",
+        "section5Title": "Your Rights",
+        "section5Body": "You have the right to information, correction, deletion and restriction of processing of your stored data as well as the right to data portability. Please contact"
+      }
+    }
+  },
+  "songbook": {
+    "metadata": {
+      "title": "Songbook — SDARM",
+      "description": "Seventh Day Adventist Reform Movement — Songbook"
+    },
+    "landing": {
+      "eyebrow": "Songbook — Hymnarium",
+      "title": "Songs of <em>Faith</em>",
+      "subtitle": "Sacred songs from the tradition of the Reform Movement — to the praise of God, the comfort of the soul, the strengthening of the community.",
+      "discover": "Discover",
+      "songCount": "{count} songs",
+      "openSongbook": "Open songbook"
+    },
+    "reader": {
+      "songs": "Songs",
+      "searchPlaceholder": "Search…",
+      "songListAria": "Song list",
+      "songbook": "Songbook",
+      "title": "Title",
+      "author": "Author",
+      "searchByNumberOrTitle": "Search by number or title…"
+    },
+    "view": {
+      "reader": "Reader",
+      "chords": "Chords",
+      "projector": "Projector",
+      "sheetMusic": "Sheet music"
+    },
+    "sheets": {
+      "noSheets": "No sheet music available for this song.",
+      "sheetTab": "Sheet {n}",
+      "sheetAlt": "Sheet music {id}",
+      "sheetTitle": "Sheet music {id}"
+    },
+    "projector": {
+      "openExternal": "Open on external screen",
+      "close": "Close projector",
+      "previousPart": "Previous part",
+      "nextPart": "Next part",
+      "decreaseFont": "Decrease font size",
+      "increaseFont": "Increase font size"
+    },
+    "partTypes": {
+      "verse": "Verse",
+      "chorus": "Chorus",
+      "bridge": "Bridge",
+      "intro": "Intro",
+      "outro": "Outro",
+      "coda": "Coda"
+    }
+  },
+  "events": {
+    "metadata": {
+      "title": "Events — SDARM",
+      "description": "Seventh Day Adventist Reform Movement — Events"
+    },
+    "comingSoonTitle": "Events",
+    "comingSoonSubtitle": "Events, seminars, and services — coming soon."
+  },
+  "treasures": {
+    "metadata": {
+      "title": "Treasures — SDARM",
+      "description": "Seventh Day Adventist Reform Movement — Treasures"
+    },
+    "comingSoonTitle": "Treasures",
+    "comingSoonSubtitle": "Spiritual resources, books, and materials — coming soon."
+  }
+}

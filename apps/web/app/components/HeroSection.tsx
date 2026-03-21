@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 export interface HeroPost {
   title: string;
@@ -13,18 +14,20 @@ export interface HeroPost {
   slug: string;
 }
 
-const STATIC: HeroPost = {
-  title: 'Die Reformation und ihre Folgen für Deutschland und die ganze Welt',
-  meta: '21.09.2020 · Maksim Korol',
-  excerpt: '',
-  body: '',
-  imageUrl:
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg/1280px-Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg',
-  thumbUrl:
-    'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg/1280px-Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg',
-  imageAlt: 'Historisches Gemälde',
-  slug: '#',
-};
+function makeStatic(t: (key: string) => string): HeroPost {
+  return {
+    title: t('fallbackTitle'),
+    meta: '21.09.2020 · Maksim Korol',
+    excerpt: '',
+    body: '',
+    imageUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg/1280px-Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg',
+    thumbUrl:
+      'https://upload.wikimedia.org/wikipedia/commons/thumb/1/1a/Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg/1280px-Jennie_Augusta_Brownscombe_-_Thanksgiving_at_Plymouth.jpg',
+    imageAlt: t('fallbackAlt'),
+    slug: '#',
+  };
+}
 
 const TINTS = [
   'radial-gradient(ellipse at 62% 28%, rgba(90,62,28,0.32) 0%, transparent 58%), radial-gradient(ellipse at 15% 80%, rgba(40,22,8,0.45) 0%, transparent 50%)',
@@ -53,7 +56,8 @@ function nextSabbath(): string {
 }
 
 export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
-  const slides = posts?.length ? posts : [STATIC];
+  const t = useTranslations('web.hero');
+  const slides = posts?.length ? posts : [makeStatic(t)];
   const N = slides.length;
 
   const [active, setActive] = useState(0);
@@ -118,7 +122,7 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
         <div className="deco-circle" />
 
         <div className="side-label">
-          <div className="lbl">{post.meta || 'Reformation'}</div>
+          <div className="lbl">{post.meta || t('fallbackLabel')}</div>
           <div className="cnt">
             {String(active + 1).padStart(2, '0')} / {String(N).padStart(2, '0')}
           </div>
@@ -164,7 +168,7 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
           ))}
           <div className="hev-item hev-item--date">
             <div className="hev-date-big">{nextSabbath()}</div>
-            <div className="hev-date-sub">Nächster Gottesdienst</div>
+            <div className="hev-date-sub">{t('nextService')}</div>
           </div>
         </div>
       </section>

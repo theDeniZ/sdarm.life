@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations, useLocale } from 'next-intl';
 import type { SongbookDto, SongListItemDto, ListResponse } from '@sdarm/types';
 import { fetchSongs } from '@/app/lib/api';
 
@@ -13,6 +14,8 @@ interface Props {
 }
 
 export default function SongListClient({ songbook, initial }: Props) {
+  const t = useTranslations('songbook.reader');
+  const locale = useLocale();
   const router = useRouter();
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
@@ -50,7 +53,7 @@ export default function SongListClient({ songbook, initial }: Props) {
         <input
           className="search-input"
           type="search"
-          placeholder="Search by number or title…"
+          placeholder={t('searchByNumberOrTitle')}
           value={q}
           onChange={(e) => {
             setPage(1);
@@ -63,8 +66,8 @@ export default function SongListClient({ songbook, initial }: Props) {
         <thead>
           <tr>
             <th>#</th>
-            <th>Title</th>
-            <th>Author</th>
+            <th>{t('title')}</th>
+            <th>{t('author')}</th>
           </tr>
         </thead>
         <tbody style={{ opacity: loading ? 0.5 : 1, transition: 'opacity 0.1s' }}>
@@ -72,7 +75,7 @@ export default function SongListClient({ songbook, initial }: Props) {
             <tr
               key={song.id}
               className="song-row"
-              onClick={() => router.push(`/songbooks/${songbook.slug}/${song.id}`)}
+              onClick={() => router.push(`/${locale}/songbooks/${songbook.slug}/${song.id}`)}
             >
               <td className="song-row__num">{song.number}</td>
               <td className="song-row__title">{song.title}</td>

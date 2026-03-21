@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
 import { hasChords } from '@/app/lib/chords';
 import SongReader from './SongReader';
@@ -10,6 +11,7 @@ import SheetViewer from './SheetViewer';
 type Mode = 'reader' | 'projector' | 'sheets';
 
 export default function SongView({ song }: { song: SongDto }) {
+  const t = useTranslations('songbook.view');
   const [mode, setMode] = useState<Mode>('reader');
   const [showChords, setShowChords] = useState(false);
   const anyChords = song.parts.some((p) => p.lyrics.split('\n').some(hasChords));
@@ -26,19 +28,19 @@ export default function SongView({ song }: { song: SongDto }) {
 
       <div className="mode-bar">
         <button className={`mode-btn${mode === 'reader' ? ' active' : ''}`} onClick={() => setMode('reader')}>
-          Reader
+          {t('reader')}
         </button>
         {anyChords && mode === 'reader' && (
           <button className={`mode-btn${showChords ? ' active' : ''}`} onClick={() => setShowChords((v) => !v)}>
-            Chords
+            {t('chords')}
           </button>
         )}
         <button className={`mode-btn${mode === 'projector' ? ' active' : ''}`} onClick={() => setMode('projector')}>
-          Projector
+          {t('projector')}
         </button>
         {song.sheets.length > 0 && (
           <button className={`mode-btn${mode === 'sheets' ? ' active' : ''}`} onClick={() => setMode('sheets')}>
-            Sheet music
+            {t('sheetMusic')}
           </button>
         )}
       </div>

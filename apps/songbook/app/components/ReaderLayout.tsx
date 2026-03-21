@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
+import { useTranslations, useLocale } from 'next-intl';
 import type { SongbookDto, SongDto, SongListItemDto, ListResponse } from '@sdarm/types';
 import { fetchSongs, fetchSong } from '@/app/lib/api';
 import SongView from './SongView';
@@ -17,6 +18,8 @@ interface Props {
 }
 
 export default function ReaderLayout({ songbook, song: initialSong, initialSongs, slug, apiUrl }: Props) {
+  const t = useTranslations('songbook.reader');
+  const locale = useLocale();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
@@ -57,7 +60,7 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
     if (id === currentSong.id) return;
     if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
     setSongLoading(true);
-    window.history.pushState(null, '', `/songbooks/${slug}/${id}`);
+    window.history.pushState(null, '', `/${locale}/songbooks/${slug}/${id}`);
     fetchSong(String(id), apiUrl).then((s) => {
       if (s) setCurrentSong(s);
       setSongLoading(false);
@@ -69,11 +72,11 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
       {/* Toolbar */}
       <div className="reader-toolbar-bar">
         <div className="reader-breadcrumb">
-          <Link href="/" className="reader-breadcrumb__link">
-            Lieder
+          <Link href={`/${locale}`} className="reader-breadcrumb__link">
+            {t('songs')}
           </Link>
           <span className="reader-breadcrumb__sep">›</span>
-          <Link href={`/songbooks/${slug}`} className="reader-breadcrumb__link">
+          <Link href={`/${locale}/songbooks/${slug}`} className="reader-breadcrumb__link">
             {songbook.title}
           </Link>
           <span className="reader-breadcrumb__sep">›</span>
@@ -82,7 +85,7 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
         <button
           className={`reader-icon-btn${sidebarOpen ? ' active' : ''}`}
           onClick={() => setSidebarOpen((o) => !o)}
-          aria-label="Liedliste"
+          aria-label={t('songListAria')}
         >
           <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6">
             <line x1="2" y1="4" x2="16" y2="4" />
@@ -97,7 +100,7 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
         <div className={`reader-sidebar${sidebarOpen ? '' : ' collapsed'}`}>
           <div className="reader-sidebar-inner">
             <div className="reader-sidebar-book">
-              <div className="reader-sidebar-eyebrow">Gesangbuch</div>
+              <div className="reader-sidebar-eyebrow">{t('songbook')}</div>
               <div className="reader-sidebar-title">{songbook.title}</div>
               {songbook.description && <div className="reader-sidebar-desc">{songbook.description}</div>}
             </div>
@@ -106,7 +109,7 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
               <input
                 className="reader-sidebar-search-input"
                 type="search"
-                placeholder="Suchen…"
+                placeholder={t('searchPlaceholder')}
                 value={q}
                 onChange={(e) => {
                   setPage(1);
@@ -115,7 +118,10 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
               />
             </div>
 
-            <div className="reader-sidebar-toc-label">Lieder{total > 0 ? ` (${total})` : ''}</div>
+            <div className="reader-sidebar-toc-label">
+              {t('songs')}
+              {total > 0 ? ` (${total})` : ''}
+            </div>
 
             <div className="reader-sidebar-toc" style={{ opacity: listLoading ? 0.4 : 1 }}>
               {items.map((s) => (

@@ -24,12 +24,14 @@ API response shapes (`PostDto`, `ImageDto`, etc.) are currently redefined in bot
 - `@sdarm/db` — Drizzle schema definitions (DB layer). Types have `Date` objects and internal fields.
 - `@sdarm/types` — HTTP response types (API contract layer). Types have ISO strings and only publicly surfaced fields.
 - `@sdarm/ui` — Shared React components and the dark museum CSS design system used by all public-facing apps.
+- `@sdarm/i18n` — Shared i18n config (`locales`, `defaultLocale`) and message JSON files (`de.json`, `en.json`).
 
 ```
 packages/
   db/      — @sdarm/db   : Drizzle schema, migrations, KNOWN_CONFIG_KEYS
   types/   — @sdarm/types: Shared DTO interfaces for API responses
   ui/      — @sdarm/ui   : Navbar, Footer, Pagination + CSS design system
+  i18n/    — @sdarm/i18n : Locale config, de/en message files
 ```
 
 ```ts

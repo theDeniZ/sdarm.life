@@ -98,6 +98,32 @@ Never put secrets in `wrangler.jsonc`.
 
 ---
 
+## Internationalization (i18n)
+
+All public-facing apps (`web`, `songbook`, `events`, `treasures`) use `next-intl` for localization. The admin app is not localized.
+
+**Supported locales:** `de` (default), `en`. Configured in `packages/i18n/src/config.ts`.
+
+**URL structure:** `/{locale}/path` — e.g. `/de/about`, `/en/about`. The middleware auto-redirects `/` to `/{browserLocale}/` with German as fallback.
+
+**Message files:** `packages/i18n/src/messages/de.json` and `en.json`. All UI strings live here — namespaced by app (`web.*`, `songbook.*`, `events.*`, `treasures.*`) with shared keys under `common.*`.
+
+**How to add a new string:**
+1. Add the key to both `de.json` and `en.json`
+2. Use `getTranslations('namespace')` in server components or `useTranslations('namespace')` in client components
+3. Use ICU message format for interpolation: `t('key', { count: 5 })` with `"{count} items"` in the JSON
+
+**`ConnectedNavbar` and `ConnectedFooter`** receive `locale` as a prop from the page/layout server component. They pass it to the underlying `Navbar`/`Footer` client components which use `useTranslations()`.
+
+**Each app has three i18n files:**
+- `i18n/routing.ts` — `defineRouting()` with locales from `@sdarm/i18n`
+- `i18n/request.ts` — `getRequestConfig()` that imports message JSON and resolves locale
+- `middleware.ts` — `createMiddleware(routing)` with matcher `['/', '/(de|en)/:path*']`
+
+**Do not use dynamic `import()` with template literals** for message files — webpack cannot resolve them against the package exports map. Use static imports instead (see `i18n/request.ts`).
+
+---
+
 ## General code quality
 
 - Do not add abstractions for single-use operations.

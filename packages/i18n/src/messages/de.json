@@ -1,0 +1,216 @@
+{
+  "common": {
+    "nav": {
+      "news": "Neues",
+      "songs": "Lieder",
+      "events": "Events",
+      "treasures": "Schätze",
+      "about": "Über uns",
+      "contact": "Kontakt",
+      "imprint": "Impressum",
+      "privacy": "Datenschutz",
+      "searchAria": "Suche"
+    },
+    "footer": {
+      "stayInTouch": "In <em>Kontakt</em> bleiben",
+      "orgName": "Reformierte Adventisten",
+      "orgRegion": "Deutschland & Österreich",
+      "newsletter": "Newsletter",
+      "emailPlaceholder": "E-Mail-Adresse",
+      "subscribeSuccess": "Vielen Dank für Ihre Anmeldung!",
+      "subscribeDuplicate": "Diese E-Mail ist bereits registriert.",
+      "subscribeError": "Fehler. Bitte versuchen Sie es später.",
+      "locationPlaceholder": "Stadt oder PLZ",
+      "locationUpdateAria": "Standort aktualisieren",
+      "copyright": "© {year} SDARM.life — Siebenten-Tags-Adventisten Reformationsbewegung",
+      "allRightsReserved": "Alle Rechte vorbehalten"
+    },
+    "clock": {
+      "friday": "Freitag",
+      "saturday": "Samstag",
+      "untilSabbath": "Bis Sabbat",
+      "sabbathEnds": "Sabbat endet",
+      "untilSunset": "Bis Sonnenuntergang",
+      "untilSunrise": "Bis Sonnenaufgang",
+      "defaultLocation": "Pforzheim, Baden-Württemberg",
+      "sunset": "Untergang"
+    },
+    "comingSoon": "Demnächst",
+    "back": "← Zurück",
+    "notFound": {
+      "title": "Seite nicht gefunden",
+      "description": "Die angeforderte Seite existiert nicht.",
+      "home": "Zur Startseite"
+    },
+    "langSwitchAria": "Switch to {lang}"
+  },
+  "web": {
+    "metadata": {
+      "description": "Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland"
+    },
+    "hero": {
+      "fallbackTitle": "Die Reformation und ihre Folgen für Deutschland und die ganze Welt",
+      "fallbackAlt": "Historisches Gemälde",
+      "fallbackLabel": "Reformation",
+      "nextService": "Nächster Gottesdienst"
+    },
+    "post": {
+      "content": "Inhalt",
+      "video": "Video",
+      "morePosts": "Weitere Beiträge"
+    },
+    "about": {
+      "title": "Über uns",
+      "subtitle": "Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland & Österreich",
+      "learnMore": "Mehr erfahren → sdarm.org",
+      "fallbackText1": "sdarm.life ist der lokale Onlineauftritt der Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland — Teil der weltweiten Gemeinschaft unter sdarm.org.",
+      "fallbackText2": "Unsere Gemeinde entstand als Ort der geistlichen Erneuerung — für Menschen, die biblische Wahrheit, den Sabbat und die Botschaft der Reformation ernst nehmen.",
+      "fallbackImageAlt": "Gemeinde betet"
+    },
+    "uberUns": {
+      "eyebrow": "Wer wir sind",
+      "title": "Über <em>uns</em>",
+      "faithTitle": "Unsere Glaubensgrundlage",
+      "faithText": "Wir glauben an die vollständige Autorität der Heiligen Schrift als Grundlage aller Lehre und des Lebens. Die Bibel ist unser einziger Maßstab für Glauben und Praxis — unveränderlich und zeitlos.",
+      "sabbathTitle": "Der Siebente Tag",
+      "sabbathText": "Wir halten den biblischen Schabbat — den siebenten Tag der Woche — als heiligen Ruhetag, wie es Gott seit der Schöpfung eingesetzt und in den Zehn Geboten befohlen hat.",
+      "communityTitle": "Gemeinschaft & Reformation",
+      "communityText": "Als Reformationsbewegung innerhalb der Adventgemeinde setzen wir uns für eine vollständige Rückkehr zu den Grundsätzen der Bibel ein — in Lehre, Lebensstil und Gottesdienst.",
+      "worshipTitle": "Gottesdienst & Anbetung",
+      "worshipText": "Im Mittelpunkt unseres Lebens steht die Anbetung Gottes — in Geist und Wahrheit, nach dem Vorbild der Heiligen Schrift und der frühen Christengemeinde.",
+      "healthTitle": "Gesundheit & Natur",
+      "healthText": "Wir pflegen einen Lebensstil, der den Körper als Tempel Gottes achtet — natürliche Ernährung, Bewegung und Enthaltsamkeit als Teil ganzheitlicher christlicher Lebensführung.",
+      "prophecyTitle": "Prophetie & Endzeit",
+      "prophecyText": "Die biblischen Prophezeiungen leiten unsere Gemeinschaft. Wir leben in der Erwartung der baldigen Wiederkunft Christi und bereiten uns und andere darauf vor.",
+      "prayerTitle": "Gebet & Andacht",
+      "prayerText": "Persönliches Gebet und tägliches Bibelstudium sind die Grundpfeiler unseres geistlichen Lebens. In der Stille begegnen wir dem lebendigen Gott.",
+      "cta": "Mehr über uns erfahren"
+    },
+    "products": {
+      "title": "Neueste Produkte",
+      "viewNow": "Jetzt ansehen",
+      "prevAria": "Zurück",
+      "nextAria": "Weiter",
+      "items": {
+        "1": {
+          "imageAlt": "Der Große Kampf",
+          "category": "Bücher",
+          "tag": "Klassiker",
+          "title": "Der Große Kampf zwischen Christus und Satan",
+          "description": "Das umfassendste Werk über den Konflikt zwischen Gut und Böse — von der Zerstörung Jerusalems bis zur neuen Erde.",
+          "meta": "Ellen G. White · Klassiker"
+        },
+        "2": {
+          "imageAlt": "Schritte zu Christus",
+          "category": "Bücher",
+          "tag": "Weltweiter Bestseller",
+          "title": "Schritte zu Christus — Weg zur persönlichen Gemeinschaft mit Gott",
+          "description": "Das meistgelesene Buch von Ellen White — ein klarer, einfühlsamer Weg zu einem lebendigen Glauben.",
+          "meta": "Ellen G. White · Weltweiter Bestseller"
+        }
+      }
+    },
+    "unsubscribe": {
+      "invalidLink": "Ungültiger Link.",
+      "success": "Sie wurden erfolgreich abgemeldet.",
+      "error": "Der Link ist ungültig oder abgelaufen."
+    },
+    "legal": {
+      "impressum": {
+        "title": "Impressum",
+        "metaTitle": "Impressum – sdarm.life",
+        "section1Title": "Angaben gemäß § 5 TMG",
+        "section1Body": "Gemeinschaft der Siebenten-Tags-Adventisten Reformationsbewegung e.\u00a0V.\nEisenbahnstr. 6\nD-65439 Flörsheim/M",
+        "section2Title": "Kontakt",
+        "section3Title": "Vereinsregister",
+        "section3Body": "Registergericht: Amtsgericht Wiesbaden\nRegisternummer: VR 6992",
+        "section4Title": "Verantwortlich für den Inhalt (§ 18 Abs. 2 MStV)",
+        "section4Body": "Serghei Galuscinshi\nEisenbahnstr. 6, D-65439 Flörsheim/M",
+        "section5Title": "Übergeordnete Organisation",
+        "section5Body": "Generalkonferenz der STA-REF"
+      },
+      "datenschutz": {
+        "title": "Datenschutzerklärung",
+        "metaTitle": "Datenschutzerklärung – sdarm.life",
+        "section1Title": "Verantwortlicher",
+        "section1Body": "Gemeinschaft der Siebenten-Tags-Adventisten Reformationsbewegung e.\u00a0V.\nEisenbahnstr. 6, D-65439 Flörsheim/M",
+        "section2Title": "Newsletter",
+        "section2Body": "Wenn Sie unseren Newsletter abonnieren, speichern wir Ihre E-Mail-Adresse sowie den Zeitpunkt der Anmeldung. Die Verarbeitung erfolgt auf Grundlage Ihrer Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO. Sie können das Abonnement jederzeit über den Abmeldelink in jeder Newsletter-E-Mail widerrufen.",
+        "section3Title": "Cookies",
+        "section3Body": "Diese Website setzt keine eigenen Cookies. Cloudflare kann als technischer Dienstleister ein funktional notwendiges Cookie (__cf_bm) zum Schutz vor automatisierten Zugriffen setzen. Dieses Cookie erfordert keine Einwilligung (Art.\u00a06 Abs.\u00a01 lit.\u00a0f DSGVO).",
+        "section4Title": "Hosting & Analyse",
+        "section4Body": "Diese Website wird über Cloudflare Pages gehostet. Cloudflare kann dabei technische Zugriffsdaten (z.\u00a0B. IP-Adresse, Zeitpunkt des Abrufs) verarbeiten. Websitestatistiken werden über Cloudflare Web Analytics erfasst — cookiefrei, ohne Nutzerprofile und ohne personenbezogene Daten.",
+        "cloudflarePrivacy": "Datenschutzerklärung von Cloudflare",
+        "section5Title": "Ihre Rechte",
+        "section5Body": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer gespeicherten Daten sowie das Recht auf Datenübertragbarkeit. Wenden Sie sich dazu an"
+      }
+    }
+  },
+  "songbook": {
+    "metadata": {
+      "title": "Liederbuch — SDARM",
+      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Liederbuch"
+    },
+    "landing": {
+      "eyebrow": "Gesangbuch — Hymnarium",
+      "title": "Lieder des <em>Glaubens</em>",
+      "subtitle": "Heilige Gesänge aus der Tradition der Reformationsbewegung — zum Lob Gottes, zum Trost der Seele, zur Stärkung der Gemeinschaft.",
+      "discover": "Entdecken",
+      "songCount": "{count} Lieder",
+      "openSongbook": "Gesangbuch öffnen"
+    },
+    "reader": {
+      "songs": "Lieder",
+      "searchPlaceholder": "Suchen…",
+      "songListAria": "Liedliste",
+      "songbook": "Gesangbuch",
+      "title": "Titel",
+      "author": "Autor",
+      "searchByNumberOrTitle": "Nach Nummer oder Titel suchen…"
+    },
+    "view": {
+      "reader": "Leser",
+      "chords": "Akkorde",
+      "projector": "Projektor",
+      "sheetMusic": "Noten"
+    },
+    "sheets": {
+      "noSheets": "Keine Noten für dieses Lied verfügbar.",
+      "sheetTab": "Blatt {n}",
+      "sheetAlt": "Notenblatt {id}",
+      "sheetTitle": "Notenblatt {id}"
+    },
+    "projector": {
+      "openExternal": "Auf externem Bildschirm öffnen",
+      "close": "Projektor schließen",
+      "previousPart": "Vorheriger Teil",
+      "nextPart": "Nächster Teil",
+      "decreaseFont": "Schriftgröße verkleinern",
+      "increaseFont": "Schriftgröße vergrößern"
+    },
+    "partTypes": {
+      "verse": "Strophe",
+      "chorus": "Refrain",
+      "bridge": "Bridge",
+      "intro": "Intro",
+      "outro": "Outro",
+      "coda": "Coda"
+    }
+  },
+  "events": {
+    "metadata": {
+      "title": "Events — SDARM",
+      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Veranstaltungen"
+    },
+    "comingSoonTitle": "Events",
+    "comingSoonSubtitle": "Veranstaltungen, Seminare und Gottesdienste — bald hier verfügbar."
+  },
+  "treasures": {
+    "metadata": {
+      "title": "Schätze — SDARM",
+      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Schätze"
+    },
+    "comingSoonTitle": "Schätze",
+    "comingSoonSubtitle": "Geistliche Ressourcen, Bücher und Materialien — bald hier verfügbar."
+  }
+}

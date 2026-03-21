@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslations, useLocale } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
 import { expandParts } from '@/app/lib/format';
 import ChordLine from './ChordLine';
@@ -13,6 +14,9 @@ interface Props {
 }
 
 export default function Projector({ song, onClose, isDisplay }: Props) {
+  const t = useTranslations('songbook.projector');
+  const locale = useLocale();
+  const partT = useTranslations('songbook.partTypes');
   const parts = expandParts(song.parts);
   // index 0 = title slide; 1..parts.length = song parts; parts.length+1 = amen slide
   const total = parts.length + 2;
@@ -117,7 +121,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     } catch {
       // API unavailable or permission denied — fall back to current screen dimensions
     }
-    window.open(`/songbooks/${song.songbook.slug}/${song.id}?projector=1`, 'projector-display', features);
+    window.open(`/${locale}/songbooks/${song.songbook.slug}/${song.id}?projector=1`, 'projector-display', features);
   }
 
   const isTitleSlide = index === 0;
@@ -137,7 +141,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     if (isTitleSlide) return String(song.number);
     if (isAmenSlide) return 'Amen';
     const partIndex = index - 1;
-    if (part?.type === 'chorus') return 'Ref';
+    if (part?.type === 'chorus') return partT('chorus').slice(0, 3);
     const vn = verseNumbers[partIndex];
     return vn !== null ? String(vn) : null;
   })();
@@ -172,8 +176,8 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
           <button
             className="projector__close projector__screen-btn"
             onClick={openOnScreen}
-            aria-label="Open on external screen"
-            title="Open on external screen"
+            aria-label={t('openExternal')}
+            title={t('openExternal')}
           >
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18">
               <rect x="2" y="3" width="16" height="11" rx="1.5" />
@@ -182,7 +186,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
             </svg>
           </button>
         )}
-        <button className="projector__close" onClick={onClose} aria-label="Close projector">
+        <button className="projector__close" onClick={onClose} aria-label={t('close')}>
           ✕
         </button>
       </div>
@@ -205,11 +209,16 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
       {/* Bottom bar: nav (centered) + font controls (right) */}
       <div className="projector__bottombar">
         <div className="projector__nav">
-          <button className="projector__nav-btn" onClick={prev} disabled={index === 0} aria-label="Previous part">
+          <button className="projector__nav-btn" onClick={prev} disabled={index === 0} aria-label={t('previousPart')}>
             ‹
           </button>
           <span className="projector__counter">{counterLabel}</span>
-          <button className="projector__nav-btn" onClick={next} disabled={index === total - 1} aria-label="Next part">
+          <button
+            className="projector__nav-btn"
+            onClick={next}
+            disabled={index === total - 1}
+            aria-label={t('nextPart')}
+          >
             ›
           </button>
         </div>
@@ -217,14 +226,14 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
           <button
             className="projector__ctrl-btn"
             onClick={() => setFontScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}
-            title="Decrease font size"
+            title={t('decreaseFont')}
           >
             A−
           </button>
           <button
             className="projector__ctrl-btn"
             onClick={() => setFontScale((s) => Math.min(2, +(s + 0.15).toFixed(2)))}
-            title="Increase font size"
+            title={t('increaseFont')}
           >
             A+
           </button>

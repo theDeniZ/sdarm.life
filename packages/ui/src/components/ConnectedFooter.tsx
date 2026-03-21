@@ -24,7 +24,7 @@ async function fetchFooterConfig(apiUrl: string): Promise<FooterConfig | undefin
   }
 }
 
-export default async function ConnectedFooter() {
+export default async function ConnectedFooter({ locale = 'de' }: { locale?: string }) {
   const apiUrl = process.env.API_URL ?? DEFAULT_API;
   const webUrl = process.env.WEB_URL ?? DEFAULT_WEB;
   const songbookUrl = process.env.SONGBOOK_URL ?? DEFAULT_SONGBOOK;
@@ -35,10 +35,10 @@ export default async function ConnectedFooter() {
     <Footer
       config={config}
       apiUrl={apiUrl}
-      webUrl={webUrl}
-      songbookUrl={songbookUrl}
-      eventsUrl={eventsUrl}
-      treasuresUrl={treasuresUrl}
+      webUrl={`${webUrl}/${locale}`}
+      songbookUrl={`${songbookUrl}/${locale}`}
+      eventsUrl={`${eventsUrl}/${locale}`}
+      treasuresUrl={`${treasuresUrl}/${locale}`}
     />
   );
 }

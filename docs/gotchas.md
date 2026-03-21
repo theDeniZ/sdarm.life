@@ -28,6 +28,12 @@
 - **R2 image cache headers** — new uploads get `Cache-Control: public, max-age=31536000, immutable`. Existing R2 objects have no cache header; apply a Cloudflare Cache Rule on `images.sdarm.life/*` to cover them.
 - **Image preview after upload** — keep `URL.createObjectURL(file)` as the preview src. Do not switch to the R2 URL — local `.wrangler/state/` objects aren't served at `images.sdarm.life`. The R2 key is stored correctly regardless.
 
+## i18n / next-intl
+
+- **Dynamic `import()` with template literals breaks webpack** — `await import(\`@sdarm/i18n/messages/${locale}\`)` fails because webpack cannot resolve template strings against the package `exports` map. Use static imports: `import de from '@sdarm/i18n/messages/de'` and a lookup object.
+- **`setRequestLocale(locale)` is required** — every server page/layout under `[locale]` must call `setRequestLocale(locale)` before using `getTranslations()`. Without it, `next-intl` cannot determine the active locale in server components.
+- **`ConnectedNavbar`/`ConnectedFooter` need `locale` prop** — pass `locale` from the page server component. Without it, the language switcher defaults to `de` and cross-app links won't include the locale prefix.
+
 ## Local dev
 
 - **`.dev.vars` vs `wrangler.jsonc`** — local secrets go in `apps/api/.dev.vars` (auto-loaded by `wrangler dev`). The `dev.vars` field inside `wrangler.jsonc` is not valid.

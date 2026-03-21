@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 export interface FooterConfig {
   donation_url?: string | null;
@@ -68,7 +69,12 @@ function nowMs(): number {
   return (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) * 1000;
 }
 
-function computeClock(sun: SunData, now: number, dow: number): ClockState {
+function computeClock(
+  sun: SunData,
+  now: number,
+  dow: number,
+  clockT: (key: string) => string
+): ClockState {
   const DAY_MS = 86400000;
 
   const { todaySunrise, todaySunset, tomorrowSunrise, tomorrowSunset } = sun;
@@ -80,7 +86,7 @@ function computeClock(sun: SunData, now: number, dow: number): ClockState {
   const isAfterSunset = now >= todaySunset;
   const isNight = isAfterSunset || isBeforeSunrise;
 
-  const sunDay = isFriday ? 'Freitag' : isSaturday ? 'Samstag' : '';
+  const sunDay = isFriday ? clockT('friday') : isSaturday ? clockT('saturday') : '';
 
   const calcProgress = (remaining: number, total: number) => Math.min(1, Math.max(0, remaining / total));
 
@@ -88,7 +94,7 @@ function computeClock(sun: SunData, now: number, dow: number): ClockState {
     const total = todaySunset - todaySunrise;
     const remaining = Math.max(0, todaySunset - now);
     return {
-      label: 'Bis Sabbat',
+      label: clockT('untilSabbath'),
       sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(todaySunset),
       progress: calcProgress(remaining, total),
@@ -112,7 +118,7 @@ function computeClock(sun: SunData, now: number, dow: number): ClockState {
     const remaining = now <= end ? end - now : 0;
 
     return {
-      label: 'Sabbat endet',
+      label: clockT('sabbathEnds'),
       sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(end),
       progress: calcProgress(remaining, total),
@@ -124,7 +130,7 @@ function computeClock(sun: SunData, now: number, dow: number): ClockState {
     const total = todaySunset - todaySunrise;
     const remaining = Math.max(0, todaySunset - now);
     return {
-      label: 'Bis Sonnenuntergang',
+      label: clockT('untilSunset'),
       sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(todaySunset),
       progress: calcProgress(remaining, total),
@@ -136,7 +142,7 @@ function computeClock(sun: SunData, now: number, dow: number): ClockState {
   const remaining = isAfterSunset ? DAY_MS - now + tomorrowSunrise : Math.max(0, tomorrowSunrise - now);
 
   return {
-    label: 'Bis Sonnenaufgang',
+    label: clockT('untilSunrise'),
     sublabel: fmtRemaining(remaining),
     timeVal: msToHHMM(tomorrowSunrise),
     progress: calcProgress(remaining, total),
@@ -167,6 +173,10 @@ export default function Footer({
   eventsUrl = 'https://events.sdarm.life',
   treasuresUrl = 'https://treasures.sdarm.life',
 }: FooterProps) {
+  const t = useTranslations('common.footer');
+  const clockT = useTranslations('common.clock');
+  const navT = useTranslations('common.nav');
+
   const facebookUrl = config?.facebook_url ?? '#';
   const instagramUrl = config?.instagram_url ?? '#';
   const youtubeUrl = config?.youtube_url ?? '#';
@@ -174,9 +184,14 @@ export default function Footer({
   const [email, setEmail] = useState('');
   const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'conflict'>('idle');
   const [sunData, setSunData] = useState<SunData | null>(null);
-  const [locationName, setLocationName] = useState('Pforzheim, Baden-Württemberg');
+  const [locationName, setLocationName] = useState(clockT('defaultLocation'));
   const [locationInput, setLocationInput] = useState('');
-  const [clock, setClock] = useState<ClockState>({ label: 'Untergang', sublabel: '…', timeVal: '–:––', progress: 0 });
+  const [clock, setClock] = useState<ClockState>({
+    label: clockT('sunset'),
+    sublabel: '…',
+    timeVal: '–:––',
+    progress: 0,
+  });
 
   useEffect(() => {
     fetchSunData(DEFAULT_LAT, DEFAULT_LNG)
@@ -189,12 +204,12 @@ export default function Footer({
     function tick() {
       const now = nowMs();
       const dow = new Date().getDay();
-      setClock(computeClock(sunData!, now, dow));
+      setClock(computeClock(sunData!, now, dow, clockT));
     }
     tick();
     const id = setInterval(tick, 15000);
     return () => clearInterval(id);
-  }, [sunData]);
+  }, [sunData, clockT]);
 
   async function handleSubscribe() {
     if (!email) return;
@@ -245,13 +260,11 @@ export default function Footer({
       <div className="footer-inner-wrap">
         {/* Column 1: contact + subscribe */}
         <div className="footer-contact">
-          <h3 className="footer-heading">
-            In <em>Kontakt</em> bleiben
-          </h3>
+          <h3 className="footer-heading">{t.rich('stayInTouch', { em: (chunks) => <em>{chunks}</em> })}</h3>
           <div className="footer-info">
-            Reformierte Adventisten
+            {t('orgName')}
             <br />
-            Deutschland &amp; Österreich
+            {t('orgRegion')}
             <br />
             <br />
             <a href="mailto:info@sdarm.life">info@sdarm.life</a>
@@ -284,7 +297,7 @@ export default function Footer({
             </a>
           </div>
 
-          <div className="footer-form-label">Newsletter</div>
+          <div className="footer-form-label">{t('newsletter')}</div>
           <form
             className="footer-form"
             onSubmit={(e) => {
@@ -295,7 +308,7 @@ export default function Footer({
             <input
               className="footer-input"
               type="email"
-              placeholder="E-Mail-Adresse"
+              placeholder={t('emailPlaceholder')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={subStatus === 'loading'}
@@ -304,22 +317,22 @@ export default function Footer({
               {subStatus === 'loading' ? '…' : '→'}
             </button>
           </form>
-          {subStatus === 'ok' && <p className="f-sub-ok">Vielen Dank für Ihre Anmeldung!</p>}
-          {subStatus === 'conflict' && <p className="f-sub-err">Diese E-Mail ist bereits registriert.</p>}
-          {subStatus === 'error' && <p className="f-sub-err">Fehler. Bitte versuchen Sie es später.</p>}
+          {subStatus === 'ok' && <p className="f-sub-ok">{t('subscribeSuccess')}</p>}
+          {subStatus === 'conflict' && <p className="f-sub-err">{t('subscribeDuplicate')}</p>}
+          {subStatus === 'error' && <p className="f-sub-err">{t('subscribeError')}</p>}
         </div>
 
         {/* Column 2: nav links */}
         <div className="footer-nav">
           <div className="footer-nav-links">
-            <Link href={`${webUrl}/#neuigkeiten`}>Neues</Link>
-            <Link href={songbookUrl}>Lieder</Link>
-            <Link href={eventsUrl}>Events</Link>
-            <Link href={treasuresUrl}>Schätze</Link>
-            <Link href={`${webUrl}/about`}>Über uns</Link>
-            <Link href={`${webUrl}/#kontakt`}>Kontakt</Link>
-            <Link href={`${webUrl}/impressum`}>Impressum</Link>
-            <Link href={`${webUrl}/datenschutz`}>Datenschutz</Link>
+            <Link href={`${webUrl}/#neuigkeiten`}>{navT('news')}</Link>
+            <Link href={songbookUrl}>{navT('songs')}</Link>
+            <Link href={eventsUrl}>{navT('events')}</Link>
+            <Link href={treasuresUrl}>{navT('treasures')}</Link>
+            <Link href={`${webUrl}/about`}>{navT('about')}</Link>
+            <Link href={`${webUrl}/#kontakt`}>{navT('contact')}</Link>
+            <Link href={`${webUrl}/impressum`}>{navT('imprint')}</Link>
+            <Link href={`${webUrl}/datenschutz`}>{navT('privacy')}</Link>
           </div>
         </div>
 
@@ -350,13 +363,13 @@ export default function Footer({
               <input
                 type="text"
                 className="sunset-location-input"
-                placeholder="Stadt oder PLZ"
+                placeholder={t('locationPlaceholder')}
                 autoComplete="off"
                 spellCheck={false}
                 value={locationInput}
                 onChange={(e) => setLocationInput(e.target.value)}
               />
-              <button type="submit" className="sunset-location-btn" aria-label="Standort aktualisieren">
+              <button type="submit" className="sunset-location-btn" aria-label={t('locationUpdateAria')}>
                 →
               </button>
             </form>
@@ -368,8 +381,8 @@ export default function Footer({
         <span className="footer-bottom-logo">
           SDARM<span>.life</span>
         </span>
-        <span className="footer-copy">© 2026 SDARM.life — Siebenten-Tags-Adventisten Reformationsbewegung</span>
-        <span className="footer-copy">Alle Rechte vorbehalten</span>
+        <span className="footer-copy">{t('copyright', { year: new Date().getFullYear() })}</span>
+        <span className="footer-copy">{t('allRightsReserved')}</span>
       </div>
     </footer>
   );

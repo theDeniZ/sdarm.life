@@ -56,6 +56,25 @@ nav.scrolled {
   gap: 1rem;
 }
 
+.nav-lang {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  color: rgba(210, 200, 185, 0.5);
+  text-decoration: none;
+  padding: 3px 8px;
+  border: 1px solid rgba(201, 169, 110, 0.15);
+  border-radius: 3px;
+  transition:
+    color 0.3s,
+    border-color 0.3s;
+}
+.nav-lang:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
 .nav-search {
   background: none;
   border: none;

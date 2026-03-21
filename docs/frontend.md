@@ -4,14 +4,15 @@
 
 | Component | Type | Notes |
 |---|---|---|
-| `layout.tsx` | Server | Root layout — imports `@sdarm/ui/src/styles/index.css` then `./globals.css`, renders `<html>` + `<body>` shell |
-| `page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
-| `posts/[slug]/page.tsx` | Server (async) | Post detail page |
-| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Re-exported from `packages/ui`. |
+| `layout.tsx` | Server | Root layout — imports CSS, renders `{children}` (no `<html>` — delegated to locale layout) |
+| `[locale]/layout.tsx` | Server (async) | Locale layout — validates locale, wraps in `<NextIntlClientProvider>`, renders `<html lang={locale}><body>` |
+| `[locale]/page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
+| `[locale]/posts/[slug]/page.tsx` | Server (async) | Post detail page |
+| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN). |
 | `HeroSection` | **Client** | Featured-posts strip carousel with per-slide color tints, fog animation, deco-circle, side label counter |
 | `NewsSection` | **Client** | CSS-columns masonry grid with `IntersectionObserver` stagger fade-in |
 | `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
-| `Footer` | **Client** (`@sdarm/ui`) | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, sunset clock. Re-exported from `packages/ui`. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
+| `Footer` | **Client** (`@sdarm/ui`) | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, sunset clock. Uses `useTranslations('common.footer')`. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
 
 **Not rendered on home page** (files kept for future use): `VideoSection`, `SongbookSection`, `AboutSection`, `BgCanvas`.
 
@@ -19,11 +20,11 @@
 
 Data mappers: `toHeroPost`, `toNewsPost`, `toFooterConfig`.
 
-### Post detail page (`posts/[slug]/page.tsx`)
+### Post detail page (`[locale]/posts/[slug]/page.tsx`)
 
-Server component with edge runtime. Fetches single post + up to 5 other posts + config in parallel.
+Server component with edge runtime. Fetches single post + up to 5 other posts + config in parallel. Section labels are localized via `getTranslations('web.post')`.
 
-**Layout:** `.post-hero` (cover image as full-bleed background + `.post-hero-overlay` gradient + back button) → `.post-section` with "Inhalt" label (body text) → `.post-section` with "Video" (if `videoUrl` set, play button overlay) → `.post-section` with "Weitere Beiträge" (`.post-grid` of `.post-card` items, responsive grid).
+**Layout:** `.post-hero` (cover image as full-bleed background + `.post-hero-overlay` gradient + back button) → `.post-section` with translated "Content" label (body text) → `.post-section` with "Video" (if `videoUrl` set, play button overlay) → `.post-section` with translated "More posts" (`.post-grid` of `.post-card` items, responsive grid).
 
 CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overlay`, `.post-back`, `.post-meta`, `.post-section`, `.post-section-label`, `.post-body`, `.post-video`, `.post-video-card`, `.post-video-play`, `.post-more-title`, `.post-grid`, `.post-card`, `.post-card-img`, `.post-card-title`, `.post-card-meta`.
 
@@ -74,11 +75,11 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 
 ### Footer sunset clock
 
-`'use client'`. 3-column CSS grid (`1fr 1fr 260px`). Props: `config?: FooterConfig`, `apiUrl?`, `songbookUrl?`.
+`'use client'`. 3-column CSS grid (`1fr 1fr 260px`). Props: `config?: FooterConfig`, `apiUrl?`, `webUrl?`, `songbookUrl?`, `eventsUrl?`, `treasuresUrl?`. All visible text uses `useTranslations('common.footer')` and `useTranslations('common.clock')`.
 
 **Columns:**
 1. **Contact** — heading, social links (fb/wa/ig/yt), email subscribe form with status feedback
-2. **Nav** — navigation links (Neuigkeiten, Liederbuch, Über uns, Produkte, Impressum, Datenschutz)
+2. **Nav** — navigation links (translated via `useTranslations('common.nav')`)
 3. **Sunset clock** — SVG arc ring + countdown label
 
 **Sunset clock logic:**
@@ -92,10 +93,10 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 
 | Condition | `label` | `timeVal` |
 |---|---|---|
-| Friday (dow=5), daytime | Bis Schabbat | today's sunset |
-| Saturday (dow=6) | Schabbat endet | today's sunset |
-| Any other day, daytime | Bis Sonnenuntergang | today's sunset |
-| Any day, nighttime | Bis Sonnenaufgang | tomorrow's sunrise |
+| Friday (dow=5), daytime | `t('untilSabbath')` | today's sunset |
+| Saturday (dow=6) | `t('sabbathEnds')` | today's sunset |
+| Any other day, daytime | `t('untilSunset')` | today's sunset |
+| Any day, nighttime | `t('untilSunrise')` | tomorrow's sunrise |
 
 **Responsive:** tablet (≤900px) — clock spans `grid-column: 1 / 3`, row layout with clock left + text right; mobile (≤600px) — all columns stack, clock column-spans full width.
 
@@ -104,7 +105,9 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 ### Layout notes
 
 - Never add `export const runtime = 'edge'` to `layout.tsx` — set it only on individual page files.
-- `layout.tsx` is minimal: imports `@sdarm/ui/src/styles/index.css` (design tokens + Navbar/Footer CSS) then `./globals.css` (app-specific styles), sets metadata, renders `<html><body>{children}</body></html>`. No data fetching.
+- Root `layout.tsx` is minimal: imports CSS, returns `{children}`. No `<html>` or `<body>` tags — those are in the `[locale]/layout.tsx`.
+- `[locale]/layout.tsx` validates the locale, calls `setRequestLocale()`, wraps children in `<NextIntlClientProvider messages={messages}>`, and renders `<html lang={locale}><body>`.
+- All page files under `[locale]/` receive `params: Promise<{ locale: string }>` and call `setRequestLocale(locale)` at the top. Server components use `getTranslations()`, client components use `useTranslations()`.
 
 ---
 

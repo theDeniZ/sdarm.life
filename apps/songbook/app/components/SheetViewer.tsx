@@ -1,18 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import type { SongSheetDto } from '@sdarm/types';
 import { r2url } from '@/app/lib/api';
 
 export default function SheetViewer({ sheets }: { sheets: SongSheetDto[] }) {
+  const t = useTranslations('songbook.sheets');
   const [selectedId, setSelectedId] = useState<number | null>(sheets.length > 0 ? sheets[0].id : null);
 
   if (sheets.length === 0) {
-    return <p className="sheet-viewer__empty">No sheet music available for this song.</p>;
+    return <p className="sheet-viewer__empty">{t('noSheets')}</p>;
   }
 
   const active = sheets.find((s) => s.id === selectedId) ?? null;
-  // URL is only resolved when a sheet is selected — actual file loads lazily on demand
   const url = active ? r2url(active.key, active.type === 'image' ? { w: 1200, q: 90 } : undefined) : null;
 
   return (
@@ -24,7 +25,7 @@ export default function SheetViewer({ sheets }: { sheets: SongSheetDto[] }) {
             className={`sheet-thumb${selectedId === sheet.id ? ' active' : ''}`}
             onClick={() => setSelectedId(sheet.id)}
           >
-            {sheet.type === 'pdf' ? '📄' : '🖼'} Sheet {i + 1}
+            {sheet.type === 'pdf' ? '📄' : '🖼'} {t('sheetTab', { n: i + 1 })}
           </button>
         ))}
       </div>
@@ -32,9 +33,9 @@ export default function SheetViewer({ sheets }: { sheets: SongSheetDto[] }) {
       {url && active && (
         <div className="sheet-display">
           {active.type === 'pdf' ? (
-            <iframe src={url} title={`Sheet music ${active.id}`} />
+            <iframe src={url} title={t('sheetTitle', { id: active.id })} />
           ) : (
-            <img src={url} alt={`Sheet music ${active.id}`} />
+            <img src={url} alt={t('sheetAlt', { id: active.id })} />
           )}
         </div>
       )}

@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 interface ComingSoonProps {
   title: string;
@@ -8,10 +8,11 @@ interface ComingSoonProps {
 }
 
 export default function ComingSoon({ title, subtitle }: ComingSoonProps) {
+  const t = useTranslations('common');
   return (
     <div className="coming-soon">
       <div className="coming-soon-inner">
-        <span className="coming-soon-eyebrow">Demnächst</span>
+        <span className="coming-soon-eyebrow">{t('comingSoon')}</span>
         <h1>{title}</h1>
         {subtitle && <p className="coming-soon-sub">{subtitle}</p>}
         <div className="coming-soon-line" />
