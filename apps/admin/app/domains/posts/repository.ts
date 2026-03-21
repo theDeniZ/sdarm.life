@@ -6,7 +6,7 @@ const LIMIT = 20;
 
 export async function fetchPosts(page: number): Promise<ListResponse<PostListItem>> {
   const offset = (page - 1) * LIMIT;
-  const res = await fetch(`${API}/api/v1/posts?limit=${LIMIT}&offset=${offset}`);
+  const res = await fetch(`${API}/api/v1/posts?limit=${LIMIT}&offset=${offset}&_t=${Date.now()}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return (await res.json()) as ListResponse<PostListItem>;
 }

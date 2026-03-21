@@ -2,7 +2,7 @@ import { API, adminHeaders } from '../../lib/api';
 import type { ConfigDto } from '@sdarm/types';
 
 export async function fetchConfig(): Promise<ConfigDto> {
-  const res = await fetch(`${API}/api/v1/config`);
+  const res = await fetch(`${API}/api/v1/config?_t=${Date.now()}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return (await res.json()) as ConfigDto;
 }

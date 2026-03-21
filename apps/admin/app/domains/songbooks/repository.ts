@@ -7,7 +7,7 @@ export const SONG_LIMIT = 20;
 // ── Songbooks ──────────────────────────────────────────────────────────────
 
 export async function fetchSongbooks(): Promise<SongbookDto[]> {
-  const res = await fetch(`${API}/api/v1/songbooks`);
+  const res = await fetch(`${API}/api/v1/songbooks?_t=${Date.now()}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return (await res.json()) as SongbookDto[];
 }
@@ -45,6 +45,7 @@ export async function deleteSongbook(id: number): Promise<void> {
 export async function fetchSongs(slug: string, page: number, q?: string): Promise<ListResponse<SongListItemDto>> {
   const params = new URLSearchParams({ limit: String(SONG_LIMIT), offset: String((page - 1) * SONG_LIMIT) });
   if (q) params.set('q', q);
+  params.set('_t', String(Date.now()));
   const res = await fetch(`${API}/api/v1/songbooks/${slug}/songs?${params}`);
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
   return (await res.json()) as ListResponse<SongListItemDto>;

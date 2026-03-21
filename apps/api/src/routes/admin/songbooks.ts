@@ -44,7 +44,7 @@ router.openapi(
     const db = drizzle(c.env.DB);
     const book = await repo.createSongbook(db, c.req.valid('json'));
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, ['/api/v1/songbooks']);
+    purgeCache(c.executionCtx, origin, ['/api/v1/songbooks'], c.env);
     return c.json({ ...book, songCount: 0 }, 201);
   },
 );
@@ -72,7 +72,7 @@ router.openapi(
     const book = await repo.updateSongbook(db, c.req.valid('param').id, c.req.valid('json'));
     if (!book) return c.json({ error: 'Not found' }, 404);
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, ['/api/v1/songbooks', `/api/v1/songbooks/${book.slug}`]);
+    purgeCache(c.executionCtx, origin, ['/api/v1/songbooks', `/api/v1/songbooks/${book.slug}`], c.env);
     return c.json({ ...book, songCount: existing.songCount }, 200);
   },
 );
@@ -97,7 +97,7 @@ router.openapi(
     const origin = new URL(c.req.url).origin;
     const paths = ['/api/v1/songbooks'];
     if (book) paths.push(`/api/v1/songbooks/${book.slug}`, `/api/v1/songbooks/${book.slug}/songs`);
-    purgeCache(c.executionCtx, origin, paths);
+    purgeCache(c.executionCtx, origin, paths, c.env);
     return c.json({ ok: true as const }, 200);
   },
 );
@@ -148,7 +148,7 @@ router.openapi(
     const song = await repo.createSong(db, c.req.valid('json'));
     const full = (await repo.getSongById(db, song.id))!;
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, [`/api/v1/songbooks/${full.songbook.slug}/songs`]);
+    purgeCache(c.executionCtx, origin, [`/api/v1/songbooks/${full.songbook.slug}/songs`], c.env);
     return c.json(full, 201);
   },
 );
@@ -177,7 +177,7 @@ router.openapi(
     purgeCache(c.executionCtx, origin, [
       `/api/v1/songs/${full.id}`,
       `/api/v1/songbooks/${full.songbook.slug}/songs`,
-    ]);
+    ], c.env);
     return c.json(full, 200);
   },
 );
@@ -202,7 +202,7 @@ router.openapi(
     const origin = new URL(c.req.url).origin;
     const paths = [`/api/v1/songs/${id}`];
     if (song) paths.push(`/api/v1/songbooks/${song.songbook.slug}/songs`);
-    purgeCache(c.executionCtx, origin, paths);
+    purgeCache(c.executionCtx, origin, paths, c.env);
     return c.json({ ok: true as const }, 200);
   },
 );
@@ -237,7 +237,7 @@ router.openapi(
     const song = await repo.getSongById(db, songId);
     if (song) {
       const origin = new URL(c.req.url).origin;
-      purgeCache(c.executionCtx, origin, [`/api/v1/songs/${songId}`]);
+      purgeCache(c.executionCtx, origin, [`/api/v1/songs/${songId}`], c.env);
     }
     return c.json(part, 201);
   },
@@ -263,7 +263,7 @@ router.openapi(
     const part = await repo.updateSongPart(db, c.req.valid('param').partId, c.req.valid('json'));
     if (!part) return c.json({ error: 'Not found' }, 404);
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`]);
+    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`], c.env);
     return c.json(part, 200);
   },
 );
@@ -283,7 +283,7 @@ router.openapi(
     const db = drizzle(c.env.DB);
     await repo.deleteSongPart(db, c.req.valid('param').partId);
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`]);
+    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`], c.env);
     return c.json({ ok: true as const }, 200);
   },
 );
@@ -337,7 +337,7 @@ router.openapi(uploadSheetRoute, async (c) => {
 
   const sheet = await repo.createSongSheet(db, { songId, key, type, sortOrder: 0 });
   const origin = new URL(c.req.url).origin;
-  purgeCache(c.executionCtx, origin, [`/api/v1/songs/${songId}`]);
+  purgeCache(c.executionCtx, origin, [`/api/v1/songs/${songId}`], c.env);
   return c.json(sheet, 201);
 });
 
@@ -359,7 +359,7 @@ router.openapi(
     if (!sheet) return c.json({ error: 'Not found' }, 404);
     await c.env.IMAGES.delete(sheet.key);
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`]);
+    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`], c.env);
     return c.json({ ok: true as const }, 200);
   },
 );

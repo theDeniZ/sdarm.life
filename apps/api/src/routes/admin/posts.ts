@@ -127,7 +127,7 @@ router.openapi(createPostRoute, async (c) => {
     '/api/v1/posts?featured=1',
     '/api/v1/posts?limit=8',
     '/api/v1/posts?limit=5',
-  ]);
+  ], c.env);
   return c.json(post, 201);
 });
 
@@ -142,7 +142,7 @@ router.openapi(updatePostRoute, async (c) => {
     '/api/v1/posts?limit=8',
     '/api/v1/posts?limit=5',
     `/api/v1/posts/${post.slug}`,
-  ]);
+  ], c.env);
   return c.json(post, 200);
 });
 
@@ -157,7 +157,7 @@ router.openapi(deletePostRoute, async (c) => {
     '/api/v1/posts?limit=8',
     '/api/v1/posts?limit=5',
     `/api/v1/posts/${post.slug}`,
-  ]);
+  ], c.env);
   return c.json({ ok: true as const }, 200);
 });
 

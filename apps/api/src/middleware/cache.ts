@@ -30,11 +30,32 @@ export function cached(ttl: number): MiddlewareHandler<{ Bindings: Bindings }> {
 }
 
 /**
- * Purge specific cache URLs. Call from admin mutation handlers.
+ * Purge specific cache URLs globally.
+ *
+ * Uses Cloudflare's Purge by URL API when CF_ZONE_ID + CF_PURGE_TOKEN are set
+ * (purges across ALL edge colos). Falls back to per-colo caches.default.delete().
  */
-export function purgeCache(ctx: ExecutionContext, origin: string, paths: string[]): void {
-  const cache = caches.default;
-  ctx.waitUntil(
-    Promise.all(paths.map((path) => cache.delete(new Request(`${origin}${path}`, { method: 'GET' })))),
-  );
+export function purgeCache(ctx: ExecutionContext, origin: string, paths: string[], env?: Bindings): void {
+  const urls = paths.map((path) => `${origin}${path}`);
+
+  const zoneId = env?.CF_ZONE_ID;
+  const purgeToken = env?.CF_PURGE_TOKEN;
+
+  if (zoneId && purgeToken) {
+    // Global purge via Cloudflare API — clears all edge colos
+    ctx.waitUntil(
+      fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${purgeToken}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ files: urls }),
+      }),
+    );
+  } else {
+    // Fallback: per-colo purge (only clears the edge handling this request)
+    const cache = caches.default;
+    ctx.waitUntil(Promise.all(urls.map((url) => cache.delete(new Request(url, { method: 'GET' })))));
+  }
 }
