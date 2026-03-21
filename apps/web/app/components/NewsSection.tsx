@@ -32,11 +32,9 @@ export default function NewsSection() {
     <>
     <section className="events-section" id="neuigkeiten">
       <div className="neues-header">
-        <div className="neues-eyebrow">Aktuelles aus der Gemeinde</div>
         <h2 className="neues-title">
           <em>Neues</em>
         </h2>
-        <p className="neues-subtitle">Bücher, Lieder, Predigten, Zitate — alles Neue aus unserer Gemeinschaft.</p>
       </div>
 
       <div className="masonry-wrap">

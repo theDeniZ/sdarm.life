@@ -299,18 +299,9 @@
   align-items: center;
   justify-content: center;
 }
-.sunset-time-label {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.55rem;
-  font-weight: 300;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  color: var(--muted);
-  margin-bottom: 0.15rem;
-}
 .sunset-time-value {
   font-family: 'DM Serif Display', serif;
-  font-size: 1.6rem;
+  font-size: 2.2rem;
   font-weight: 400;
   color: #fff;
   line-height: 1;
@@ -453,7 +444,7 @@
     margin-bottom: 0;
   }
   .sunset-time-value {
-    font-size: 1.3rem;
+    font-size: 1.8rem;
   }
   .sunset-footer-text {
     text-align: left;

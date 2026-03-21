@@ -351,8 +351,7 @@ export default function Footer({
               />
             </svg>
             <div className="sunset-clock-inner">
-              <div className="sunset-time-label">{clock.label}</div>
-              <div className="sunset-time-value">{clock.sublabel}</div>
+              <div className="sunset-time-value">{clock.timeVal}</div>
             </div>
           </div>
           <div className="sunset-footer-text">
