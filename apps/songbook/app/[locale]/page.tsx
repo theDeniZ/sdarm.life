@@ -34,7 +34,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <section className="songbooks-section">
         <div className="songbooks-grid">
           {songbooks.map((sb) => (
-            <Link key={sb.id} href={`/songbooks/${sb.slug}`} className="songbook-landing-card">
+            <Link key={sb.id} href={`/${locale}/songbooks/${sb.slug}`} className="songbook-landing-card">
               <div className="songbook-landing-card__lang">{sb.language.toUpperCase()}</div>
               <div className="songbook-landing-card__icon">
                 <svg viewBox="0 0 24 24">

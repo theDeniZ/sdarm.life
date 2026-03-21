@@ -172,6 +172,7 @@
       "reader": "Leser",
       "chords": "Akkorde",
       "projector": "Projektor",
+      "fullscreen": "Vollbild",
       "sheetMusic": "Noten"
     },
     "sheets": {
@@ -182,6 +183,7 @@
     },
     "projector": {
       "openExternal": "Auf externem Bildschirm öffnen",
+      "enterFullscreen": "Vollbild",
       "close": "Projektor schließen",
       "previousPart": "Vorheriger Teil",
       "nextPart": "Nächster Teil",

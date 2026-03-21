@@ -173,6 +173,7 @@
       "reader": "Reader",
       "chords": "Chords",
       "projector": "Projector",
+      "fullscreen": "Fullscreen",
       "sheetMusic": "Sheet music"
     },
     "sheets": {
@@ -183,6 +184,7 @@
     },
     "projector": {
       "openExternal": "Open on external screen",
+      "enterFullscreen": "Fullscreen",
       "close": "Close projector",
       "previousPart": "Previous part",
       "nextPart": "Next part",

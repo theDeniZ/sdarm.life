@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { useTranslations, useLocale } from 'next-intl';
+import { useTranslations } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
 import { expandParts } from '@/app/lib/format';
 import ChordLine from './ChordLine';
@@ -15,7 +15,6 @@ interface Props {
 
 export default function Projector({ song, onClose, isDisplay }: Props) {
   const t = useTranslations('songbook.projector');
-  const locale = useLocale();
   const partT = useTranslations('songbook.partTypes');
   const parts = expandParts(song.parts);
   // index 0 = title slide; 1..parts.length = song parts; parts.length+1 = amen slide
@@ -23,27 +22,29 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   const [index, setIndex] = useState(0);
   const [fontScale, setFontScale] = useState(1);
   const [mounted, setMounted] = useState(false);
-  const [multiScreen, setMultiScreen] = useState(false);
+  const [display, setDisplay] = useState(isDisplay);
   useEffect(() => {
     setMounted(true);
-    setMultiScreen(!!(window.screen as Screen & { isExtended?: boolean }).isExtended);
   }, []);
 
   const prev = useCallback(() => setIndex((i) => Math.max(0, i - 1)), []);
   const next = useCallback(() => setIndex((i) => Math.min(total - 1, i + 1)), [total]);
+  const openFullscreen = useCallback(() => {
+    setDisplay(false);
+  }, []);
 
-  // Fullscreen
+  // Fullscreen — auto-enter only for inline mode; display window uses the manual button
   useEffect(() => {
-    document.documentElement.requestFullscreen?.().catch(() => {});
+    if (!display) document.documentElement.requestFullscreen?.().catch(() => {});
     const onFsChange = () => {
-      if (!document.fullscreenElement) onClose();
+      if (!display && !document.fullscreenElement) onClose();
     };
     document.addEventListener('fullscreenchange', onFsChange);
     return () => {
       document.removeEventListener('fullscreenchange', onFsChange);
-      if (document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
+      if (!display && document.fullscreenElement) document.exitFullscreen?.().catch(() => {});
     };
-  }, [onClose]);
+  }, [onClose, display]);
 
   // BroadcastChannel — keep slide in sync across controller + display windows
   const channelRef = useRef<BroadcastChannel | null>(null);
@@ -72,6 +73,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === 'ArrowDown') next();
       else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prev();
+      else if (e.key === 'f') openFullscreen();
       else if (e.key === 'Escape') onClose();
     };
     window.addEventListener('keydown', onKey);
@@ -98,31 +100,6 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
       window.removeEventListener('touchend', onTouchEnd);
     };
   }, [next, prev]);
-
-  // Open projector on an external screen
-  async function openOnScreen() {
-    let features = `width=${screen.availWidth},height=${screen.availHeight},left=${(screen as Screen & { availLeft?: number }).availLeft ?? 0},top=${(screen as Screen & { availTop?: number }).availTop ?? 0}`;
-    try {
-      // Window Management API — Chrome 111+, requires "window-management" permission
-      type ScreenInfo = {
-        availLeft: number;
-        availTop: number;
-        availWidth: number;
-        availHeight: number;
-        isPrimary: boolean;
-      };
-      const details = await (
-        window as Window & { getScreenDetails?: () => Promise<{ screens: ScreenInfo[] }> }
-      ).getScreenDetails?.();
-      const external = details?.screens.find((s) => !s.isPrimary) ?? details?.screens[0];
-      if (external) {
-        features = `width=${external.availWidth},height=${external.availHeight},left=${external.availLeft},top=${external.availTop}`;
-      }
-    } catch {
-      // API unavailable or permission denied — fall back to current screen dimensions
-    }
-    window.open(`/${locale}/songbooks/${song.songbook.slug}/${song.id}?projector=1`, 'projector-display', features);
-  }
 
   const isTitleSlide = index === 0;
   const isAmenSlide = index === total - 1;
@@ -172,17 +149,15 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
             {song.number}. {song.title}
           </div>
         )}
-        {!isDisplay && multiScreen && (
+        {display && isTitleSlide && (
           <button
             className="projector__close projector__screen-btn"
-            onClick={openOnScreen}
-            aria-label={t('openExternal')}
-            title={t('openExternal')}
+            onClick={() => openFullscreen()}
+            aria-label={t('enterFullscreen')}
+            title={t('enterFullscreen')}
           >
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18">
-              <rect x="2" y="3" width="16" height="11" rx="1.5" />
-              <line x1="7" y1="17" x2="13" y2="17" />
-              <line x1="10" y1="14" x2="10" y2="17" />
+              <path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
           </button>
         )}

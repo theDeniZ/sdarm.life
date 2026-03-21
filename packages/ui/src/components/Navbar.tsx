@@ -36,12 +36,11 @@ export default function Navbar({
 
   const otherLocale = locale === 'de' ? 'en' : 'de';
   const otherLabel = otherLocale === 'de' ? 'Deutsch' : 'English';
+  const [switchedPath, setSwitchedPath] = useState(`/${otherLocale}`);
 
-  // Replace current locale prefix in the page URL
-  function getSwitchedPath() {
-    if (typeof window === 'undefined') return `/${otherLocale}`;
-    return window.location.pathname.replace(/^\/(de|en)/, `/${otherLocale}`);
-  }
+  useEffect(() => {
+    setSwitchedPath(window.location.pathname.replace(/^\/(de|en)/, `/${otherLocale}`));
+  }, [otherLocale]);
 
   return (
     <nav className={scrolled ? 'scrolled' : ''}>
@@ -59,7 +58,7 @@ export default function Navbar({
 
       <div className="nav-right">
         <a
-          href={getSwitchedPath()}
+          href={switchedPath}
           className="nav-lang"
           aria-label={`Switch to ${otherLabel}`}
         >
