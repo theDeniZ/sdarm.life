@@ -1,6 +1,7 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import QuoteShareModal from './QuoteShareModal';
 
 // Kept for API compatibility
 export interface NewsPost {
@@ -16,6 +17,7 @@ export interface NewsPost {
 
 export default function NewsSection() {
   const gridRef = useRef<HTMLDivElement>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -27,6 +29,7 @@ export default function NewsSection() {
   }, []);
 
   return (
+    <>
     <section className="events-section" id="neuigkeiten">
       <div className="neues-header">
         <div className="neues-eyebrow">Aktuelles aus der Gemeinde</div>
@@ -62,12 +65,6 @@ export default function NewsSection() {
                   <div className="nc-label">Bibliothek · Neu</div>
                   <div className="nc-title">Путь ко Христу</div>
                   <div className="nc-sub">Ellen G. White — jetzt in der Bibliothek verfügbar</div>
-                  <a href="#" className="nc-cta">
-                    Lesen{' '}
-                    <svg viewBox="0 0 10 10">
-                      <polyline points="3,2 7,5 3,8" />
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
@@ -88,12 +85,6 @@ export default function NewsSection() {
                   <div className="nc-label">Kollektion · Neu</div>
                   <div className="nc-title">Neues Design</div>
                   <div className="nc-sub">Reformationsbewegung 2026 — limitierte Auflage</div>
-                  <a href="#" className="nc-cta">
-                    Ansehen{' '}
-                    <svg viewBox="0 0 10 10">
-                      <polyline points="3,2 7,5 3,8" />
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
@@ -109,6 +100,18 @@ export default function NewsSection() {
                   <div className="nc-quote-bar" />
                   <div className="nc-quote-glyph">&ldquo;</div>
                 </div>
+                <button
+                  className="quote-save-btn"
+                  onClick={() => setModalOpen(true)}
+                  title="Als Bild speichern"
+                  aria-label="Als Bild speichern"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                    <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                    <polyline points="7 10 12 15 17 10" />
+                    <line x1="12" y1="15" x2="12" y2="3" />
+                  </svg>
+                </button>
                 <div className="nc-body">
                   <div className="nc-title">Dein Wort ist meines Fußes Leuchte und ein Licht auf meinem Wege.</div>
                   <div className="nc-ref">Psalm 119,105</div>
@@ -143,12 +146,6 @@ export default function NewsSection() {
                     <br />
                     Jetzt in der Liederbibliothek
                   </div>
-                  <a href="/lieder" className="nc-cta">
-                    Zum Lied{' '}
-                    <svg viewBox="0 0 10 10">
-                      <polyline points="3,2 7,5 3,8" />
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
@@ -174,12 +171,6 @@ export default function NewsSection() {
                     <br />
                     Pforzheim, 15. März 2026
                   </div>
-                  <a href="#" className="nc-cta">
-                    Lesen{' '}
-                    <svg viewBox="0 0 10 10">
-                      <polyline points="3,2 7,5 3,8" />
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
@@ -202,12 +193,6 @@ export default function NewsSection() {
                   <div className="nc-label">Bibelstudium · Neu</div>
                   <div className="nc-title">Das Gesetz Gottes</div>
                   <div className="nc-sub">Neue Studienserie — 7 Lektionen</div>
-                  <a href="#" className="nc-cta">
-                    Studieren{' '}
-                    <svg viewBox="0 0 10 10">
-                      <polyline points="3,2 7,5 3,8" />
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
@@ -305,12 +290,6 @@ export default function NewsSection() {
                   <div className="nc-label">Kollektion · Neu</div>
                   <div className="nc-title">Anstecknadel Gold</div>
                   <div className="nc-sub">Ø 25mm · vergoldet · 3 €</div>
-                  <a href="#" className="nc-cta">
-                    Bestellen{' '}
-                    <svg viewBox="0 0 10 10">
-                      <polyline points="3,2 7,5 3,8" />
-                    </svg>
-                  </a>
                 </div>
               </div>
             </div>
@@ -318,5 +297,13 @@ export default function NewsSection() {
         </div>
       </div>
     </section>
+
+    <QuoteShareModal
+      open={modalOpen}
+      text="Dein Wort ist meines Fußes Leuchte und ein Licht auf meinem Wege."
+      ref_="Psalm 119,105"
+      onClose={() => setModalOpen(false)}
+    />
+    </>
   );
 }
