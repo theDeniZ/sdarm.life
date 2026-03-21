@@ -48,8 +48,9 @@ export default function SongView({ song }: { song: SongDto }) {
   return (
     <div className="song-view">
       <div className="song-header">
-        <div className="song-header__num">#{song.number}</div>
-        <h1 className="song-header__title">{song.title}</h1>
+        <h1 className="song-header__title">
+          <span className="song-header__num">{song.number}</span>{' '}{song.title}
+        </h1>
         {(song.author || song.copyright) && (
           <div className="song-header__meta">{[song.author, song.copyright].filter(Boolean).join(' · ')}</div>
         )}
