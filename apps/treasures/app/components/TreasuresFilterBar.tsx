@@ -49,11 +49,7 @@ export default function TreasuresFilterBar({
       <div className="filter-bar filter-bar-lang">
         <span className="filter-label">{t('filterLang')}</span>
         {LANGS.map((l) => (
-          <button
-            key={l}
-            className={`lang-btn${activeLang === l ? ' active' : ''}`}
-            onClick={() => onLangChange(l)}
-          >
+          <button key={l} className={`lang-btn${activeLang === l ? ' active' : ''}`} onClick={() => onLangChange(l)}>
             {t(`lang.${l}`)}
           </button>
         ))}

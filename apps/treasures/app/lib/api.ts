@@ -32,6 +32,7 @@ export interface Treasure {
   isFree: boolean;
   price: string | null;
   sortOrder: number;
+  epubUrl: string | null;
 }
 
 export const TREASURES: Treasure[] = [
@@ -48,6 +49,7 @@ export const TREASURES: Treasure[] = [
     isFree: true,
     price: null,
     sortOrder: 1,
+    epubUrl: null,
   },
   {
     id: 2,
@@ -62,6 +64,7 @@ export const TREASURES: Treasure[] = [
     isFree: true,
     price: null,
     sortOrder: 2,
+    epubUrl: null,
   },
   {
     id: 3,
@@ -76,6 +79,7 @@ export const TREASURES: Treasure[] = [
     isFree: true,
     price: null,
     sortOrder: 3,
+    epubUrl: null,
   },
   {
     id: 4,
@@ -90,6 +94,7 @@ export const TREASURES: Treasure[] = [
     isFree: true,
     price: null,
     sortOrder: 4,
+    epubUrl: null,
   },
   {
     id: 5,
@@ -104,19 +109,21 @@ export const TREASURES: Treasure[] = [
     isFree: true,
     price: null,
     sortOrder: 5,
+    epubUrl: null,
   },
   {
     id: 6,
-    title: 'The Great Controversy',
+    title: 'Leben Jesu',
     author: 'Ellen G. White',
     description:
-      'The conflict of the ages between good and evil, from the destruction of Jerusalem to the glorious triumph at the end of time.',
+      'Das Leben Jesu Christi — von seiner Geburt bis zu Kreuzigung und Auferstehung. Ein zeitloses Meisterwerk der geistlichen Literatur.',
     type: 'book',
-    language: 'en',
+    language: 'de',
     coverGradient: 'linear-gradient(145deg, #1a1a3a, #0d0d22)',
     coverAccentColor: '#9090c0',
     isFree: true,
     price: null,
     sortOrder: 6,
+    epubUrl: 'https://media2.egwwritings.org/epub/de_LJ(DA).epub',
   },
 ];
