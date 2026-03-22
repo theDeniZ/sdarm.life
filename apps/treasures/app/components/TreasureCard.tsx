@@ -9,12 +9,14 @@ function Book3D({ treasure }: { treasure: Treasure }) {
     <div className="book-3d">
       <div
         className="book-3d-cover"
-        style={{ background: treasure.coverGradient, borderColor: `${treasure.coverAccentColor}38` }}
+        style={{ background: treasure.coverGradient ?? undefined, borderColor: treasure.coverAccentColor ? `${treasure.coverAccentColor}38` : undefined }}
       >
         <div
           className="book-3d-spine"
           style={{
-            background: `linear-gradient(to bottom, ${treasure.coverAccentColor}80, ${treasure.coverAccentColor}2e, ${treasure.coverAccentColor}80)`,
+            background: treasure.coverAccentColor
+              ? `linear-gradient(to bottom, ${treasure.coverAccentColor}80, ${treasure.coverAccentColor}2e, ${treasure.coverAccentColor}80)`
+              : undefined,
           }}
         />
         <div className="book-3d-content">

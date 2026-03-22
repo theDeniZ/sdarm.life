@@ -85,3 +85,23 @@ export interface SongDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type TreasureType = 'book';
+
+export interface TreasureDto {
+  id: number;
+  title: string;
+  author: string | null;
+  description: string | null;
+  type: TreasureType;
+  language: string;
+  coverGradient: string | null;
+  coverAccentColor: string | null;
+  coverKey: string | null;
+  isFree: boolean;
+  price: string | null;
+  sortOrder: number;
+  epubUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}

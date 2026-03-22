@@ -114,6 +114,30 @@ export const SongSchema = z
   })
   .openapi('Song');
 
+// ── Treasures ─────────────────────────────────────────────────────────────────
+
+export const TreasureTypeSchema = z.enum(['book']);
+
+export const TreasureSchema = z
+  .object({
+    id: z.number(),
+    title: z.string(),
+    author: z.string().nullable(),
+    description: z.string().nullable(),
+    type: TreasureTypeSchema,
+    language: z.string(),
+    coverGradient: z.string().nullable(),
+    coverAccentColor: z.string().nullable(),
+    coverKey: z.string().nullable(),
+    isFree: z.boolean(),
+    price: z.string().nullable(),
+    sortOrder: z.number(),
+    epubUrl: z.string().nullable(),
+    createdAt: z.string(),
+    updatedAt: z.string(),
+  })
+  .openapi('Treasure');
+
 export const PaginationQuery = z.object({
   limit: z.coerce.number().optional().openapi({ example: 20 }),
   offset: z.coerce.number().optional().openapi({ example: 0 }),

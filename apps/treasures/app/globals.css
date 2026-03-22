@@ -132,6 +132,28 @@ a {
   margin: 0 auto;
 }
 
+/* ── INFINITE SCROLL LOADER ── */
+.shop-loading {
+  display: flex;
+  justify-content: center;
+  padding: 2.5rem 0 1.5rem;
+}
+
+.shop-spinner {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 2px solid rgba(201, 169, 110, 0.1);
+  border-top-color: rgba(201, 169, 110, 0.65);
+  animation: shop-spin 0.85s linear infinite;
+}
+
+@keyframes shop-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* ── ITEM CARD ── */
 .item-card {
   background: rgba(255, 255, 255, 0.022);

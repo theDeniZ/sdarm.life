@@ -266,6 +266,43 @@ tbody tr:hover td { background: rgba(201, 169, 110, 0.03); }
 .td-slug  { font-size: 11px; color: var(--muted); margin-top: 2px; }
 .td-actions { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
 
+.td-reorder { display: flex; align-items: center; gap: 4px; }
+.td-order-num { font-size: 11px; color: var(--muted); min-width: 20px; text-align: center; }
+.btn-reorder {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 2px 5px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.btn-reorder:hover:not(:disabled) { color: var(--gold); border-color: rgba(201,169,110,0.4); }
+.btn-reorder:disabled { opacity: 0.25; cursor: default; }
+
+.swap-form { display: contents; }
+.swap-input {
+  width: 42px;
+  padding: 2px 4px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 11px;
+  text-align: center;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.swap-input:focus { border-color: rgba(201,169,110,0.4); }
+.swap-input:disabled { opacity: 0.25; }
+/* hide browser spinners */
+.swap-input::-webkit-inner-spin-button,
+.swap-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.swap-input[type=number] { -moz-appearance: textfield; }
+.swap-error { font-size: 10px; color: var(--red); margin-top: 3px; }
+
 
 /* ── Form ────────────────────────────────────── */
 
@@ -297,6 +334,7 @@ tbody tr:hover td { background: rgba(201, 169, 110, 0.03); }
 .form-row input[type="number"],
 .form-row input[type="datetime-local"],
 .form-row input[type="search"],
+.form-row select,
 .form-row textarea {
   width: 100%;
   padding: 9px 12px;
@@ -903,6 +941,7 @@ input[type="file"]::file-selector-button:hover {
 
 .badge-active  { background: rgba(93, 190, 138, 0.12); color: #5dbe8a; border: 1px solid rgba(93,190,138,0.2); }
 .badge-revoked { background: var(--surface-2); color: var(--muted); border: 1px solid var(--border); }
+.badge-free    { background: rgba(201,169,110,0.10); color: var(--gold); border: 1px solid rgba(201,169,110,0.2); }
 
 .row-muted td { opacity: .4; }
 

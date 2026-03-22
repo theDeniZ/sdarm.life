@@ -1,7 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import { ConnectedFooter } from '@sdarm/ui';
 import TreasureCatalog from '../components/TreasureCatalog';
-import { TREASURES } from '../lib/api';
 
 export const runtime = 'edge';
 
@@ -10,7 +9,7 @@ export default async function TreasuresPage({ params }: { params: Promise<{ loca
   setRequestLocale(locale);
   return (
     <>
-      <TreasureCatalog treasures={TREASURES} />
+      <TreasureCatalog apiUrl={process.env.API_URL ?? 'https://api.sdarm.life/api/v1'} />
       <ConnectedFooter locale={locale} />
     </>
   );

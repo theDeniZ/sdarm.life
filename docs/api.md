@@ -21,6 +21,8 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/songbooks/:slug` | Songbook metadata + `songCount`. 404 if not found. |
 | `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number+title. `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays. 404 if not found. |
+| `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
+| `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |
 
 ## Admin routes
 
@@ -51,6 +53,11 @@ Require `CF-Access-Client-Id` + `CF-Access-Client-Secret` headers on every reque
 | `DELETE` | `/api/v1/admin/songs/:id/parts/:partId` | Delete a part. |
 | `POST` | `/api/v1/admin/songs/:id/sheets/upload` | `multipart/form-data` (`file`, optional `type`). Accepts PDF and images (jpg, png, webp, gif). Stores under `sheets/{songId}/{uuid}.{ext}` in R2. |
 | `DELETE` | `/api/v1/admin/songs/:id/sheets/:sheetId` | Delete sheet from D1 + R2. |
+| `GET` | `/api/v1/admin/treasures` | All treasures (up to 500). Returns `{ items, total }`. |
+| `POST` | `/api/v1/admin/treasures` | Create treasure. |
+| `POST` | `/api/v1/admin/treasures/batch` | Bulk-create. Body: array of treasure objects. Returns `{ created: N }`. |
+| `PATCH` | `/api/v1/admin/treasures/:id` | Partial update. |
+| `DELETE` | `/api/v1/admin/treasures/:id` | Hard-delete treasure. |
 | `GET` | `/api/v1/admin/api-keys` | List all API keys (active + revoked). |
 | `POST` | `/api/v1/admin/api-keys` | Create key. Body: `{ name }`. Returns `{ key, apiKey }` — plaintext shown once. |
 | `DELETE` | `/api/v1/admin/api-keys/:id` | Revoke key — removes from KV, marks revoked in index. |

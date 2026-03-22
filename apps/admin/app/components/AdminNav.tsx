@@ -9,6 +9,7 @@ const NAV_LINKS = [
   { href: '/subscribers', label: 'Subscribers' },
   { href: '/images', label: 'Images' },
   { href: '/songbooks', label: 'Songbooks', alsoActive: '/songs' },
+  { href: '/treasures', label: 'Treasures' },
   { href: '/api-keys', label: 'API Keys' },
 ];
 

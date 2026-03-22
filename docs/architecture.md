@@ -121,6 +121,26 @@ export interface SongDto {
   createdAt: string;
   updatedAt: string;
 }
+
+export type TreasureType = 'book';  // extensible — new types added here
+
+export interface TreasureDto {
+  id: number;
+  title: string;
+  author: string | null;
+  description: string | null;
+  type: TreasureType;
+  language: string;
+  coverGradient: string | null;   // CSS gradient for synthetic 3-D cover
+  coverAccentColor: string | null;
+  coverKey: string | null;        // R2 key for a real cover image
+  isFree: boolean;
+  price: string | null;
+  sortOrder: number;
+  epubUrl: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
 ```
 
 `apps/web` and `apps/admin` import from `@sdarm/types`. `apps/api` uses the same interfaces to type `c.json()` responses — enforcing the contract at the source.
@@ -218,16 +238,19 @@ apps/api/src/
     config.ts          — GET /config
     images.ts          — GET /images/* (local dev proxy)
     subscribers.ts     — POST /subscribe, GET /unsubscribe
+    treasures.ts       — GET /treasures, GET /treasures/:id
     admin/
       posts.ts         — CRUD /admin/posts
       config.ts        — PUT /admin/config/:key
       images.ts        — GET|DELETE|POST /admin/images
       subscribers.ts   — GET|DELETE /admin/subscribers
+      treasures.ts     — GET|POST|POST batch|PATCH|DELETE /admin/treasures
   repositories/
     posts.ts           — all DB queries for the posts table
     config.ts          — all DB queries for site_config
     images.ts          — all DB queries for the images table
     subscribers.ts     — all DB queries for the subscribers table
+    treasures.ts       — all DB queries for the treasures table
   middleware/
     auth.ts            — CF Access header verification middleware
   schemas.ts           — shared Zod schemas (PostSchema, ImageSchema, etc.) — source of truth for OpenAPI spec

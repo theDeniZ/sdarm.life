@@ -110,3 +110,25 @@ export const songSheets = sqliteTable('song_sheets', {
 }, (t) => [
   index('song_sheets_song_id_idx').on(t.songId),
 ]);
+
+export const treasures = sqliteTable('treasures', {
+  id:               integer('id').primaryKey({ autoIncrement: true }),
+  title:            text('title').notNull(),
+  author:           text('author'),
+  description:      text('description'),
+  type:             text('type', { enum: ['book'] }).notNull().default('book'),
+  language:         text('language').notNull(),
+  coverGradient:    text('cover_gradient'),
+  coverAccentColor: text('cover_accent_color'),
+  coverKey:         text('cover_key'),
+  isFree:           integer('is_free', { mode: 'boolean' }).notNull().default(true),
+  price:            text('price'),
+  sortOrder:        integer('sort_order').notNull().default(0),
+  epubUrl:          text('epub_url'),
+  createdAt:        integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+  updatedAt:        integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+}, (t) => [
+  index('treasures_sort_order_idx').on(t.sortOrder),
+  index('treasures_type_idx').on(t.type),
+  index('treasures_language_idx').on(t.language),
+]);

@@ -36,6 +36,14 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 - Stored in the same R2 bucket (`IMAGES` binding) as post cover images
 - Deleted from R2 on `DELETE /admin/songs/:id/sheets/:sheetId`
 
+**`treasures`**
+`id`, `title`, `author`, `description`, `type` (`book`), `language`, `cover_gradient`, `cover_accent_color`, `cover_key`, `is_free` (boolean), `price`, `sort_order`, `epub_url`, `created_at`, `updated_at`
+- `type` is an enum; only `'book'` for now — new types with additional metadata can be added later
+- `cover_gradient` / `cover_accent_color` — optional CSS gradient/color used to render a synthetic 3-D book cover when no image is available
+- `cover_key` — optional R2 object key for a real cover image
+- `epub_url` — direct URL to an EPUB file (external, e.g. `media2.egwwritings.org`)
+- Bulk-import from `scripts/epub-meta.json` via `POST /admin/treasures/batch`
+
 ## Config keys
 
 `KNOWN_CONFIG_KEYS` is exported from `@sdarm/db` and is the single source of truth. Both `apps/api` and `apps/admin` import it — never hardcode config keys elsewhere.
