@@ -1,6 +1,17 @@
 import type { MiddlewareHandler } from 'hono';
 import type { Bindings } from '../types';
 
+/** Only accepts the bootstrap env API_KEY — used for api-key management routes. */
+export const bootstrapAuth: MiddlewareHandler<{ Bindings: Bindings }> = async (c, next) => {
+	const header = c.req.header('Authorization');
+	const key = header?.startsWith('Bearer ') ? header.slice(7) : null;
+	if (key && c.env.API_KEY && key === c.env.API_KEY) {
+		await next();
+		return;
+	}
+	return c.json({ error: 'Unauthorized' }, 401);
+};
+
 async function hashKey(key: string): Promise<string> {
 	const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(key));
 	return Array.from(new Uint8Array(buf))

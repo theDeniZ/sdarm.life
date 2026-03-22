@@ -3,7 +3,7 @@ import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
 import type { Bindings } from './types';
-import { auth } from './middleware/auth';
+import { auth, bootstrapAuth } from './middleware/auth';
 import { cached } from './middleware/cache';
 import postsRouter from './routes/posts';
 import configRouter from './routes/config';
@@ -89,7 +89,7 @@ app.doc('/api/openapi.json', {
 app.get('/api/ui', swaggerUI({ url: '/api/openapi.json' }));
 
 // ── API Keys route (excluded from Swagger docs) ──────────────────────────────
-apiKeysApp.use('*', auth);
+apiKeysApp.use('*', bootstrapAuth);
 apiKeysApp.route('', adminApiKeysRouter);
 app.route('/api/v1/admin/api-keys', apiKeysApp);
 
