@@ -71,17 +71,6 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
     <>
       {/* Toolbar */}
       <div className="reader-toolbar-bar">
-        <div className="reader-breadcrumb">
-          <Link href={`/${locale}`} className="reader-breadcrumb__link">
-            {t('songs')}
-          </Link>
-          <span className="reader-breadcrumb__sep">›</span>
-          <Link href={`/${locale}/songbooks/${slug}`} className="reader-breadcrumb__link">
-            {songbook.title}
-          </Link>
-          <span className="reader-breadcrumb__sep">›</span>
-          <span className="reader-breadcrumb__current">{currentSong.title}</span>
-        </div>
         <button
           className={`reader-icon-btn${sidebarOpen ? ' active' : ''}`}
           onClick={() => setSidebarOpen((o) => !o)}
@@ -93,6 +82,17 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
             <line x1="2" y1="14" x2="16" y2="14" />
           </svg>
         </button>
+        <div className="reader-breadcrumb">
+          <Link href={`/${locale}`} className="reader-breadcrumb__link">
+            {t('songs')}
+          </Link>
+          <span className="reader-breadcrumb__sep">›</span>
+          <Link href={`/${locale}/songbooks/${slug}`} className="reader-breadcrumb__link">
+            {songbook.title}
+          </Link>
+          <span className="reader-breadcrumb__sep">›</span>
+          <span className="reader-breadcrumb__current">{currentSong.title}</span>
+        </div>
       </div>
 
       <div className="reader-body">

@@ -391,7 +391,10 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                 <button
                   key={entry.id}
                   className={`epub-toc-item${entry.chapterIndex === currentIdx ? ' epub-toc-item--active' : ''}`}
-                  onClick={() => setCurrentIdx(entry.chapterIndex)}
+                  onClick={() => {
+                    setCurrentIdx(entry.chapterIndex);
+                    if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
+                  }}
                 >
                   <span className="epub-toc-item__num">{entry.chapterIndex + 1}</span>
                   <span className="epub-toc-item__title">{entry.title}</span>

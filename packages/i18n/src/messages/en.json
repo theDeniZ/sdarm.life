@@ -142,8 +142,11 @@
         "section4Title": "Hosting & Analytics",
         "section4Body": "This website is hosted via Cloudflare Pages. Cloudflare may process technical access data (e.g. IP address, time of access). Website statistics are collected via Cloudflare Web Analytics — cookie-free, without user profiles and without personal data.",
         "cloudflarePrivacy": "Cloudflare Privacy Policy",
-        "section5Title": "Your Rights",
-        "section5Body": "You have the right to information, correction, deletion and restriction of processing of your stored data as well as the right to data portability. Please contact"
+        "section5Title": "External Content (E-Books)",
+        "section5Body": "The \u201cTreasures\u201d platform allows digital books in EPUB format to be read directly in the browser. When opening a book, your browser establishes a direct connection to the external file server (currently: egwwritings.org, operated by the Ellen G. White Estate, Inc., USA) from which the EPUB file is retrieved. In doing so, your IP address and the time of access are transmitted to this third-party provider. Processing is based on our legitimate interest in delivering the requested content (Art.\u00a06(1)(f) GDPR). For more information, please see the",
+        "section5PrivacyLink": "Ellen G. White Estate Privacy Policy",
+        "section6Title": "Your Rights",
+        "section6Body": "You have the right to information, correction, deletion and restriction of processing of your stored data as well as the right to data portability. Please contact"
       }
     }
   },

@@ -43,7 +43,16 @@ export default async function DatenschutzPage({ params }: { params: Promise<{ lo
 
       <h2>{t('section5Title')}</h2>
       <p>
-        {t('section5Body')} <a href="mailto:info@sdarm.life">info@sdarm.life</a>.
+        {t('section5Body')}{' '}
+        <a href="https://whiteestate.org/legal-notice/privacy-policy/" target="_blank" rel="noopener noreferrer">
+          {t('section5PrivacyLink')}
+        </a>
+        .
+      </p>
+
+      <h2>{t('section6Title')}</h2>
+      <p>
+        {t('section6Body')} <a href="mailto:info@sdarm.life">info@sdarm.life</a>.
       </p>
     </main>
   );
