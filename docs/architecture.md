@@ -131,34 +131,62 @@ export interface SongDto {
 
 ### Shared UI: `packages/ui`
 
-React components and the dark museum CSS design system used by all public-facing apps (`web`, `songbook`, and any future apps).
+React components and the dark museum CSS design system used by all public-facing apps (`web`, `songbook`, `treasures`, and any future apps).
 
 ```
 packages/ui/src/
   components/
-    Navbar.tsx       — fixed nav; transparent → frosted glass on scroll
-    Footer.tsx       — 3-col: contact+subscribe, nav links, sunset clock
-    Pagination.tsx   — generic offset pagination (styling left to consumer)
+    ConnectedNavbar.tsx  — wraps Navbar; accepts locale prop, reads translations server-side
+    ConnectedFooter.tsx  — wraps Footer; accepts locale prop, reads translations + apiUrl server-side
+    Navbar.tsx           — fixed nav; transparent → frosted glass on scroll; language switcher
+    Footer.tsx           — 3-col: contact+subscribe, nav links, sunset clock
+    PageHero.tsx         — full-bleed landing hero: grain, glow, fog, deco-circle, decoration slot, scroll hint
+    ScriptureVerseSection.tsx — centered quote band: large italic text + reference tag
+    ComingSoon.tsx       — placeholder section for unreleased pages
+    Pagination.tsx       — generic offset pagination (styling left to consumer)
   styles/
-    tokens.css       — Google Fonts import, CSS custom properties, base reset
-    navbar.css       — nav component styles + responsive breakpoints
-    footer.css       — footer + sunset clock styles + responsive breakpoints
-    index.css        — @imports all three (single entry point)
-  index.ts           — re-exports all components + FooterConfig type
+    tokens.css           — Google Fonts import, CSS custom properties, base reset
+    navbar.css           — nav component styles + responsive breakpoints
+    footer.css           — footer + sunset clock styles + responsive breakpoints
+    page-hero.css        — PageHero styles (grain, fog, deco-circle, entrance animations)
+    scripture-verse.css  — ScriptureVerseSection styles
+    coming-soon.css      — ComingSoon styles
+    index.css            — @imports all of the above (single entry point)
+  index.ts               — re-exports all components + FooterConfig, PageHeroProps types
 ```
 
 **How to use in a new app:**
 
 ```ts
-// layout.tsx
-import '@sdarm/ui/src/styles/index.css'; // dark museum theme
+// layout.tsx — imports the full design system (tokens + all component styles)
+import '@sdarm/ui/src/styles/index.css';
 ```
 
 ```ts
-// any component
-import { Navbar, Footer } from '@sdarm/ui';
-import type { FooterConfig } from '@sdarm/ui';
+// locale layout — use the Connected wrappers; they handle i18n and env vars internally
+import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
+
+// page — use the content components directly
+import { PageHero, ScriptureVerseSection } from '@sdarm/ui';
+import type { PageHeroProps } from '@sdarm/ui';
 ```
+
+**`PageHero` props** — use whenever a landing page needs a full-bleed dark hero:
+
+| Prop | Type | Notes |
+|---|---|---|
+| `title` | `ReactNode` | Supports `<em>` for gold italic accent |
+| `eyebrow` | `string?` | Small uppercase label above the title |
+| `subtitle` | `string?` | Body text beneath the title |
+| `decoration` | `ReactNode?` | SVG icon placed right-centre (use `viewBox`, any size — rendered at 120×120) |
+| `scrollHint` | `string?` | Bouncing label + chevron at the bottom centre |
+
+**`ScriptureVerseSection` props:**
+
+| Prop | Type | Notes |
+|---|---|---|
+| `text` | `string` | The verse body |
+| `reference` | `string` | Citation, e.g. `"Psalm 96,1"` |
 
 **CSS design tokens** (set in `tokens.css`, available via `var()` everywhere after the import):
 
@@ -171,7 +199,7 @@ import type { FooterConfig } from '@sdarm/ui';
 | `--border` | `rgba(201,169,110,0.12)` | Subtle separator |
 | `--hc-ease` | `cubic-bezier(0.76,0,0.24,1)` | Strip carousel easing |
 
-**Pagination CSS is not included** — it uses admin-specific variables (`--red`, `--border` from admin theme). The `Pagination` component is shared but consumers style it via their own globals.
+**Pagination CSS is not included** — it uses admin-specific variables. The `Pagination` component is shared but consumers style it via their own globals.
 
 **Peer dependencies:** `next >=15`, `react >=19` — all current apps already satisfy these.
 

@@ -214,6 +214,29 @@
       "description": "Seventh Day Adventist Reform Movement — Treasures"
     },
     "comingSoonTitle": "Treasures",
-    "comingSoonSubtitle": "Spiritual resources, books, and materials — coming soon."
+    "comingSoonSubtitle": "Spiritual resources, books, and materials — coming soon.",
+    "catalog": {
+      "eyebrow": "Spiritual Resources",
+      "title": "Books & <em>Treasures</em>",
+      "subtitle": "Classic literature and spiritual resources — freely accessible to everyone.",
+      "discover": "Discover",
+      "filterCategory": "Category",
+      "filterLang": "Language",
+      "filterAll": "All",
+      "lang": {
+        "all": "All",
+        "de": "German",
+        "ru": "Russian",
+        "en": "English"
+      },
+      "type": {
+        "book": "Books"
+      },
+      "free": "Free",
+      "readSoon": "Read",
+      "empty": "No results for this selection.",
+      "scriptureText": "Your testimonies are my heritage forever, for they are the joy of my heart.",
+      "scriptureRef": "Psalm 119:111"
+    }
   }
 }

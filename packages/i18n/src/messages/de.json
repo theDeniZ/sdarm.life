@@ -213,6 +213,29 @@
       "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Schätze"
     },
     "comingSoonTitle": "Schätze",
-    "comingSoonSubtitle": "Geistliche Ressourcen, Bücher und Materialien — bald hier verfügbar."
+    "comingSoonSubtitle": "Geistliche Ressourcen, Bücher und Materialien — bald hier verfügbar.",
+    "catalog": {
+      "eyebrow": "Geistliche Ressourcen",
+      "title": "Bücher & <em>Schätze</em>",
+      "subtitle": "Klassische Literatur und geistliche Ressourcen — kostenlos zugänglich für jeden.",
+      "discover": "Entdecken",
+      "filterCategory": "Kategorie",
+      "filterLang": "Sprache",
+      "filterAll": "Alle",
+      "lang": {
+        "all": "Alle",
+        "de": "Deutsch",
+        "ru": "Russisch",
+        "en": "Englisch"
+      },
+      "type": {
+        "book": "Bücher"
+      },
+      "free": "Kostenlos",
+      "readSoon": "Lesen",
+      "empty": "Keine Ergebnisse für diese Auswahl.",
+      "scriptureText": "Deine Zeugnisse sind mein ewiges Erbe; denn sie sind meines Herzens Wonne.",
+      "scriptureRef": "Psalm 119,111"
+    }
   }
 }

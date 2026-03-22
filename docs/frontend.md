@@ -161,6 +161,46 @@ Image fields render `<ImagePicker>`. Text-area fields render `<textarea>`. URL a
 
 ---
 
+## `@sdarm/ui` shared components
+
+All public-facing apps (`web`, `songbook`, `treasures`, `events`) import from `@sdarm/ui`. **Check here before building something from scratch** — the hero, footer, nav, and quote band are already done.
+
+Import the design system once in the root layout:
+
+```ts
+import '@sdarm/ui/src/styles/index.css';
+```
+
+### Component reference
+
+| Component | Import | Notes |
+|---|---|---|
+| `ConnectedNavbar` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads nav translations internally. Use in every locale layout. |
+| `ConnectedFooter` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads footer translations + `apiUrl` from env internally. Use in every locale layout. |
+| `PageHero` | `@sdarm/ui` | Full-bleed dark landing hero. Pass `title` (ReactNode), `eyebrow?`, `subtitle?`, `decoration?` (SVG), `scrollHint?`. Already has grain, fog, deco-circle, entrance animations — **do not re-implement these**. |
+| `ScriptureVerseSection` | `@sdarm/ui` | Centered italic quote band. Pass `text` and `reference`. |
+| `ComingSoon` | `@sdarm/ui` | Placeholder for unreleased pages. Pass `title` and `subtitle`. |
+| `Pagination` | `@sdarm/ui` | Generic offset pagination. Consumers provide their own CSS. |
+
+### When to use `PageHero`
+
+Any public landing page that needs a dark hero with ambient atmosphere should use `PageHero` rather than building its own. The `decoration` prop accepts any ReactNode — pass an SVG that represents the page's domain (music note for songbook, book for treasures, etc.). The SVG is rendered at 120×120 with 12% opacity on the right side.
+
+```tsx
+// songbook example
+<PageHero
+  eyebrow={t('eyebrow')}
+  title={t.rich('title', { em: (chunks) => <em>{chunks}</em> })}
+  subtitle={t('subtitle')}
+  decoration={<svg viewBox="0 0 100 130">…</svg>}
+  scrollHint={t('discover')}
+/>
+```
+
+The `<em>` inside `title` renders in `--gold` italic. Use `t.rich()` with `{ em: (chunks) => <em>{chunks}</em> }` to drive it from i18n.
+
+---
+
 ## Next.js component rules
 
 **Default to Server Components.** Add `'use client'` only when you need browser APIs, event handlers, or `useState`/`useEffect`.
