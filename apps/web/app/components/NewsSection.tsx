@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import QuoteShareModal from './QuoteShareModal';
+// import QuoteShareModal from './QuoteShareModal';
 
 // Kept for API compatibility
 export interface NewsPost {
@@ -296,12 +296,12 @@ export default function NewsSection() {
         </div>
       </section>
 
-      <QuoteShareModal
+      {/* <QuoteShareModal
         open={modalOpen}
         text="Dein Wort ist meines Fußes Leuchte und ein Licht auf meinem Wege."
         ref_="Psalm 119,105"
         onClose={() => setModalOpen(false)}
-      />
+      /> */}
     </>
   );
 }

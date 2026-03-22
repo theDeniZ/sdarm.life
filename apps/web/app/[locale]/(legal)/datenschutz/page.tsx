@@ -31,6 +31,7 @@ export default async function DatenschutzPage({ params }: { params: Promise<{ lo
 
       <h2>{t('section3Title')}</h2>
       <p>{t('section3Body')}</p>
+      <p>{t('section3LocalStorage')}</p>
 
       <h2>{t('section4Title')}</h2>
       <p>

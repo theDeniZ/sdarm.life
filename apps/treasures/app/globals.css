@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Serif+Display:ital@0;1&family=Bebas+Neue&family=Oswald:wght@200;300&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Serif+Display:ital@0;1&family=Bebas+Neue&family=Oswald:wght@200;300&family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&display=swap');
 
 *,
 *::before,
@@ -584,6 +584,50 @@ a {
   letter-spacing: 0.04em;
 }
 
+/* ── Reader themes ───────────────────────────────────────── */
+/* Default (dark) — scoped inside .epub-reader so the rest of the page is unaffected */
+.epub-reader {
+  --reader-bg: #0c0b09;
+  --reader-toolbar: #0e0d0b;
+  --reader-sidebar: #0a0908;
+  --text: #d6d0c8;
+  --muted: #7a7470;
+  --gold: #c9a96e;
+  --border: rgba(201, 169, 110, 0.12);
+  /* Typography defaults — overridden via inline CSS vars from component state */
+  --epub-font-size: 17px;
+  --epub-font-family: 'Cormorant Garamond', serif;
+  --epub-line-height: 1.9;
+}
+
+/* data-theme lives on <html> (mirrors prototype pattern) so body bg also adapts */
+[data-theme='sepia'] body {
+  background: #f5f0e8;
+}
+[data-theme='light'] body {
+  background: #fafafa;
+}
+
+[data-theme='sepia'] .epub-reader {
+  --reader-bg: #f5f0e8;
+  --reader-toolbar: #ede8df;
+  --reader-sidebar: #e8e3da;
+  --text: #3d2e1e;
+  --muted: #8a7660;
+  --gold: #8a6830;
+  --border: rgba(138, 104, 48, 0.18);
+}
+
+[data-theme='light'] .epub-reader {
+  --reader-bg: #fafafa;
+  --reader-toolbar: #f2f2f2;
+  --reader-sidebar: #efefef;
+  --text: #1a1a1a;
+  --muted: #666;
+  --gold: #b8924a;
+  --border: rgba(0, 0, 0, 0.1);
+}
+
 /* ── Reader shell ────────────────────────────────────────── */
 .epub-reader {
   display: flex;
@@ -594,7 +638,8 @@ a {
   right: 0;
   bottom: 0;
   overflow: hidden;
-  background: var(--dark);
+  background: var(--reader-bg);
+  transition: background 0.25s, color 0.25s;
 }
 
 /* ── Toolbar ─────────────────────────────────────────────── */
@@ -604,7 +649,7 @@ a {
   height: 44px;
   flex-shrink: 0;
   padding: 0 1rem;
-  background: #0e0d0b;
+  background: var(--reader-toolbar);
   border-bottom: 1px solid var(--border);
   gap: 0.8rem;
 }
@@ -734,7 +779,7 @@ a {
 .epub-sidebar {
   width: 260px;
   flex-shrink: 0;
-  background: #0a0908;
+  background: var(--reader-sidebar);
   border-right: 1px solid var(--border);
   display: flex;
   overflow: hidden;
@@ -887,10 +932,11 @@ a {
 
 /* Typography for epub body content */
 .epub-chapter__body {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.08rem;
-  line-height: 1.9;
+  font-family: var(--epub-font-family);
+  font-size: var(--epub-font-size);
+  line-height: var(--epub-line-height);
   color: var(--text);
+  transition: font-size 0.15s, line-height 0.15s;
 }
 
 .epub-chapter__body h1,
@@ -928,7 +974,7 @@ a {
   padding-left: 1.2rem;
   margin: 1.5rem 0;
   font-style: italic;
-  color: rgba(214, 208, 200, 0.72);
+  color: var(--muted);
 }
 
 .epub-chapter__body a {
@@ -1019,6 +1065,191 @@ a {
 .epub-retry-btn:hover {
   color: var(--gold);
   border-color: var(--gold);
+}
+
+/* ── Settings panel ──────────────────────────────────────── */
+.epub-settings-wrap {
+  position: relative;
+}
+
+.epub-settings {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--reader-toolbar);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1.1rem 1.2rem;
+  width: 280px;
+  z-index: 300;
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+}
+
+.epub-settings__label {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.58rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.9rem;
+  margin-bottom: 0.55rem;
+}
+
+.epub-settings__label:first-child {
+  margin-top: 0;
+}
+
+/* Theme row */
+.epub-theme-row {
+  display: flex;
+  gap: 0.45rem;
+}
+
+.epub-theme-btn {
+  flex: 1;
+  padding: 0.5rem 0.3rem;
+  border-radius: 7px;
+  cursor: pointer;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  border: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  background: none;
+  color: var(--text);
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.epub-theme-btn--active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.07);
+}
+
+.epub-theme-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Font size */
+.epub-font-size-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.epub-size-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 169, 110, 0.06);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+
+.epub-size-btn:hover:not(:disabled) {
+  background: rgba(201, 169, 110, 0.14);
+  color: var(--gold);
+}
+
+.epub-size-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.epub-font-size-val {
+  flex: 1;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.epub-size-slider {
+  width: 100%;
+  margin-top: 0.5rem;
+  height: 2px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border);
+  outline: none;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.epub-size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+}
+
+/* Font family */
+.epub-font-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.epub-font-btn {
+  padding: 0.38rem 0.7rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.epub-font-btn--active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.07);
+}
+
+/* Line height */
+.epub-lh-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.epub-lh-btn {
+  flex: 1;
+  padding: 0.42rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  font-family: 'Cormorant Garamond', serif;
+  transition: border-color 0.2s, background 0.2s, color 0.2s;
+}
+
+.epub-lh-btn--active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.07);
 }
 
 /* ── Disabled CTA ────────────────────────────────────────── */

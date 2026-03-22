@@ -21,6 +21,35 @@ interface TocEntry {
 }
 
 type Phase = 'downloading' | 'parsing' | 'ready' | 'error';
+type ReaderTheme = 'dark' | 'sepia' | 'light';
+type ReaderFont = 'lora' | 'cormorant' | 'playfair' | 'inter';
+
+const THEME_LABELS: Record<ReaderTheme, string> = { dark: 'Dunkel', sepia: 'Sepia', light: 'Hell' };
+const THEME_DOTS: Record<ReaderTheme, { bg: string; border: string }> = {
+  dark: { bg: '#1a1814', border: '#c9a96e' },
+  sepia: { bg: '#f5f0e8', border: '#8a6830' },
+  light: { bg: '#fff', border: '#ccc' },
+};
+
+const FONT_MAP: Record<ReaderFont, string> = {
+  lora: "'Lora', serif",
+  cormorant: "'Cormorant Garamond', serif",
+  playfair: "'Playfair Display', serif",
+  inter: "'Inter', sans-serif",
+};
+
+const FONT_LABELS: Record<ReaderFont, string> = {
+  lora: 'Lora',
+  cormorant: 'Cormorant',
+  playfair: 'Playfair',
+  inter: 'Inter',
+};
+
+const LH_OPTIONS = [
+  { value: 1.6, label: 'Kompakt' },
+  { value: 1.9, label: 'Normal' },
+  { value: 2.2, label: 'Weit' },
+];
 
 interface Props {
   epubUrl: string;
@@ -137,10 +166,69 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
+  const [theme, setThemeState] = useState<ReaderTheme>('dark');
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [fontSize, setFontSizeState] = useState(17);
+  const [fontKey, setFontKeyState] = useState<ReaderFont>('cormorant');
+  const [lineHeight, setLineHeightState] = useState(1.9);
 
   const contentRef = useRef<HTMLDivElement>(null);
+  const settingsWrapRef = useRef<HTMLDivElement>(null);
   // retrySignal increments on manual retry to re-trigger the effect
   const [retrySignal, setRetrySignal] = useState(0);
+
+  // Restore all reader prefs from localStorage on mount
+  useEffect(() => {
+    const savedTheme = localStorage.getItem('sdarm_theme') as ReaderTheme | null;
+    if (savedTheme && (savedTheme === 'dark' || savedTheme === 'sepia' || savedTheme === 'light')) {
+      setThemeState(savedTheme);
+    }
+    const savedFs = localStorage.getItem('sdarm_fs');
+    if (savedFs) setFontSizeState(Math.max(13, Math.min(26, Number(savedFs))));
+    const savedFont = localStorage.getItem('sdarm_font') as ReaderFont | null;
+    if (savedFont && FONT_MAP[savedFont]) setFontKeyState(savedFont);
+    const savedLh = localStorage.getItem('sdarm_lh');
+    if (savedLh) setLineHeightState(Number(savedLh));
+  }, []);
+
+  // Mirror theme to <html data-theme> so body bg and scrollbar also respond
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    return () => document.documentElement.removeAttribute('data-theme');
+  }, [theme]);
+
+  // Close settings panel on outside click
+  useEffect(() => {
+    if (!settingsOpen) return;
+    function onOutside(e: MouseEvent) {
+      if (settingsWrapRef.current && !settingsWrapRef.current.contains(e.target as Node)) {
+        setSettingsOpen(false);
+      }
+    }
+    document.addEventListener('mousedown', onOutside);
+    return () => document.removeEventListener('mousedown', onOutside);
+  }, [settingsOpen]);
+
+  function setTheme(t: ReaderTheme) {
+    setThemeState(t);
+    localStorage.setItem('sdarm_theme', t);
+  }
+
+  function setFontSize(n: number) {
+    const v = Math.max(13, Math.min(26, n));
+    setFontSizeState(v);
+    localStorage.setItem('sdarm_fs', String(v));
+  }
+
+  function setFont(key: ReaderFont) {
+    setFontKeyState(key);
+    localStorage.setItem('sdarm_font', key);
+  }
+
+  function setLineHeight(lh: number) {
+    setLineHeightState(lh);
+    localStorage.setItem('sdarm_lh', String(lh));
+  }
 
   useEffect(() => {
     async function loadEpub() {
@@ -335,7 +423,16 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const readingProgress = Math.round(((currentIdx + 1) / chapters.length) * 100);
 
   return (
-    <div className="epub-reader">
+    <div
+      className="epub-reader"
+      style={
+        {
+          '--epub-font-size': `${fontSize}px`,
+          '--epub-font-family': FONT_MAP[fontKey],
+          '--epub-line-height': lineHeight,
+        } as React.CSSProperties
+      }
+    >
       {/* Toolbar */}
       <div className="epub-toolbar">
         <div className="epub-toolbar__left">
@@ -367,6 +464,89 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
           <span className="epub-chapter-pos">
             {currentIdx + 1} / {chapters.length}
           </span>
+          <div className="epub-settings-wrap" ref={settingsWrapRef}>
+            <button
+              className="epub-icon-btn"
+              onClick={() => setSettingsOpen((v) => !v)}
+              aria-label="Leseeinstellungen"
+            >
+              <svg viewBox="0 0 18 18" fill="none">
+                <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" />
+                <path
+                  d="M9 1v2M9 15v2M1 9h2M15 9h2M3.22 3.22l1.42 1.42M13.36 13.36l1.42 1.42M14.78 3.22l-1.42 1.42M4.64 13.36l-1.42 1.42"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
+            </button>
+            {settingsOpen && (
+              <div className="epub-settings">
+                <span className="epub-settings__label">Thema</span>
+                <div className="epub-theme-row">
+                  {(['dark', 'sepia', 'light'] as ReaderTheme[]).map((t) => (
+                    <button
+                      key={t}
+                      className={`epub-theme-btn${theme === t ? ' epub-theme-btn--active' : ''}`}
+                      onClick={() => setTheme(t)}
+                    >
+                      <span
+                        className="epub-theme-dot"
+                        style={{ background: THEME_DOTS[t].bg, border: `1px solid ${THEME_DOTS[t].border}` }}
+                      />
+                      {THEME_LABELS[t]}
+                    </button>
+                  ))}
+                </div>
+
+                <span className="epub-settings__label">Schriftgröße</span>
+                <div className="epub-font-size-row">
+                  <button className="epub-size-btn" onClick={() => setFontSize(fontSize - 1)} disabled={fontSize <= 13}>
+                    A−
+                  </button>
+                  <div className="epub-font-size-val">{fontSize}px</div>
+                  <button className="epub-size-btn" onClick={() => setFontSize(fontSize + 1)} disabled={fontSize >= 26}>
+                    A+
+                  </button>
+                </div>
+                <input
+                  type="range"
+                  className="epub-size-slider"
+                  min={13}
+                  max={26}
+                  value={fontSize}
+                  onChange={(e) => setFontSize(Number(e.target.value))}
+                />
+
+                <span className="epub-settings__label">Schriftart</span>
+                <div className="epub-font-row">
+                  {(Object.keys(FONT_MAP) as ReaderFont[]).map((key) => (
+                    <button
+                      key={key}
+                      className={`epub-font-btn${fontKey === key ? ' epub-font-btn--active' : ''}`}
+                      style={{ fontFamily: FONT_MAP[key] }}
+                      onClick={() => setFont(key)}
+                    >
+                      {FONT_LABELS[key]}
+                    </button>
+                  ))}
+                </div>
+
+                <span className="epub-settings__label">Zeilenabstand</span>
+                <div className="epub-lh-row">
+                  {LH_OPTIONS.map(({ value, label }) => (
+                    <button
+                      key={value}
+                      className={`epub-lh-btn${lineHeight === value ? ' epub-lh-btn--active' : ''}`}
+                      onClick={() => setLineHeight(value)}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
