@@ -19,7 +19,9 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 - Direct R2 operations (wrangler, CF dashboard) bypass this table — manual backfill required
 
 **`subscribers`**
-`id`, `email` (unique), `token` (unique), `unsubscribed_at`, `created_at`
+`id`, `email` (unique), `token` (unique), `language` (default `'de'`), `unsubscribed_at`, `created_at`
+- `language` — locale the subscriber was using when they signed up (`'de'` or `'en'`); used to send emails in their preferred language
+- Unsubscribing hard-deletes the row (`DELETE`); there are no soft-deleted subscribers
 
 **`songbooks`**
 `id`, `title`, `slug` (unique), `language` (default `'ru'`), `description`, `cover_key`, `sort_order`, `created_at`, `updated_at`

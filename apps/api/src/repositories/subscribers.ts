@@ -4,6 +4,10 @@ import { desc, count, eq } from 'drizzle-orm';
 
 type DB = ReturnType<typeof drizzle>;
 
+export async function listAllSubscribers(db: DB) {
+	return db.select().from(subscribers).orderBy(desc(subscribers.createdAt));
+}
+
 export async function listSubscribers(db: DB, opts: { limit?: number; offset?: number }) {
 	const [items, [{ total }]] = await Promise.all([
 		db.select().from(subscribers).orderBy(desc(subscribers.createdAt))
@@ -13,8 +17,8 @@ export async function listSubscribers(db: DB, opts: { limit?: number; offset?: n
 	return { items, total };
 }
 
-export async function createSubscriber(db: DB, email: string, token: string) {
-	await db.insert(subscribers).values({ email, token });
+export async function createSubscriber(db: DB, email: string, token: string, language: string) {
+	await db.insert(subscribers).values({ email, token, language });
 }
 
 export async function unsubscribeByToken(db: DB, token: string) {

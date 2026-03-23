@@ -465,11 +465,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             {currentIdx + 1} / {chapters.length}
           </span>
           <div className="epub-settings-wrap" ref={settingsWrapRef}>
-            <button
-              className="epub-icon-btn"
-              onClick={() => setSettingsOpen((v) => !v)}
-              aria-label="Leseeinstellungen"
-            >
+            <button className="epub-icon-btn" onClick={() => setSettingsOpen((v) => !v)} aria-label="Leseeinstellungen">
               <svg viewBox="0 0 18 18" fill="none">
                 <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" />
                 <path

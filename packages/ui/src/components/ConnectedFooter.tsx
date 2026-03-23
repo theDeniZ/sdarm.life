@@ -39,6 +39,7 @@ export default async function ConnectedFooter({ locale = 'de' }: { locale?: stri
       songbookUrl={`${songbookUrl}/${locale}`}
       eventsUrl={`${eventsUrl}/${locale}`}
       treasuresUrl={`${treasuresUrl}/${locale}`}
+      locale={locale}
     />
   );
 }

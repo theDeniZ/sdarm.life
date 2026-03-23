@@ -79,7 +79,12 @@ export default function TreasureForm({ id, initial = {} }: Props) {
 
       <div className="form-row">
         <label>Language</label>
-        <input type="text" value={form.language} placeholder="de, en, ru…" onChange={(e) => set('language', e.target.value)} />
+        <input
+          type="text"
+          value={form.language}
+          placeholder="de, en, ru…"
+          onChange={(e) => set('language', e.target.value)}
+        />
       </div>
 
       <div className="form-row">
@@ -105,7 +110,11 @@ export default function TreasureForm({ id, initial = {} }: Props) {
       <div className="form-row">
         <label>Cover accent color</label>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-          <input type="color" value={form.coverAccentColor || '#c9a96e'} onChange={(e) => set('coverAccentColor', e.target.value)} />
+          <input
+            type="color"
+            value={form.coverAccentColor || '#c9a96e'}
+            onChange={(e) => set('coverAccentColor', e.target.value)}
+          />
           <input
             type="text"
             value={form.coverAccentColor}

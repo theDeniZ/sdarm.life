@@ -3,6 +3,7 @@ import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../types';
 import { createSubscriber, unsubscribeByToken } from '../repositories/subscribers';
 import { ErrorSchema, OkSchema } from '../schemas';
+import { welcomeEmail } from '../emails/welcome';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -12,7 +13,7 @@ const subscribeRoute = createRoute({
   tags: ['Subscribers'],
   request: {
     body: {
-      content: { 'application/json': { schema: z.object({ email: z.string().email() }) } },
+      content: { 'application/json': { schema: z.object({ email: z.string().email(), language: z.enum(['de', 'en']).optional() }) } },
       required: true,
     },
   },
@@ -57,16 +58,34 @@ const unsubscribeRoute = createRoute({
 
 router.openapi(subscribeRoute, async (c) => {
   const db = drizzle(c.env.DB);
-  const { email } = c.req.valid('json');
+  const { email, language } = c.req.valid('json');
 
   if (!email.includes('@')) return c.json({ error: 'Invalid email' }, 400);
 
+  let token: string;
   try {
-    const token = crypto.randomUUID();
-    await createSubscriber(db, email.toLowerCase().trim(), token);
+    token = crypto.randomUUID();
+    await createSubscriber(db, email.toLowerCase().trim(), token, language ?? 'de');
   } catch {
     return c.json({ error: 'Already subscribed' }, 409);
   }
+
+  const locale = (language ?? 'de') as 'de' | 'en';
+  const apiBase = new URL(c.req.url).origin;
+  const unsubscribeUrl = `${apiBase}/api/v1/unsubscribe?token=${token}`;
+
+  c.executionCtx.waitUntil(
+    fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${c.env.RESEND_API_KEY}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        from: 'info@sdarm.life',
+        to: email.toLowerCase().trim(),
+        subject: locale === 'de' ? 'Willkommen bei sdarm.life' : 'Welcome to sdarm.life',
+        html: welcomeEmail({ unsubscribeUrl, locale }),
+      }),
+    }),
+  );
 
   return c.json({ ok: true as const }, 201);
 });

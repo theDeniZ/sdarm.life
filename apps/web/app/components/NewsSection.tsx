@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 // import QuoteShareModal from './QuoteShareModal';
 
 // Kept for API compatibility
@@ -17,7 +17,7 @@ export interface NewsPost {
 
 export default function NewsSection() {
   const gridRef = useRef<HTMLDivElement>(null);
-  const [modalOpen, setModalOpen] = useState(false);
+  // const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -100,7 +100,7 @@ export default function NewsSection() {
                   </div>
                   <button
                     className="quote-save-btn"
-                    onClick={() => setModalOpen(true)}
+                    // onClick={() => setModalOpen(true)}
                     title="Als Bild speichern"
                     aria-label="Als Bild speichern"
                   >

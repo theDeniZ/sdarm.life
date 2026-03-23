@@ -35,6 +35,7 @@ export const SubscriberSchema = z
   .object({
     id: z.number(),
     email: z.string(),
+    language: z.string(),
     createdAt: z.string(),
   })
   .openapi('Subscriber');

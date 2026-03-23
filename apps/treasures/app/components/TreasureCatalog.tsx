@@ -37,7 +37,6 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [lang, setLang] = useState<Language>('all');
   const [items, setItems] = useState<Treasure[]>([]);
-  const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
@@ -68,11 +67,12 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
       if (res.ok) {
         const data = (await res.json()) as { items: Treasure[]; total: number };
         setItems((prev) => (reset ? data.items : [...prev, ...data.items]));
-        setTotal(data.total);
         totalRef.current = data.total;
         offsetRef.current = off + data.items.length;
       }
-    } catch {}
+    } catch {
+      // Ignore errors for now — could add retry logic or error state if desired
+    }
 
     loadingRef.current = false;
     setLoading(false);
@@ -83,7 +83,7 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
   // Initial load
   useEffect(() => {
     loadMoreRef.current(true);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Sentinel observer — set up once, reads latest state from refs
   useEffect(() => {
@@ -95,11 +95,11 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
           loadMoreRef.current(false);
         }
       },
-      { rootMargin: '400px' },
+      { rootMargin: '400px' }
     );
     obs.observe(sentinel);
     return () => obs.disconnect();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, []);
 
   // Stagger reveal for newly added cards
   useEffect(() => {
@@ -118,7 +118,7 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
           }
         });
       },
-      { threshold: 0.06 },
+      { threshold: 0.06 }
     );
     cards.forEach((c) => obs.observe(c));
     return () => obs.disconnect();

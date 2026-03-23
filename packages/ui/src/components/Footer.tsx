@@ -19,6 +19,7 @@ interface FooterProps {
   songbookUrl?: string;
   eventsUrl?: string;
   treasuresUrl?: string;
+  locale?: string;
 }
 
 interface SunData {
@@ -172,6 +173,7 @@ export default function Footer({
   songbookUrl = 'https://songs.sdarm.life',
   eventsUrl = 'https://events.sdarm.life',
   treasuresUrl = 'https://treasures.sdarm.life',
+  locale = 'de',
 }: FooterProps) {
   const t = useTranslations('common.footer');
   const clockT = useTranslations('common.clock');
@@ -218,7 +220,7 @@ export default function Footer({
       const res = await fetch(`${apiUrl}/subscribe`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, language: locale }),
       });
       if (res.status === 409) {
         setSubStatus('conflict');

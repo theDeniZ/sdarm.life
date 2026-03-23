@@ -55,6 +55,7 @@ export const subscribers = sqliteTable('subscribers', {
   id:             integer('id').primaryKey({ autoIncrement: true }),
   email:          text('email').notNull().unique(),
   token:          text('token').notNull().unique(),
+  language:       text('language').notNull().default('de'),
   unsubscribedAt: integer('unsubscribed_at', { mode: 'timestamp' }),
   createdAt:      integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 }, (t) => [

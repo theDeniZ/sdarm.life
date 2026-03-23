@@ -2,7 +2,17 @@ import type { TreasureDto } from '@sdarm/types';
 
 export type TreasureListItem = Pick<
   TreasureDto,
-  'id' | 'title' | 'author' | 'type' | 'language' | 'isFree' | 'price' | 'sortOrder' | 'epubUrl' | 'coverKey' | 'createdAt'
+  | 'id'
+  | 'title'
+  | 'author'
+  | 'type'
+  | 'language'
+  | 'isFree'
+  | 'price'
+  | 'sortOrder'
+  | 'epubUrl'
+  | 'coverKey'
+  | 'createdAt'
 >;
 
 export interface TreasureFormData {

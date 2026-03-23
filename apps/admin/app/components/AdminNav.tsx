@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { href: '/songbooks', label: 'Songbooks', alsoActive: '/songs' },
   { href: '/treasures', label: 'Treasures' },
   { href: '/api-keys', label: 'API Keys' },
+  { href: '/email', label: 'Email' },
 ];
 
 export default function AdminNav() {

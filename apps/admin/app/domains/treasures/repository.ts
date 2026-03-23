@@ -13,7 +13,10 @@ export async function fetchTreasures(page: number): Promise<ListResponse<Treasur
   return (await res.json()) as ListResponse<TreasureListItem>;
 }
 
-export async function swapSortOrder(a: { id: number; sortOrder: number }, b: { id: number; sortOrder: number }): Promise<void> {
+export async function swapSortOrder(
+  a: { id: number; sortOrder: number },
+  b: { id: number; sortOrder: number }
+): Promise<void> {
   await Promise.all([
     fetch(`${API}/api/v1/admin/treasures/${a.id}`, {
       method: 'PATCH',

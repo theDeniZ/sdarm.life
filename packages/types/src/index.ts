@@ -26,6 +26,7 @@ export interface ImageDto {
 export interface SubscriberDto {
   id: number;
   email: string;
+  language: string;
   createdAt: string;
 }
 

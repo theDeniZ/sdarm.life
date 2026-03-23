@@ -77,17 +77,24 @@ export default function TreasureList() {
                       disabled={i === 0 || moving !== null}
                       onClick={() => handleMove(i, 'up')}
                       title="Move up"
-                    >↑</button>
+                    >
+                      ↑
+                    </button>
                     <span className="td-order-num">{t.sortOrder}</span>
                     <button
                       className="btn-reorder"
                       disabled={i === items.length - 1 || moving !== null}
                       onClick={() => handleMove(i, 'down')}
                       title="Move down"
-                    >↓</button>
+                    >
+                      ↓
+                    </button>
                     <form
                       className="swap-form"
-                      onSubmit={(e) => { e.preventDefault(); handleSwapWith(t); }}
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        handleSwapWith(t);
+                      }}
                     >
                       <input
                         className="swap-input"
@@ -101,19 +108,23 @@ export default function TreasureList() {
                       />
                     </form>
                   </div>
-                  {swapErrors[t.id] && (
-                    <div className="swap-error">{swapErrors[t.id]}</div>
-                  )}
+                  {swapErrors[t.id] && <div className="swap-error">{swapErrors[t.id]}</div>}
                 </td>
-                <td><div className="td-title">{t.title}</div></td>
+                <td>
+                  <div className="td-title">{t.title}</div>
+                </td>
                 <td>{t.author ?? '—'}</td>
                 <td>{t.language}</td>
                 <td>{t.isFree ? <span className="badge badge-free">Free</span> : (t.price ?? '—')}</td>
                 <td>{t.epubUrl ? '●' : ''}</td>
                 <td>
                   <div className="td-actions">
-                    <Link href={`/treasures/${t.id}`} className="btn-ghost">Edit</Link>
-                    <button className="btn-danger" onClick={() => handleDelete(t)}>Delete</button>
+                    <Link href={`/treasures/${t.id}`} className="btn-ghost">
+                      Edit
+                    </Link>
+                    <button className="btn-danger" onClick={() => handleDelete(t)}>
+                      Delete
+                    </button>
                   </div>
                 </td>
               </tr>

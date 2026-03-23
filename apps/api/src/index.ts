@@ -18,6 +18,7 @@ import adminSubscribersRouter from './routes/admin/subscribers';
 import adminSongbooksRouter from './routes/admin/songbooks';
 import adminTreasuresRouter from './routes/admin/treasures';
 import adminApiKeysRouter from './routes/admin/api-keys';
+import adminEmailRouter from './routes/admin/email';
 import treasuresRouter from './routes/treasures';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -70,6 +71,7 @@ admin.route('/images', adminImagesRouter);
 admin.route('/subscribers', adminSubscribersRouter);
 admin.route('', adminSongbooksRouter);
 admin.route('', adminTreasuresRouter);
+admin.route('', adminEmailRouter);
 
 v1.route('/admin', admin);
 app.route('/api/v1', v1);
