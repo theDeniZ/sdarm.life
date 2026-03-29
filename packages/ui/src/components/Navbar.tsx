@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 export default function Navbar({
@@ -17,6 +18,7 @@ export default function Navbar({
   treasuresUrl?: string;
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const [activeHref, setActiveHref] = useState('');
   const t = useTranslations('common.nav');
 
   const navLinks = [
@@ -34,6 +36,14 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  useEffect(() => {
+    const host = window.location.hostname;
+    if (host.includes('treasures')) setActiveHref(treasuresUrl);
+    else if (host.includes('songs') || host.includes('songbook')) setActiveHref(songbookUrl);
+    else if (host.includes('events')) setActiveHref(eventsUrl);
+    else setActiveHref(webUrl);
+  }, [webUrl, songbookUrl, eventsUrl, treasuresUrl]);
+
   const otherLocale = locale === 'de' ? 'en' : 'de';
   const otherLabel = otherLocale === 'de' ? 'Deutsch' : 'English';
   const [switchedPath, setSwitchedPath] = useState(`/${otherLocale}`);
@@ -44,26 +54,22 @@ export default function Navbar({
 
   return (
     <nav className={scrolled ? 'scrolled' : ''}>
-      <a href={webUrl} className="nav-logo">
+      <Link href={webUrl} className="nav-logo">
         SDARM<span>.life</span>
-      </a>
+      </Link>
 
       <div className="nav-links">
         {navLinks.map(({ label, href }) => (
-          <a key={href} href={href}>
+          <Link key={href} href={href} className={href === activeHref ? 'active' : undefined}>
             {label}
-          </a>
+          </Link>
         ))}
       </div>
 
       <div className="nav-right">
-        <a
-          href={switchedPath}
-          className="nav-lang"
-          aria-label={`Switch to ${otherLabel}`}
-        >
+        <Link href={switchedPath} className="nav-lang" aria-label={`Switch to ${otherLabel}`}>
           {otherLocale.toUpperCase()}
-        </a>
+        </Link>
         <button className="nav-search" aria-label={t('searchAria')}>
           <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.7">
             <circle cx="7.5" cy="7.5" r="5" />

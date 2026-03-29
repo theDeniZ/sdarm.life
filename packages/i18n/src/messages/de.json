@@ -65,7 +65,13 @@
       "learnMore": "Mehr erfahren → sdarm.org",
       "fallbackText1": "sdarm.life ist der lokale Onlineauftritt der Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland — Teil der weltweiten Gemeinschaft unter sdarm.org.",
       "fallbackText2": "Unsere Gemeinde entstand als Ort der geistlichen Erneuerung — für Menschen, die biblische Wahrheit, den Sabbat und die Botschaft der Reformation ernst nehmen.",
-      "fallbackImageAlt": "Gemeinde betet"
+      "fallbackImageAlt": "Gemeinde betet",
+      "eyebrow": "Wer wir sind",
+      "heroTitle": "Über <em>uns</em>",
+      "scrollHint": "Entdecken",
+      "glaubensEyebrow": "Grundlagen",
+      "glaubensTitle": "Punkte unseres Glaubens",
+      "glaubensSub": "25 Grundsätze, die unser Denken und Leben prägen."
     },
     "uberUns": {
       "eyebrow": "Wer wir sind",
@@ -145,8 +151,10 @@
         "section5Title": "Externe Inhalte (E-Books)",
         "section5Body": "Auf der Plattform \u201eSchätze\u201c können digitale Bücher im EPUB-Format direkt im Browser gelesen werden. Beim Öffnen eines Buches stellt Ihr Browser eine direkte Verbindung zum externen Dateiserver her (derzeit: egwwritings.org, betrieben von der Ellen G. White Estate, Inc., USA), von dem die EPUB-Datei bezogen wird. Dabei wird Ihre IP-Adresse sowie der Zeitpunkt des Abrufs an diesen Drittanbieter übermittelt. Die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an der Bereitstellung des angeforderten Inhalts (Art.\u00a06 Abs.\u00a01 lit.\u00a0f DSGVO). Weitere Informationen finden Sie in der",
         "section5PrivacyLink": "Datenschutzerklärung der Ellen G. White Estate",
-        "section6Title": "Ihre Rechte",
-        "section6Body": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer gespeicherten Daten sowie das Recht auf Datenübertragbarkeit. Wenden Sie sich dazu an"
+        "section6Title": "Buchanfrage (Geschenk erhalten)",
+        "section6Body": "Wenn Sie über das Formular \u201eGeschenk erhalten\u201c Bücher anfordern, verarbeiten wir folgende Daten: Name, E-Mail-Adresse, Postanschrift (Straße, PLZ, Stadt), Land sowie optional Telefonnummer und eine persönliche Mitteilung. Rechtsgrundlage ist Ihre Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO. Die Daten werden ausschließlich für die Bearbeitung und den Versand der Anfrage verwendet und nach Abschluss des Versands gelöscht. Sie können Ihre Einwilligung jederzeit per E-Mail widerrufen:",
+        "section7Title": "Ihre Rechte",
+        "section7Body": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer gespeicherten Daten sowie das Recht auf Datenübertragbarkeit. Wenden Sie sich dazu an"
       }
     }
   },
@@ -236,10 +244,58 @@
         "book": "Bücher"
       },
       "free": "Kostenlos",
+      "postBadge": "per Post",
       "readSoon": "Lesen",
       "empty": "Keine Ergebnisse für diese Auswahl.",
       "scriptureText": "Deine Zeugnisse sind mein ewiges Erbe; denn sie sind meines Herzens Wonne.",
       "scriptureRef": "Psalm 119,111"
-    }
+    },
+    "bookRequest": {
+        "bannerEyebrow": "Kostenlose Bücher",
+        "bannerTitle": "Lies, was die Welt verschweigt",
+        "bannerSubtitle": "Klassische Bücher der Reformationsbewegung — kostenlos, direkt zu Ihnen nach Hause.",
+        "cta": "Geschenk erhalten",
+        "modalTitle": "Ihre Bücher warten auf Sie",
+        "modalSubtitle": "Nur wenige Felder — und wir schicken Ihnen das Paket kostenlos nach Hause.",
+        "notice": "Ein Geschenk pro Adresse — damit möglichst viele Menschen davon profitieren können.",
+        "fieldLand": "Wo leben Sie?",
+        "landPlaceholder": "Land wählen …",
+        "fieldName": "Wie heißen Sie?",
+        "namePlaceholder": "Vor- und Nachname",
+        "fieldEmail": "Ihre E-Mail",
+        "emailPlaceholder": "damit wir Ihnen Bescheid geben können",
+        "fieldPhone": "Handynummer",
+        "phonePlaceholder": "+49 …",
+        "fieldStreet": "Wohin liefern wir?",
+        "streetPlaceholder": "Straße und Hausnummer",
+        "fieldPlz": "PLZ",
+        "plzPlaceholder": "10115",
+        "fieldCity": "Stadt",
+        "cityPlaceholder": "Ihre Stadt",
+        "fieldBooks": "Welche Bücher möchten Sie entdecken?",
+        "fieldWish": "Noch ein Wunsch?",
+        "wishPlaceholder": "Schreiben Sie uns gerne etwas …",
+        "dsgvoNotice": "Ihre Daten (Name, Adresse, E-Mail) werden ausschließlich für die Bearbeitung und den Versand dieser Buchanfrage verarbeitet. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO. Nach Abschluss des Versands werden Ihre Daten gelöscht. Sie können Ihre Einwilligung jederzeit widerrufen (info@sdarm.life).",
+        "consent": "Ich willige in die Verarbeitung meiner Daten für den einmaligen Buchversand ein. Ich habe die",
+        "consentPrivacyLink": "Datenschutzerklärung",
+        "submit": "Ja, ich möchte diese Bücher!",
+        "submitNote": "Kostenlos · Kein Spam · Kein Haken",
+        "successTitle": "Ihr Wunsch ist angekommen!",
+        "successBody": "Wir freuen uns, Ihnen diese Bücher zusenden zu dürfen. In 2–15 Werktagen sind sie bei Ihnen.",
+        "successClose": "Wunderbar, danke!",
+        "optional": "optional",
+        "required": "*",
+        "books": {
+          "wegZuChristus": "Der Weg zu Christus – E. G. White",
+          "grosserKampf": "Der Große Kampf (Tragödie der Zeitalter) – E. G. White",
+          "lebenJesu": "Das Leben Jesu – E. G. White",
+          "bibel": "Die Bibel"
+        },
+        "errorMinBook": "Bitte wählen Sie mindestens ein Buch aus.",
+        "errorSubmit": "Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut.",
+        "landDe": "Deutschland",
+        "landAt": "Österreich",
+        "landCh": "Schweiz"
+      }
   }
 }

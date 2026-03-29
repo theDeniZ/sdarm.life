@@ -6,11 +6,13 @@ export interface PageHeroProps {
   subtitle?: string;
   decoration?: ReactNode;
   scrollHint?: string;
+  cta?: ReactNode;
+  centered?: boolean;
 }
 
-export default function PageHero({ eyebrow, title, subtitle, decoration, scrollHint }: PageHeroProps) {
+export default function PageHero({ eyebrow, title, subtitle, decoration, scrollHint, cta, centered }: PageHeroProps) {
   return (
-    <section className="page-hero">
+    <section className={`page-hero${centered ? ' page-hero--centered' : ''}`}>
       <div className="page-hero__grain" />
       <div className="page-hero__glow" />
       <div className="page-hero__fog" />
@@ -20,6 +22,7 @@ export default function PageHero({ eyebrow, title, subtitle, decoration, scrollH
         {eyebrow && <div className="page-hero__eyebrow">{eyebrow}</div>}
         <h1 className="page-hero__title">{title}</h1>
         {subtitle && <p className="page-hero__subtitle">{subtitle}</p>}
+        {cta && <div className="page-hero__cta">{cta}</div>}
       </div>
       {scrollHint && (
         <div className="page-hero__scroll-hint" aria-hidden="true">

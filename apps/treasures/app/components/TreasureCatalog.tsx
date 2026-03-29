@@ -6,18 +6,9 @@ import { PageHero } from '@sdarm/ui';
 import type { Treasure, TreasureType } from '../lib/api';
 import TreasuresFilterBar, { type CategoryFilter, type Language } from './TreasuresFilterBar';
 import TreasureCard from './TreasureCard';
+import BookRequestModal from './BookRequestModal';
 
 const LIMIT = 20;
-
-const BOOK_DECORATION = (
-  <svg viewBox="0 0 60 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <rect x="8" y="5" width="44" height="62" rx="2" stroke="rgba(201,169,110,0.9)" strokeWidth="2" />
-    <line x1="8" y1="5" x2="8" y2="67" stroke="rgba(201,169,110,0.9)" strokeWidth="4" />
-    <line x1="18" y1="22" x2="46" y2="22" stroke="rgba(201,169,110,0.9)" strokeWidth="1.5" />
-    <line x1="18" y1="30" x2="46" y2="30" stroke="rgba(201,169,110,0.9)" strokeWidth="1.5" />
-    <line x1="18" y1="38" x2="38" y2="38" stroke="rgba(201,169,110,0.9)" strokeWidth="1.5" />
-  </svg>
-);
 
 function ScriptureQuote() {
   const t = useTranslations('treasures.catalog');
@@ -33,9 +24,10 @@ function ScriptureQuote() {
 }
 
 export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
-  const t = useTranslations('treasures.catalog');
+  const tBr = useTranslations('treasures.bookRequest');
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [lang, setLang] = useState<Language>('all');
+  const [modalOpen, setModalOpen] = useState(false);
   const [items, setItems] = useState<Treasure[]>([]);
   const [loading, setLoading] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
@@ -138,25 +130,44 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
     loadMoreRef.current(true);
   }
 
-  // Derive available categories from loaded items (or fallback to known types)
+  // Derive available categories and languages from loaded items
   const availableCategories = items.length
     ? ([...new Set(items.map((tr) => tr.type))] as TreasureType[])
     : (['book'] as TreasureType[]);
+  const availableLanguages = items.length
+    ? ([...new Set(items.map((tr) => tr.language))] as Language[])
+    : (['de'] as Language[]);
 
   return (
     <>
       <PageHero
-        eyebrow={t('eyebrow')}
-        title={t.rich('title', { em: (chunks) => <em>{chunks}</em> })}
-        subtitle={t('subtitle')}
-        decoration={BOOK_DECORATION}
-        scrollHint={t('discover')}
+        title={tBr('bannerTitle')}
+        centered
+        cta={
+          <button className="br-hero-cta" onClick={() => setModalOpen(true)}>
+            {tBr('cta')}
+            <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              <polyline
+                points="3,1 8,1 8,6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="1.4"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </button>
+        }
       />
+
+      <BookRequestModal open={modalOpen} onClose={() => setModalOpen(false)} apiUrl={apiUrl} />
 
       <TreasuresFilterBar
         activeCategory={category}
         activeLang={lang}
         availableCategories={availableCategories}
+        availableLanguages={availableLanguages}
         onCategoryChange={handleCategoryChange}
         onLangChange={handleLangChange}
       />

@@ -1,4 +1,4 @@
-import type { PostDto, ConfigDto, ListResponse } from '@sdarm/types';
+import type { PostDto, ConfigDto, ListResponse, TreasureDto, SongbookDto } from '@sdarm/types';
 import { formatDate } from './format';
 import type { HeroPost } from '../components/HeroSection';
 import type { NewsPost } from '../components/NewsSection';
@@ -80,6 +80,34 @@ export function toNewsPost(post: PostDto): NewsPost {
     imageAlt: post.coverAlt ?? post.title,
     href: `/posts/${post.slug}`,
   };
+}
+
+export interface NewsData {
+  book: { title: string; author: string | null; href: string } | null;
+  song: { title: string; songCount: number; href: string } | null;
+  sermon: { title: string; author: string | null; date: string; href: string } | null;
+  study: { title: string; href: string } | null;
+  eventsUrl: string;
+}
+
+export async function fetchTreasures(params: string): Promise<TreasureDto[] | null> {
+  try {
+    const res = await fetch(`${API}/treasures?${params}`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return ((await res.json()) as ListResponse<TreasureDto>).items;
+  } catch {
+    return null;
+  }
+}
+
+export async function fetchSongbooks(): Promise<SongbookDto[] | null> {
+  try {
+    const res = await fetch(`${API}/songbooks`, { cache: 'no-store' });
+    if (!res.ok) return null;
+    return (await res.json()) as SongbookDto[];
+  } catch {
+    return null;
+  }
 }
 
 export function toFooterConfig(config: ConfigDto): FooterConfig {

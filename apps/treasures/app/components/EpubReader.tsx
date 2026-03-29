@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useLocale } from 'next-intl';
 import JSZip from 'jszip';
@@ -24,12 +24,18 @@ type Phase = 'downloading' | 'parsing' | 'ready' | 'error';
 type ReaderTheme = 'dark' | 'sepia' | 'light';
 type ReaderFont = 'lora' | 'cormorant' | 'playfair' | 'inter';
 
-const THEME_LABELS: Record<ReaderTheme, string> = { dark: 'Dunkel', sepia: 'Sepia', light: 'Hell' };
 const THEME_DOTS: Record<ReaderTheme, { bg: string; border: string }> = {
-  dark: { bg: '#1a1814', border: '#c9a96e' },
-  sepia: { bg: '#f5f0e8', border: '#8a6830' },
-  light: { bg: '#fff', border: '#ccc' },
+  dark: { bg: '#1c1c1e', border: '#c9a96e' },
+  sepia: { bg: '#faf6ef', border: '#a0692a' },
+  light: { bg: '#ffffff', border: '#8a8a8e' },
 };
+
+// Названия тем по языкам
+const THEME_NAMES: Record<string, Record<ReaderTheme, string>> = {
+  de: { dark: 'Dunkel', sepia: 'Sepia', light: 'Hell' },
+  en: { dark: 'Dark', sepia: 'Sepia', light: 'Light' },
+};
+const THEME_LABEL: Record<string, string> = { de: 'Thema', en: 'Theme' };
 
 const FONT_MAP: Record<ReaderFont, string> = {
   lora: "'Lora', serif",
@@ -48,7 +54,6 @@ const FONT_LABELS: Record<ReaderFont, string> = {
 const LH_OPTIONS = [
   { value: 1.6, label: 'Kompakt' },
   { value: 1.9, label: 'Normal' },
-  { value: 2.2, label: 'Weit' },
 ];
 
 interface Props {
@@ -152,6 +157,87 @@ function fmtBytes(n: number): string {
   return `${(n / 1024 / 1024).toFixed(1)} MB`;
 }
 
+// ── Highlight helpers ──────────────────────────────────────────────────────
+
+interface HighlightRecord {
+  start: number;
+  end: number;
+  color: string;
+}
+
+function getCharOffset(root: Node, targetNode: Node, targetOffset: number): number {
+  let offset = 0;
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node: Node | null;
+  while ((node = walk.nextNode())) {
+    if (node === targetNode) return offset + targetOffset;
+    offset += node.textContent?.length ?? 0;
+  }
+  return -1; // нода не найдена в поддереве
+}
+
+function getNodeAtCharOffset(root: Node, charOffset: number): { node: Text; offset: number } | null {
+  let offset = 0;
+  const walk = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  let node: Node | null;
+  while ((node = walk.nextNode())) {
+    const len = node.textContent?.length ?? 0;
+    if (offset + len >= charOffset) return { node: node as Text, offset: charOffset - offset };
+    offset += len;
+  }
+  return null;
+}
+
+// Теги, которые считаются блочными — выделение через них создаёт невалидный HTML
+const BLOCK_TAGS = new Set(['P', 'DIV', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'LI', 'BLOCKQUOTE', 'TD', 'TH']);
+
+/** Находит ближайший блочный предок ноды */
+function getBlockAncestor(node: Node): Element | null {
+  let n: Node | null = node.nodeType === Node.TEXT_NODE ? node.parentElement : (node as Element);
+  while (n) {
+    if (BLOCK_TAGS.has((n as Element).tagName)) return n as Element;
+    n = (n as Element).parentElement;
+  }
+  return null;
+}
+
+/** Возвращает false если range охватывает несколько блочных элементов (разные абзацы) */
+function rangeIsInline(range: Range): boolean {
+  const startBlock = getBlockAncestor(range.startContainer);
+  const endBlock = getBlockAncestor(range.endContainer);
+  return startBlock === endBlock;
+}
+
+/** Возвращает true если range пересекается хотя бы с одним существующим .hl */
+function rangeOverlapsHL(range: Range, container: HTMLElement): boolean {
+  const spans = container.querySelectorAll('.hl');
+  for (const span of spans) {
+    const spanRange = document.createRange();
+    spanRange.selectNodeContents(span);
+    if (
+      range.compareBoundaryPoints(Range.END_TO_START, spanRange) < 0 &&
+      range.compareBoundaryPoints(Range.START_TO_END, spanRange) > 0
+    ) {
+      return true;
+    }
+  }
+  return false;
+}
+
+const HL_COLORS = [
+  'hl-cream',
+  'hl-honey',
+  'hl-sage',
+  'hl-mint',
+  'hl-sky',
+  'hl-rose',
+  'hl-peach',
+  'hl-periwinkle',
+  'hl-lilac',
+  'hl-lavender',
+] as const;
+type HLColor = (typeof HL_COLORS)[number];
+
 // ── Component ──────────────────────────────────────────────────────────────
 
 export default function EpubReader({ epubUrl, title, author }: Props) {
@@ -168,12 +254,27 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const [errorMsg, setErrorMsg] = useState('');
   const [theme, setThemeState] = useState<ReaderTheme>('dark');
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [fontSize, setFontSizeState] = useState(17);
+  const [fontSize, setFontSizeState] = useState(26);
   const [fontKey, setFontKeyState] = useState<ReaderFont>('cormorant');
   const [lineHeight, setLineHeightState] = useState(1.9);
 
+  // Search
+  const [searchInput, setSearchInput] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<{ chapterIndex: number; snippet: string }[]>([]);
+  const [activeSearchIdx, setActiveSearchIdx] = useState(0);
+  const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const chapterTexts = useMemo(
+    () => chapters.map((ch) => ch.html.replace(/<[^>]+>/g, '').replace(/&[a-zA-Z0-9#]+;/g, ' ')),
+    [chapters]
+  );
+
   const contentRef = useRef<HTMLDivElement>(null);
   const settingsWrapRef = useRef<HTMLDivElement>(null);
+  const savedRangeRef = useRef<Range | null>(null);
+  const clickedHLRef = useRef<HTMLElement | null>(null);
+  const [hlToolbarPos, setHlToolbarPos] = useState<{ x: number; y: number } | null>(null);
   // retrySignal increments on manual retry to re-trigger the effect
   const [retrySignal, setRetrySignal] = useState(0);
 
@@ -184,7 +285,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
       setThemeState(savedTheme);
     }
     const savedFs = localStorage.getItem('sdarm_fs');
-    if (savedFs) setFontSizeState(Math.max(13, Math.min(26, Number(savedFs))));
+    if (savedFs) setFontSizeState(Math.max(13, Math.min(32, Number(savedFs))));
     const savedFont = localStorage.getItem('sdarm_font') as ReaderFont | null;
     if (savedFont && FONT_MAP[savedFont]) setFontKeyState(savedFont);
     const savedLh = localStorage.getItem('sdarm_lh');
@@ -215,7 +316,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   }
 
   function setFontSize(n: number) {
-    const v = Math.max(13, Math.min(26, n));
+    const v = Math.max(13, Math.min(32, n));
     setFontSizeState(v);
     localStorage.setItem('sdarm_fs', String(v));
   }
@@ -230,7 +331,128 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     localStorage.setItem('sdarm_lh', String(lh));
   }
 
+  // ── Highlight functions ────────────────────────────────────────────────────
+
+  function hlStorageKey(chIdx: number) {
+    return `sdarm_highlights::${epubUrl}::${chIdx}`;
+  }
+
+  function hideHlToolbar() {
+    setHlToolbarPos(null);
+    savedRangeRef.current = null;
+    clickedHLRef.current = null;
+  }
+
+  function saveHighlights() {
+    const body = contentRef.current?.querySelector('.epub-chapter__body');
+    if (!body) return;
+    const spans = body.querySelectorAll<HTMLElement>('.hl');
+    const records: HighlightRecord[] = [];
+    spans.forEach((span) => {
+      const color = Array.from(span.classList).find((c) => c.startsWith('hl-') && c !== 'hl');
+      if (!color) return;
+      const range = document.createRange();
+      range.selectNodeContents(span);
+      const start = getCharOffset(body, range.startContainer, range.startOffset);
+      const end = getCharOffset(body, range.endContainer, range.endOffset);
+      if (start < 0 || end < 0 || start >= end) return; // невалидный диапазон
+      records.push({ start, end, color });
+    });
+    try {
+      localStorage.setItem(hlStorageKey(currentIdx), JSON.stringify(records));
+    } catch {
+      // localStorage may be unavailable (private browsing) — ignore silently
+    }
+  }
+
+  const restoreHighlights = useCallback(
+    (chIdx: number) => {
+      const body = contentRef.current?.querySelector('.epub-chapter__body');
+      if (!body) return;
+      let records: HighlightRecord[] = [];
+      try {
+        const raw = localStorage.getItem(`sdarm_highlights::${epubUrl}::${chIdx}`);
+        if (raw) records = JSON.parse(raw);
+      } catch {
+        // corrupted localStorage value — skip restoring highlights
+      }
+      records
+        .slice()
+        .reverse()
+        .forEach(({ start, end, color }) => {
+          const s = getNodeAtCharOffset(body, start);
+          const e = getNodeAtCharOffset(body, end);
+          if (!s || !e) return;
+          try {
+            const range = document.createRange();
+            range.setStart(s.node, s.offset);
+            range.setEnd(e.node, e.offset);
+            const span = document.createElement('span');
+            span.className = 'hl ' + color;
+            span.appendChild(range.extractContents());
+            range.insertNode(span);
+          } catch {
+            // invalid range after DOM mutation — skip this highlight
+          }
+        });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [epubUrl, hlStorageKey]
+  );
+
+  function applyHL(colorClass: HLColor) {
+    if (clickedHLRef.current) {
+      // Re-color an existing highlight span
+      clickedHLRef.current.className = 'hl ' + colorClass;
+      clickedHLRef.current = null;
+      hideHlToolbar();
+      saveHighlights();
+    } else if (savedRangeRef.current) {
+      // Apply color to a fresh text selection using the saved Range
+      const range = savedRangeRef.current;
+      savedRangeRef.current = null;
+
+      // Не применять если выделение перекрывает существующий .hl — иначе фрагментируется DOM
+      const body = contentRef.current?.querySelector<HTMLElement>('.epub-chapter__body');
+      if (body && rangeOverlapsHL(range, body)) {
+        hideHlToolbar();
+        return;
+      }
+
+      const span = document.createElement('span');
+      span.className = 'hl ' + colorClass;
+      try {
+        span.appendChild(range.extractContents());
+        range.insertNode(span);
+        window.getSelection()?.removeAllRanges();
+      } catch {
+        // range стал невалидным между выделением и кликом — игнорируем
+      }
+      hideHlToolbar();
+      saveHighlights();
+    }
+  }
+
+  function removeHL() {
+    const hl = clickedHLRef.current;
+    clickedHLRef.current = null; // clear before hideHlToolbar to prevent double unwrap
+    if (hl) {
+      const p = hl.parentNode;
+      if (p) {
+        while (hl.firstChild) p.insertBefore(hl.firstChild, hl);
+        p.removeChild(hl);
+        (p as Element).normalize?.();
+      }
+    }
+    hideHlToolbar();
+    saveHighlights();
+  }
+
   useEffect(() => {
+    savedRangeRef.current = null;
+    clickedHLRef.current = null;
+    setHlToolbarPos(null);
+
     async function loadEpub() {
       try {
         setPhase('downloading');
@@ -244,7 +466,8 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
         const contentLength = Number(res.headers.get('Content-Length') ?? '0');
         setTotalBytes(contentLength);
 
-        const reader = res.body!.getReader();
+        if (!res.body) throw new Error('Response body is null');
+        const reader = res.body.getReader();
         const chunks: Uint8Array[] = [];
         let loaded = 0;
 
@@ -321,12 +544,136 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   useEffect(() => {
     if (phase !== 'ready') return;
     function onKey(e: KeyboardEvent) {
+      if ((e.target as HTMLElement).tagName === 'INPUT') return;
       if (e.key === 'ArrowLeft') setCurrentIdx((i) => Math.max(0, i - 1));
       if (e.key === 'ArrowRight') setCurrentIdx((i) => Math.min(chapters.length - 1, i + 1));
     }
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [phase, chapters.length]);
+
+  // Debounce search input → searchQuery (min 2 chars)
+  useEffect(() => {
+    if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    const trimmed = searchInput.trim();
+    if (trimmed.length < 2) {
+      setSearchQuery('');
+      setSearchResults([]);
+      setActiveSearchIdx(0);
+      return;
+    }
+    searchDebounceRef.current = setTimeout(() => setSearchQuery(trimmed), 300);
+    return () => {
+      if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
+    };
+  }, [searchInput]);
+
+  // Search across pre-computed plain text (capped at 200 results)
+  useEffect(() => {
+    if (!searchQuery || chapterTexts.length === 0) {
+      setSearchResults([]);
+      setActiveSearchIdx(0);
+      return;
+    }
+    const MAX_RESULTS = 200;
+    const q = searchQuery.toLowerCase();
+    const results: { chapterIndex: number; snippet: string }[] = [];
+    outer: for (let ci = 0; ci < chapterTexts.length; ci++) {
+      const text = chapterTexts[ci];
+      const lower = text.toLowerCase();
+      let pos = 0;
+      while ((pos = lower.indexOf(q, pos)) !== -1) {
+        const start = Math.max(0, pos - 30);
+        const end = Math.min(text.length, pos + q.length + 30);
+        const snippet = (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
+        results.push({ chapterIndex: ci, snippet });
+        if (results.length >= MAX_RESULTS) break outer;
+        pos += q.length;
+      }
+    }
+    setSearchResults(results);
+    setActiveSearchIdx(0);
+  }, [searchQuery, chapterTexts]);
+
+  // Mouseup: show toolbar on text selection
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content || phase !== 'ready') return;
+    function onMouseUp() {
+      setTimeout(() => {
+        if (!content) return;
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0 && sel.toString().trim().length > 0) {
+          const range = sel.getRangeAt(0).cloneRange();
+          // Ignore selections outside the content pane (e.g. sidebar)
+          if (!content.contains(range.commonAncestorContainer)) return;
+          // Не показывать тулбар для кросс-блочных выделений (через <p>, <div> и т.д.)
+          if (!rangeIsInline(range)) return;
+          const rect = range.getBoundingClientRect();
+          // Save the Range — we apply color only when the user picks one.
+          // The selection stays highlighted by the browser because toolbar
+          // buttons use onMouseDown + e.preventDefault() to block focus loss.
+          savedRangeRef.current = range;
+          clickedHLRef.current = null;
+          setHlToolbarPos({
+            x: rect.left + rect.width / 2,
+            y: Math.max(rect.top - 130, 8),
+          });
+        }
+      }, 10);
+    }
+    content.addEventListener('mouseup', onMouseUp);
+    return () => content.removeEventListener('mouseup', onMouseUp);
+  }, [phase]);
+
+  // Click on existing .hl span
+  useEffect(() => {
+    const content = contentRef.current;
+    if (!content || phase !== 'ready') return;
+    function onClickHL(e: MouseEvent) {
+      // Allow anchor clicks inside highlights to pass through to handleContentClick
+      if ((e.target as Element).closest('a')) return;
+      const hl = (e.target as Element).closest<HTMLElement>('.hl');
+      if (hl) {
+        clickedHLRef.current = hl;
+        savedRangeRef.current = null;
+        setHlToolbarPos({ x: e.clientX, y: Math.max(e.clientY - 64, 8) });
+        e.stopPropagation();
+      }
+    }
+    content.addEventListener('click', onClickHL);
+    return () => content.removeEventListener('click', onClickHL);
+  }, [phase]);
+
+  // Mousedown outside toolbar → hide
+  useEffect(() => {
+    function onMouseDown(e: MouseEvent) {
+      const toolbar = document.getElementById('epub-hl-toolbar');
+      if (toolbar?.contains(e.target as Node)) return;
+      // If clicking the same non-preview highlight that's already active, let onClickHL reposition it
+      const targetHL = (e.target as Element).closest<HTMLElement>('.hl');
+      if (targetHL && targetHL === clickedHLRef.current) return;
+      // All other cases (outside click, different .hl, new selection start) → clean up
+      hideHlToolbar();
+    }
+    document.addEventListener('mousedown', onMouseDown);
+    return () => document.removeEventListener('mousedown', onMouseDown);
+  }, []);
+
+  // Clear toolbar state when navigating to a different chapter
+  // (dangerouslySetInnerHTML has already replaced the DOM, so preview spans are gone)
+  useEffect(() => {
+    setHlToolbarPos(null);
+    clickedHLRef.current = null;
+    savedRangeRef.current = null;
+  }, [currentIdx]);
+
+  // Restore highlights when chapter changes
+  useEffect(() => {
+    if (phase !== 'ready') return;
+    const timer = setTimeout(() => restoreHighlights(currentIdx), 50);
+    return () => clearTimeout(timer);
+  }, [currentIdx, phase, restoreHighlights]);
 
   function handleContentClick(e: React.MouseEvent<HTMLDivElement>) {
     const anchor = (e.target as HTMLElement).closest('a');
@@ -362,6 +709,39 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
         }, 50);
       }
     }
+  }
+
+  // ── Derived state (must stay above early returns for hook order) ─────────
+
+  const chapter = chapters[currentIdx];
+  const readingProgress = chapters.length > 0 ? Math.round(((currentIdx + 1) / chapters.length) * 100) : 0;
+
+  // Inject <mark> tags for search matches in the current chapter
+  const chapterHtml = useMemo(() => {
+    if (!chapter) return '';
+    if (!searchQuery.trim()) return chapter.html;
+    const q = searchQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`(${q})`, 'gi');
+    return chapter.html.replace(/>([^<]+)</g, (full, text: string) => {
+      return '>' + text.replace(re, '<mark class="epub-search-mark">$1</mark>') + '<';
+    });
+  }, [chapter, searchQuery]);
+
+  function goToSearchResult(idx: number) {
+    const r = searchResults[idx];
+    if (!r) return;
+    setActiveSearchIdx(idx);
+    if (r.chapterIndex !== currentIdx) {
+      setCurrentIdx(r.chapterIndex);
+    }
+    requestAnimationFrame(() => {
+      const marks = contentRef.current?.querySelectorAll('.epub-search-mark');
+      if (!marks?.length) return;
+      const resultsInChapter = searchResults.filter((sr) => sr.chapterIndex === r.chapterIndex);
+      const localIdx = resultsInChapter.indexOf(r);
+      const mark = marks[Math.max(0, localIdx)] ?? marks[0];
+      mark.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
   }
 
   // ── Loading / error screens ──────────────────────────────────────────────
@@ -419,9 +799,6 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
 
   // ── Reader ───────────────────────────────────────────────────────────────
 
-  const chapter = chapters[currentIdx];
-  const readingProgress = Math.round(((currentIdx + 1) / chapters.length) * 100);
-
   return (
     <div
       className="epub-reader"
@@ -461,11 +838,13 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
         <div className="epub-toolbar__center">{chapter.title}</div>
 
         <div className="epub-toolbar__right">
-          <span className="epub-chapter-pos">
-            {currentIdx + 1} / {chapters.length}
-          </span>
+          <span className="epub-chapter-pos">{readingProgress}%</span>
           <div className="epub-settings-wrap" ref={settingsWrapRef}>
-            <button className="epub-icon-btn" onClick={() => setSettingsOpen((v) => !v)} aria-label="Leseeinstellungen">
+            <button
+              className={`epub-icon-btn${settingsOpen ? ' epub-icon-btn--active' : ''}`}
+              onClick={() => setSettingsOpen((v) => !v)}
+              aria-label="Leseeinstellungen"
+            >
               <svg viewBox="0 0 18 18" fill="none">
                 <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" />
                 <path
@@ -478,20 +857,20 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             </button>
             {settingsOpen && (
               <div className="epub-settings">
-                <span className="epub-settings__label">Thema</span>
-                <div className="epub-theme-row">
+                <span className="epub-settings__label">
+                  {THEME_LABEL[locale] ?? 'Thema'} — {(THEME_NAMES[locale] ?? THEME_NAMES.de)[theme]}
+                </span>
+                <div className="epub-theme-picker">
                   {(['dark', 'sepia', 'light'] as ReaderTheme[]).map((t) => (
-                    <button
+                    <div
                       key={t}
-                      className={`epub-theme-btn${theme === t ? ' epub-theme-btn--active' : ''}`}
+                      className={`epub-theme-dot${theme === t ? ' epub-theme-dot--active' : ''}`}
+                      style={{
+                        background: THEME_DOTS[t].bg,
+                        borderColor: theme === t ? THEME_DOTS[t].border : 'transparent',
+                      }}
                       onClick={() => setTheme(t)}
-                    >
-                      <span
-                        className="epub-theme-dot"
-                        style={{ background: THEME_DOTS[t].bg, border: `1px solid ${THEME_DOTS[t].border}` }}
-                      />
-                      {THEME_LABELS[t]}
-                    </button>
+                    />
                   ))}
                 </div>
 
@@ -501,7 +880,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                     A−
                   </button>
                   <div className="epub-font-size-val">{fontSize}px</div>
-                  <button className="epub-size-btn" onClick={() => setFontSize(fontSize + 1)} disabled={fontSize >= 26}>
+                  <button className="epub-size-btn" onClick={() => setFontSize(fontSize + 1)} disabled={fontSize >= 32}>
                     A+
                   </button>
                 </div>
@@ -509,7 +888,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                   type="range"
                   className="epub-size-slider"
                   min={13}
-                  max={26}
+                  max={32}
                   value={fontSize}
                   onChange={(e) => setFontSize(Number(e.target.value))}
                 />
@@ -556,63 +935,154 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
         {/* Sidebar */}
         <aside className={`epub-sidebar${sidebarOpen ? '' : ' epub-sidebar--collapsed'}`}>
           <div className="epub-sidebar__inner">
-            <div className="epub-sidebar__book">
-              <div className="epub-sidebar__eyebrow">Buch</div>
-              <div className="epub-sidebar__title">{title}</div>
-              {author && <div className="epub-sidebar__author">{author}</div>}
+            <div className="epub-sidebar__search">
+              <input
+                className="epub-sidebar__search-input"
+                type="search"
+                placeholder={locale === 'de' ? 'Im Buch suchen…' : 'Search in book…'}
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && searchResults.length > 0) {
+                    e.preventDefault();
+                    goToSearchResult(
+                      e.shiftKey
+                        ? Math.max(0, activeSearchIdx - 1)
+                        : Math.min(searchResults.length - 1, activeSearchIdx + 1)
+                    );
+                  }
+                  if (e.key === 'Escape') {
+                    setSearchInput('');
+                    (e.target as HTMLInputElement).blur();
+                  }
+                }}
+              />
+              {searchResults.length > 0 && (
+                <div className="epub-sidebar__search-nav">
+                  <span className="epub-sidebar__search-count">
+                    {activeSearchIdx + 1} / {searchResults.length}
+                  </span>
+                  <button
+                    className="epub-sidebar__search-arrow"
+                    disabled={activeSearchIdx === 0}
+                    onClick={() => goToSearchResult(activeSearchIdx - 1)}
+                    aria-label="Previous result"
+                  >
+                    ↑
+                  </button>
+                  <button
+                    className="epub-sidebar__search-arrow"
+                    disabled={activeSearchIdx >= searchResults.length - 1}
+                    onClick={() => goToSearchResult(activeSearchIdx + 1)}
+                    aria-label="Next result"
+                  >
+                    ↓
+                  </button>
+                </div>
+              )}
             </div>
-            <div className="epub-sidebar__toc-label">Kapitel</div>
-            <div className="epub-sidebar__toc">
-              {toc.map((entry) => (
-                <button
-                  key={entry.id}
-                  className={`epub-toc-item${entry.chapterIndex === currentIdx ? ' epub-toc-item--active' : ''}`}
-                  onClick={() => {
-                    setCurrentIdx(entry.chapterIndex);
-                    if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
-                  }}
-                >
-                  <span className="epub-toc-item__num">{entry.chapterIndex + 1}</span>
-                  <span className="epub-toc-item__title">{entry.title}</span>
-                </button>
-              ))}
-            </div>
+
+            {searchResults.length > 0 ? (
+              <div className="epub-sidebar__toc-label">
+                {locale === 'de' ? 'Ergebnisse' : 'Results'} ({searchResults.length})
+              </div>
+            ) : (
+              <div className="epub-sidebar__toc-label">Kapitel</div>
+            )}
+
+            {searchResults.length > 0 ? (
+              <div className="epub-sidebar__toc">
+                {searchResults.map((r, i) => (
+                  <button
+                    key={i}
+                    className={`epub-toc-item${i === activeSearchIdx ? ' epub-toc-item--active' : ''}`}
+                    onClick={() => goToSearchResult(i)}
+                  >
+                    <span className="epub-toc-item__num">{r.chapterIndex + 1}</span>
+                    <span className="epub-toc-item__title">{r.snippet}</span>
+                  </button>
+                ))}
+              </div>
+            ) : searchInput.trim().length >= 2 ? (
+              <div className="epub-sidebar__search-empty">{locale === 'de' ? 'Keine Treffer' : 'No results'}</div>
+            ) : (
+              <div className="epub-sidebar__toc">
+                {toc.map((entry) => (
+                  <button
+                    key={entry.id}
+                    className={`epub-toc-item${entry.chapterIndex === currentIdx ? ' epub-toc-item--active' : ''}`}
+                    onClick={() => {
+                      setCurrentIdx(entry.chapterIndex);
+                      if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
+                    }}
+                  >
+                    <span className="epub-toc-item__num">{entry.chapterIndex + 1}</span>
+                    <span className="epub-toc-item__title">{entry.title}</span>
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </aside>
 
-        {/* Floating prev / next arrows centred in the content pane */}
-        <button
-          className="epub-float-btn epub-float-btn--prev"
-          onClick={() => setCurrentIdx((i) => i - 1)}
-          disabled={currentIdx === 0}
-          aria-label="Voriges Kapitel"
-        >
-          <svg viewBox="0 0 10 16" fill="none">
-            <line x1="8" y1="1" x2="2" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            <line x1="2" y1="8" x2="8" y2="15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        </button>
+        {/* Content pane wrapper — positions nav arrows relative to content, not full layout */}
+        <div className="epub-content-pane">
+          <button
+            className="epub-float-btn epub-float-btn--prev"
+            onClick={() => setCurrentIdx((i) => i - 1)}
+            disabled={currentIdx === 0}
+            aria-label="Voriges Kapitel"
+          >
+            <svg viewBox="0 0 10 16" fill="none">
+              <line x1="8" y1="1" x2="2" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              <line x1="2" y1="8" x2="8" y2="15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
 
-        {/* Content */}
-        <div className="epub-content" ref={contentRef} onClick={handleContentClick}>
-          <article className="epub-chapter">
-            <div className="epub-chapter__body" dangerouslySetInnerHTML={{ __html: chapter.html }} />
-            <div style={{ height: '8vh' }} aria-hidden="true" />
-          </article>
+          <div className="epub-content" ref={contentRef} onClick={handleContentClick}>
+            <article className="epub-chapter">
+              <div className="epub-chapter__body" dangerouslySetInnerHTML={{ __html: chapterHtml }} />
+              <div style={{ height: '8vh' }} aria-hidden="true" />
+            </article>
+          </div>
+
+          <button
+            className="epub-float-btn epub-float-btn--next"
+            onClick={() => setCurrentIdx((i) => i + 1)}
+            disabled={currentIdx === chapters.length - 1}
+            aria-label="Nächstes Kapitel"
+          >
+            <svg viewBox="0 0 10 16" fill="none">
+              <line x1="2" y1="1" x2="8" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+              <line x1="8" y1="8" x2="2" y2="15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            </svg>
+          </button>
         </div>
-
-        <button
-          className="epub-float-btn epub-float-btn--next"
-          onClick={() => setCurrentIdx((i) => i + 1)}
-          disabled={currentIdx === chapters.length - 1}
-          aria-label="Nächstes Kapitel"
-        >
-          <svg viewBox="0 0 10 16" fill="none">
-            <line x1="2" y1="1" x2="8" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-            <line x1="8" y1="8" x2="2" y2="15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-          </svg>
-        </button>
       </div>
+
+      {/* Highlight toolbar */}
+      {hlToolbarPos && (
+        <div
+          id="epub-hl-toolbar"
+          className="hl-toolbar show"
+          style={{
+            left: Math.min(Math.max(hlToolbarPos.x, 130), window.innerWidth - 130),
+            top: hlToolbarPos.y,
+          }}
+          // Prevent browser from moving focus away from the text on any interaction
+          // with the toolbar — without this the selection is lost before applyHL runs.
+          onMouseDown={(e) => e.preventDefault()}
+        >
+          <div className="hl-grid">
+            {HL_COLORS.map((color) => (
+              <div key={color} className={`hl-color hl-c-${color.replace('hl-', '')}`} onClick={() => applyHL(color)} />
+            ))}
+          </div>
+          <button className="hl-remove" onClick={removeHL}>
+            ✕
+          </button>
+        </div>
+      )}
     </div>
   );
 }

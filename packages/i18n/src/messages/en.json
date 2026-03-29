@@ -65,7 +65,13 @@
       "learnMore": "Learn more → sdarm.org",
       "fallbackText1": "sdarm.life is the local online presence of the Seventh Day Adventist Reform Movement in Germany — part of the worldwide community at sdarm.org.",
       "fallbackText2": "Our community was founded as a place of spiritual renewal — for people who take biblical truth, the Sabbath, and the message of the Reformation seriously.",
-      "fallbackImageAlt": "Community praying"
+      "fallbackImageAlt": "Community praying",
+      "eyebrow": "Who we are",
+      "heroTitle": "About <em>us</em>",
+      "scrollHint": "Discover",
+      "glaubensEyebrow": "Foundations",
+      "glaubensTitle": "Points of Our Faith",
+      "glaubensSub": "25 principles that shape our thinking and living."
     },
     "uberUns": {
       "eyebrow": "Who we are",
@@ -146,8 +152,10 @@
         "section5Title": "External Content (E-Books)",
         "section5Body": "The \u201cTreasures\u201d platform allows digital books in EPUB format to be read directly in the browser. When opening a book, your browser establishes a direct connection to the external file server (currently: egwwritings.org, operated by the Ellen G. White Estate, Inc., USA) from which the EPUB file is retrieved. In doing so, your IP address and the time of access are transmitted to this third-party provider. Processing is based on our legitimate interest in delivering the requested content (Art.\u00a06(1)(f) GDPR). For more information, please see the",
         "section5PrivacyLink": "Ellen G. White Estate Privacy Policy",
-        "section6Title": "Your Rights",
-        "section6Body": "You have the right to information, correction, deletion and restriction of processing of your stored data as well as the right to data portability. Please contact"
+        "section6Title": "Book Request (Receive a Gift)",
+        "section6Body": "When you request books through the \"Receive a Gift\" form, we process the following data: name, email address, postal address (street, postal code, city), country, and optionally phone number and a personal message. The legal basis is your consent pursuant to Art. 6(1)(a) GDPR. The data is used solely for processing and shipping your request and will be deleted after delivery is complete. You may revoke your consent at any time by email:",
+        "section7Title": "Your Rights",
+        "section7Body": "You have the right to information, correction, deletion and restriction of processing of your stored data as well as the right to data portability. Please contact"
       }
     }
   },
@@ -237,10 +245,58 @@
         "book": "Books"
       },
       "free": "Free",
+      "postBadge": "by mail",
       "readSoon": "Read",
       "empty": "No results for this selection.",
       "scriptureText": "Your testimonies are my heritage forever, for they are the joy of my heart.",
       "scriptureRef": "Psalm 119:111"
-    }
+    },
+    "bookRequest": {
+        "bannerEyebrow": "Free Books",
+        "bannerTitle": "Read what the world keeps silent",
+        "bannerSubtitle": "Classic books of the Reform Movement — free, delivered directly to your home.",
+        "cta": "Receive a gift",
+        "modalTitle": "Your books are waiting",
+        "modalSubtitle": "Just a few fields — and we will send you the package free of charge.",
+        "notice": "One gift per address — so that as many people as possible can benefit.",
+        "fieldLand": "Where do you live?",
+        "landPlaceholder": "Select country …",
+        "fieldName": "What is your name?",
+        "namePlaceholder": "First and last name",
+        "fieldEmail": "Your email",
+        "emailPlaceholder": "so we can keep you informed",
+        "fieldPhone": "Mobile number",
+        "phonePlaceholder": "+49 …",
+        "fieldStreet": "Where should we deliver?",
+        "streetPlaceholder": "Street and house number",
+        "fieldPlz": "Postal code",
+        "plzPlaceholder": "10115",
+        "fieldCity": "City",
+        "cityPlaceholder": "Your city",
+        "fieldBooks": "Which books would you like to discover?",
+        "fieldWish": "Any other wishes?",
+        "wishPlaceholder": "Feel free to write us something …",
+        "dsgvoNotice": "Your data (name, address, email) will be processed solely for the purpose of handling and shipping this book request. Legal basis: Art. 6(1)(a) GDPR. Your data will be deleted after shipping is complete. You may revoke your consent at any time (info@sdarm.life).",
+        "consent": "I consent to the processing of my data for this one-time book shipment. I have read the",
+        "consentPrivacyLink": "Privacy Policy",
+        "submit": "Yes, I want these books!",
+        "submitNote": "Free · No spam · No catch",
+        "successTitle": "Your request has arrived!",
+        "successBody": "We are delighted to send you these books. They will arrive within 2–15 working days.",
+        "successClose": "Wonderful, thank you!",
+        "optional": "optional",
+        "required": "*",
+        "books": {
+          "wegZuChristus": "Steps to Christ – E. G. White",
+          "grosserKampf": "The Great Controversy – E. G. White",
+          "lebenJesu": "The Desire of Ages – E. G. White",
+          "bibel": "The Bible"
+        },
+        "errorMinBook": "Please select at least one book.",
+        "errorSubmit": "Something went wrong. Please try again later.",
+        "landDe": "Germany",
+        "landAt": "Austria",
+        "landCh": "Switzerland"
+      }
   }
 }

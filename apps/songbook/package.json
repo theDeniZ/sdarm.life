@@ -12,6 +12,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/lexend": "^5.2.11",
     "@sdarm/types": "workspace:*",
     "@sdarm/ui": "workspace:*",
     "next": "15.2.2",

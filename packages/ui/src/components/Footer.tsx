@@ -40,7 +40,15 @@ interface ClockState {
 const CIRC = 2 * Math.PI * 76;
 const DEFAULT_LAT = 48.8922;
 const DEFAULT_LNG = 8.6944;
-const TZ = 'Europe/Berlin';
+const LOCATION_KEY = 'sdarm_sunset_location';
+
+function getBrowserTz(): string {
+  try {
+    return Intl.DateTimeFormat().resolvedOptions().timeZone;
+  } catch {
+    return 'Europe/Berlin';
+  }
+}
 
 function parseTimeToMs(timeStr: string): number {
   const [time, period] = timeStr.split(' ');
@@ -70,12 +78,7 @@ function nowMs(): number {
   return (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) * 1000;
 }
 
-function computeClock(
-  sun: SunData,
-  now: number,
-  dow: number,
-  clockT: (key: string) => string
-): ClockState {
+function computeClock(sun: SunData, now: number, dow: number, clockT: (key: string) => string): ClockState {
   const DAY_MS = 86400000;
 
   const { todaySunrise, todaySunset, tomorrowSunrise, tomorrowSunset } = sun;
@@ -151,8 +154,8 @@ function computeClock(
   };
 }
 
-async function fetchSunData(lat: number, lng: number): Promise<SunData> {
-  const base = `https://api.sunrisesunset.io/json?lat=${lat}&lng=${lng}&timezone=${TZ}`;
+async function fetchSunData(lat: number, lng: number, tz?: string): Promise<SunData> {
+  const base = `https://api.sunrisesunset.io/json?lat=${lat}&lng=${lng}&timezone=${encodeURIComponent(tz ?? getBrowserTz())}`;
   const [todayRes, tomorrowRes] = await Promise.all([fetch(`${base}&date=today`), fetch(`${base}&date=tomorrow`)]);
   const [todayData, tomorrowData] = await Promise.all([
     todayRes.json() as Promise<{ results: { sunrise: string; sunset: string } }>,
@@ -197,6 +200,19 @@ export default function Footer({
   });
 
   useEffect(() => {
+    try {
+      const saved = localStorage.getItem(LOCATION_KEY);
+      if (saved) {
+        const { lat, lng, name, tz } = JSON.parse(saved) as { lat: number; lng: number; name: string; tz?: string };
+        setLocationName(name);
+        fetchSunData(lat, lng, tz)
+          .then(setSunData)
+          .catch(() => {});
+        return;
+      }
+    } catch {
+      // ignore
+    }
     fetchSunData(DEFAULT_LAT, DEFAULT_LNG)
       .then(setSunData)
       .catch(() => {});
@@ -240,15 +256,24 @@ export default function Footer({
     if (!locationInput.trim()) return;
     try {
       const geo = await fetch(
-        `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(locationInput)}&countrycodes=de&format=jsonv2&limit=1&addressdetails=1`
+        `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(locationInput)}&format=jsonv2&limit=1&addressdetails=1`
       );
       const results = (await geo.json()) as { lat: string; lon: string; display_name: string }[];
       if (!results.length) return;
       const { lat, lon, display_name } = results[0];
-      const data = await fetchSunData(Number(lat), Number(lon));
+      const parsedLat = Number(lat);
+      const parsedLng = Number(lon);
+      const name = display_name.split(',').slice(0, 2).join(',').trim();
+      const tz = getBrowserTz();
+      const data = await fetchSunData(parsedLat, parsedLng, tz);
       setSunData(data);
-      setLocationName(display_name.split(',').slice(0, 2).join(',').trim());
+      setLocationName(name);
       setLocationInput('');
+      try {
+        localStorage.setItem(LOCATION_KEY, JSON.stringify({ lat: parsedLat, lng: parsedLng, name, tz }));
+      } catch {
+        // ignore
+      }
     } catch {
       // silently fail
     }

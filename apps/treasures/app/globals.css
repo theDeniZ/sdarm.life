@@ -40,7 +40,6 @@ a {
 
 /* ── FILTER BAR ── */
 .filter-section {
-  border-top: 1px solid rgba(201, 169, 110, 0.06);
   background: #0a0908;
   position: sticky;
   top: var(--nav-h);
@@ -48,11 +47,12 @@ a {
 }
 
 .filter-bar {
-  padding: 0.85rem 2rem;
+  padding: 0 2rem;
+  height: 52px;
   display: flex;
-  gap: 0;
   align-items: center;
   justify-content: center;
+  gap: 0;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -60,63 +60,40 @@ a {
   display: none;
 }
 
-.filter-label {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.55rem;
-  font-weight: 300;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  color: rgba(100, 90, 78, 0.35);
-  margin-right: 1.4rem;
+.filter-group {
+  display: flex;
+  align-items: center;
+}
+
+.filter-sep {
+  width: 1px;
+  height: 18px;
+  background: rgba(201, 169, 110, 0.12);
+  margin: 0 1rem;
   flex-shrink: 0;
 }
 
-.filter-btn {
+.filter-pill {
   flex-shrink: 0;
-  padding: 0.4rem 0.95rem;
+  padding: 0.42rem 1.1rem;
   border: none;
   background: transparent;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.68rem;
-  font-weight: 300;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: rgba(145, 135, 120, 0.42);
-  cursor: pointer;
-  transition: color 0.3s;
-}
-.filter-btn:hover {
-  color: rgba(210, 200, 185, 0.7);
-}
-.filter-btn.active {
-  color: rgba(201, 169, 110, 0.9);
-}
-
-.filter-bar-lang {
-  border-top: 1px solid rgba(201, 169, 110, 0.04);
-  padding-top: 0;
-  padding-bottom: 0.7rem;
-}
-
-.lang-btn {
-  flex-shrink: 0;
-  padding: 0.32rem 0.85rem;
-  border: none;
-  background: transparent;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.6rem;
+  font-size: 0.78rem;
   font-weight: 300;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(120, 110, 98, 0.36);
+  color: rgba(160, 148, 128, 0.75);
   cursor: pointer;
-  transition: color 0.3s;
+  transition: color 0.2s;
+  line-height: 1;
 }
-.lang-btn:hover {
-  color: rgba(180, 170, 155, 0.6);
+.filter-pill:hover {
+  color: rgba(210, 200, 185, 0.75);
 }
-.lang-btn.active {
-  color: rgba(201, 169, 110, 0.75);
+.filter-pill.active {
+  color: rgba(201, 169, 110, 1);
+  background: none;
 }
 
 /* ── SHOP GRID ── */
@@ -156,7 +133,7 @@ a {
 
 /* ── ITEM CARD ── */
 .item-card {
-  background: rgba(255, 255, 255, 0.022);
+  background: rgba(255, 255, 255, 0.042);
   border-radius: 6px;
   position: relative;
   overflow: hidden;
@@ -168,13 +145,19 @@ a {
   cursor: pointer;
   opacity: 0;
   transform: translateY(22px);
+  display: block;
+  text-decoration: none;
+  color: inherit;
+}
+.item-card--no-link {
+  cursor: default;
 }
 .item-card.visible {
   opacity: 1;
   transform: translateY(0);
 }
 .item-card:hover {
-  background: rgba(255, 255, 255, 0.036);
+  background: rgba(255, 255, 255, 0.065);
   box-shadow:
     0 12px 44px rgba(0, 0, 0, 0.38),
     0 0 0 1px rgba(201, 169, 110, 0.06);
@@ -207,7 +190,7 @@ a {
   right: 0.9rem;
   z-index: 5;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 300;
   letter-spacing: 0.16em;
   text-transform: uppercase;
@@ -218,6 +201,11 @@ a {
   color: rgba(201, 169, 110, 0.9);
   border: 1px solid rgba(201, 169, 110, 0.3);
   background: rgba(201, 169, 110, 0.06);
+}
+.post-badge {
+  color: rgba(180, 220, 180, 0.85);
+  border: 1px solid rgba(180, 220, 180, 0.25);
+  background: rgba(180, 220, 180, 0.06);
 }
 
 /* ── 3D BOOK ── */
@@ -271,7 +259,7 @@ a {
 
 .book-3d-title {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.55rem;
+  font-size: 0.72rem;
   font-weight: 400;
   color: rgba(201, 169, 110, 0.9);
   line-height: 1.45;
@@ -288,7 +276,7 @@ a {
 
 .book-3d-author {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.4rem;
+  font-size: 0.6rem;
   font-weight: 300;
   color: rgba(201, 169, 110, 0.45);
   letter-spacing: 0.08em;
@@ -300,33 +288,30 @@ a {
   padding: 1.4rem 1.6rem 1.6rem;
 }
 
-.item-cat {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.6rem;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(201, 169, 110, 0.55);
-  margin-bottom: 0.5rem;
+.item-title-row {
   display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.item-cat::before {
-  content: '';
-  width: 10px;
-  height: 1px;
-  background: rgba(201, 169, 110, 0.35);
-  flex-shrink: 0;
+  align-items: flex-start;
+  gap: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .item-title {
-  font-family: 'Playfair Display', serif;
-  font-size: 1.02rem;
-  font-weight: 400;
+  font-family: 'Inter', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 500;
   color: rgba(225, 215, 200, 0.92);
-  margin-bottom: 0.38rem;
-  letter-spacing: 0.01em;
-  line-height: 1.3;
+  letter-spacing: 0;
+  line-height: 1.35;
+  flex: 1;
+}
+
+.item-lang {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 0.72rem;
+  color: rgba(201, 169, 110, 0.55);
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+  padding-top: 0.15rem;
 }
 
 .item-author {
@@ -341,7 +326,7 @@ a {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.82rem;
   font-weight: 300;
-  color: rgba(145, 135, 118, 0.52);
+  color: rgba(160, 150, 132, 0.82);
   line-height: 1.65;
   margin-bottom: 1.1rem;
 }
@@ -369,7 +354,7 @@ a {
   align-items: center;
   gap: 0.35rem;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(201, 169, 110, 0.45);
@@ -503,7 +488,7 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.85rem;
+  gap: 1rem;
   max-width: 380px;
   width: 100%;
   text-align: center;
@@ -595,37 +580,138 @@ a {
   --gold: #c9a96e;
   --border: rgba(201, 169, 110, 0.12);
   /* Typography defaults — overridden via inline CSS vars from component state */
-  --epub-font-size: 17px;
+  --epub-font-size: 26px;
   --epub-font-family: 'Cormorant Garamond', serif;
   --epub-line-height: 1.9;
 }
 
 /* data-theme lives on <html> (mirrors prototype pattern) so body bg also adapts */
 [data-theme='sepia'] body {
-  background: #f5f0e8;
+  background: #faf6ef;
 }
 [data-theme='light'] body {
-  background: #fafafa;
+  background: #f5f4f2;
 }
 
 [data-theme='sepia'] .epub-reader {
-  --reader-bg: #f5f0e8;
-  --reader-toolbar: #ede8df;
-  --reader-sidebar: #e8e3da;
-  --text: #3d2e1e;
-  --muted: #8a7660;
-  --gold: #8a6830;
-  --border: rgba(138, 104, 48, 0.18);
+  --reader-bg: #faf6ef;
+  --reader-toolbar: #faf6ef;
+  --reader-sidebar: #fdf9f4;
+  --text: #3b2f1e;
+  --muted: #9c8468;
+  --gold: #a0692a;
+  --border: rgba(100, 70, 30, 0.12);
 }
 
 [data-theme='light'] .epub-reader {
-  --reader-bg: #fafafa;
-  --reader-toolbar: #f2f2f2;
-  --reader-sidebar: #efefef;
-  --text: #1a1a1a;
-  --muted: #666;
+  --reader-bg: #f5f4f2;
+  --reader-toolbar: #f0efed;
+  --reader-sidebar: #f5f4f2;
+  --text: #1c1c1e;
+  --muted: #8a8a8e;
   --gold: #b8924a;
   --border: rgba(0, 0, 0, 0.1);
+}
+
+/* ── Navbar overrides for light reader themes ──────────── */
+[data-theme='sepia'] nav,
+[data-theme='light'] nav {
+  background: transparent;
+}
+
+[data-theme='sepia'] nav.scrolled {
+  background: rgba(240, 232, 216, 0.88);
+  backdrop-filter: blur(16px);
+}
+[data-theme='light'] nav.scrolled {
+  background: rgba(242, 242, 247, 0.9);
+  backdrop-filter: blur(16px);
+}
+
+/* Logo: SDARM part dark, .life stays gold via var(--gold) */
+[data-theme='sepia'] .nav-logo,
+[data-theme='light'] .nav-logo {
+  color: #1c1208;
+}
+
+/* Nav links */
+[data-theme='sepia'] .nav-links a {
+  color: rgba(44, 28, 8, 0.65);
+}
+[data-theme='light'] .nav-links a {
+  color: rgba(30, 20, 5, 0.6);
+}
+[data-theme='sepia'] .nav-links a:hover,
+[data-theme='light'] .nav-links a:hover {
+  color: var(--gold);
+}
+
+/* Lang switcher */
+[data-theme='sepia'] .nav-lang,
+[data-theme='light'] .nav-lang {
+  color: rgba(44, 28, 8, 0.5);
+  border-color: rgba(100, 70, 30, 0.2);
+}
+
+/* Search icon */
+[data-theme='sepia'] .nav-search,
+[data-theme='light'] .nav-search {
+  color: rgba(44, 28, 8, 0.5);
+}
+[data-theme='sepia'] .nav-search:hover,
+[data-theme='light'] .nav-search:hover {
+  color: var(--gold);
+}
+
+/* ── Toolbar buttons — dark in light themes ──────────────── */
+[data-theme='sepia'] .epub-icon-btn,
+[data-theme='light'] .epub-icon-btn {
+  color: var(--text);
+}
+
+[data-theme='sepia'] .epub-icon-btn:hover,
+[data-theme='light'] .epub-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text);
+}
+
+/* Active button (settings panel open) — gold in all themes */
+.epub-icon-btn--active {
+  color: var(--gold) !important;
+}
+
+/* ── TOC contrast for light reader themes ────────────────── */
+[data-theme='sepia'] .epub-sidebar__toc-label,
+[data-theme='light'] .epub-sidebar__toc-label {
+  color: var(--muted);
+}
+
+[data-theme='sepia'] .epub-toc-item__num,
+[data-theme='light'] .epub-toc-item__num {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+[data-theme='sepia'] .epub-toc-item:hover,
+[data-theme='light'] .epub-toc-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme='sepia'] .epub-toc-item--active,
+[data-theme='light'] .epub-toc-item--active {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* Sidebar border — subtler in light themes */
+[data-theme='sepia'] .epub-sidebar,
+[data-theme='light'] .epub-sidebar {
+  border-right-color: rgba(0, 0, 0, 0.08);
+}
+
+/* TOC scrollbar — neutral */
+[data-theme='sepia'] .epub-sidebar__toc::-webkit-scrollbar-thumb,
+[data-theme='light'] .epub-sidebar__toc::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
 }
 
 /* ── Reader shell ────────────────────────────────────────── */
@@ -665,11 +751,11 @@ a {
 .epub-toolbar__center {
   flex: 1;
   text-align: center;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.78rem;
-  font-weight: 300;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
   color: var(--muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -712,10 +798,10 @@ a {
   display: flex;
   align-items: center;
   gap: 0.3rem;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.72rem;
-  font-weight: 300;
-  letter-spacing: 0.1em;
+  font-weight: 400;
+  letter-spacing: 0;
   color: var(--muted);
   min-width: 0;
 }
@@ -746,10 +832,11 @@ a {
 }
 
 .epub-chapter-pos {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Inter', sans-serif;
   font-size: 0.72rem;
+  font-weight: 400;
   color: var(--muted);
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   white-space: nowrap;
 }
 
@@ -777,7 +864,7 @@ a {
 
 /* ── Sidebar ─────────────────────────────────────────────── */
 .epub-sidebar {
-  width: 260px;
+  width: 300px;
   flex-shrink: 0;
   background: var(--reader-sidebar);
   border-right: 1px solid var(--border);
@@ -791,7 +878,7 @@ a {
 }
 
 .epub-sidebar__inner {
-  width: 260px;
+  width: 300px;
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -806,38 +893,141 @@ a {
 }
 
 .epub-sidebar__eyebrow {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.58rem;
-  font-weight: 300;
-  letter-spacing: 0.22em;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(201, 169, 110, 0.35);
+  color: rgba(201, 169, 110, 0.55);
   margin-bottom: 0.5rem;
 }
 
 .epub-sidebar__title {
-  font-family: 'Playfair Display', serif;
-  font-size: 0.9rem;
-  font-style: italic;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
   color: var(--text);
   line-height: 1.35;
   margin-bottom: 0.25rem;
 }
 
 .epub-sidebar__author {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.75rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
   color: var(--muted);
+}
+
+.epub-sidebar__search {
+  padding: 0.9rem 1.2rem;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.08);
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.epub-sidebar__search-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(201, 169, 110, 0.15);
+  padding: 0.45rem 0.75rem;
+  font-family: var(--epub-font-family, 'Cormorant Garamond', serif);
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.25s;
+}
+
+.epub-sidebar__search-input::placeholder {
+  color: rgba(122, 116, 112, 0.6);
+}
+
+.epub-sidebar__search-input:focus {
+  border-color: rgba(201, 169, 110, 0.4);
+}
+
+[data-theme='sepia'] .epub-sidebar__search-input,
+[data-theme='light'] .epub-sidebar__search-input {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1c1c1e;
+}
+
+[data-theme='sepia'] .epub-sidebar__search-input:focus,
+[data-theme='light'] .epub-sidebar__search-input:focus {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
+.epub-sidebar__search-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.15rem;
+  flex-shrink: 0;
+}
+
+.epub-sidebar__search-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-right: 0.15rem;
+}
+
+.epub-sidebar__search-arrow {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 0.8rem;
+  cursor: pointer;
+  padding: 0.1rem 0.25rem;
+  line-height: 1;
+  transition: color 0.2s;
+}
+
+.epub-sidebar__search-arrow:hover:not(:disabled) {
+  color: var(--gold);
+}
+
+.epub-sidebar__search-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.epub-sidebar__search-empty {
+  padding: 1.5rem 1.4rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── Search highlight in content ──────────────────────────── */
+.epub-search-mark {
+  background: rgba(201, 169, 110, 0.35);
+  color: inherit;
+  padding: 0.05em 0.1em;
+  border-radius: 2px;
+}
+
+[data-theme='sepia'] .epub-search-mark {
+  background: rgba(160, 105, 42, 0.25);
+}
+
+[data-theme='light'] .epub-search-mark {
+  background: rgba(255, 213, 79, 0.45);
 }
 
 .epub-sidebar__toc-label {
   padding: 0.8rem 1.4rem 0.35rem;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.6rem;
-  font-weight: 300;
-  letter-spacing: 0.2em;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(201, 169, 110, 0.32);
+  color: rgba(201, 169, 110, 0.52);
   flex-shrink: 0;
 }
 
@@ -860,8 +1050,8 @@ a {
 .epub-toc-item {
   display: flex;
   align-items: baseline;
-  gap: 0.65rem;
-  padding: 0.6rem 1.4rem;
+  gap: 0.55rem;
+  padding: 0.35rem 1.2rem;
   width: 100%;
   background: none;
   border: none;
@@ -881,9 +1071,10 @@ a {
 }
 
 .epub-toc-item__num {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.65rem;
-  color: rgba(201, 169, 110, 0.3);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(201, 169, 110, 0.5);
   min-width: 1.4rem;
   flex-shrink: 0;
 }
@@ -893,17 +1084,25 @@ a {
 }
 
 .epub-toc-item__title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.88rem;
-  font-weight: 300;
+  font-family: var(--epub-font-family, 'Inter', sans-serif);
+  font-size: 0.82rem;
+  font-weight: 500;
   color: var(--muted);
-  line-height: 1.45;
-  letter-spacing: 0.02em;
+  line-height: 1.4;
+  letter-spacing: 0;
 }
 
 .epub-toc-item--active .epub-toc-item__title {
   color: var(--text);
   font-weight: 400;
+}
+
+/* ── Content pane (wrapper for content + nav arrows) ────── */
+.epub-content-pane {
+  flex: 1;
+  position: relative;
+  display: flex;
+  overflow: hidden;
 }
 
 /* ── Content area ────────────────────────────────────────── */
@@ -935,15 +1134,17 @@ a {
   font-family: var(--epub-font-family);
   font-size: var(--epub-font-size);
   line-height: var(--epub-line-height);
+  font-weight: 500;
   color: var(--text);
   transition: font-size 0.15s, line-height 0.15s;
 }
 
+/* Headings follow selected reading font for harmony */
 .epub-chapter__body h1,
 .epub-chapter__body h2,
 .epub-chapter__body h3,
 .epub-chapter__body h4 {
-  font-family: 'Playfair Display', serif;
+  font-family: var(--epub-font-family);
   color: var(--text);
   margin: 2rem 0 1rem;
   line-height: 1.3;
@@ -963,10 +1164,102 @@ a {
   letter-spacing: 0.05em;
 }
 
+/* EPUB chapter heading class */
+.epub-chapter__body h2.chapterhead {
+  font-size: 1.5rem;
+  font-weight: 500;
+  text-align: center;
+  margin: 2.5rem 0 2rem;
+  line-height: 1.4;
+}
+
 .epub-chapter__body p {
   margin-bottom: 1.25em;
   text-align: justify;
   hyphens: auto;
+}
+
+/* Standard indented paragraph — first-line indent, no margin-top after first */
+.epub-chapter__body p.standard-indented {
+  text-indent: 1.5em;
+  margin-bottom: 0;
+}
+.epub-chapter__body p.standard-noindent {
+  text-indent: 0;
+  margin-bottom: 0;
+}
+
+/* Drop cap on very first paragraph of chapter */
+.epub-chapter__body p.standard-indented:first-of-type {
+  text-indent: 0;
+}
+.epub-chapter__body p.standard-indented:first-of-type::first-letter {
+  float: left;
+  font-size: 3.6em;
+  line-height: 0.78;
+  margin: 4px 8px 0 0;
+  color: var(--gold);
+  font-weight: 600;
+}
+
+/* Blockquote paragraphs */
+.epub-chapter__body p.blockquote-indented,
+.epub-chapter__body p.blockquote-noindent {
+  border-left: 2px solid rgba(201, 169, 110, 0.45);
+  padding-left: 1.2rem;
+  margin: 1.2rem 0;
+  font-style: italic;
+  color: var(--muted);
+  text-indent: 0;
+}
+
+/* Poem paragraphs */
+.epub-chapter__body p.poem-noindent,
+.epub-chapter__body p.poem-indented {
+  font-style: italic;
+  margin: 0.5rem 0 0.5rem 1.5rem;
+  text-indent: 0;
+  text-align: left;
+}
+.epub-chapter__body p.poem-source {
+  text-align: right;
+  font-size: 0.88em;
+  color: var(--muted);
+  margin-bottom: 1.2rem;
+}
+
+/* Centered and devotional text */
+.epub-chapter__body p.center,
+.epub-chapter__body p.page {
+  text-align: center;
+  text-indent: 0;
+}
+.epub-chapter__body p.devotionaltext {
+  text-align: center;
+  font-weight: 600;
+  text-indent: 0;
+}
+
+/* Signature line */
+.epub-chapter__body p.signatureline {
+  text-align: right;
+  color: var(--muted);
+  font-style: italic;
+  text-indent: 0;
+}
+
+/* Bible reference spans — subtle gold tint */
+.epub-chapter__body span.bible-rus {
+  color: var(--gold);
+  opacity: 0.85;
+  text-decoration: underline dotted;
+  text-underline-offset: 3px;
+  cursor: default;
+}
+
+/* Hide EPUB page number markers */
+.epub-chapter__body span.pagebreak {
+  display: none;
 }
 
 .epub-chapter__body blockquote {
@@ -998,6 +1291,126 @@ a {
   padding: 0.4rem 0.6rem;
   border-bottom: 1px solid var(--border);
   text-align: left;
+}
+
+/* ── TEXT HIGHLIGHT SYSTEM ───────────────────────────────── */
+
+.epub-chapter__body ::selection {
+  background: rgba(255, 214, 0, 0.45);
+  color: inherit;
+}
+
+.epub-chapter__body .hl {
+  border-radius: 3px 6px 3px 5px;
+  cursor: pointer;
+}
+.epub-chapter__body .hl-preview {
+  background-color: rgba(160, 160, 160, 0.30);
+  border-radius: 3px;
+  cursor: default;
+}
+
+/* Pastel highlight colors — simple background-color, works on all themes */
+.epub-chapter__body .hl-cream      { background-color: rgba(238, 225, 183, 0.75); }
+.epub-chapter__body .hl-honey      { background-color: rgba(230, 203, 138, 0.75); }
+.epub-chapter__body .hl-sage       { background-color: rgba(189, 210, 153, 0.75); }
+.epub-chapter__body .hl-mint       { background-color: rgba(225, 233, 183, 0.75); }
+.epub-chapter__body .hl-sky        { background-color: rgba(168, 199, 214, 0.75); }
+.epub-chapter__body .hl-rose       { background-color: rgba(238, 186, 183, 0.75); }
+.epub-chapter__body .hl-peach      { background-color: rgba(238, 211, 183, 0.75); }
+.epub-chapter__body .hl-periwinkle { background-color: rgba(168, 175, 214, 0.75); }
+.epub-chapter__body .hl-lilac      { background-color: rgba(212, 168, 214, 0.75); }
+.epub-chapter__body .hl-lavender   { background-color: rgba(186, 168, 214, 0.75); }
+
+/* On dark theme — slightly higher opacity for visibility */
+[data-theme='dark'] .epub-chapter__body .hl-cream      { background-color: rgba(238, 225, 183, 0.30); }
+[data-theme='dark'] .epub-chapter__body .hl-honey      { background-color: rgba(230, 203, 138, 0.30); }
+[data-theme='dark'] .epub-chapter__body .hl-sage       { background-color: rgba(189, 210, 153, 0.30); }
+[data-theme='dark'] .epub-chapter__body .hl-mint       { background-color: rgba(225, 233, 183, 0.30); }
+[data-theme='dark'] .epub-chapter__body .hl-sky        { background-color: rgba(168, 199, 214, 0.35); }
+[data-theme='dark'] .epub-chapter__body .hl-rose       { background-color: rgba(238, 186, 183, 0.30); }
+[data-theme='dark'] .epub-chapter__body .hl-peach      { background-color: rgba(238, 211, 183, 0.30); }
+[data-theme='dark'] .epub-chapter__body .hl-periwinkle { background-color: rgba(168, 175, 214, 0.35); }
+[data-theme='dark'] .epub-chapter__body .hl-lilac      { background-color: rgba(212, 168, 214, 0.30); }
+[data-theme='dark'] .epub-chapter__body .hl-lavender   { background-color: rgba(186, 168, 214, 0.30); }
+
+.hl-toolbar {
+  position: fixed;
+  z-index: 9999;
+  background: var(--reader-toolbar);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(-50%);
+  pointer-events: all;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.15s, visibility 0.15s;
+}
+.hl-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 22px);
+  gap: 6px;
+}
+.hl-toolbar.show {
+  opacity: 1;
+  visibility: visible;
+}
+[data-theme='sepia'] .hl-toolbar,
+[data-theme='light'] .hl-toolbar {
+  background: #f5f4f2;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.hl-color {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: transform 0.15s, border-color 0.15s;
+}
+.hl-color:hover {
+  transform: scale(1.2);
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+.hl-c-cream      { background: #EEE1B7; box-shadow: 0 0 0 1px rgba(238,225,183,0.6); }
+.hl-c-honey      { background: #E6CB8A; box-shadow: 0 0 0 1px rgba(230,203,138,0.6); }
+.hl-c-sage       { background: #BDD299; box-shadow: 0 0 0 1px rgba(189,210,153,0.6); }
+.hl-c-mint       { background: #E1E9B7; box-shadow: 0 0 0 1px rgba(225,233,183,0.6); }
+.hl-c-sky        { background: #A8C7D6; box-shadow: 0 0 0 1px rgba(168,199,214,0.6); }
+.hl-c-rose       { background: #EEBAB7; box-shadow: 0 0 0 1px rgba(238,186,183,0.6); }
+.hl-c-peach      { background: #EED3B7; box-shadow: 0 0 0 1px rgba(238,211,183,0.6); }
+.hl-c-periwinkle { background: #A8AFD6; box-shadow: 0 0 0 1px rgba(168,175,214,0.6); }
+.hl-c-lilac      { background: #D4A8D6; box-shadow: 0 0 0 1px rgba(212,168,214,0.6); }
+.hl-c-lavender   { background: #BAA8D6; box-shadow: 0 0 0 1px rgba(186,168,214,0.6); }
+
+.hl-remove {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s;
+}
+.hl-remove:hover {
+  border-color: #ff3b30;
+  color: #ff3b30;
 }
 
 /* ── Floating prev / next arrows ─────────────────────────── */
@@ -1034,11 +1447,6 @@ a {
 
 .epub-float-btn--prev {
   left: 4px;
-  transition: left 0.38s var(--ease), color 0.2s, opacity 0.2s;
-}
-
-.epub-layout--sidebar-open .epub-float-btn--prev {
-  left: calc(260px + 4px);
 }
 
 .epub-float-btn--next {
@@ -1082,13 +1490,20 @@ a {
   padding: 1.1rem 1.1rem 1.2rem;
   width: 280px;
   z-index: 300;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+[data-theme='sepia'] .epub-settings,
+[data-theme='light'] .epub-settings {
+  background: #f5f4f2;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .epub-settings__label {
   display: block;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 300;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -1101,42 +1516,30 @@ a {
   margin-top: 0;
 }
 
-/* Theme row */
-.epub-theme-row {
-  display: flex;
-  gap: 0.45rem;
-}
-
-.epub-theme-btn {
-  flex: 1;
-  padding: 0.5rem 0.3rem;
-  border-radius: 7px;
-  cursor: pointer;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.72rem;
-  font-weight: 300;
-  letter-spacing: 0.05em;
-  border: 1px solid var(--border);
+/* Theme picker — dots only */
+.epub-theme-picker {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.3rem;
-  background: none;
-  color: var(--text);
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
-}
-
-.epub-theme-btn--active {
-  border-color: var(--gold);
-  color: var(--gold);
-  background: rgba(201, 169, 110, 0.07);
+  gap: 10px;
 }
 
 .epub-theme-dot {
-  width: 9px;
-  height: 9px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
   flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+  transition: border-color 0.15s, transform 0.15s;
+}
+
+.epub-theme-dot:hover {
+  transform: scale(1.15);
+}
+
+.epub-theme-dot--active {
+  /* border-color comes via inline style */
 }
 
 /* Font size */
@@ -1149,7 +1552,7 @@ a {
 .epub-size-btn {
   width: 34px;
   height: 34px;
-  border-radius: 7px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1157,8 +1560,8 @@ a {
   border: 1px solid var(--border);
   cursor: pointer;
   color: var(--text);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.95rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
   transition: background 0.2s, color 0.2s;
   flex-shrink: 0;
 }
@@ -1210,8 +1613,8 @@ a {
 }
 
 .epub-font-btn {
-  padding: 0.38rem 0.7rem;
-  border-radius: 6px;
+  padding: 0.36rem 0.75rem;
+  border-radius: 100px;
   cursor: pointer;
   font-size: 0.78rem;
   border: 1px solid var(--border);
@@ -1235,14 +1638,14 @@ a {
 .epub-lh-btn {
   flex: 1;
   padding: 0.42rem;
-  border-radius: 6px;
+  border-radius: 100px;
   cursor: pointer;
   font-size: 0.72rem;
   border: 1px solid var(--border);
   background: none;
   color: var(--text);
   letter-spacing: 0.04em;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Inter', sans-serif;
   transition: border-color 0.2s, background 0.2s, color 0.2s;
 }
 
@@ -1285,4 +1688,489 @@ a {
 
 nav {
   padding-inline: 1.8rem;
+}
+
+/* ── BOOK REQUEST HERO BUTTON ─────────────────────────────────────────────── */
+
+.br-hero-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--gold);
+  color: #0c0b09;
+  border: none;
+  border-radius: 3px;
+  padding: 14px 36px;
+  font-family: 'Inter', sans-serif;
+  font-size: 16px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+
+.br-hero-cta::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.38) 50%,
+    transparent 100%
+  );
+  transition: left 0.5s ease;
+}
+
+.br-hero-cta svg {
+  width: 9px;
+  height: 9px;
+  position: relative;
+  z-index: 1;
+}
+
+.br-hero-cta:hover::after {
+  left: 160%;
+}
+
+.br-hero-cta:hover {
+}
+
+/* ── BOOK REQUEST MODAL ────────────────────────────────────────────────────── */
+
+@keyframes br-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes br-slide-up {
+  from { opacity: 0; transform: translateY(24px) scale(0.98); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.br-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 3, 2, 0.88);
+  z-index: 9000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(22px) saturate(1.2);
+  animation: br-fade-in 0.2s ease;
+}
+
+.br-modal {
+  background: #141210;
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 8px;
+  width: 100%;
+  max-width: 640px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  padding: 48px;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(201, 169, 110, 0.04);
+  animation: br-slide-up 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(201, 169, 110, 0.2) transparent;
+}
+
+.br-modal::-webkit-scrollbar {
+  width: 4px;
+}
+.br-modal::-webkit-scrollbar-track {
+  background: transparent;
+}
+.br-modal::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 110, 0.2);
+  border-radius: 2px;
+}
+
+.br-close {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(10, 9, 7, 0.65);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(201, 169, 110, 0.22);
+  color: rgba(201, 169, 110, 0.6);
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  line-height: 1;
+}
+
+.br-close:hover {
+  color: var(--gold);
+  border-color: rgba(201, 169, 110, 0.5);
+  background: rgba(201, 169, 110, 0.14);
+}
+
+.br-modal-header {
+  margin-bottom: 28px;
+}
+
+.br-modal-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.9rem;
+  font-weight: 400;
+  color: #f0ebe2;
+  margin-bottom: 8px;
+  line-height: 1.2;
+}
+
+.br-modal-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.br-notice {
+  border-left: 2px solid rgba(201, 169, 110, 0.35);
+  padding: 10px 16px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.9rem;
+  color: var(--muted);
+  margin-bottom: 28px;
+  font-style: italic;
+  background: rgba(201, 169, 110, 0.03);
+  border-radius: 0 3px 3px 0;
+}
+
+.br-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.br-field {
+  margin-bottom: 20px;
+}
+
+.br-field > label,
+.br-field > label:first-child {
+  display: block;
+  font-family: 'Oswald', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+.br-req {
+  color: var(--gold);
+}
+
+.br-opt {
+  color: var(--muted);
+  font-size: 0.78em;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  text-transform: none;
+  letter-spacing: 0;
+  font-style: italic;
+}
+
+.br-field input,
+.br-field select {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(201, 169, 110, 0.12);
+  border-radius: 3px;
+  color: var(--text);
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.05rem;
+  padding: 12px 14px;
+  outline: none;
+  transition: border-color 0.2s, background 0.2s;
+  appearance: none;
+  -webkit-appearance: none;
+}
+
+.br-field input::placeholder {
+  color: rgba(122, 116, 112, 0.6);
+}
+
+.br-field input:hover,
+.br-field select:hover {
+  border-color: rgba(201, 169, 110, 0.25);
+}
+
+.br-field input:focus,
+.br-field select:focus {
+  border-color: rgba(201, 169, 110, 0.5);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.br-field select {
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23c9a96e' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+}
+
+.br-field select option {
+  background: #1a1814;
+  color: var(--text);
+}
+
+.br-field-row {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.br-field-row .br-field {
+  margin-bottom: 0;
+}
+
+.br-divider {
+  border: none;
+  border-top: 1px solid rgba(201, 169, 110, 0.08);
+  margin: 4px 0 24px;
+}
+
+.br-check-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.br-check-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.08);
+  cursor: pointer;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 1.15rem;
+  color: var(--text);
+  transition: color 0.15s;
+  user-select: none;
+}
+
+.br-check-item:last-child {
+  border-bottom: none;
+}
+
+.br-check-item:hover {
+  color: #f0ebe2;
+}
+
+.br-check-item.selected {
+  color: #f0ebe2;
+}
+
+.br-box {
+  width: 18px;
+  height: 18px;
+  border: 1px solid rgba(122, 116, 112, 0.6);
+  border-radius: 2px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0c0b09;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.br-check-item.selected .br-box,
+.br-consent.selected .br-box {
+  border-color: var(--gold);
+  background: var(--gold);
+}
+
+.br-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  cursor: pointer;
+  font-family: 'Cormorant Garamond', Georgia, serif;
+  font-size: 0.9rem;
+  color: var(--muted);
+  line-height: 1.7;
+  padding: 14px 16px;
+  border: 1px solid rgba(201, 169, 110, 0.1);
+  border-radius: 3px;
+  transition: border-color 0.2s, background 0.2s;
+  user-select: none;
+}
+
+.br-consent .br-box {
+  margin-top: 3px;
+}
+
+.br-consent:hover {
+  background: rgba(201, 169, 110, 0.02);
+  border-color: rgba(201, 169, 110, 0.2);
+}
+
+.br-consent.selected {
+  border-color: rgba(201, 169, 110, 0.38);
+  background: rgba(201, 169, 110, 0.03);
+}
+
+.br-submit {
+  width: 100%;
+  background: var(--gold);
+  color: #0c0b09;
+  border: none;
+  border-radius: 3px;
+  padding: 16px 40px;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow 0.3s;
+}
+
+.br-submit::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 60%;
+  height: 100%;
+  background: linear-gradient(120deg, transparent 0%, rgba(255, 255, 255, 0.32) 50%, transparent 100%);
+  transition: left 0.5s ease;
+}
+
+.br-submit:hover:not(:disabled)::after {
+  left: 160%;
+}
+
+.br-submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.br-submit-note {
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.82rem;
+  color: rgba(122, 116, 112, 0.7);
+  margin-top: 12px;
+  letter-spacing: 0.06em;
+}
+
+.br-book-error {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem;
+  color: #c06868;
+  margin-top: 8px;
+  font-style: italic;
+}
+
+.br-dsgvo-notice {
+  background: rgba(201, 169, 110, 0.04);
+  border: 1px solid rgba(201, 169, 110, 0.1);
+  border-radius: 6px;
+  padding: 14px 16px;
+}
+
+.br-dsgvo-notice__text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.84rem;
+  color: rgba(214, 208, 200, 0.55);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.br-consent-link {
+  color: var(--gold);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.br-consent-link:hover {
+  opacity: 1;
+}
+
+/* ── SUCCESS STATE ─────────────────────────────────────────────────────────── */
+
+.br-success {
+  text-align: center;
+  padding: 48px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: br-slide-up 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.br-success-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: rgba(201, 169, 110, 0.1);
+  border: 1px solid rgba(201, 169, 110, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  color: var(--gold);
+}
+
+.br-success-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.7rem;
+  font-weight: 400;
+  color: #f0ebe2;
+  line-height: 1.2;
+}
+
+.br-success-body {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  color: var(--muted);
+  max-width: 380px;
+  line-height: 1.7;
+}
+
+/* ── RESPONSIVE ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 700px) {
+  .br-banner-inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 24px;
+  }
+
+  .br-modal {
+    padding: 28px 20px;
+  }
+
+  .br-field-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .br-field-row .br-field {
+    margin-bottom: 20px;
+  }
 }

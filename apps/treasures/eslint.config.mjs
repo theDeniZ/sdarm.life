@@ -1,6 +1,7 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import prettier from 'eslint-plugin-prettier';
+import reactHooks from 'eslint-plugin-react-hooks';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
@@ -22,9 +23,11 @@ export default tseslint.config(
   {
     plugins: {
       prettier,
+      'react-hooks': reactHooks,
     },
     rules: {
       'prettier/prettier': 'error',
+      ...reactHooks.configs.recommended.rules,
     },
   }
 );

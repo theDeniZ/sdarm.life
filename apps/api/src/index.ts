@@ -20,6 +20,7 @@ import adminTreasuresRouter from './routes/admin/treasures';
 import adminApiKeysRouter from './routes/admin/api-keys';
 import adminEmailRouter from './routes/admin/email';
 import treasuresRouter from './routes/treasures';
+import bookRequestRouter from './routes/book-request';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -62,6 +63,8 @@ v1.route('/songs', songsRouter);
 v1.use('/treasures', cached(3600)); // 1 hour — treasure list
 v1.use('/treasures/*', cached(3600)); // 1 hour — treasure detail
 v1.route('/treasures', treasuresRouter);
+
+v1.route('', bookRequestRouter); // /book-request
 
 // ── Admin routes (auth-gated) ─────────────────────────────────────────────────
 admin.use('*', auth);

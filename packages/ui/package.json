@@ -16,5 +16,9 @@
     "@types/react-dom": "^19",
     "next-intl": "^4.8.3",
     "typescript": "^5"
+  },
+  "dependencies": {
+    "@fontsource-variable/noto-sans": "^5.2.10",
+    "@fontsource/noto-sans": "^5.2.10"
   }
 }

@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Raleway:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Serif+Display:ital@0;1&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300&family=Raleway:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400;1,700&family=DM+Serif+Display:ital@0;1&display=swap');
 
 *, *::before, *::after {
   box-sizing: border-box;
@@ -52,10 +52,10 @@ a { text-decoration: none; color: inherit; }
 }
 
 .admin-nav-logo {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 300;
   font-size: 1.05rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: #fff;
   display: flex;
   align-items: baseline;
@@ -68,8 +68,11 @@ a { text-decoration: none; color: inherit; }
 }
 
 .admin-nav-logo .accent {
-  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
   font-style: italic;
+  color: var(--gold);
+  letter-spacing: 0;
 }
 
 .admin-badge {

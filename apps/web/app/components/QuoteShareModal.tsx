@@ -2,20 +2,25 @@
 
 import { useEffect, useRef, useState } from 'react';
 
-type Fmt = 'square' | 'story' | 'wide';
-type ThemeId = 'dark' | 'vanilla' | 'sand' | 'mahog';
+type Fmt = 'square' | 'story' | 'wide' | 'portrait';
+type ThemeId = 'wald' | 'nacht' | 'vanilla' | 'sand' | 'duomo';
 
 const FORMATS: Record<Fmt, { w: number; h: number; label: string }> = {
   square: { w: 1080, h: 1080, label: '1:1' },
+  portrait: { w: 1080, h: 1350, label: '4:5' },
   story: { w: 1080, h: 1920, label: '9:16' },
   wide: { w: 1920, h: 1080, label: '16:9' },
 };
 
-const THEMES: Record<ThemeId, { bg1: string; bg2: string; text: string; accent: string; label: string }> = {
-  dark: { bg1: '#0c0b09', bg2: '#1a1710', text: '#d6d0c8', accent: '#c9a96e', label: 'Dunkel' },
+const THEMES: Record<
+  ThemeId,
+  { bg1: string; bg2: string; text: string; accent: string; label: string; layout?: 'clean' }
+> = {
+  wald: { bg1: '#283a2a', bg2: '#1e2e20', text: '#e8e0cc', accent: '#c8b07a', label: 'Wald' },
+  nacht: { bg1: '#1e2430', bg2: '#161c28', text: '#e0d8c8', accent: '#c9a96e', label: 'Nacht' },
   vanilla: { bg1: '#f5f0e8', bg2: '#ebe4d4', text: '#2a2318', accent: '#8b6914', label: 'Vanilla' },
   sand: { bg1: '#e8dcc8', bg2: '#d4c4a8', text: '#2a1e0e', accent: '#7a5c1e', label: 'Sand' },
-  mahog: { bg1: '#1a0e08', bg2: '#2a1810', text: '#e8d8c0', accent: '#c9845e', label: 'Mahagoni' },
+  duomo: { bg1: '#b8c8b8', bg2: '#a8bca8', text: '#1e2a1e', accent: '#3a5a3a', label: 'Duomo', layout: 'clean' },
 };
 
 function renderCanvas(canvas: HTMLCanvasElement, text: string, ref: string, fmt: Fmt, themeId: ThemeId) {
@@ -25,64 +30,38 @@ function renderCanvas(canvas: HTMLCanvasElement, text: string, ref: string, fmt:
   const ctx = canvas.getContext('2d')!;
   const T = THEMES[themeId];
   const cx = w / 2;
-  const cy = h / 2;
   const story = fmt === 'story';
   const wide = fmt === 'wide';
+  const portrait = fmt === 'portrait';
 
-  // BG gradient
-  const grad = ctx.createLinearGradient(0, 0, w, h);
+  // Background — subtle top-to-bottom gradient
+  const grad = ctx.createLinearGradient(0, 0, 0, h);
   grad.addColorStop(0, T.bg1);
   grad.addColorStop(1, T.bg2);
   ctx.fillStyle = grad;
   ctx.fillRect(0, 0, w, h);
 
-  // Radial glow
-  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.max(w, h) * 0.55);
-  glow.addColorStop(0, T.accent + '18');
-  glow.addColorStop(1, 'transparent');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, w, h);
-
-  // Grain overlay
+  // Subtle grain
   const imageData = ctx.getImageData(0, 0, w, h);
   const data = imageData.data;
   for (let i = 0; i < data.length; i += 4) {
-    const n = (Math.random() - 0.5) * 18;
+    const n = (Math.random() - 0.5) * 12;
     data[i] = Math.max(0, Math.min(255, data[i] + n));
     data[i + 1] = Math.max(0, Math.min(255, data[i + 1] + n));
     data[i + 2] = Math.max(0, Math.min(255, data[i + 2] + n));
   }
   ctx.putImageData(imageData, 0, 0);
 
-  // Decorative teardrops
-  const dropCount = story ? 6 : wide ? 4 : 5;
-  for (let d = 0; d < dropCount; d++) {
-    const dx = (w * (d + 0.5)) / dropCount + (Math.random() - 0.5) * w * 0.12;
-    const dy = h * 0.08 + (Math.random() - 0.5) * h * 0.04;
-    const dr = story ? 180 : wide ? 100 : 130;
-    const dg = ctx.createRadialGradient(dx, dy, 0, dx, dy, dr);
-    dg.addColorStop(0, T.accent + '22');
-    dg.addColorStop(1, 'transparent');
-    ctx.fillStyle = dg;
-    ctx.fillRect(0, 0, w, h);
-  }
-
-  // Decorative quote mark
-  const qSize = story ? 320 : wide ? 200 : 260;
-  ctx.font = `bold ${qSize}px Georgia, serif`;
-  ctx.fillStyle = T.accent + '12';
-  ctx.textAlign = 'center';
-  ctx.fillText('\u201C', cx, cy - (story ? h * 0.15 : h * 0.12));
-
-  // Quote text
-  const maxW = w * (wide ? 0.7 : 0.78);
-  const fontSize = story ? 68 : wide ? 52 : 62;
-  const lineH = story ? 96 : wide ? 74 : 88;
-  ctx.font = `italic ${fontSize}px 'Georgia', serif`;
-  ctx.fillStyle = T.text;
-  ctx.textAlign = 'center';
+  const padding = w * 0.13;
+  const maxW = w - padding * 2;
+  const fontSize = story ? 62 : wide ? 46 : 56;
+  const lineH = story ? 88 : wide ? 66 : 80;
+  const refFontSize = story ? 40 : wide ? 30 : 36;
+  const refGap = story ? 52 : wide ? 40 : 48;
+  const wmZone = story ? 160 : wide ? 110 : portrait ? 140 : 130;
 
   // Word-wrap
+  ctx.font = `italic ${fontSize}px Georgia, serif`;
   const words = text.split(' ');
   const lines: string[] = [];
   let line = '';
@@ -97,34 +76,92 @@ function renderCanvas(canvas: HTMLCanvasElement, text: string, ref: string, fmt:
   }
   if (line) lines.push(line);
 
-  const totalTextH = lines.length * lineH;
-  const refFontSize = story ? 44 : wide ? 34 : 40;
-  const refGap = story ? 52 : wide ? 40 : 48;
-  const totalH = totalTextH + refGap + refFontSize;
-  let textY = cy - totalH / 2 + lineH * 0.8;
+  if (T.layout === 'clean') {
+    // Duomo layout: reference at top, text centered, no quote mark
+    const refTopSize = story ? 36 : wide ? 28 : 32;
+    const refTopY = story ? h * 0.1 : wide ? h * 0.18 : h * 0.13;
+    ctx.font = `${refTopSize}px Georgia, serif`;
+    ctx.fillStyle = T.text;
+    ctx.globalAlpha = 0.5;
+    ctx.textAlign = 'center';
+    ctx.fillText(ref, cx, refTopY);
+    ctx.globalAlpha = 1;
 
-  for (const l of lines) {
-    ctx.fillText(l, cx, textY);
-    textY += lineH;
+    const totalTextH = lines.length * lineH;
+    const contentTop = refTopY + refTopSize * 2;
+    const contentBottom = h - wmZone;
+    let textY = contentTop + (contentBottom - contentTop - totalTextH) / 2 + lineH * 0.8;
+    ctx.font = `italic ${fontSize}px Georgia, serif`;
+    ctx.fillStyle = T.text;
+    ctx.textAlign = 'center';
+    for (const l of lines) {
+      ctx.fillText(l, cx, textY);
+      textY += lineH;
+    }
+  } else {
+    // Classic layout: ❝ at top, text + reference centered
+    const qqSize = story ? 210 : wide ? 140 : 170;
+    const qqY = story ? h * 0.14 : wide ? h * 0.26 : h * 0.19;
+    ctx.font = `bold ${qqSize}px Georgia, serif`;
+    ctx.fillStyle = T.accent;
+    ctx.globalAlpha = 0.8;
+    ctx.textAlign = 'center';
+    ctx.fillText('\u201C', cx, qqY);
+    ctx.globalAlpha = 1;
+
+    const totalTextH = lines.length * lineH + refGap + refFontSize;
+    const contentTop = qqY + qqSize * 0.15;
+    const contentBottom = h - wmZone;
+    let textY = contentTop + (contentBottom - contentTop - totalTextH) / 2 + lineH * 0.8;
+    ctx.font = `italic ${fontSize}px Georgia, serif`;
+    ctx.fillStyle = T.text;
+    ctx.textAlign = 'center';
+    for (const l of lines) {
+      ctx.fillText(l, cx, textY);
+      textY += lineH;
+    }
+
+    // Reference
+    ctx.font = `${refFontSize}px Georgia, serif`;
+    ctx.fillStyle = T.accent;
+    ctx.textAlign = 'center';
+    ctx.fillText(`— ${ref}`, cx, textY + refGap * 0.6);
   }
 
-  // Reference
-  ctx.font = `${refFontSize}px 'Georgia', serif`;
-  ctx.fillStyle = T.accent;
-  ctx.textAlign = 'center';
-  ctx.fillText(`— ${ref}`, cx, textY + refGap * 0.6);
-
-  // Watermark
+  // Watermark: "SDARM" (Lexend light) + ".life" (Cormorant bold italic) — matches nav logo
   const wmSize = story ? 30 : wide ? 24 : 28;
-  ctx.font = `${wmSize}px 'Georgia', serif`;
-  ctx.fillStyle = T.accent + '55';
-  ctx.textAlign = 'center';
-  ctx.fillText('SDARM.life', cx, h - (story ? 80 : wide ? 50 : 60));
+  const wmY = h - (story ? 80 : wide ? 50 : 60);
+
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  ctx.textAlign = 'left';
+
+  ctx.font = `600 ${wmSize}px Lexend, sans-serif`;
+  ctx.letterSpacing = `${wmSize * 0.05}px`;
+  ctx.fillStyle = T.text;
+  const sdarmW = ctx.measureText('SDARM').width;
+
+  ctx.font = `bold italic ${wmSize}px 'Cormorant Garamond', serif`;
+  ctx.letterSpacing = '0px';
+  const lifeW = ctx.measureText('.life').width;
+
+  const wmStartX = cx - (sdarmW + lifeW) / 2;
+
+  ctx.font = `600 ${wmSize}px Lexend, sans-serif`;
+  ctx.letterSpacing = `${wmSize * 0.05}px`;
+  ctx.fillText('SDARM', wmStartX, wmY);
+
+  ctx.font = `bold italic ${wmSize}px 'Cormorant Garamond', serif`;
+  ctx.letterSpacing = '0px';
+  ctx.fillText('.life', wmStartX + sdarmW, wmY);
+
+  ctx.restore();
 }
 
 const FMT_ICONS: Record<Fmt, { cls: string; label: string }> = {
-  story: { cls: 'qsm-fmt-icon qsm-fmt-icon--story', label: 'Story' },
   square: { cls: 'qsm-fmt-icon qsm-fmt-icon--post', label: 'Post' },
+  portrait: { cls: 'qsm-fmt-icon qsm-fmt-icon--portrait', label: '4:5' },
+  story: { cls: 'qsm-fmt-icon qsm-fmt-icon--story', label: 'Story' },
   wide: { cls: 'qsm-fmt-icon qsm-fmt-icon--wide', label: 'Wide' },
 };
 
@@ -141,7 +178,7 @@ export default function QuoteShareModal({
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fmt, setFmt] = useState<Fmt>('square');
-  const [theme, setTheme] = useState<ThemeId>('dark');
+  const [theme, setTheme] = useState<ThemeId>('wald');
 
   useEffect(() => {
     if (open && canvasRef.current) {

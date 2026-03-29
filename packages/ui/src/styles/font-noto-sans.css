@@ -1,0 +1,22 @@
+/* Noto Sans — Google Fonts open-source typeface */
+/* Full package installed via @fontsource/noto-sans + @fontsource-variable/noto-sans */
+/* Ready to use — import this file in tokens.css when needed */
+
+/* Option A: Static weights (pick only weights you need) */
+/* @import '@fontsource/noto-sans/300.css';    Light */
+/* @import '@fontsource/noto-sans/400.css';    Regular */
+/* @import '@fontsource/noto-sans/500.css';    Medium */
+/* @import '@fontsource/noto-sans/600.css';    SemiBold */
+/* @import '@fontsource/noto-sans/700.css';    Bold */
+/* @import '@fontsource/noto-sans/900.css';    Black */
+/* @import '@fontsource/noto-sans/400-italic.css'; */
+/* @import '@fontsource/noto-sans/700-italic.css'; */
+
+/* Option B: Variable font — all weights in one file (recommended) */
+/* @import '@fontsource-variable/noto-sans'; */
+
+/* Cyrillic subset (for Russian content) */
+/* @import '@fontsource/noto-sans/cyrillic-400.css'; */
+/* @import '@fontsource/noto-sans/cyrillic-700.css'; */
+
+/* Usage: font-family: 'Noto Sans', sans-serif; */

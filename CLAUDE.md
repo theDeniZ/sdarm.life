@@ -50,3 +50,50 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 @docs/architecture.md
 @docs/conventions.md
 @docs/gotchas.md
+
+## Agent patterns
+
+Use parallel subagents when work is independently executable across the monorepo.
+The `Agent` tool with `isolation: "worktree"` gives each agent its own git working copy — no merge conflicts mid-task.
+
+### When TO spawn agents
+
+| Scenario | Pattern |
+|---|---|
+| New feature touches multiple apps (API + web + admin + i18n) | 4 parallel agents, each owns one app |
+| Heavy codebase research before implementation | `Explore` agent first → findings → implement in main |
+| Redesign component A while adding feature to component B | 2 parallel agents with `isolation: "worktree"` |
+| DB migration + route + frontend all needed at once | Sequential agents: migration first, then parallel route + frontend |
+
+### When NOT to spawn agents
+
+- Single-file edit or small bug fix
+- Work that is strictly sequential (migration must apply before the route can be written)
+- Anything under ~30 min of work — overhead isn't worth it
+
+### Monorepo agent split for large features
+
+```
+1. Explore agent      — reads codebase, returns file map + contract decisions
+2. API agent          — packages/db schema + migration + apps/api route (--worktree)
+3. Web agent          — apps/web page + components (--worktree)
+4. Admin agent        — apps/admin UI (--worktree, if needed)
+5. i18n agent         — packages/i18n/src/messages/de.json + en.json (--worktree)
+Main agent            — reviews all diffs, resolves conflicts, commits
+```
+
+### Example invocation
+
+```ts
+// Research first (foreground, no worktree)
+Agent({ subagent_type: "Explore", prompt: "Find all places that reference X..." })
+
+// Then parallel implementation (background, isolated)
+Agent({ prompt: "Add route POST /api/v1/...", isolation: "worktree", run_in_background: true })
+Agent({ prompt: "Add page /[locale]/...",    isolation: "worktree", run_in_background: true })
+```
+
+### This monorepo's shared boundaries
+
+Agents must respect package boundaries — never import across apps.
+Shared code changes (`packages/db`, `packages/types`, `packages/i18n`) must be done by **one agent only** (usually API agent) to avoid conflicts. Other agents wait for that diff before starting.

@@ -19,15 +19,18 @@ nav.scrolled {
   backdrop-filter: blur(16px);
 }
 .nav-logo {
-  font-family: 'Playfair Display', serif;
-  font-weight: 400;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 300;
   font-size: 1.15rem;
-  letter-spacing: 0.06em;
+  letter-spacing: 0.05em;
   color: #fff;
 }
 .nav-logo span {
-  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
   font-style: italic;
+  color: var(--gold);
+  letter-spacing: 0;
 }
 
 .nav-links {
@@ -40,13 +43,16 @@ nav.scrolled {
   font-weight: 300;
   font-size: 1rem;
   letter-spacing: 0.12em;
-  color: rgba(210, 200, 185, 0.7);
+  color: rgba(210, 200, 185, 0.85);
   text-decoration: none;
   transition: color 0.4s;
   position: relative;
   text-transform: uppercase;
 }
 .nav-links a:hover {
+  color: var(--gold);
+}
+.nav-links a.active {
   color: var(--gold);
 }
 

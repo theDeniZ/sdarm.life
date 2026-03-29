@@ -1,3 +1,8 @@
+@import '@fontsource/lexend/300.css';
+@import '@fontsource/lexend/400.css';
+@import '@fontsource/lexend/500.css';
+@import '@fontsource/lexend/600.css';
+
 *,
 *::before,
 *::after {
@@ -83,7 +88,7 @@ a {
   font-size: 0.88rem;
   font-weight: 300;
   letter-spacing: 0.06em;
-  color: rgba(220, 210, 195, 0.6);
+  color: rgba(220, 210, 195, 0.82);
   white-space: nowrap;
   transition: color 0.3s;
   position: relative;
@@ -195,18 +200,18 @@ a {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.82rem;
   font-weight: 300;
-  color: rgba(170, 160, 145, 0.5);
-  line-height: 1.7;
+  color: rgba(170, 160, 145, 0.82);
+  line-height: 1.6;
   margin-bottom: 1.2rem;
 }
 
 .songbook-landing-card__count {
   font-family: 'Oswald', sans-serif;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 200;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(201, 169, 110, 0.45);
+  color: rgba(201, 169, 110, 0.68);
 }
 
 .songbook-landing-card__arrow {
@@ -264,9 +269,9 @@ a {
   flex-wrap: wrap;
 }
 .song-list-header h1 {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: clamp(1.4rem, 2.6vw, 1.8rem);
+  font-family: 'Lexend', sans-serif;
+  font-style: normal;
+  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
   font-weight: 400;
   color: #fff;
 }
@@ -276,7 +281,7 @@ a {
   border: none;
   border-bottom: 1px solid rgba(201, 169, 110, 0.22);
   padding: 0.55rem 0;
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 0.88rem;
   font-weight: 300;
   color: var(--text);
@@ -285,7 +290,7 @@ a {
   transition: border-color 0.3s;
 }
 .search-input::placeholder {
-  color: rgba(130, 120, 105, 0.55);
+  color: rgba(130, 120, 105, 0.78);
 }
 .search-input:focus {
   border-color: rgba(201, 169, 110, 0.55);
@@ -298,7 +303,7 @@ a {
 .song-table th {
   text-align: left;
   font-family: 'Oswald', sans-serif;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 200;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -316,8 +321,8 @@ a {
 }
 .song-row td {
   padding: 0.75rem 0.8rem 0.75rem 0;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.92rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.85rem;
   font-weight: 300;
 }
 .song-row__num {
@@ -394,24 +399,24 @@ a {
   margin-bottom: 2rem;
 }
 .song-header__title {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Lexend', sans-serif;
   font-style: normal;
-  font-size: clamp(1.5rem, 3vw, 2rem);
-  font-weight: 400;
+  font-size: clamp(1.3rem, 2.6vw, 1.75rem);
+  font-weight: 500;
   color: #fff;
   line-height: 1.3;
   margin-bottom: 0.5rem;
 }
 .song-header__num {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 1em;
-  font-weight: 700;
+  font-weight: 300;
   color: rgba(201, 169, 110, 0.45);
   font-style: normal;
 }
 .song-header__meta {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.82rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.8rem;
   font-weight: 300;
   color: var(--muted);
 }
@@ -451,7 +456,7 @@ a {
 }
 .song-part__label {
   font-family: 'Oswald', sans-serif;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 200;
   letter-spacing: 0.14em;
   text-transform: uppercase;
@@ -459,9 +464,11 @@ a {
   margin-bottom: 0.7rem;
 }
 .song-part__lyrics {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.25rem;
-  line-height: 1.85;
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  font-weight: 400;
+  letter-spacing: 0.01em;
   color: var(--text);
 }
 
@@ -478,10 +485,10 @@ a {
   white-space: pre;
 }
 .chord-token__chord {
-  font-size: 0.7rem;
-  font-weight: 400;
-  font-family: 'Oswald', sans-serif;
-  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-family: 'Lexend', sans-serif;
+  letter-spacing: 0.03em;
   color: var(--chord);
   line-height: 1.2;
   min-height: 14px;
@@ -496,7 +503,7 @@ a {
 .projector {
   position: fixed;
   inset: 0;
-  background: #000;
+  background: #0c0b09;
   color: #fff;
   z-index: 10000;
   display: flex;
@@ -504,7 +511,7 @@ a {
   width: 100dvw;
   height: 100dvh;
   overflow: hidden;
-  font-size: clamp(30px, 5vw, 64px);
+  font-size: clamp(36px, 6vw, 76px);
 }
 
 /* Background symbol (verse number, "Ref", song number) — purely decorative */
@@ -605,32 +612,40 @@ a {
   z-index: 1;
 }
 
-/* Title slide */
+/* Title slide — positioned at golden ratio (61.8% from top) */
 .projector__title-slide {
+  position: absolute;
+  top: 61.8%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 90%;
   text-align: center;
 }
 .projector__title-name {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 1em;
-  font-weight: 400;
-  line-height: 1.25;
+  font-weight: 500;
+  line-height: 1.3;
   color: #fff;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
+  font-optical-sizing: auto;
 }
 .projector__title-meta {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 0.42em;
   font-weight: 300;
   color: rgba(255, 255, 255, 0.35);
   margin-top: 0.8em;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.02em;
 }
 
 .projector__lyrics {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 1em;
-  line-height: 1.45;
+  line-height: 1.6;
   font-weight: 400;
+  letter-spacing: 0.02em;
+  font-optical-sizing: auto;
 }
 
 /* Amen closing slide */
@@ -852,7 +867,7 @@ a {
 }
 .reader-breadcrumb__sep {
   opacity: 0.4;
-  font-size: 0.65rem;
+  font-size: 0.72rem;
   flex-shrink: 0;
 }
 .reader-breadcrumb__current {
@@ -931,7 +946,7 @@ a {
 }
 .reader-sidebar-eyebrow {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 300;
   letter-spacing: 0.22em;
   text-transform: uppercase;
@@ -939,15 +954,15 @@ a {
   margin-bottom: 0.5rem;
 }
 .reader-sidebar-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.95rem;
-  font-weight: 400;
-  font-style: italic;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.92rem;
+  font-weight: 500;
+  font-style: normal;
   color: var(--text);
   line-height: 1.3;
 }
 .reader-sidebar-desc {
-  font-family: 'Cormorant Garamond', serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 0.75rem;
   font-weight: 300;
   color: var(--muted);
@@ -964,8 +979,8 @@ a {
   background: rgba(255, 255, 255, 0.04);
   border: 1px solid rgba(201, 169, 110, 0.15);
   padding: 0.45rem 0.75rem;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.85rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.82rem;
   font-weight: 300;
   color: var(--text);
   outline: none;
@@ -981,7 +996,7 @@ a {
 .reader-sidebar-toc-label {
   padding: 0.8rem 1.6rem 0.35rem;
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.58rem;
+  font-size: 0.72rem;
   font-weight: 300;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -1013,11 +1028,11 @@ a {
   background: none;
   border: none;
   border-left: 2px solid transparent;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.92rem;
-  font-weight: 400;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 300;
   color: rgba(180, 172, 158, 0.7);
-  letter-spacing: 0.01em;
+  letter-spacing: 0;
   line-height: 1.35;
   cursor: pointer;
   transition:
@@ -1036,10 +1051,10 @@ a {
   background: rgba(201, 169, 110, 0.08);
 }
 .reader-toc-num {
-  font-family: 'Oswald', sans-serif;
-  font-size: 0.68rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.72rem;
   font-weight: 400;
-  letter-spacing: 0.05em;
+  letter-spacing: 0;
   color: rgba(201, 169, 110, 0.55);
   flex-shrink: 0;
   min-width: 2rem;
@@ -1064,8 +1079,8 @@ a {
   gap: 0.8rem;
   padding: 0.75rem 1.6rem;
   border-top: 1px solid rgba(201, 169, 110, 0.08);
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.78rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.75rem;
   font-weight: 300;
   color: var(--muted);
 }
