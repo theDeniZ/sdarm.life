@@ -1,6 +1,6 @@
 import { ScriptureVerseSection as SharedScriptureVerseSection } from '@sdarm/ui';
 
-export default function ScriptureVerseSection() {
+export default function ScriptureVerseSection({ href }: { href?: string }) {
   return (
     <SharedScriptureVerseSection
       eyebrow="Wort der Woche"
@@ -14,7 +14,7 @@ export default function ScriptureVerseSection() {
         </>
       }
       reference="Offenbarung 14,12"
-      href="/schaetze"
+      href={href}
     />
   );
 }

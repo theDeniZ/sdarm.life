@@ -55,7 +55,7 @@ function nextSabbath(): string {
   return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
 }
 
-export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
+export default function HeroSection({ posts, bgUrl }: { posts?: HeroPost[]; bgUrl?: string | null }) {
   const t = useTranslations('web.hero');
   const slides = posts?.length ? posts : [makeStatic(t)];
   const N = slides.length;
@@ -109,6 +109,18 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
       <section className="hero">
         <div className="hero-base" />
 
+        {bgUrl && (
+          <div className="hero-bg-img hero-bg-img--base visible" style={{ backgroundImage: `url(${bgUrl})` }} />
+        )}
+
+        {slides.map((slide, i) => (
+          <div
+            key={i}
+            className={`hero-bg-img${active === i ? ' visible' : ''}`}
+            style={{ backgroundImage: slide.imageUrl ? `url(${slide.imageUrl})` : undefined }}
+          />
+        ))}
+
         {slides.map((_, i) => (
           <div
             key={i}
@@ -142,22 +154,23 @@ export default function HeroSection({ posts }: { posts?: HeroPost[] }) {
               onClick={() => handleClick(i)}
             >
               <div className="hev-thumb">
-                <div
-                  className="hev-thumb-inner"
-                  style={{
-                    background: `radial-gradient(ellipse at 60% 30%, ${THUMB_COLORS[i % THUMB_COLORS.length]} 0%, rgba(8,6,3,1) 75%)`,
-                  }}
-                />
-                <svg
-                  className="hev-thumb-icon"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="rgba(201,169,110,.45)"
-                  strokeWidth="1.2"
-                >
-                  <path d="M12 20h9" />
-                  <path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z" />
-                </svg>
+                {slide.thumbUrl ? (
+                  <div
+                    className="hev-thumb-inner"
+                    style={{
+                      backgroundImage: `url(${slide.thumbUrl})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                  />
+                ) : (
+                  <div
+                    className="hev-thumb-inner"
+                    style={{
+                      background: `radial-gradient(ellipse at 60% 30%, ${THUMB_COLORS[i % THUMB_COLORS.length]} 0%, rgba(8,6,3,1) 75%)`,
+                    }}
+                  />
+                )}
               </div>
               <div className="hev-text">
                 <div className="hev-lbl">{slide.meta}</div>

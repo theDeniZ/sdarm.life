@@ -182,6 +182,7 @@ export default function Footer({
   const facebookUrl = config?.facebook_url ?? '#';
   const instagramUrl = config?.instagram_url ?? '#';
   const youtubeUrl = config?.youtube_url ?? '#';
+  const whatsappUrl = config?.whatsapp_url ?? '#';
 
   const [email, setEmail] = useState('');
   const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'conflict'>('idle');
@@ -286,10 +287,9 @@ export default function Footer({
                 <polygon points="9.75,15.02 15.5,12 9.75,8.98 9.75,15.02" fill="currentColor" stroke="none" />
               </svg>
             </a>
-            <a href="#" title="Telegram" aria-label="Telegram">
+            <a href={whatsappUrl} title="WhatsApp" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer">
               <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M22 2L11 13" />
-                <path d="M22 2L15 22 11 13 2 9l20-7z" />
+                <path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" />
               </svg>
             </a>
             <a href={facebookUrl} title="Facebook" aria-label="Facebook" target="_blank" rel="noopener noreferrer">

@@ -1,7 +1,21 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
-// import QuoteShareModal from './QuoteShareModal';
+import { useEffect, useRef, useState } from 'react';
+import { useLocale } from 'next-intl';
+import QuoteShareModal from './QuoteShareModal';
+
+const VERSES = {
+  de: [
+    { text: 'Ich vermag alles durch den, der mich stark macht.', ref: 'Philipper 4,13' },
+    { text: 'Fürchte dich nicht, denn ich bin mit dir.', ref: 'Jesaja 41,10' },
+    { text: 'Wirf deine Last auf den HERRN, der wird dich versorgen.', ref: 'Psalm 55,23' },
+  ],
+  en: [
+    { text: 'I can do all things through Christ who strengthens me.', ref: 'Philippians 4:13' },
+    { text: 'Fear not, for I am with you.', ref: 'Isaiah 41:10' },
+    { text: 'Cast your burden on the Lord, and he will sustain you.', ref: 'Psalm 55:22' },
+  ],
+} as const;
 
 // Kept for API compatibility
 export interface NewsPost {
@@ -17,7 +31,12 @@ export interface NewsPost {
 
 export default function NewsSection() {
   const gridRef = useRef<HTMLDivElement>(null);
-  // const [modalOpen, setModalOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const locale = useLocale();
+  const verses = VERSES[locale as keyof typeof VERSES] ?? VERSES.de;
+  const today = new Date();
+  const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % verses.length;
+  const verse = verses[dayIndex];
 
   useEffect(() => {
     const grid = gridRef.current;
@@ -100,7 +119,7 @@ export default function NewsSection() {
                   </div>
                   <button
                     className="quote-save-btn"
-                    // onClick={() => setModalOpen(true)}
+                    onClick={() => setModalOpen(true)}
                     title="Als Bild speichern"
                     aria-label="Als Bild speichern"
                   >
@@ -111,8 +130,8 @@ export default function NewsSection() {
                     </svg>
                   </button>
                   <div className="nc-body">
-                    <div className="nc-title">Dein Wort ist meines Fußes Leuchte und ein Licht auf meinem Wege.</div>
-                    <div className="nc-ref">Psalm 119,105</div>
+                    <div className="nc-title">{verse.text}</div>
+                    <div className="nc-ref">{verse.ref}</div>
                   </div>
                 </div>
               </div>
@@ -296,12 +315,7 @@ export default function NewsSection() {
         </div>
       </section>
 
-      {/* <QuoteShareModal
-        open={modalOpen}
-        text="Dein Wort ist meines Fußes Leuchte und ein Licht auf meinem Wege."
-        ref_="Psalm 119,105"
-        onClose={() => setModalOpen(false)}
-      /> */}
+      <QuoteShareModal open={modalOpen} text={verse.text} ref_={verse.ref} onClose={() => setModalOpen(false)} />
     </>
   );
 }
