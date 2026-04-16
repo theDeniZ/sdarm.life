@@ -1,0 +1,20 @@
+{
+  "name": "@sdarm/bot",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "echo 'Bot skipped in local dev (webhook-only, needs Telegram tunnel)'",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "cf-typegen": "wrangler types"
+  },
+  "dependencies": {
+    "@sdarm/types": "workspace:*",
+    "grammy": "^1.36.1"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20250409.0",
+    "typescript": "^5",
+    "wrangler": "^4.14.1"
+  }
+}

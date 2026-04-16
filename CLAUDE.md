@@ -9,6 +9,7 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | `@sdarm/web` | `sdarm.life` | Next.js 15 public site |
 | `@sdarm/admin` | `admin.sdarm.life` | Next.js 15 admin UI |
 | `@sdarm/api` | `api.sdarm.life` | Hono Cloudflare Worker |
+| `@sdarm/bot` | Telegram (`breezify-bot` Worker, `@BreezifyBot`) | grammY Telegram bot — songbook search, webhook mode |
 | `@sdarm/events` | `events.sdarm.life` | Next.js 15 events landing page |
 | `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 15 analog treasures site |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
