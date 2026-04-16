@@ -38,6 +38,51 @@ interface ClockState {
 }
 
 const CIRC = 2 * Math.PI * 76;
+
+interface NominatimResult {
+  lat: string;
+  lon: string;
+  display_name: string;
+  address?: {
+    city?: string;
+    town?: string;
+    village?: string;
+    municipality?: string;
+    county?: string;
+    state?: string;
+    country?: string;
+    country_code?: string;
+    postcode?: string;
+  };
+}
+
+function extractCityName(r: NominatimResult): string {
+  const a = r.address;
+  if (!a) return r.display_name.split(',')[0];
+  return a.city || a.town || a.village || a.municipality || a.county || a.state || r.display_name.split(',')[0];
+}
+
+function extractDropdownLabel(r: NominatimResult): string {
+  const a = r.address;
+  const city = extractCityName(r);
+  const postcode = a?.postcode;
+  const country = a?.country || '';
+  const countryCode = a?.country_code?.toUpperCase() || '';
+
+  // For US/CA/AU show "City, State" — country is too broad
+  const stateCountries = ['us', 'ca', 'au'];
+  if (a?.state && a.country_code && stateCountries.includes(a.country_code)) {
+    const prefix = postcode ? `${postcode} · ` : '';
+    return `${prefix}${city}, ${a.state}`;
+  }
+
+  // Postal code search: show "10115 · Berlin, Germany"
+  if (postcode && postcode === r.display_name.split(',')[0].trim()) {
+    return city !== postcode ? `${postcode} · ${city}, ${countryCode}` : `${postcode}, ${country}`;
+  }
+
+  return country ? `${city}, ${country}` : city;
+}
 const DEFAULT_LAT = 48.8922;
 const DEFAULT_LNG = 8.6944;
 const LOCATION_KEY = 'sdarm_sunset_location';
@@ -107,24 +152,26 @@ function computeClock(sun: SunData, now: number, dow: number, clockT: (key: stri
   }
 
   if ((isFriday && isAfterSunset) || (isSaturday && !isAfterSunset)) {
-    let start: number;
-    let end: number;
+    let total: number;
+    let remaining: number;
+    let endTimeVal: number;
 
     if (isFriday) {
-      start = todaySunset;
-      end = tomorrowSunset;
+      // Sabbath started at today's sunset, ends at tomorrow's sunset (crosses midnight)
+      total = DAY_MS - todaySunset + tomorrowSunset;
+      remaining = Math.max(0, DAY_MS - now + tomorrowSunset);
+      endTimeVal = tomorrowSunset;
     } else {
-      start = todaySunset - DAY_MS;
-      end = todaySunset;
+      // Saturday: period from yesterday's sunset (~DAY_MS ago) to today's sunset
+      total = DAY_MS;
+      remaining = Math.max(0, todaySunset - now);
+      endTimeVal = todaySunset;
     }
-
-    const total = end - start;
-    const remaining = now <= end ? end - now : 0;
 
     return {
       label: clockT('sabbathEnds'),
       sublabel: fmtRemaining(remaining),
-      timeVal: msToHHMM(end),
+      timeVal: msToHHMM(endTimeVal),
       progress: calcProgress(remaining, total),
       sunDay,
     };
@@ -192,6 +239,8 @@ export default function Footer({
   const [sunData, setSunData] = useState<SunData | null>(null);
   const [locationName, setLocationName] = useState(clockT('defaultLocation'));
   const [locationInput, setLocationInput] = useState('');
+  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [clock, setClock] = useState<ClockState>({
     label: clockT('sunset'),
     sublabel: '…',
@@ -226,7 +275,7 @@ export default function Footer({
       setClock(computeClock(sunData!, now, dow, clockT));
     }
     tick();
-    const id = setInterval(tick, 15000);
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
   }, [sunData, clockT]);
 
@@ -251,26 +300,41 @@ export default function Footer({
     }
   }
 
-  async function handleLocationChange(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (!locationInput.trim()) return;
+  useEffect(() => {
+    if (locationInput.trim().length < 2) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationInput)}&format=jsonv2&limit=3&addressdetails=1`
+        );
+        const data = (await res.json()) as NominatimResult[];
+        setSuggestions(data);
+        setShowSuggestions(data.length > 0);
+      } catch {
+        // silently fail
+      }
+    }, 320);
+    return () => clearTimeout(timer);
+  }, [locationInput]);
+
+  async function applyLocation(result: NominatimResult) {
+    const name = extractCityName(result);
+    const lat = Number(result.lat);
+    const lng = Number(result.lon);
+    const tz = getBrowserTz();
     try {
-      const geo = await fetch(
-        `https://nominatim.openstreetmap.org/search?postalcode=${encodeURIComponent(locationInput)}&format=jsonv2&limit=1&addressdetails=1`
-      );
-      const results = (await geo.json()) as { lat: string; lon: string; display_name: string }[];
-      if (!results.length) return;
-      const { lat, lon, display_name } = results[0];
-      const parsedLat = Number(lat);
-      const parsedLng = Number(lon);
-      const name = display_name.split(',').slice(0, 2).join(',').trim();
-      const tz = getBrowserTz();
-      const data = await fetchSunData(parsedLat, parsedLng, tz);
+      const data = await fetchSunData(lat, lng, tz);
       setSunData(data);
       setLocationName(name);
       setLocationInput('');
+      setSuggestions([]);
+      setShowSuggestions(false);
       try {
-        localStorage.setItem(LOCATION_KEY, JSON.stringify({ lat: parsedLat, lng: parsedLng, name, tz }));
+        localStorage.setItem(LOCATION_KEY, JSON.stringify({ lat, lng, name, tz }));
       } catch {
         // ignore
       }
@@ -279,7 +343,35 @@ export default function Footer({
     }
   }
 
-  const dashOffset = CIRC * (1 - clock.progress);
+  async function handleLocationChange(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (suggestions.length > 0) {
+      await applyLocation(suggestions[0]);
+      return;
+    }
+    if (!locationInput.trim()) return;
+    try {
+      const geo = await fetch(
+        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(locationInput)}&format=jsonv2&limit=1&addressdetails=1`
+      );
+      const results = (await geo.json()) as NominatimResult[];
+      if (!results.length) return;
+      await applyLocation(results[0]);
+    } catch {
+      // silently fail
+    }
+  }
+
+  // Ring shows ELAPSED progress: fills up as time passes (empty at start, full when period ends)
+  const elapsed = 1 - clock.progress;
+  const dashOffset = CIRC * (1 - elapsed); // = CIRC * clock.progress
+  // Dot at the leading edge of the fill, going clockwise from 12 o'clock
+  const R = 76;
+  const CX = 90;
+  const CY = 90;
+  const angle = elapsed * 2 * Math.PI;
+  const dotX = CX + R * Math.cos(angle);
+  const dotY = CY + R * Math.sin(angle);
 
   return (
     <footer className="site-footer">
@@ -290,11 +382,6 @@ export default function Footer({
         <div className="footer-contact">
           <h3 className="footer-heading">{t.rich('stayInTouch', { em: (chunks) => <em>{chunks}</em> })}</h3>
           <div className="footer-info">
-            {t('orgName')}
-            <br />
-            {t('orgRegion')}
-            <br />
-            <br />
             <a href="mailto:info@sdarm.life">info@sdarm.life</a>
           </div>
 
@@ -340,8 +427,12 @@ export default function Footer({
               onChange={(e) => setEmail(e.target.value)}
               disabled={subStatus === 'loading'}
             />
-            <button className="footer-subscribe" type="submit" disabled={subStatus === 'loading'}>
-              {subStatus === 'loading' ? '…' : '→'}
+            <button className="footer-subscribe" type="submit" disabled={subStatus === 'loading'} aria-label="Subscribe">
+              {subStatus === 'loading' ? (
+                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="5" strokeDasharray="28" strokeDashoffset="10" style={{ animation: 'footer-spin 0.8s linear infinite' }} /></svg>
+              ) : (
+                <svg viewBox="0 0 16 16" aria-hidden="true"><line x1="2" y1="8" x2="13" y2="8" /><polyline points="9,4 13,8 9,12" /></svg>
+              )}
             </button>
           </form>
           {subStatus === 'ok' && <p className="f-sub-ok">{t('subscribeSuccess')}</p>}
@@ -358,8 +449,6 @@ export default function Footer({
             <Link href={treasuresUrl}>{navT('treasures')}</Link>
             <Link href={`${webUrl}/about`}>{navT('about')}</Link>
             <Link href={`${webUrl}/#kontakt`}>{navT('contact')}</Link>
-            <Link href={`${webUrl}/impressum`}>{navT('imprint')}</Link>
-            <Link href={`${webUrl}/datenschutz`}>{navT('privacy')}</Link>
           </div>
         </div>
 
@@ -376,29 +465,63 @@ export default function Footer({
                 strokeDasharray={CIRC}
                 strokeDashoffset={dashOffset}
               />
+              {clock.progress > 0 && clock.progress < 1 && (
+                <>
+                  <circle className="sunset-ring-dot" cx={dotX} cy={dotY} r="5" />
+                  <circle className="sunset-ring-dot-glow" cx={dotX} cy={dotY} r="9" />
+                </>
+              )}
             </svg>
             <div className="sunset-clock-inner">
-              <div className="sunset-time-value">{clock.timeVal}</div>
+              <div className="sunset-time-value">
+                {clock.timeVal === '–:––' ? (
+                  clock.timeVal
+                ) : (
+                  <>
+                    {clock.timeVal.split(':')[0]}
+                    <span className="sunset-colon">:</span>
+                    {clock.timeVal.split(':')[1]}
+                  </>
+                )}
+              </div>
             </div>
           </div>
           <div className="sunset-footer-text">
-            <div className="sunset-footer-label">{clock.label}</div>
-            {clock.sunDay && <div className="sunset-footer-day">{clock.sunDay}</div>}
             <div className="sunset-footer-location">{locationName}</div>
-            <form className="sunset-location-form" onSubmit={handleLocationChange}>
-              <input
-                type="text"
-                className="sunset-location-input"
-                placeholder={t('locationPlaceholder')}
-                autoComplete="off"
-                spellCheck={false}
-                value={locationInput}
-                onChange={(e) => setLocationInput(e.target.value)}
-              />
-              <button type="submit" className="sunset-location-btn" aria-label={t('locationUpdateAria')}>
-                →
-              </button>
-            </form>
+            <div className="sunset-footer-label">{clock.label}</div>
+            <div className="sunset-location-wrap">
+              <form className="sunset-location-form" onSubmit={handleLocationChange}>
+                <input
+                  type="text"
+                  className="sunset-location-input"
+                  placeholder={t('locationPlaceholder')}
+                  autoComplete="off"
+                  spellCheck={false}
+                  value={locationInput}
+                  onChange={(e) => setLocationInput(e.target.value)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+                />
+                <button type="submit" className="sunset-location-btn" aria-label={t('locationUpdateAria')}>
+                  <svg viewBox="0 0 13 13" aria-hidden="true"><line x1="1.5" y1="6.5" x2="11" y2="6.5" /><polyline points="7.5,3 11,6.5 7.5,10" /></svg>
+                </button>
+              </form>
+              {showSuggestions && suggestions.length > 0 && (
+                <ul className="sunset-suggestions">
+                  {suggestions.map((s, i) => (
+                    <li key={i}>
+                      <button
+                        type="button"
+                        className="sunset-suggestion-item"
+                        onMouseDown={() => applyLocation(s)}
+                      >
+                        {extractDropdownLabel(s)}
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -408,7 +531,11 @@ export default function Footer({
           SDARM<span>.life</span>
         </span>
         <span className="footer-copy">{t('copyright', { year: new Date().getFullYear() })}</span>
-        <span className="footer-copy">{t('allRightsReserved')}</span>
+        <div className="footer-legal">
+          <Link href={`${webUrl}/impressum`}>{navT('imprint')}</Link>
+          <span>·</span>
+          <Link href={`${webUrl}/datenschutz`}>{navT('privacy')}</Link>
+        </div>
       </div>
     </footer>
   );

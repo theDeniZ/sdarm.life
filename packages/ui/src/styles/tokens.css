@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,700&family=DM+Serif+Display:ital@0;1&family=Bebas+Neue&family=Oswald:wght@200;300;400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@300..400&family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,300;1,400;1,700&family=DM+Serif+Display:ital@0;1&family=Bebas+Neue&family=Oswald:wght@200;300;400&display=swap');
 
 *,
 *::before,
@@ -15,7 +15,34 @@
   --muted: #7a7470;
   --border: rgba(201, 169, 110, 0.12);
 
+  /* Semantic tokens used across components */
+  --bg-section: #0e0d0b;
+  --bg-card: #111009;
+  --text-strong: #f0ebe3;
+  --nav-bg-scrolled: rgba(9, 8, 6, 0.62);
+  --nav-mobile-bg: rgba(10, 9, 7, 0.97);
+  --footer-bg: #080706;
+
   --hc-ease: cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+/* ── Light theme ─────────────────────────────────────────────────────────── */
+[data-theme='light'] {
+  /* Accent — deep warm gold, rich contrast on light bg */
+  --gold: #b8872c;
+  /* Surfaces — warm paper white, not clinical */
+  --dark: #f6f5f2;
+  /* Text — near-black charcoal (no brown) */
+  --text: #1c1c22;
+  --muted: #6b6b78;
+  --border: rgba(184, 135, 44, 0.16);
+
+  --bg-section: #edece8;
+  --bg-card: #e8e7e2;
+  --text-strong: #0e0e12;
+  --nav-bg-scrolled: rgba(246, 245, 242, 0.90);
+  --nav-mobile-bg: rgba(246, 245, 242, 0.98);
+  --footer-bg: #13131a;
 }
 
 html,

@@ -6,6 +6,10 @@ import type { FooterConfig } from '../components/Footer';
 
 export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
+export const WEB_URL = process.env.WEB_URL ?? 'https://sdarm.life';
+export const TREASURES_URL = process.env.TREASURES_URL ?? 'https://treasures.sdarm.life';
+export const SONGBOOK_URL = process.env.SONGBOOK_URL ?? 'https://songs.sdarm.life';
+export const EVENTS_URL = process.env.EVENTS_URL ?? 'https://events.sdarm.life';
 export const FALLBACK_IMG = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=85&fit=crop';
 
 export interface ImageTransform {

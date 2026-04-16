@@ -1,3 +1,4 @@
+export { default as ThemeProvider } from './components/ThemeProvider';
 export { default as Navbar } from './components/Navbar';
 export { default as Footer } from './components/Footer';
 export type { FooterConfig } from './components/Footer';

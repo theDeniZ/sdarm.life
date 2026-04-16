@@ -1,23 +1,9 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale } from 'next-intl';
 import QuoteShareModal from './QuoteShareModal';
-import type { NewsData } from '../lib/api';
-
-const VERSES = {
-  de: [
-    { text: 'Ich vermag alles durch den, der mich stark macht.', ref: 'Philipper 4,13' },
-    { text: 'Fürchte dich nicht, denn ich bin mit dir.', ref: 'Jesaja 41,10' },
-    { text: 'Wirf deine Last auf den HERRN, der wird dich versorgen.', ref: 'Psalm 55,23' },
-  ],
-  en: [
-    { text: 'I can do all things through Christ who strengthens me.', ref: 'Philippians 4:13' },
-    { text: 'Fear not, for I am with you.', ref: 'Isaiah 41:10' },
-    { text: 'Cast your burden on the Lord, and he will sustain you.', ref: 'Psalm 55:22' },
-  ],
-} as const;
+import { pickVerse, type Verse } from '../lib/verses';
 
 // Kept for API compatibility
 export interface NewsPost {
@@ -31,33 +17,42 @@ export interface NewsPost {
   href: string;
 }
 
-export default function NewsSection({ newsData }: { newsData?: NewsData }) {
+interface NewsSectionProps {
+  treasuresUrl: string;
+  songbookUrl: string;
+  eventsUrl: string;
+}
+
+export default function NewsSection({ treasuresUrl, songbookUrl, eventsUrl }: NewsSectionProps) {
   const gridRef = useRef<HTMLDivElement>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const locale = useLocale();
-  const verses = VERSES[locale as keyof typeof VERSES] ?? VERSES.de;
-  const today = new Date();
-  const dayIndex = (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) % verses.length;
-  const verse = verses[dayIndex];
+  const [verse, setVerse] = useState<Verse | null>(null);
+
+  // Set verse after mount to avoid SSR/client timezone mismatch
+  useEffect(() => {
+    setVerse(pickVerse(locale));
+
+    function refresh() {
+      setVerse(pickVerse(locale));
+    }
+    const now = new Date();
+    const msUntilNextHour = (60 - now.getMinutes()) * 60_000 - now.getSeconds() * 1_000 - now.getMilliseconds();
+    const timer = setTimeout(() => {
+      refresh();
+      const interval = setInterval(refresh, 3_600_000);
+      return () => clearInterval(interval);
+    }, msUntilNextHour);
+    return () => clearTimeout(timer);
+  }, [locale]);
 
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
     const items = Array.from(grid.querySelectorAll<HTMLElement>('.masonry-item'));
-    const obs = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            const i = items.indexOf(entry.target as HTMLElement);
-            setTimeout(() => (entry.target as HTMLElement).classList.add('is-visible'), i * 80);
-            obs.unobserve(entry.target);
-          }
-        });
-      },
-      { threshold: 0.08 }
-    );
-    items.forEach((el) => obs.observe(el));
-    return () => obs.disconnect();
+    items.forEach((el, i) => {
+      setTimeout(() => el.classList.add('is-visible'), i * 80);
+    });
   }, []);
 
   return (
@@ -71,15 +66,8 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
 
         <div className="masonry-wrap">
           <div className="masonry-grid" ref={gridRef}>
-            {/* 1: Book — φ landscape */}
-            <div className="masonry-item ratio-phi-h" style={{ position: 'relative' }}>
-              {newsData?.book?.href && (
-                <a
-                  href={newsData.book.href}
-                  style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'block' }}
-                  aria-label={newsData.book.title}
-                />
-              )}
+            {/* 1: Book — 3:4 */}
+            <a className="masonry-item ratio-3-4" href={`${treasuresUrl}/${locale}`}>
               <div className="img-wrap">
                 <div className="nc nc--book">
                   <div className="nc-bg" />
@@ -92,64 +80,43 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
                   </div>
                   <div className="nc-bookdeco">
                     <div className="nc-bookdeco-text">
-                      {newsData?.book?.title ?? 'Путь ко Христу'}
+                      Путь ко Христу
                       <br />
                       <br />
-                      {newsData?.book?.author ?? 'Ellen G. White'}
+                      Ellen G. White
                     </div>
                   </div>
                   <div className="nc-body">
                     <div className="nc-label">Bibliothek · Neu</div>
-                    <div className="nc-title">{newsData?.book?.title ?? 'Путь ко Христу'}</div>
-                    <div className="nc-sub">
-                      {newsData?.book?.author ?? 'Ellen G. White'} — jetzt in der Bibliothek verfügbar
-                    </div>
+                    <div className="nc-title">Путь ко Христу</div>
+                    <div className="nc-sub">Ellen G. White — jetzt in der Bibliothek verfügbar</div>
                   </div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            {/* 2: Faith — φ landscape */}
-            <div className="masonry-item ratio-phi-h" style={{ position: 'relative' }}>
-              <a
-                href={`/${locale}/about`}
-                style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'block' }}
-                aria-label="Grundlagen unseres Glaubens"
-              />
+            {/* 2: Merch — 1:1 */}
+            <div className="masonry-item ratio-1-1" style={{ cursor: 'default' }}>
               <div className="img-wrap">
-                <div className="nc nc--faith">
+                <div className="nc nc--merch">
                   <div className="nc-bg" />
                   <div className="nc-veil" />
                   <div className="nc-bigicon">
                     <svg viewBox="0 0 24 24">
-                      <polygon points="12,2 22,20 2,20" />
-                      <circle cx="12" cy="13" r="1.5" />
-                      <line x1="12" y1="11.5" x2="12" y2="7" />
+                      <path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.57a1 1 0 00.99.84H6v10c0 1.1.9 2 2 2h8a2 2 0 002-2V10h2.15a1 1 0 00.99-.84l.58-3.57a2 2 0 00-1.34-2.23z" />
                     </svg>
                   </div>
                   <div className="nc-body">
-                    <div className="nc-label">Glaube · 25 Punkte</div>
-                    <div className="nc-title">Grundlagen unseres Glaubens</div>
-                    <div className="nc-sub">jetzt entdecken</div>
+                    <div className="nc-label">Kollektion · Neu</div>
+                    <div className="nc-title">Neues Design</div>
+                    <div className="nc-sub">Reformationsbewegung 2026 — limitierte Auflage</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 3: Quote — φ² panoramic */}
-            <div
-              className="masonry-item ratio-phi-w"
-              onClick={() => setModalOpen(true)}
-              style={{ cursor: 'pointer' }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setModalOpen(true);
-                }
-              }}
-            >
+            {/* 3: Quote */}
+            <div className="masonry-item ratio-quote">
               <div className="img-wrap">
                 <div className="nc nc--quote">
                   <div className="nc-bg" />
@@ -158,23 +125,28 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
                     <div className="nc-quote-bar" />
                     <div className="nc-quote-glyph">&ldquo;</div>
                   </div>
+                  <button
+                    className="quote-save-btn"
+                    onClick={() => setModalOpen(true)}
+                    title="Als Bild speichern"
+                    aria-label="Als Bild speichern"
+                  >
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                      <polyline points="7 10 12 15 17 10" />
+                      <line x1="12" y1="15" x2="12" y2="3" />
+                    </svg>
+                  </button>
                   <div className="nc-body">
-                    <div className="nc-title">{verse.text}</div>
-                    <div className="nc-ref">{verse.ref}</div>
+                    <div className="nc-title">{verse?.text ?? ''}</div>
+                    <div className="nc-ref">{verse?.ref ?? ''}</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 4: Song — φ portrait */}
-            <div className="masonry-item ratio-phi-v" style={{ position: 'relative' }}>
-              {newsData?.song?.href && (
-                <a
-                  href={newsData.song.href}
-                  style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'block' }}
-                  aria-label={newsData.song.title}
-                />
-              )}
+            {/* 4: Song — 9:16 */}
+            <a className="masonry-item ratio-9-16" href={`${songbookUrl}/${locale}`}>
               <div className="img-wrap">
                 <div className="nc nc--song">
                   <div className="nc-bg" />
@@ -192,25 +164,20 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
                     </svg>
                   </div>
                   <div className="nc-body">
-                    <div className="nc-label">
-                      Liederbuch · {newsData?.song?.songCount ? `${newsData.song.songCount} Lieder` : 'Neu'}
+                    <div className="nc-label">Lieder · Neu</div>
+                    <div className="nc-title">Ich weiß, an wen ich glaube</div>
+                    <div className="nc-sub">
+                      Adventlied · Nr. 214
+                      <br />
+                      Jetzt in der Liederbibliothek
                     </div>
-                    <div className="nc-title">{newsData?.song?.title ?? 'Adventlieder'}</div>
-                    <div className="nc-sub">Jetzt in der Liederbibliothek</div>
                   </div>
                 </div>
               </div>
-            </div>
+            </a>
 
-            {/* 5: Sermon — φ landscape */}
-            <div className="masonry-item ratio-phi-h" style={{ position: 'relative' }}>
-              {newsData?.sermon?.href && (
-                <Link
-                  href={newsData.sermon.href}
-                  style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'block' }}
-                  aria-label={newsData.sermon.title}
-                />
-              )}
+            {/* 5: Sermon — 3:4 */}
+            <div className="masonry-item ratio-3-4" style={{ cursor: 'default' }}>
               <div className="img-wrap">
                 <div className="nc nc--sermon">
                   <div className="nc-bg" />
@@ -222,23 +189,20 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
                     </svg>
                   </div>
                   <div className="nc-body">
-                    <div className="nc-label">Predigt · {newsData?.sermon?.date ?? 'Neueste'}</div>
-                    <div className="nc-title">{newsData?.sermon?.title ?? 'Der Sabbat — Zeichen der Treue'}</div>
-                    <div className="nc-sub">{newsData?.sermon?.author ?? 'Br. Daniel Hoffmann'}</div>
+                    <div className="nc-label">Predigt · März 2026</div>
+                    <div className="nc-title">Der Sabbat — Zeichen der Treue</div>
+                    <div className="nc-sub">
+                      Br. Daniel Hoffmann
+                      <br />
+                      Pforzheim, 15. März 2026
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 6: Bible Study — φ landscape */}
-            <div className="masonry-item ratio-phi-h" style={{ position: 'relative' }}>
-              {newsData?.study?.href && (
-                <Link
-                  href={newsData.study.href}
-                  style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'block' }}
-                  aria-label={newsData.study.title}
-                />
-              )}
+            {/* 6: Bible Study — 1:1 */}
+            <div className="masonry-item ratio-1-1" style={{ cursor: 'default' }}>
               <div className="img-wrap">
                 <div className="nc nc--study">
                   <div className="nc-bg" />
@@ -251,21 +215,16 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
                     </svg>
                   </div>
                   <div className="nc-body">
-                    <div className="nc-label">Beitrag · Neu</div>
-                    <div className="nc-title">{newsData?.study?.title ?? 'Das Gesetz Gottes'}</div>
-                    <div className="nc-sub">Jetzt lesen</div>
+                    <div className="nc-label">Bibelstudium · Neu</div>
+                    <div className="nc-title">Das Gesetz Gottes</div>
+                    <div className="nc-sub">Neue Studienserie — 7 Lektionen</div>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* 7: Event — φ landscape */}
-            <div className="masonry-item ratio-phi-h" style={{ position: 'relative' }}>
-              <a
-                href={newsData?.eventsUrl}
-                style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'block' }}
-                aria-label="Zum Veranstaltungskalender"
-              />
+            {/* 7: Event — 16:9 */}
+            <a className="masonry-item ratio-16-9" href={`${eventsUrl}/${locale}`}>
               <div className="img-wrap">
                 <div className="nc nc--event">
                   <div className="nc-bg" />
@@ -279,9 +238,78 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
                     </svg>
                   </div>
                   <div className="nc-body">
-                    <div className="nc-label">Gottesdienst · Wöchentlich</div>
-                    <div className="nc-title">Sabbat Pforzheim</div>
-                    <div className="nc-sub">jeden Samstag · 15:00 Uhr · Pforzheim</div>
+                    <div className="nc-label">Schabbat · Nächster</div>
+                    <div className="nc-title">Gottesdienst Pforzheim</div>
+                    <div className="nc-sub">Sa. 22. März 2026 · 15:00 Uhr · Pforzheim, BW</div>
+                  </div>
+                </div>
+              </div>
+            </a>
+
+            {/* 8: Badge/Pin — 1:1 */}
+            <div className="masonry-item ratio-1-1" style={{ cursor: 'default' }}>
+              <div className="img-wrap">
+                <div className="nc nc--badge">
+                  <div className="nc-bg" />
+                  <div className="nc-veil" />
+                  <div className="nc-bigicon" style={{ opacity: 0.08 }}>
+                    <svg viewBox="0 0 24 24">
+                      <circle cx="12" cy="12" r="10" />
+                      <circle cx="12" cy="12" r="7" />
+                    </svg>
+                  </div>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 2,
+                    }}
+                  >
+                    <svg viewBox="0 0 120 140" width="80" style={{ filter: 'drop-shadow(0 4px 16px rgba(0,0,0,.6))' }}>
+                      <circle
+                        cx="60"
+                        cy="52"
+                        r="38"
+                        fill="rgba(18,13,7,.95)"
+                        stroke="rgba(201,169,110,.38)"
+                        strokeWidth="1.6"
+                      />
+                      <circle cx="60" cy="52" r="30" fill="none" stroke="rgba(201,169,110,.1)" strokeWidth=".7" />
+                      <text
+                        x="60"
+                        y="47"
+                        textAnchor="middle"
+                        fontFamily="'Bebas Neue',sans-serif"
+                        fontSize="14"
+                        fill="rgba(201,169,110,.9)"
+                        letterSpacing="1.2"
+                      >
+                        SDARM
+                      </text>
+                      <text
+                        x="60"
+                        y="61"
+                        textAnchor="middle"
+                        fontFamily="'Cormorant Garamond',serif"
+                        fontSize="7"
+                        fill="rgba(201,169,110,.48)"
+                        letterSpacing="3"
+                        fontStyle="italic"
+                      >
+                        .life
+                      </text>
+                      <line x1="60" y1="90" x2="60" y2="132" stroke="rgba(201,169,110,.5)" strokeWidth="1.4" />
+                      <circle cx="60" cy="134" r="2.5" fill="rgba(201,169,110,.6)" />
+                      <path d="M54 124 Q60 128 66 124" fill="none" stroke="rgba(201,169,110,.4)" strokeWidth="1.2" />
+                    </svg>
+                  </div>
+                  <div className="nc-body">
+                    <div className="nc-label">Kollektion · Neu</div>
+                    <div className="nc-title">Anstecknadel Gold</div>
+                    <div className="nc-sub">Ø 25mm · vergoldet · 3 €</div>
                   </div>
                 </div>
               </div>
@@ -290,7 +318,12 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
         </div>
       </section>
 
-      <QuoteShareModal open={modalOpen} text={verse.text} ref_={verse.ref} onClose={() => setModalOpen(false)} />
+      <QuoteShareModal
+        open={modalOpen}
+        text={verse?.text ?? ''}
+        ref_={verse?.ref ?? ''}
+        onClose={() => setModalOpen(false)}
+      />
     </>
   );
 }

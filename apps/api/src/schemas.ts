@@ -78,6 +78,16 @@ export const SongListItemSchema = z
   })
   .openapi('SongListItem');
 
+export const SongSearchResultSchema = z
+  .object({
+    id: z.number(),
+    number: z.number(),
+    title: z.string(),
+    author: z.string().nullable(),
+    songbook: z.object({ id: z.number(), title: z.string(), slug: z.string() }),
+  })
+  .openapi('SongSearchResult');
+
 export const SongPartTypeSchema = z.enum(['verse', 'chorus', 'bridge', 'intro', 'outro', 'coda']);
 export const SongSheetTypeSchema = z.enum(['pdf', 'image']);
 

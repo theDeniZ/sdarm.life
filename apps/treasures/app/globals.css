@@ -9,11 +9,7 @@
 }
 
 :root {
-  --gold: #c9a96e;
-  --dark: #0c0b09;
-  --text: #d6d0c8;
-  --muted: #7a7470;
-  --border: rgba(201, 169, 110, 0.12);
+  /* Treasures-specific tokens (common tokens inherited from @sdarm/ui tokens.css) */
   --ease: cubic-bezier(0.76, 0, 0.24, 1);
   /* nav padding-y × 2 + logo line-height — must match @sdarm/ui navbar.css */
   --nav-h: calc(2 * 1.3rem + 1.15rem * 1.4);
@@ -1322,17 +1318,18 @@ a {
 .epub-chapter__body .hl-lilac      { background-color: rgba(212, 168, 214, 0.75); }
 .epub-chapter__body .hl-lavender   { background-color: rgba(186, 168, 214, 0.75); }
 
-/* On dark theme — slightly higher opacity for visibility */
-[data-theme='dark'] .epub-chapter__body .hl-cream      { background-color: rgba(238, 225, 183, 0.30); }
-[data-theme='dark'] .epub-chapter__body .hl-honey      { background-color: rgba(230, 203, 138, 0.30); }
-[data-theme='dark'] .epub-chapter__body .hl-sage       { background-color: rgba(189, 210, 153, 0.30); }
-[data-theme='dark'] .epub-chapter__body .hl-mint       { background-color: rgba(225, 233, 183, 0.30); }
-[data-theme='dark'] .epub-chapter__body .hl-sky        { background-color: rgba(168, 199, 214, 0.35); }
-[data-theme='dark'] .epub-chapter__body .hl-rose       { background-color: rgba(238, 186, 183, 0.30); }
-[data-theme='dark'] .epub-chapter__body .hl-peach      { background-color: rgba(238, 211, 183, 0.30); }
-[data-theme='dark'] .epub-chapter__body .hl-periwinkle { background-color: rgba(168, 175, 214, 0.35); }
-[data-theme='dark'] .epub-chapter__body .hl-lilac      { background-color: rgba(212, 168, 214, 0.30); }
-[data-theme='dark'] .epub-chapter__body .hl-lavender   { background-color: rgba(186, 168, 214, 0.30); }
+/* On dark theme — screen blend mode + higher opacity for visibility on dark #1a1918 background */
+[data-theme='dark'] .epub-chapter__body .hl { mix-blend-mode: screen; }
+[data-theme='dark'] .epub-chapter__body .hl-cream      { background-color: rgba(238, 225, 183, 0.60); }
+[data-theme='dark'] .epub-chapter__body .hl-honey      { background-color: rgba(230, 203, 138, 0.60); }
+[data-theme='dark'] .epub-chapter__body .hl-sage       { background-color: rgba(189, 210, 153, 0.60); }
+[data-theme='dark'] .epub-chapter__body .hl-mint       { background-color: rgba(225, 233, 183, 0.60); }
+[data-theme='dark'] .epub-chapter__body .hl-sky        { background-color: rgba(168, 199, 214, 0.65); }
+[data-theme='dark'] .epub-chapter__body .hl-rose       { background-color: rgba(238, 186, 183, 0.60); }
+[data-theme='dark'] .epub-chapter__body .hl-peach      { background-color: rgba(238, 211, 183, 0.60); }
+[data-theme='dark'] .epub-chapter__body .hl-periwinkle { background-color: rgba(168, 175, 214, 0.65); }
+[data-theme='dark'] .epub-chapter__body .hl-lilac      { background-color: rgba(212, 168, 214, 0.60); }
+[data-theme='dark'] .epub-chapter__body .hl-lavender   { background-color: rgba(186, 168, 214, 0.60); }
 
 .hl-toolbar {
   position: fixed;
@@ -1411,6 +1408,18 @@ a {
 .hl-remove:hover {
   border-color: #ff3b30;
   color: #ff3b30;
+}
+
+/* Cross-block selection shake feedback */
+@keyframes epub-shake {
+  0%, 100% { transform: translateX(0); }
+  20%       { transform: translateX(-4px); }
+  40%       { transform: translateX(4px); }
+  60%       { transform: translateX(-3px); }
+  80%       { transform: translateX(2px); }
+}
+.epub-content--shake {
+  animation: epub-shake 0.5s ease;
 }
 
 /* ── Floating prev / next arrows ─────────────────────────── */
@@ -2174,3 +2183,40 @@ nav {
     margin-bottom: 20px;
   }
 }
+
+/* ═══ LIGHT THEME ═══ */
+
+/* Catalog / filter section */
+[data-theme='light'] .filter-section { background: var(--bg-section); }
+[data-theme='light'] .treasures-page { background: var(--dark); }
+[data-theme='light'] .treasure-card { background: var(--bg-card); }
+[data-theme='light'] .treasure-title { color: var(--text-strong); }
+[data-theme='light'] .treasure-author { color: var(--muted); }
+[data-theme='light'] .book-visual { background: #c0b090; }
+
+/* Detail page */
+[data-theme='light'] .treasure-detail { background: var(--dark); }
+[data-theme='light'] .treasure-detail-title { color: var(--text-strong); }
+[data-theme='light'] .treasure-detail-desc { color: var(--text); }
+
+/* Reader — keep dark always (reading comfort) */
+[data-theme='light'] .epub-reader { background: #1a1814; color: #d6d0c8; }
+[data-theme='light'] .reader-toolbar { background: #0e0d0b; }
+[data-theme='light'] .reader-sidebar { background: #12100c; }
+
+/* Book request modal */
+[data-theme='light'] .br-modal {
+  background: var(--bg-card);
+  color: var(--text-strong);
+}
+[data-theme='light'] .br-modal-title { color: var(--text-strong); }
+[data-theme='light'] .br-field label { color: var(--muted); }
+[data-theme='light'] .br-field input,
+[data-theme='light'] .br-field select,
+[data-theme='light'] .br-field textarea {
+  background: var(--dark);
+  color: var(--text);
+  border-color: var(--border);
+}
+[data-theme='light'] .br-banner { background: var(--bg-section); }
+[data-theme='light'] .sheet-display { background: var(--bg-section); }

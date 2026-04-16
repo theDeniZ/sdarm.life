@@ -1,13 +1,52 @@
+import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
 import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchPost, fetchPosts, r2url, FALLBACK_IMG } from '../../../lib/api';
+import { fetchPost, fetchPosts, r2url, FALLBACK_IMG, WEB_URL } from '../../../lib/api';
 import { formatDate } from '../../../lib/format';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
+
+const BASE = WEB_URL;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string; slug: string }>;
+}): Promise<Metadata> {
+  const { locale, slug } = await params;
+  const post = await fetchPost(slug);
+  if (!post) return {};
+
+  const canonical = `${BASE}/${locale}/posts/${slug}`;
+  const ogImage = r2url(post.coverKey, { w: 1200, q: 85 }) ?? FALLBACK_IMG;
+  const description = post.excerpt ?? post.body?.slice(0, 160) ?? undefined;
+
+  return {
+    title: post.title,
+    description,
+    alternates: {
+      canonical,
+      languages: {
+        de: `${BASE}/de/posts/${slug}`,
+        en: `${BASE}/en/posts/${slug}`,
+        'x-default': `${BASE}/de/posts/${slug}`,
+      },
+    },
+    openGraph: {
+      type: 'article',
+      url: canonical,
+      title: post.title,
+      description,
+      publishedTime: post.publishedAt ?? undefined,
+      modifiedTime: post.updatedAt,
+      images: [{ url: ogImage, width: 1200, height: 630, alt: post.coverAlt ?? post.title }],
+    },
+  };
+}
 
 function isUnoptimized(url: string) {
   return url.startsWith('https://upload.wikimedia.org') || url.startsWith('https://images.unsplash.com');

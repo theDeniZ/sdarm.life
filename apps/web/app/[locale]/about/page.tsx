@@ -1,12 +1,35 @@
+import type { Metadata } from 'next';
 import Image from 'next/image';
 import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchConfig, r2url } from '../../lib/api';
+import { fetchConfig, r2url, WEB_URL } from '../../lib/api';
 import ScriptureVerseSection from '../../components/ScriptureVerseSection';
 import GlaubensLongRead from '../../components/GlaubensLongRead';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
+
+const BASE = WEB_URL;
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'web.about' });
+  const canonical = `${BASE}/${locale}/about`;
+  return {
+    title: t('metaTitle'),
+    description: t('metaDescription'),
+    alternates: {
+      canonical,
+      languages: { de: `${BASE}/de/about`, en: `${BASE}/en/about`, 'x-default': `${BASE}/de/about` },
+    },
+    openGraph: {
+      type: 'website',
+      url: canonical,
+      title: t('metaTitle'),
+      description: t('metaDescription'),
+    },
+  };
+}
 
 function isUnoptimized(url: string) {
   return url.startsWith('https://upload.wikimedia.org') || url.startsWith('https://images.unsplash.com');
@@ -70,7 +93,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
       <GlaubensLongRead />
 
-      <ScriptureVerseSection />
+      <ScriptureVerseSection locale={locale} />
 
       <ConnectedFooter locale={locale} />
     </>

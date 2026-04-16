@@ -29,8 +29,8 @@ export default function SongForm({ songbookId }: Props) {
         songbookId,
         number: form.number,
         title: form.title,
-        author: form.author || '',
-        copyright: form.copyright || '',
+        author: form.author || null,
+        copyright: form.copyright || null,
       });
       router.push(`/songs/${song.id}`);
     } catch (e) {
@@ -59,14 +59,14 @@ export default function SongForm({ songbookId }: Props) {
 
       <div className="form-row">
         <label>Author</label>
-        <input type="text" value={form.author} onChange={(e) => set('author', e.target.value)} />
+        <input type="text" value={form.author ?? ''} onChange={(e) => set('author', e.target.value)} />
       </div>
 
       <div className="form-row">
         <label>Copyright</label>
         <input
           type="text"
-          value={form.copyright}
+          value={form.copyright ?? ''}
           placeholder="© Author, Year"
           onChange={(e) => set('copyright', e.target.value)}
         />

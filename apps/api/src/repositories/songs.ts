@@ -133,6 +133,55 @@ export async function getSongById(db: DrizzleD1Database, id: number) {
   };
 }
 
+export async function searchSongsGlobal(
+  db: DrizzleD1Database,
+  opts: { q: string; limit?: number; offset?: number },
+) {
+  const { q, limit = 20, offset = 0 } = opts;
+  const pattern = `%${q}%`;
+
+  const condition = or(
+    like(songs.title, pattern),
+    like(sql`cast(${songs.number} as text)`, pattern),
+    like(songParts.lyrics, pattern),
+  );
+
+  // SELECT DISTINCT eliminates duplicate song rows produced by the LEFT JOIN on songParts.
+  // All selected columns come from songs/songbooks, so rows per matching song are identical.
+  const rows = await db
+    .selectDistinct({
+      id: songs.id,
+      number: songs.number,
+      title: songs.title,
+      author: songs.author,
+      sbId: songbooks.id,
+      sbTitle: songbooks.title,
+      sbSlug: songbooks.slug,
+    })
+    .from(songs)
+    .innerJoin(songbooks, eq(songs.songbookId, songbooks.id))
+    .leftJoin(songParts, eq(songParts.songId, songs.id))
+    .where(condition)
+    .orderBy(asc(songs.number))
+    .limit(limit)
+    .offset(offset);
+
+  const [{ total }] = await db
+    .select({ total: sql<number>`count(distinct ${songs.id})` })
+    .from(songs)
+    .innerJoin(songbooks, eq(songs.songbookId, songbooks.id))
+    .leftJoin(songParts, eq(songParts.songId, songs.id))
+    .where(condition);
+
+  return {
+    items: rows.map(({ sbId, sbTitle, sbSlug, ...r }) => ({
+      ...r,
+      songbook: { id: sbId, title: sbTitle, slug: sbSlug },
+    })),
+    total: total ?? 0,
+  };
+}
+
 export async function createSong(
   db: DrizzleD1Database,
   data: { songbookId: number; number: number; title: string; author?: string | null; copyright?: string | null },

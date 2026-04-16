@@ -10,7 +10,7 @@ import configRouter from './routes/config';
 import imagesRouter from './routes/images';
 import subscribersRouter from './routes/subscribers';
 import songbooksRouter from './routes/songbooks';
-import songsRouter from './routes/songs';
+import songsRouter, { songSearchRouter } from './routes/songs';
 import adminPostsRouter from './routes/admin/posts';
 import adminConfigRouter from './routes/admin/config';
 import adminImagesRouter from './routes/admin/images';
@@ -31,10 +31,12 @@ app.use(
 			'https://sdarm.life',
 			'https://admin.sdarm.life',
 			'https://songs.sdarm.life',
+			'https://events.sdarm.life',
 			'https://treasures.sdarm.life',
 			'http://localhost:3000',
 			'http://localhost:3001',
 			'http://localhost:3002',
+			'http://localhost:3003',
 			'http://localhost:3004',
 		],
 	}),
@@ -57,7 +59,10 @@ v1.use('/songbooks', cached(3600)); // 1 hour — songbook list
 v1.use('/songbooks/*', cached(3600)); // 1 hour — songbook detail + songs
 v1.route('/songbooks', songbooksRouter);
 
-v1.use('/songs/*', cached(3600)); // 1 hour — individual songs
+v1.use('/songs/search', cached(300)); // 5 min — search results vary by query, shorter TTL
+v1.route('/songs/search', songSearchRouter); // literal path — must be mounted before /songs/{id}
+
+v1.use('/songs/*', cached(3600));    // 1 hour — individual songs
 v1.route('/songs', songsRouter);
 
 v1.use('/treasures', cached(3600)); // 1 hour — treasure list

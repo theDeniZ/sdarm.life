@@ -5,14 +5,14 @@
       "songs": "Songs",
       "events": "Events",
       "treasures": "Treasures",
-      "about": "About us",
+      "about": "Faith",
       "contact": "Contact",
       "imprint": "Imprint",
       "privacy": "Privacy",
       "searchAria": "Search"
     },
     "footer": {
-      "stayInTouch": "Stay in <em>touch</em>",
+      "stayInTouch": "Be <em>part</em> of it",
       "orgName": "Reformed Adventists",
       "orgRegion": "Germany & Austria",
       "newsletter": "Newsletter",
@@ -46,13 +46,18 @@
   },
   "web": {
     "metadata": {
-      "description": "Seventh Day Adventist Reform Movement in Germany"
+      "title": "SDARM.life – Seventh Day Adventist Reform Movement",
+      "description": "Seventh Day Adventist Reform Movement in Germany & Austria – news, hymns, spiritual resources and community. Sabbath worship, Bible study and Bible-based Christian living.",
+      "ogTitle": "SDARM.life – Adventist Reform Movement Germany"
     },
     "hero": {
       "fallbackTitle": "The Reformation and its consequences for Germany and the whole world",
       "fallbackAlt": "Historical painting",
       "fallbackLabel": "Reformation",
       "nextService": "Next service"
+    },
+    "verse": {
+      "eyebrow": "Word of the Hour"
     },
     "post": {
       "content": "Content",
@@ -71,7 +76,9 @@
       "scrollHint": "Discover",
       "glaubensEyebrow": "Foundations",
       "glaubensTitle": "Points of Our Faith",
-      "glaubensSub": "25 principles that shape our thinking and living."
+      "glaubensSub": "25 principles that shape our thinking and living.",
+      "metaTitle": "About Us – Seventh Day Adventist Reform Movement",
+      "metaDescription": "Meet the Seventh Day Adventist Reform Movement – 25 principles of faith, Sabbath observance, the Reformation message and Bible-based Christianity in Germany & Austria."
     },
     "uberUns": {
       "eyebrow": "Who we are",

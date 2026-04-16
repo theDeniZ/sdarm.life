@@ -275,6 +275,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const savedRangeRef = useRef<Range | null>(null);
   const clickedHLRef = useRef<HTMLElement | null>(null);
   const [hlToolbarPos, setHlToolbarPos] = useState<{ x: number; y: number } | null>(null);
+  const [hlShake, setHlShake] = useState(false);
   // retrySignal increments on manual retry to re-trigger the effect
   const [retrySignal, setRetrySignal] = useState(0);
 
@@ -396,8 +397,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
           }
         });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [epubUrl, hlStorageKey]
+    [epubUrl]
   );
 
   function applyHL(colorClass: HLColor) {
@@ -595,35 +595,65 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     setActiveSearchIdx(0);
   }, [searchQuery, chapterTexts]);
 
-  // Mouseup: show toolbar on text selection
+  // Text selection → toolbar (works on desktop mouse and mobile touch).
+  //
+  // Strategy: selectionchange fires continuously while dragging — we only cache the
+  // range there (no state updates). pointerup fires on both mouse-release and
+  // touchend, so we process the cached range only once the user has finished selecting.
   useEffect(() => {
     const content = contentRef.current;
     if (!content || phase !== 'ready') return;
-    function onMouseUp() {
+
+    let pendingRange: Range | null = null;
+
+    function onSelectionChange() {
+      if (!content) return;
+      const sel = window.getSelection();
+      if (!sel || sel.rangeCount === 0 || sel.toString().trim().length === 0) {
+        pendingRange = null;
+        return;
+      }
+      const range = sel.getRangeAt(0).cloneRange();
+      // Ignore selections outside the content pane (e.g. sidebar)
+      if (!content.contains(range.commonAncestorContainer)) {
+        pendingRange = null;
+        return;
+      }
+      pendingRange = range;
+    }
+
+    function onPointerUp() {
       setTimeout(() => {
-        if (!content) return;
-        const sel = window.getSelection();
-        if (sel && sel.rangeCount > 0 && sel.toString().trim().length > 0) {
-          const range = sel.getRangeAt(0).cloneRange();
-          // Ignore selections outside the content pane (e.g. sidebar)
-          if (!content.contains(range.commonAncestorContainer)) return;
-          // Не показывать тулбар для кросс-блочных выделений (через <p>, <div> и т.д.)
-          if (!rangeIsInline(range)) return;
-          const rect = range.getBoundingClientRect();
-          // Save the Range — we apply color only when the user picks one.
-          // The selection stays highlighted by the browser because toolbar
-          // buttons use onMouseDown + e.preventDefault() to block focus loss.
-          savedRangeRef.current = range;
-          clickedHLRef.current = null;
-          setHlToolbarPos({
-            x: rect.left + rect.width / 2,
-            y: Math.max(rect.top - 130, 8),
-          });
+        if (!pendingRange) return;
+        const range = pendingRange;
+        pendingRange = null;
+
+        // Не показывать тулбар для кросс-блочных выделений (через <p>, <div> и т.д.)
+        if (!rangeIsInline(range)) {
+          setHlShake(true);
+          setTimeout(() => setHlShake(false), 600);
+          return;
         }
+        const rect = range.getBoundingClientRect();
+        if (rect.width === 0 && rect.height === 0) return; // collapsed selection
+        // Save the Range — we apply color only when the user picks one.
+        // The selection stays highlighted by the browser because toolbar
+        // buttons use onPointerDown + e.preventDefault() to block focus loss.
+        savedRangeRef.current = range;
+        clickedHLRef.current = null;
+        setHlToolbarPos({
+          x: rect.left + rect.width / 2,
+          y: Math.max(rect.top - 130, 8),
+        });
       }, 10);
     }
-    content.addEventListener('mouseup', onMouseUp);
-    return () => content.removeEventListener('mouseup', onMouseUp);
+
+    document.addEventListener('selectionchange', onSelectionChange);
+    document.addEventListener('pointerup', onPointerUp);
+    return () => {
+      document.removeEventListener('selectionchange', onSelectionChange);
+      document.removeEventListener('pointerup', onPointerUp);
+    };
   }, [phase]);
 
   // Click on existing .hl span
@@ -1039,7 +1069,11 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             </svg>
           </button>
 
-          <div className="epub-content" ref={contentRef} onClick={handleContentClick}>
+          <div
+            className={`epub-content${hlShake ? ' epub-content--shake' : ''}`}
+            ref={contentRef}
+            onClick={handleContentClick}
+          >
             <article className="epub-chapter">
               <div className="epub-chapter__body" dangerouslySetInnerHTML={{ __html: chapterHtml }} />
               <div style={{ height: '8vh' }} aria-hidden="true" />
@@ -1071,7 +1105,8 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
           }}
           // Prevent browser from moving focus away from the text on any interaction
           // with the toolbar — without this the selection is lost before applyHL runs.
-          onMouseDown={(e) => e.preventDefault()}
+          // onPointerDown works for both mouse and touch (iOS Safari loses selection on mousedown).
+          onPointerDown={(e) => e.preventDefault()}
         >
           <div className="hl-grid">
             {HL_COLORS.map((color) => (

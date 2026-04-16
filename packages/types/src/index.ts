@@ -87,6 +87,14 @@ export interface SongDto {
   updatedAt: string;
 }
 
+export interface SongSearchResultDto {
+  id: number;
+  number: number;
+  title: string;
+  author: string | null;
+  songbook: { id: number; title: string; slug: string };
+}
+
 export type TreasureType = 'book';
 
 export interface TreasureDto {

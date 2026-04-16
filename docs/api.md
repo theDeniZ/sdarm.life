@@ -20,6 +20,7 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/songbooks` | All songbooks ordered by `sort_order`, each with `songCount`. |
 | `GET` | `/api/v1/songbooks/:slug` | Songbook metadata + `songCount`. 404 if not found. |
 | `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number+title. `?limit=N&offset=N`. Returns `{ items, total }`. |
+| `GET` | `/api/v1/songs/search` | Global search across all songbooks. `?q=` (required, max 100 chars), `?limit=N&offset=N`. Returns `{ items, total }` of `SongSearchResultDto` (id, number, title, author, songbook). |
 | `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays. 404 if not found. |
 | `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |

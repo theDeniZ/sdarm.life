@@ -4,8 +4,12 @@ import type { Bindings } from '../types';
 import { createSubscriber, unsubscribeByToken } from '../repositories/subscribers';
 import { ErrorSchema, OkSchema } from '../schemas';
 import { welcomeEmail } from '../emails/welcome';
+import { rateLimit } from '../middleware/rate-limit';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
+
+// 3 subscribe attempts per IP per minute — prevents Resend quota exhaustion
+router.use('/subscribe', rateLimit('sub', 3));
 
 const subscribeRoute = createRoute({
   method: 'post',

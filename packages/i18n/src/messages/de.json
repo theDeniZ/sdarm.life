@@ -5,14 +5,14 @@
       "songs": "Lieder",
       "events": "Events",
       "treasures": "Schätze",
-      "about": "Über uns",
+      "about": "Glauben",
       "contact": "Kontakt",
       "imprint": "Impressum",
       "privacy": "Datenschutz",
       "searchAria": "Suche"
     },
     "footer": {
-      "stayInTouch": "In <em>Kontakt</em> bleiben",
+      "stayInTouch": "Sei <em>dabei</em>",
       "orgName": "Reformierte Adventisten",
       "orgRegion": "Deutschland & Österreich",
       "newsletter": "Newsletter",
@@ -46,13 +46,18 @@
   },
   "web": {
     "metadata": {
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland"
+      "title": "SDARM.life – Siebenten-Tags-Adventisten Reformationsbewegung",
+      "description": "Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland & Österreich – Nachrichten, Lieder, geistliche Schätze und Gemeinschaft. Sabbat-Gottesdienst, Bibelstudium und bibeltreues christliches Leben.",
+      "ogTitle": "SDARM.life – Adventisten Reformationsbewegung Deutschland"
     },
     "hero": {
       "fallbackTitle": "Die Reformation und ihre Folgen für Deutschland und die ganze Welt",
       "fallbackAlt": "Historisches Gemälde",
       "fallbackLabel": "Reformation",
       "nextService": "Nächster Gottesdienst"
+    },
+    "verse": {
+      "eyebrow": "Wort der Stunde"
     },
     "post": {
       "content": "Inhalt",
@@ -71,7 +76,9 @@
       "scrollHint": "Entdecken",
       "glaubensEyebrow": "Grundlagen",
       "glaubensTitle": "Punkte unseres Glaubens",
-      "glaubensSub": "25 Grundsätze, die unser Denken und Leben prägen."
+      "glaubensSub": "25 Grundsätze, die unser Denken und Leben prägen.",
+      "metaTitle": "Über uns – Siebenten-Tags-Adventisten Reformationsbewegung",
+      "metaDescription": "Lernen Sie die Siebenten-Tags-Adventisten Reformationsbewegung kennen – 25 Glaubensgrundsätze, Sabbat-Beobachtung, die Reformationsbotschaft und bibeltreues Christentum in Deutschland & Österreich."
     },
     "uberUns": {
       "eyebrow": "Wer wir sind",
@@ -135,6 +142,7 @@
         "section5Title": "Übergeordnete Organisation",
         "section5Body": "Generalkonferenz der STA-REF"
       },
+      "courtesyNote": "Dies ist eine informelle Übersetzung. Die rechtsverbindliche Fassung ist das deutsche Original.",
       "datenschutz": {
         "title": "Datenschutzerklärung",
         "metaTitle": "Datenschutzerklärung – sdarm.life",

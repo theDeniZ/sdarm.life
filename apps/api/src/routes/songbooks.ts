@@ -38,7 +38,7 @@ const listSongsRoute = createRoute({
   request: {
     params: z.object({ slug: z.string() }),
     query: PaginationQuery.extend({
-      q: z.string().optional().openapi({ description: 'Search by number or title' }),
+      q: z.string().max(100).optional().openapi({ description: 'Search by number or title (max 100 chars)' }),
     }),
   },
   responses: {

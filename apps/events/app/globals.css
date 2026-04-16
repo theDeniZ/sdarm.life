@@ -2,13 +2,7 @@
 
 *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
 
-:root {
-  --gold:   #c9a96e;
-  --dark:   #0c0b09;
-  --text:   #d6d0c8;
-  --muted:  #7a7470;
-  --border: rgba(201,169,110,0.12);
-}
+/* Common tokens inherited from @sdarm/ui tokens.css — no overrides needed */
 
 html, body { height: 100%; }
 

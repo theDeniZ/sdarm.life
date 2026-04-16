@@ -8,8 +8,8 @@ export type SongbookFormData = Pick<
 export interface SongFormData {
   number: number;
   title: string;
-  author: string;
-  copyright: string;
+  author: string | null;
+  copyright: string | null;
 }
 
 export interface PartFormData {

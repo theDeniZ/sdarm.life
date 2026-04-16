@@ -37,23 +37,7 @@ const TINTS = [
   'radial-gradient(ellipse at 62% 28%, rgba(55,32,14,0.28) 0%, transparent 58%), radial-gradient(ellipse at 15% 80%, rgba(28,12,4,0.38) 0%, transparent 50%)',
 ];
 
-const THUMB_COLORS = [
-  'rgba(120,88,40,.55)',
-  'rgba(40,60,100,.55)',
-  'rgba(100,60,20,.55)',
-  'rgba(30,50,90,.55)',
-  'rgba(90,50,15,.55)',
-];
-
 const INTERVAL = 5000;
-
-function nextSabbath(): string {
-  const d = new Date();
-  const day = d.getDay();
-  const daysUntil = day === 6 ? 7 : 6 - day;
-  d.setDate(d.getDate() + daysUntil);
-  return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
-}
 
 export default function HeroSection({ posts, bgUrl }: { posts?: HeroPost[]; bgUrl?: string | null }) {
   const t = useTranslations('web.hero');
@@ -146,44 +130,19 @@ export default function HeroSection({ posts, bgUrl }: { posts?: HeroPost[]; bgUr
           {post.body && <p className={`hero-sub${textVisible ? '' : ' fade-out'}`}>{post.body}</p>}
         </div>
 
-        <div className="hero-events-list" style={{ gridTemplateColumns: `${slides.map(() => '1fr').join(' ')} 220px` }}>
-          {slides.map((slide, i) => (
-            <div
-              key={slide.slug + i}
-              className={`hev-item${active === i ? ' active' : ''}`}
-              onClick={() => handleClick(i)}
-            >
-              <div className="hev-thumb">
-                {slide.thumbUrl ? (
-                  <div
-                    className="hev-thumb-inner"
-                    style={{
-                      backgroundImage: `url(${slide.thumbUrl})`,
-                      backgroundSize: 'cover',
-                      backgroundPosition: 'center',
-                    }}
-                  />
-                ) : (
-                  <div
-                    className="hev-thumb-inner"
-                    style={{
-                      background: `radial-gradient(ellipse at 60% 30%, ${THUMB_COLORS[i % THUMB_COLORS.length]} 0%, rgba(8,6,3,1) 75%)`,
-                    }}
-                  />
-                )}
-              </div>
-              <div className="hev-text">
-                <div className="hev-lbl">{slide.meta}</div>
-                <div className="hev-title">{slide.title}</div>
-                {slide.excerpt && <div className="hev-desc">{slide.excerpt}</div>}
-              </div>
-            </div>
-          ))}
-          <div className="hev-item hev-item--date">
-            <div className="hev-date-big">{nextSabbath()}</div>
-            <div className="hev-date-sub">{t('nextService')}</div>
+        {/* Slide dots — bottom-center navigation */}
+        {N > 1 && (
+          <div className="hero-dots">
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                className={`hero-dot${active === i ? ' active' : ''}`}
+                onClick={() => handleClick(i)}
+                aria-label={`Slide ${i + 1}`}
+              />
+            ))}
           </div>
-        </div>
+        )}
       </section>
     </div>
   );

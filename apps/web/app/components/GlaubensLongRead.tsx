@@ -579,8 +579,10 @@ export default function GlaubensLongRead() {
                   else articleRefs.current.delete(a.num);
                 }}
               >
-                <div className="glr-item__num">{a.num}</div>
-                <h3 className="glr-item__title">{a.titleEl}</h3>
+                <div className="glr-item__header">
+                  <div className="glr-item__num">{a.num}</div>
+                  <h3 className="glr-item__title">{a.titleEl}</h3>
+                </div>
                 <p className="glr-item__body">{a.body}</p>
                 <p className="glr-item__refs">{a.refs}</p>
 

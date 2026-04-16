@@ -1,8 +1,8 @@
-export const runtime = 'edge';
-
 import { fetchSong } from '../../domains/songbooks/repository';
 import SongEditor from '../../domains/songbooks/SongEditor';
 import Link from 'next/link';
+
+export const runtime = 'edge';
 
 export default async function SongPage({ params }: { params: Promise<{ id: string }> }) {
   const id = Number((await params).id);

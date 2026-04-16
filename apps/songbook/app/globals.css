@@ -12,12 +12,12 @@
 }
 
 :root {
-  --gold: #c9a96e;
-  --dark: #0c0b09;
-  --text: #d6d0c8;
-  --muted: #7a7470;
-  --border: rgba(201, 169, 110, 0.12);
+  /* Songbook-specific tokens (common tokens inherited from @sdarm/ui tokens.css) */
   --chord: #c9a96e;
+}
+
+[data-theme='light'] {
+  --chord: #b8872c;
 }
 
 html,
@@ -1237,3 +1237,48 @@ a {
     align-items: flex-start;
   }
 }
+
+/* ═══ LIGHT THEME ═══ */
+
+/* Top nav */
+[data-theme='light'] .top-nav {
+  background: rgba(246, 245, 242, 0.93);
+  border-bottom-color: rgba(184, 135, 44, 0.14);
+}
+[data-theme='light'] .top-nav__brand { color: rgba(14, 14, 18, 0.88); }
+[data-theme='light'] .top-nav__link { color: rgba(28, 28, 34, 0.68); }
+[data-theme='light'] .top-nav__link:hover,
+[data-theme='light'] .top-nav__link.active { color: var(--gold); }
+
+/* Songbook landing */
+[data-theme='light'] .songbook-landing { background: var(--dark); }
+[data-theme='light'] .songbook-landing-card { background: var(--bg-card); }
+[data-theme='light'] .songbook-landing-card__name { color: var(--text-strong); }
+[data-theme='light'] .songbook-landing-card__subtitle { color: var(--muted); }
+[data-theme='light'] .book-visual { background: #c4a870; }
+
+/* Song list */
+[data-theme='light'] .song-list-wrap { background: var(--dark); }
+[data-theme='light'] .song-list-header h1 { color: var(--text-strong); }
+[data-theme='light'] .song-row { border-bottom-color: var(--border); }
+[data-theme='light'] .song-row:hover { background: var(--bg-card); }
+[data-theme='light'] .song-row__number { color: var(--gold); }
+[data-theme='light'] .song-row__title { color: var(--text-strong); }
+[data-theme='light'] .song-row__author { color: var(--muted); }
+
+/* Song detail */
+[data-theme='light'] .song-page { background: var(--dark); }
+[data-theme='light'] .song-header { background: var(--bg-section); }
+[data-theme='light'] .song-header__title { color: var(--text-strong); }
+[data-theme='light'] .song-header__meta { color: var(--muted); }
+[data-theme='light'] .back-link { color: var(--muted); }
+[data-theme='light'] .back-link:hover { color: var(--text-strong); }
+[data-theme='light'] .part-block { border-bottom-color: var(--border); }
+[data-theme='light'] .part-label { color: var(--muted); }
+[data-theme='light'] .lyrics-line { color: var(--text); }
+
+/* Projector — keep dark always */
+[data-theme='light'] .projector { background: #0c0b09; color: #d6d0c8; }
+
+/* Sheet display */
+[data-theme='light'] .sheet-display { background: var(--bg-section); }
