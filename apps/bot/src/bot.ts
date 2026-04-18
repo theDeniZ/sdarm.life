@@ -142,9 +142,7 @@ function langKeyboard(t: Strings, current?: Lang): InlineKeyboard {
   return new InlineKeyboard()
     .text(mark('ru', t.btn_lang_ru), 'lang:ru')
     .row()
-    .text(mark('en', t.btn_lang_en), 'lang:en')
-    .row()
-    .text(mark('de', t.btn_lang_de), 'lang:de');
+    .text(mark('en', t.btn_lang_en), 'lang:en');
 }
 
 // ── Screen renderers ──────────────────────────────────────────────────────────
@@ -486,14 +484,14 @@ export function createBot(env: Env): Bot {
     });
   });
 
-  // lang:ru / lang:en / lang:de
-  bot.callbackQuery(/^lang:(ru|en|de)$/, async (ctx) => {
+  // lang:ru / lang:en
+  bot.callbackQuery(/^lang:(ru|en)$/, async (ctx) => {
     await ctx.answerCallbackQuery();
     const lang = ctx.match[1] as Lang;
     const userId = ctx.from?.id;
     if (userId) await saveSession(kv, userId, { lang });
     const t = getT(lang);
-    const name = lang === 'ru' ? 'Русский 🇷🇺' : lang === 'de' ? 'Deutsch 🇩🇪' : 'English 🇬🇧';
+    const name = lang === 'ru' ? 'Русский 🇷🇺' : 'English 🇬🇧';
     // Edit the language-selection message in place with a confirmation + back button
     await editOrReply(ctx, t.lang_set(name), {
       parse_mode: 'MarkdownV2',
