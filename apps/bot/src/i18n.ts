@@ -1,5 +1,16 @@
-export type Lang = 'ru' | 'en';
+export type Lang = 'ru' | 'en' | 'de';
 export const DEFAULT_LANG: Lang = 'ru';
+export const SUPPORTED_LANGS: readonly Lang[] = ['ru', 'en', 'de'] as const;
+
+/**
+ * Map a Telegram `User.language_code` (e.g. "de", "de-DE", "en-US") to a
+ * supported bot language. Returns null when no match — caller decides the fallback.
+ */
+export function detectLangFromCode(code: string | undefined | null): Lang | null {
+  if (!code) return null;
+  const prefix = code.toLowerCase().slice(0, 2);
+  return (SUPPORTED_LANGS as readonly string[]).includes(prefix) ? (prefix as Lang) : null;
+}
 
 export interface Strings {
   // ── Buttons ───────────────────────────────────────────────────────────────
@@ -15,9 +26,11 @@ export interface Strings {
   btn_lang: string;
   btn_lang_ru: string;
   btn_lang_en: string;
+  btn_lang_de: string;
   btn_resume: (title: string) => string;
   btn_show_chords: string;
   btn_hide_chords: string;
+  btn_search_global: string;
 
   // ── Screens ───────────────────────────────────────────────────────────────
   welcome: string;
@@ -30,6 +43,7 @@ export interface Strings {
   search_no_results: (q: string) => string;
   search_header: (q: string) => string;
   search_truncated: (shown: number, total: number) => string;
+  search_in_book_header: (q: string, book: string) => string;
 
   // ── Song list ─────────────────────────────────────────────────────────────
   song_list_meta: (lang: string, total: number, page: number, pages: number) => string;
@@ -55,6 +69,7 @@ export interface Strings {
   err_general: string;
   rate_limit: string;
   min_chars: string;
+  long_song_no_chords: string;
   help: string;
 }
 
@@ -69,11 +84,13 @@ const ru: Strings = {
   btn_home: '🏠  Меню',
   btn_contact_short: '✉️  Связаться',
   btn_lang: '🌐  Язык / Language',
-  btn_lang_ru: '🇷🇺  Русский ✓',
+  btn_lang_ru: '🇷🇺  Русский',
   btn_lang_en: '🇬🇧  English',
+  btn_lang_de: '🇩🇪  Deutsch',
   btn_resume: (title) => `▶  ${title}`,
   btn_show_chords: '🎸  Аккорды',
   btn_hide_chords: '📝  Только текст',
+  btn_search_global: '🌍  По всем сборникам',
 
   welcome: ['🎵 *Breezify*', '_карманный песенник_', '', 'Листай или ищи:'].join('\n'),
 
@@ -93,6 +110,7 @@ const ru: Strings = {
   search_no_results: (q) => `🔍 *«${q}»*\n\nНичего не найдено\\.\nПопробуй другое слово или номер\\.`,
   search_header: (q) => `🔍 *«${q}»*`,
   search_truncated: (shown, total) => `_Первые ${shown} из ${total} — уточни запрос\\._\n\n`,
+  search_in_book_header: (q, book) => `🔍 *«${q}»* в _${book}_`,
 
   song_list_meta: (lang, total, page, pages) => `_${lang.toUpperCase()} · ${total} песен · ${page}/${pages}_`,
   no_songs: 'Песен пока нет\\.',
@@ -114,6 +132,7 @@ const ru: Strings = {
   err_general: '⚠ Что\\-то пошло не так\\. Попробуй ещё раз\\.',
   rate_limit: '⏳ Помедленнее\\.',
   min_chars: '_Введи хотя бы 2 символа\\._',
+  long_song_no_chords: '_⚠ Песня слишком длинная для переключения аккордов в чате\\._',
 
   help: [
     '🎵 *Breezify — карманный песенник*',
@@ -139,12 +158,14 @@ const en: Strings = {
   btn_switch_short: '📚  Collections',
   btn_home: '🏠  Menu',
   btn_contact_short: '✉️  Contact',
-  btn_lang: '🌐  Язык / Language',
+  btn_lang: '🌐  Language',
   btn_lang_ru: '🇷🇺  Русский',
-  btn_lang_en: '🇬🇧  English ✓',
+  btn_lang_en: '🇬🇧  English',
+  btn_lang_de: '🇩🇪  Deutsch',
   btn_resume: (title) => `▶  ${title}`,
   btn_show_chords: '🎸  Chords',
   btn_hide_chords: '📝  Lyrics only',
+  btn_search_global: '🌍  Search all collections',
 
   welcome: ['🎵 *Breezify*', '_your pocket hymnbook_', '', 'Browse or search:'].join('\n'),
 
@@ -164,6 +185,7 @@ const en: Strings = {
   search_no_results: (q) => `🔍 *"${q}"*\n\nNothing found\\.\nTry another word or number\\.`,
   search_header: (q) => `🔍 *"${q}"*`,
   search_truncated: (shown, total) => `_Top ${shown} of ${total} — refine your query\\._\n\n`,
+  search_in_book_header: (q, book) => `🔍 *"${q}"* in _${book}_`,
 
   song_list_meta: (lang, total, page, pages) => `_${lang.toUpperCase()} · ${total} songs · ${page}/${pages}_`,
   no_songs: 'No songs yet\\.',
@@ -185,6 +207,7 @@ const en: Strings = {
   err_general: '⚠ Something went wrong\\. Try again\\.',
   rate_limit: '⏳ Slow down\\.',
   min_chars: '_Type at least 2 characters\\._',
+  long_song_no_chords: '_⚠ This song is too long for inline chord toggle\\._',
 
   help: [
     '🎵 *Breezify — pocket hymnbook*',
@@ -200,6 +223,88 @@ const en: Strings = {
   ].join('\n'),
 };
 
+const de: Strings = {
+  btn_songbooks: '📚  Liederbücher',
+  btn_search: '🔍  Suche',
+  btn_contact: '✉️  Entwickler',
+  btn_back_menu: '‹  Menü',
+  btn_back_list: '‹  Zurück',
+  btn_switch: '📚  Liederbücher',
+  btn_switch_short: '📚  Bücher',
+  btn_home: '🏠  Menü',
+  btn_contact_short: '✉️  Kontakt',
+  btn_lang: '🌐  Sprache',
+  btn_lang_ru: '🇷🇺  Русский',
+  btn_lang_en: '🇬🇧  English',
+  btn_lang_de: '🇩🇪  Deutsch',
+  btn_resume: (title) => `▶  ${title}`,
+  btn_show_chords: '🎸  Akkorde',
+  btn_hide_chords: '📝  Nur Text',
+  btn_search_global: '🌍  Alle Bücher durchsuchen',
+
+  welcome: ['🎵 *Breezify*', '_dein Taschen\\-Liederbuch_', '', 'Stöbern oder suchen:'].join('\n'),
+
+  songbooks_header: '📚 *Liederbücher*\n\n_Wähle eine Sammlung:_',
+  songbooks_empty: 'Noch keine Liederbücher\\.',
+
+  search_hint: [
+    '🔍 *So findest du ein Lied:*',
+    '',
+    '`42` — nach Nummer',
+    '`Amazing grace` — nach Titel',
+    '`Ich war einst blind` — nach Zeile',
+    '',
+    '_Oder einfach tippen — ich finde es\\._',
+  ].join('\n'),
+  search_prompt: '🔍 *Was suchst du?*\n\n`/search 42`\n`/search Amazing grace`\n`/search Ich war einst blind`',
+  search_no_results: (q) => `🔍 *„${q}"*\n\nNichts gefunden\\.\nVersuche ein anderes Wort oder eine Nummer\\.`,
+  search_header: (q) => `🔍 *„${q}"*`,
+  search_truncated: (shown, total) => `_Erste ${shown} von ${total} — präzisiere die Anfrage\\._\n\n`,
+  search_in_book_header: (q, book) => `🔍 *„${q}"* in _${book}_`,
+
+  song_list_meta: (lang, total, page, pages) => `_${lang.toUpperCase()} · ${total} Lieder · ${page}/${pages}_`,
+  no_songs: 'Noch keine Lieder\\.',
+
+  part_verse: 'Strophe',
+  part_chorus: 'Refrain',
+  part_bridge: 'Bridge',
+  part_intro: 'Intro',
+  part_outro: 'Outro',
+  part_coda: 'Coda',
+
+  lang_choose: '🌐 *Sprache:*',
+  lang_set: (name) => `✓ Sprache: *${name}*`,
+
+  err_books: '⚠ Laden fehlgeschlagen\\. Versuche es später\\.',
+  err_songs: '⚠ Laden fehlgeschlagen\\. Versuche es später\\.',
+  err_song: '⚠ Laden fehlgeschlagen\\. Versuche es später\\.',
+  err_search: '⚠ Suchfehler\\. Versuche es später\\.',
+  err_general: '⚠ Etwas ist schiefgelaufen\\. Versuche es erneut\\.',
+  rate_limit: '⏳ Langsamer\\.',
+  min_chars: '_Tippe mindestens 2 Zeichen\\._',
+  long_song_no_chords: '_⚠ Das Lied ist zu lang für die Akkord\\-Anzeige im Chat\\._',
+
+  help: [
+    '🎵 *Breezify — Taschen\\-Liederbuch*',
+    '',
+    '`/start` · `/songbooks` · `/lang`',
+    '',
+    '*Suche:*',
+    '`42` — Nummer',
+    '`Amazing grace` — Titel',
+    '`Ich war einst blind` — Liedzeile',
+    '',
+    '_Oder einfach tippen — ich finde es\\._',
+  ].join('\n'),
+};
+
 export function getT(lang: Lang): Strings {
-  return lang === 'ru' ? ru : en;
+  switch (lang) {
+    case 'ru':
+      return ru;
+    case 'en':
+      return en;
+    case 'de':
+      return de;
+  }
 }

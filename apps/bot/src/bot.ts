@@ -3,11 +3,11 @@ import type { Context } from 'grammy';
 import type { SongbookDto } from '@sdarm/types';
 import type { Env } from './types';
 import { createApiClient, type ApiClient } from './api';
-import { isRateLimited } from './rate-limit';
+import { isRateLimited, DEFAULT_RATE_LIMIT_PER_MINUTE } from './rate-limit';
 import { getSession, saveSession } from './session';
-import { getT, DEFAULT_LANG, type Lang, type Strings } from './i18n';
+import { getT, DEFAULT_LANG, detectLangFromCode, type Lang, type Strings } from './i18n';
 import { logError } from './logger';
-import { formatSong, formatSongList, formatSearchResults, formatSongbookList } from './format';
+import { formatSong, formatSongList, formatSearchResults, formatSongbookList, esc } from './format';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -15,13 +15,34 @@ const SONGS_PER_PAGE = 15;
 const MAX_SEARCH_RESULTS = 20;
 const CONTACT_URL = 'https://t.me/maestr_os';
 
-// ── Session helper ────────────────────────────────────────────────────────────
+// Callback parameter bounds — accept only sane values to avoid pathological input
+const MAX_SONG_ID = 10_000_000;
+const MAX_PAGE = 1000;
+const SLUG_RE = /^[a-zA-Z0-9-]{1,100}$/;
+const NUMERIC_RE = /^\d{1,6}$/;
 
-async function getUserLang(kv: KVNamespace, userId?: number): Promise<Lang> {
+// ── Session helpers ───────────────────────────────────────────────────────────
+
+/**
+ * Resolve the user's interface language.
+ * Order of precedence:
+ *   1. Saved session.lang
+ *   2. Telegram User.language_code (auto-detected on first interaction; persisted)
+ *   3. DEFAULT_LANG (Russian)
+ */
+async function ensureUserLang(kv: KVNamespace, ctx: Context): Promise<Lang> {
+  const userId = ctx.from?.id;
   if (!userId) return DEFAULT_LANG;
   try {
     const session = await getSession(kv, userId);
-    return session.lang ?? DEFAULT_LANG;
+    if (session.lang) return session.lang;
+    const detected = detectLangFromCode(ctx.from?.language_code);
+    if (detected) {
+      // Best-effort persist so subsequent requests skip detection
+      saveSession(kv, userId, { lang: detected }).catch(() => {});
+      return detected;
+    }
+    return DEFAULT_LANG;
   } catch {
     return DEFAULT_LANG;
   }
@@ -116,8 +137,14 @@ function searchResultsKeyboard(
   return kb;
 }
 
-function langKeyboard(t: Strings): InlineKeyboard {
-  return new InlineKeyboard().text(t.btn_lang_ru, 'lang:ru').row().text(t.btn_lang_en, 'lang:en');
+function langKeyboard(t: Strings, current?: Lang): InlineKeyboard {
+  const mark = (lang: Lang, label: string) => (current === lang ? `${label}  ✓` : label);
+  return new InlineKeyboard()
+    .text(mark('ru', t.btn_lang_ru), 'lang:ru')
+    .row()
+    .text(mark('en', t.btn_lang_en), 'lang:en')
+    .row()
+    .text(mark('de', t.btn_lang_de), 'lang:de');
 }
 
 // ── Screen renderers ──────────────────────────────────────────────────────────
@@ -125,7 +152,8 @@ function langKeyboard(t: Strings): InlineKeyboard {
 async function showMainMenu(ctx: Context, kv: KVNamespace): Promise<void> {
   const userId = ctx.from?.id;
   const session = userId ? await getSession(kv, userId) : {};
-  const t = getT(session.lang ?? DEFAULT_LANG);
+  const lang = session.lang ?? (await ensureUserLang(kv, ctx));
+  const t = getT(lang);
 
   const resume = session.sbSlug && session.sbTitle ? { title: session.sbTitle } : undefined;
 
@@ -176,7 +204,8 @@ async function showSongs(
 /**
  * Open a song as a new message (from song list taps).
  * Short songs (≤ 4096 chars) get a chord toggle button.
- * Long songs are split into chunks; no toggle (can't edit multi-message).
+ * Long songs are split into chunks; toggle is unavailable (multi-message
+ * editing is impractical) and the user is told why.
  */
 async function showSong(
   ctx: Context,
@@ -195,16 +224,21 @@ async function showSong(
       parse_mode: 'MarkdownV2',
       reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, songHasChords),
     });
-  } else {
-    const chunks = splitMessage(text, 4096);
-    for (let i = 0; i < chunks.length; i++) {
-      const isLast = i === chunks.length - 1;
-      await ctx.reply(chunks[i], {
-        parse_mode: 'MarkdownV2',
-        // Long songs: no chord toggle (multi-message editing is impractical)
-        ...(isLast ? { reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, false) } : {}),
-      });
-    }
+    return;
+  }
+
+  // Long song: split, no chord toggle, explain why on the last chunk.
+  // Use a tighter limit so the hint fits inside the final chunk.
+  const HINT_RESERVE = 200;
+  const chunks = splitMessage(text, songHasChords ? 4096 - HINT_RESERVE : 4096);
+  for (let i = 0; i < chunks.length; i++) {
+    const isLast = i === chunks.length - 1;
+    let body = chunks[i];
+    if (isLast && songHasChords) body += '\n\n' + t.long_song_no_chords;
+    await ctx.reply(body, {
+      parse_mode: 'MarkdownV2',
+      ...(isLast ? { reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, false) } : {}),
+    });
   }
 }
 
@@ -221,6 +255,40 @@ async function showSearch(ctx: Context, api: ApiClient, query: string, t: String
     items.length > 0 ? searchResultsKeyboard(t, items) : new InlineKeyboard().text(t.btn_back_menu, 'main_menu');
 
   await editOrReply(ctx, text, { parse_mode: 'MarkdownV2', reply_markup: kb });
+}
+
+/**
+ * Context-aware numeric search.
+ * If the user is currently browsing a songbook and types a pure number,
+ * try matching by song number inside that book first. Falls back to global
+ * search when the book has no such number.
+ */
+async function showNumericSearchInBook(
+  ctx: Context,
+  api: ApiClient,
+  slug: string,
+  bookTitle: string,
+  number: string,
+  t: Strings,
+): Promise<boolean> {
+  const { items, total } = await api.getSongs(slug, { q: number, limit: SONGS_PER_PAGE });
+  if (items.length === 0) return false;
+
+  // Render as a search-results screen scoped to this songbook + offer global fallback
+  const lines = [
+    t.search_in_book_header(esc(number), esc(bookTitle)),
+    ...items.map((s) => `*№${s.number}* ${esc(s.title)}`),
+  ];
+  if (total > items.length) {
+    lines.unshift(t.search_truncated(items.length, total).trimEnd());
+  }
+  const kb = new InlineKeyboard();
+  for (const s of items) kb.text(`№${s.number} ${s.title}`, `song:${s.id}:0`).row();
+  kb.text(t.btn_search_global, `gs:${number}`).row();
+  kb.text(t.btn_back_menu, 'main_menu');
+
+  await ctx.reply(lines.join('\n'), { parse_mode: 'MarkdownV2', reply_markup: kb });
+  return true;
 }
 
 // ── Utility ───────────────────────────────────────────────────────────────────
@@ -257,12 +325,20 @@ async function editOrReply(
   }
 }
 
+function parseBoundedInt(raw: string, max: number): number | null {
+  if (!/^\d+$/.test(raw)) return null;
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n) || n < 0 || n > max) return null;
+  return n;
+}
+
 // ── Bot factory ───────────────────────────────────────────────────────────────
 
 export function createBot(env: Env): Bot {
   const bot = new Bot(env.BOT_TOKEN);
   const api = createApiClient(env.API_URL ?? 'https://api.sdarm.life/api/v1');
   const kv = env.RATE_KV;
+  const rateLimit = parseBoundedInt(env.RATE_LIMIT_PER_MIN ?? '', 10_000) ?? DEFAULT_RATE_LIMIT_PER_MINUTE;
 
   // ── Security: ignore other bots ───────────────────────────────────────────
   bot.use(async (ctx, next) => {
@@ -275,9 +351,9 @@ export function createBot(env: Env): Bot {
     const userId = ctx.from?.id;
     if (!userId) return next();
     try {
-      const limited = await isRateLimited(kv, userId);
+      const limited = await isRateLimited(kv, userId, rateLimit);
       if (limited) {
-        const t = getT(await getUserLang(kv, userId));
+        const t = getT(await ensureUserLang(kv, ctx));
         await ctx.reply(t.rate_limit, { parse_mode: 'MarkdownV2' });
         return;
       }
@@ -297,17 +373,18 @@ export function createBot(env: Env): Bot {
   });
 
   bot.command('help', async (ctx) => {
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const t = getT(await ensureUserLang(kv, ctx));
     await ctx.reply(t.help, { parse_mode: 'MarkdownV2' });
   });
 
   bot.command('lang', async (ctx) => {
-    const t = getT(await getUserLang(kv, ctx.from?.id));
-    await ctx.reply(t.lang_choose, { parse_mode: 'MarkdownV2', reply_markup: langKeyboard(t) });
+    const lang = await ensureUserLang(kv, ctx);
+    const t = getT(lang);
+    await ctx.reply(t.lang_choose, { parse_mode: 'MarkdownV2', reply_markup: langKeyboard(t, lang) });
   });
 
   bot.command('songbooks', async (ctx) => {
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const t = getT(await ensureUserLang(kv, ctx));
     try {
       await showSongbooks(ctx, api, t);
     } catch (err) {
@@ -317,7 +394,7 @@ export function createBot(env: Env): Bot {
   });
 
   bot.command('search', async (ctx) => {
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const t = getT(await ensureUserLang(kv, ctx));
     const query = ctx.match?.trim() ?? '';
     if (!query) {
       await ctx.reply(t.search_prompt, { parse_mode: 'MarkdownV2' });
@@ -331,13 +408,13 @@ export function createBot(env: Env): Bot {
     }
   });
 
-  // ── Plain text → implicit search ─────────────────────────────────────────
+  // ── Plain text → context-aware search ────────────────────────────────────
   bot.on('message:text', async (ctx) => {
     if (ctx.chat?.type !== 'private') return;
     const text = ctx.message.text.trim();
     if (text.startsWith('/')) return;
 
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const t = getT(await ensureUserLang(kv, ctx));
 
     if (text.length < 2) {
       await ctx.reply(t.min_chars, { parse_mode: 'MarkdownV2' });
@@ -345,6 +422,16 @@ export function createBot(env: Env): Bot {
     }
 
     try {
+      // If the user is browsing a songbook AND typed a pure number,
+      // search within that songbook first; fall back to global search if empty.
+      const userId = ctx.from?.id;
+      if (userId && NUMERIC_RE.test(text)) {
+        const session = await getSession(kv, userId);
+        if (session.sbSlug && session.sbTitle) {
+          const handled = await showNumericSearchInBook(ctx, api, session.sbSlug, session.sbTitle, text, t);
+          if (handled) return;
+        }
+      }
       await showSearch(ctx, api, text, t);
     } catch (err) {
       logError('text:search', err, { userId: ctx.from?.id, text });
@@ -361,7 +448,7 @@ export function createBot(env: Env): Bot {
 
   bot.callbackQuery('sb_list', async (ctx) => {
     await ctx.answerCallbackQuery();
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const t = getT(await ensureUserLang(kv, ctx));
     try {
       await showSongbooks(ctx, api, t);
     } catch (err) {
@@ -376,9 +463,10 @@ export function createBot(env: Env): Bot {
     if (!userId) return;
     try {
       const session = await getSession(kv, userId);
-      const t = getT(session.lang ?? DEFAULT_LANG);
-      if (session.sbSlug) {
-        await showSongs(ctx, api, kv, session.sbSlug, session.sbPage ?? 0, t);
+      const t = getT(session.lang ?? (await ensureUserLang(kv, ctx)));
+      if (session.sbSlug && SLUG_RE.test(session.sbSlug)) {
+        const page = Math.min(Math.max(session.sbPage ?? 0, 0), MAX_PAGE);
+        await showSongs(ctx, api, kv, session.sbSlug, page, t);
       } else {
         await showMainMenu(ctx, kv);
       }
@@ -390,21 +478,22 @@ export function createBot(env: Env): Bot {
 
   bot.callbackQuery('lang_choose', async (ctx) => {
     await ctx.answerCallbackQuery();
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const lang = await ensureUserLang(kv, ctx);
+    const t = getT(lang);
     await editOrReply(ctx, t.lang_choose, {
       parse_mode: 'MarkdownV2',
-      reply_markup: langKeyboard(t),
+      reply_markup: langKeyboard(t, lang),
     });
   });
 
-  // lang:ru / lang:en
-  bot.callbackQuery(/^lang:(ru|en)$/, async (ctx) => {
+  // lang:ru / lang:en / lang:de
+  bot.callbackQuery(/^lang:(ru|en|de)$/, async (ctx) => {
     await ctx.answerCallbackQuery();
     const lang = ctx.match[1] as Lang;
     const userId = ctx.from?.id;
     if (userId) await saveSession(kv, userId, { lang });
     const t = getT(lang);
-    const name = lang === 'ru' ? 'Русский 🇷🇺' : 'English 🇬🇧';
+    const name = lang === 'ru' ? 'Русский 🇷🇺' : lang === 'de' ? 'Deutsch 🇩🇪' : 'English 🇬🇧';
     // Edit the language-selection message in place with a confirmation + back button
     await editOrReply(ctx, t.lang_set(name), {
       parse_mode: 'MarkdownV2',
@@ -414,21 +503,37 @@ export function createBot(env: Env): Bot {
 
   bot.callbackQuery('search_hint', async (ctx) => {
     await ctx.answerCallbackQuery();
-    const t = getT(await getUserLang(kv, ctx.from?.id));
-    await editOrReply(ctx, t.search_hint, { parse_mode: 'MarkdownV2', reply_markup: new InlineKeyboard().text(t.btn_back_menu, 'main_menu') });
+    const t = getT(await ensureUserLang(kv, ctx));
+    await editOrReply(ctx, t.search_hint, {
+      parse_mode: 'MarkdownV2',
+      reply_markup: new InlineKeyboard().text(t.btn_back_menu, 'main_menu'),
+    });
   });
 
   bot.callbackQuery('noop', async (ctx) => {
     await ctx.answerCallbackQuery();
   });
 
+  // gs:{query} — explicit "search globally" button from in-book numeric results
+  bot.callbackQuery(/^gs:(.+)$/, async (ctx) => {
+    await ctx.answerCallbackQuery();
+    const query = ctx.match[1].slice(0, 100);
+    const t = getT(await ensureUserLang(kv, ctx));
+    try {
+      await showSearch(ctx, api, query, t);
+    } catch (err) {
+      logError('cb:gs', err, { userId: ctx.from?.id, query });
+      await ctx.reply(t.err_search, { parse_mode: 'MarkdownV2' });
+    }
+  });
+
   // sb:{slug}:{page}
   bot.callbackQuery(/^sb:([^:]+):(\d+)$/, async (ctx) => {
     await ctx.answerCallbackQuery();
     const slug = ctx.match[1];
-    const page = parseInt(ctx.match[2], 10);
-    if (!Number.isFinite(page) || page < 0) return;
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const page = parseBoundedInt(ctx.match[2], MAX_PAGE);
+    if (!SLUG_RE.test(slug) || page === null) return;
+    const t = getT(await ensureUserLang(kv, ctx));
     try {
       await showSongs(ctx, api, kv, slug, page, t);
     } catch (err) {
@@ -440,9 +545,10 @@ export function createBot(env: Env): Bot {
   // song:{id}:{page}  — opens song as a NEW message
   bot.callbackQuery(/^song:(\d+):(\d+)$/, async (ctx) => {
     await ctx.answerCallbackQuery();
-    const id = parseInt(ctx.match[1], 10);
-    const backPage = parseInt(ctx.match[2], 10);
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const id = parseBoundedInt(ctx.match[1], MAX_SONG_ID);
+    const backPage = parseBoundedInt(ctx.match[2], MAX_PAGE);
+    if (id === null || id < 1 || backPage === null) return;
+    const t = getT(await ensureUserLang(kv, ctx));
     try {
       await showSong(ctx, api, id, backPage, t, false);
     } catch (err) {
@@ -454,10 +560,11 @@ export function createBot(env: Env): Bot {
   // chord:{id}:{page}:{0|1}  — toggle chords by EDITING the current song message
   bot.callbackQuery(/^chord:(\d+):(\d+):(0|1)$/, async (ctx) => {
     await ctx.answerCallbackQuery();
-    const id = parseInt(ctx.match[1], 10);
-    const backPage = parseInt(ctx.match[2], 10);
+    const id = parseBoundedInt(ctx.match[1], MAX_SONG_ID);
+    const backPage = parseBoundedInt(ctx.match[2], MAX_PAGE);
+    if (id === null || id < 1 || backPage === null) return;
     const showChords = ctx.match[3] === '1';
-    const t = getT(await getUserLang(kv, ctx.from?.id));
+    const t = getT(await ensureUserLang(kv, ctx));
     try {
       const song = await api.getSong(id);
       const text = formatSong(song, t, showChords);

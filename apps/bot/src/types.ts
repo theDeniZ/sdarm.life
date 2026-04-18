@@ -7,4 +7,6 @@ export interface Env {
   RATE_KV: KVNamespace;
   /** Base URL of the public API (default: https://api.sdarm.life/api/v1) */
   API_URL: string;
+  /** Per-user requests/minute (default: 20). Set as Worker var to override. */
+  RATE_LIMIT_PER_MIN?: string;
 }
