@@ -23,6 +23,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   const [fontScale, setFontScale] = useState(1);
   const [mounted, setMounted] = useState(false);
   const [display, setDisplay] = useState(isDisplay);
+  const [pendingFullscreen, setPendingFullscreen] = useState(false);
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -48,25 +49,40 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
 
   // BroadcastChannel — keep slide in sync across controller + display windows
   const channelRef = useRef<BroadcastChannel | null>(null);
-  const isRemote = useRef(false);
+  const isSlideRemote = useRef(false);
+  const isFontRemote = useRef(false);
   useEffect(() => {
     const ch = new BroadcastChannel('projector');
     ch.onmessage = (e) => {
       if (e.data.type === 'slide') {
-        isRemote.current = true;
+        isSlideRemote.current = true;
         setIndex(e.data.index);
+      } else if (e.data.type === 'fontScale') {
+        isFontRemote.current = true;
+        setFontScale(e.data.value);
+      } else if (e.data.type === 'requestFullscreen') {
+        setPendingFullscreen(true);
       }
     };
     channelRef.current = ch;
+    // Announce to the presenter that the display window is ready
+    if (isDisplay) ch.postMessage({ type: 'ready' });
     return () => ch.close();
-  }, []);
+  }, [isDisplay]);
   useEffect(() => {
-    if (isRemote.current) {
-      isRemote.current = false;
+    if (isSlideRemote.current) {
+      isSlideRemote.current = false;
       return;
     }
     channelRef.current?.postMessage({ type: 'slide', index });
   }, [index]);
+  useEffect(() => {
+    if (isFontRemote.current) {
+      isFontRemote.current = false;
+      return;
+    }
+    channelRef.current?.postMessage({ type: 'fontScale', value: fontScale });
+  }, [fontScale]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -127,8 +143,23 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
 
   if (!mounted) return null;
 
+  function enterFullscreen() {
+    document.documentElement.requestFullscreen?.().catch(() => {});
+    setPendingFullscreen(false);
+  }
+
   return createPortal(
     <div className="projector">
+      {/* Fullscreen request overlay — requires a user gesture on this window */}
+      {pendingFullscreen && (
+        <button className="projector__fs-overlay" onClick={enterFullscreen} aria-label={t('enterFullscreen')}>
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="32" height="32">
+            <path d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+          <span>{t('enterFullscreen')}</span>
+        </button>
+      )}
+
       {/* Decorative background symbol — position:absolute, pointer-events:none */}
       {bgSymbol && (
         <div
@@ -197,22 +228,24 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
             ›
           </button>
         </div>
-        <div className="projector__controls">
-          <button
-            className="projector__ctrl-btn"
-            onClick={() => setFontScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}
-            title={t('decreaseFont')}
-          >
-            A−
-          </button>
-          <button
-            className="projector__ctrl-btn"
-            onClick={() => setFontScale((s) => Math.min(2, +(s + 0.15).toFixed(2)))}
-            title={t('increaseFont')}
-          >
-            A+
-          </button>
-        </div>
+        {!display && (
+          <div className="projector__controls">
+            <button
+              className="projector__ctrl-btn"
+              onClick={() => setFontScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}
+              title={t('decreaseFont')}
+            >
+              A−
+            </button>
+            <button
+              className="projector__ctrl-btn"
+              onClick={() => setFontScale((s) => Math.min(2, +(s + 0.15).toFixed(2)))}
+              title={t('increaseFont')}
+            >
+              A+
+            </button>
+          </div>
+        )}
       </div>
     </div>,
     document.body

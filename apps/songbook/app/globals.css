@@ -763,6 +763,422 @@ a {
   border-color: var(--gold);
 }
 
+/* ── PRESENTER VIEW ── */
+.presenter {
+  position: fixed;
+  inset: 0;
+  background: #111009;
+  color: #fff;
+  z-index: 10001;
+  display: flex;
+  flex-direction: column;
+  width: 100dvw;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.presenter__header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.08);
+  flex-shrink: 0;
+}
+
+.presenter__logo {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.2);
+  white-space: nowrap;
+}
+
+.presenter__logo-accent {
+  color: var(--gold);
+  font-style: italic;
+}
+
+.presenter__song-info {
+  flex: 1;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 17px;
+  font-weight: 400;
+  color: rgba(255, 255, 255, 0.65);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.presenter__song-num {
+  color: var(--gold);
+  margin-right: 0.3em;
+}
+
+.presenter__header-right {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.presenter__font-scale {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.25);
+  min-width: 36px;
+  text-align: center;
+}
+
+.presenter__ctrl-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(201, 169, 110, 0.2);
+  border-radius: 4px;
+  width: 34px;
+  height: 26px;
+  color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.3s;
+}
+
+.presenter__ctrl-btn:hover {
+  background: rgba(201, 169, 110, 0.1);
+  border-color: var(--gold);
+}
+
+.presenter__ctrl-btn--icon {
+  width: 28px;
+  color: rgba(255, 255, 255, 0.5);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.presenter__ctrl-btn--icon:hover {
+  color: #fff;
+  border-color: rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.presenter__ctrl-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+.presenter__header-divider {
+  width: 1px;
+  height: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  margin: 0 2px;
+}
+
+.presenter__close {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.3);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.15s;
+  margin-left: 6px;
+  line-height: 1;
+}
+
+.presenter__close:hover {
+  color: #fff;
+}
+
+/* Slides two-column layout */
+.presenter__slides {
+  flex: 1;
+  display: flex;
+  gap: 12px;
+  padding: 14px 20px;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.presenter__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+}
+
+.presenter__panel--current {
+  flex: 3;
+}
+
+.presenter__panel--next {
+  flex: 1.6;
+}
+
+.presenter__panel-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.65rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.22);
+  flex-shrink: 0;
+}
+
+.presenter__slide-meta {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: var(--gold);
+  text-align: center;
+  flex-shrink: 0;
+  letter-spacing: 0.05em;
+}
+
+/* Slide preview card */
+.pres-slide {
+  flex: 1;
+  background: #0c0b09;
+  border: 1px solid rgba(201, 169, 110, 0.1);
+  border-radius: 3px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+.pres-slide--current {
+  font-size: clamp(12px, 2vw, 24px);
+  border-color: rgba(201, 169, 110, 0.28);
+}
+
+.pres-slide--next {
+  font-size: clamp(9px, 1.3vw, 16px);
+  opacity: 0.55;
+}
+
+.pres-slide--end {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.18);
+  font-style: italic;
+}
+
+/* Background symbol inside preview */
+.pres-slide__bg {
+  position: absolute;
+  right: 3%;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: 2.6em;
+  line-height: 1;
+  color: rgba(255, 255, 255, 0.07);
+  pointer-events: none;
+  user-select: none;
+  white-space: nowrap;
+  z-index: 0;
+}
+
+.pres-slide__bg--center {
+  right: auto;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-style: normal;
+}
+
+.pres-slide__bg--word {
+  font-size: 1.8em;
+  font-style: normal;
+}
+
+.pres-slide__bg--ref {
+  font-style: italic;
+}
+
+.pres-slide__body {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  padding: 6% 7%;
+  text-align: center;
+}
+
+.pres-slide__title {
+  font-family: 'Lexend', sans-serif;
+  font-size: 1em;
+  font-weight: 500;
+  line-height: 1.3;
+  color: #fff;
+}
+
+.pres-slide__lyrics {
+  font-family: 'Lexend', sans-serif;
+  font-size: 1em;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+/* Chord tokens inside presenter previews — always hide chords */
+.pres-slide .chord-line {
+  justify-content: center;
+}
+
+.pres-slide .chord-token__word,
+.pres-slide .chord-token__word--plain {
+  font-size: 1em;
+  color: #fff;
+  line-height: 1.5;
+  display: block;
+}
+
+.pres-slide .chord-token__chord {
+  display: none;
+}
+
+/* Connecting overlay */
+.presenter__connecting {
+  position: absolute;
+  inset: 0;
+  background: rgba(17, 16, 9, 0.82);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.presenter__connecting-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.presenter__connecting-dots {
+  display: flex;
+  gap: 8px;
+}
+
+.presenter__connecting-dots span {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gold);
+  opacity: 0.3;
+  animation: pres-dot-pulse 1.2s ease-in-out infinite;
+}
+
+.presenter__connecting-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+
+.presenter__connecting-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
+
+@keyframes pres-dot-pulse {
+  0%, 80%, 100% { opacity: 0.15; transform: scale(0.85); }
+  40%            { opacity: 1;    transform: scale(1); }
+}
+
+.presenter__connecting-text {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.35);
+  letter-spacing: 0.04em;
+  margin: 0;
+}
+
+/* Footer navigation */
+.presenter__footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(201, 169, 110, 0.08);
+  flex-shrink: 0;
+}
+
+.presenter__nav-btn {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(201, 169, 110, 0.25);
+  border-radius: 50%;
+  width: 52px;
+  height: 52px;
+  color: var(--gold);
+  font-size: 28px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s, border-color 0.3s;
+  line-height: 1;
+}
+
+.presenter__nav-btn:hover {
+  background: rgba(201, 169, 110, 0.1);
+  border-color: var(--gold);
+}
+
+.presenter__nav-btn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.presenter__counter {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 300;
+  color: rgba(255, 255, 255, 0.3);
+  min-width: 70px;
+  text-align: center;
+}
+
+/* Fullscreen request overlay on the display window */
+.projector__fs-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 20000;
+  background: rgba(12, 11, 9, 0.75);
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  border: none;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.6);
+  animation: fs-overlay-in 0.3s ease;
+}
+
+.projector__fs-overlay:hover {
+  color: #fff;
+}
+
+.projector__fs-overlay span {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+@keyframes fs-overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
 /* ── SHEET VIEWER ── */
 .sheet-viewer__empty {
   font-family: 'Cormorant Garamond', serif;

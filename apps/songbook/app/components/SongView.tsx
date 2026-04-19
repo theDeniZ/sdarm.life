@@ -1,14 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
 import { hasChords } from '@/app/lib/chords';
 import SongReader from './SongReader';
 import Projector from './Projector';
 import SheetViewer from './SheetViewer';
+import PresenterDashboard from './PresenterDashboard';
 
-type Mode = 'reader' | 'fullscreen' | 'sheets';
+type Mode = 'reader' | 'fullscreen' | 'presenter' | 'sheets';
 
 export default function SongView({ song }: { song: SongDto }) {
   const t = useTranslations('songbook.view');
@@ -16,13 +17,14 @@ export default function SongView({ song }: { song: SongDto }) {
   const [mode, setMode] = useState<Mode>('reader');
   const [showChords, setShowChords] = useState(false);
   const [multiScreen, setMultiScreen] = useState(false);
+  const displayWinRef = useRef<Window | null>(null);
   const anyChords = song.parts.some((p) => p.lyrics.split('\n').some(hasChords));
 
   useEffect(() => {
     setMultiScreen(!!(window.screen as Screen & { isExtended?: boolean }).isExtended);
   }, []);
 
-  async function openOnScreen() {
+  async function openPresenter() {
     let features = `width=${screen.availWidth},height=${screen.availHeight},left=${(screen as Screen & { availLeft?: number }).availLeft ?? 0},top=${(screen as Screen & { availTop?: number }).availTop ?? 0}`;
     try {
       type ScreenInfo = {
@@ -42,7 +44,19 @@ export default function SongView({ song }: { song: SongDto }) {
     } catch {
       // fall back to current screen dimensions
     }
-    window.open(`/${locale}/songbooks/${song.songbook.slug}/${song.id}?projector=1`, 'projector-display', features);
+    const win = window.open(
+      `/${locale}/songbooks/${song.songbook.slug}/${song.id}?projector=1`,
+      'projector-display',
+      features
+    );
+    displayWinRef.current = win;
+    setMode('presenter');
+  }
+
+  function closePresenter() {
+    displayWinRef.current?.close();
+    displayWinRef.current = null;
+    setMode('reader');
   }
 
   return (
@@ -69,8 +83,8 @@ export default function SongView({ song }: { song: SongDto }) {
           {t('fullscreen')}
         </button>
         {multiScreen && (
-          <button className="mode-btn" onClick={openOnScreen}>
-            {t('projector')}
+          <button className={`mode-btn${mode === 'presenter' ? ' active' : ''}`} onClick={openPresenter}>
+            {t('presenter')}
           </button>
         )}
         {song.sheets.length > 0 && (
@@ -82,6 +96,7 @@ export default function SongView({ song }: { song: SongDto }) {
 
       {mode === 'reader' && <SongReader parts={song.parts} showChords={showChords} />}
       {mode === 'fullscreen' && <Projector song={song} onClose={() => setMode('reader')} />}
+      {mode === 'presenter' && <PresenterDashboard song={song} onClose={closePresenter} />}
       {mode === 'sheets' && <SheetViewer sheets={song.sheets} />}
     </div>
   );

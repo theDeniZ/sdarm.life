@@ -192,6 +192,7 @@
       "reader": "Reader",
       "chords": "Chords",
       "projector": "Projector",
+      "presenter": "Presenter",
       "fullscreen": "Fullscreen",
       "sheetMusic": "Sheet music"
     },
@@ -209,6 +210,18 @@
       "nextPart": "Next part",
       "decreaseFont": "Decrease font size",
       "increaseFont": "Increase font size"
+    },
+    "presenter": {
+      "close": "Close presenter",
+      "fullscreen": "Fullscreen on display",
+      "currentSlide": "Current slide",
+      "nextSlide": "Next slide",
+      "previous": "Previous",
+      "next": "Next",
+      "decreaseFont": "Decrease font size",
+      "increaseFont": "Increase font size",
+      "titleSlide": "Title",
+      "endOfSong": "End of song"
     },
     "partTypes": {
       "verse": "Verse",

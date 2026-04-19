@@ -191,6 +191,64 @@ Image fields render `<ImagePicker>`. Text-area fields render `<textarea>`. URL a
 
 ---
 
+## `apps/songbook` component map
+
+| Component | Type | Notes |
+|---|---|---|
+| `SongView` | **Client** | Mode switcher rendered on every song detail page. Owns mode state and the display window ref. |
+| `SongReader` | Client | Default reading view — parts list with optional chord display. |
+| `Projector` | **Client** | Full-screen lyric display used in two contexts: inline fullscreen (portal over current window) and display window (`?projector=1`). |
+| `ProjectorOnly` | Client | Thin wrapper rendered when `?projector=1` — passes `isDisplay` to `Projector` and closes the window on exit. |
+| `PresenterDashboard` | **Client** | PowerPoint-style presenter view (portal over current window). Shows current + next slide previews, font controls, and navigation. Controls the display window via `BroadcastChannel`. |
+| `SheetViewer` | Client | Sheet music viewer — thumbnail tabs + full image or PDF display. |
+| `ChordLine` | Client | Renders a single lyric line with optional inline chord annotations (`[G]`, `[C]`, etc.). |
+
+### SongView modes
+
+`SongView` owns a `mode` state of type `'reader' | 'fullscreen' | 'presenter' | 'sheets'`.
+
+| Mode | What renders | How triggered |
+|---|---|---|
+| `reader` | `SongReader` | Default; also returned to on close |
+| `fullscreen` | `Projector` (inline portal, auto-enters fullscreen) | "Fullscreen" button |
+| `presenter` | `PresenterDashboard` (portal) + display window opened | "Presenter" button (only shown when `window.screen.isExtended`) |
+| `sheets` | `SheetViewer` | "Sheet music" button (only shown when `song.sheets.length > 0`) |
+
+Closing presenter also closes the display window via the stored `displayWinRef`.
+
+### Projector / PresenterDashboard — multi-window architecture
+
+```
+Main screen (presenter)              External screen (display window)
+┌─────────────────────┐             ┌──────────────────────┐
+│  PresenterDashboard │             │  Projector           │
+│  (portal overlay)   │             │  (?projector=1)      │
+│                     │──slide─────▶│                      │
+│  [current preview]  │◀─────slide──│  full-screen lyrics  │
+│  [next preview]     │──fontScale─▶│                      │
+│  [⛶] [A−] [A+]     │──fullscreen▶│  [tap to fullscreen] │
+│  [‹] 3/8 [›]        │             │                      │
+└─────────────────────┘             └──────────────────────┘
+         └────────────── BroadcastChannel('projector') ───────────────┘
+```
+
+**BroadcastChannel message types:**
+
+| `type` | Direction | Payload | Effect |
+|---|---|---|---|
+| `ready` | display → presenter | — | Display finished loading; presenter re-pushes current slide + fontScale to sync |
+| `slide` | bidirectional | `{ index: number }` | Navigate both sides to the same slide |
+| `fontScale` | bidirectional | `{ value: number }` | Resize lyrics on the display; reflected in presenter header |
+| `requestFullscreen` | presenter → display | — | Display shows a "tap to enter fullscreen" overlay; click on display triggers `requestFullscreen()` |
+
+**Connecting overlay:** `PresenterDashboard` shows a pulsing dots overlay until the first `ready` message arrives. The fullscreen button is disabled until connected. This covers the ~10 s cold-start time for the display window to load Next.js.
+
+**Fullscreen constraint:** `requestFullscreen()` requires a user gesture in that window. A BroadcastChannel message does not qualify. The display therefore renders a click-to-fullscreen overlay (`projector__fs-overlay`) when it receives `requestFullscreen`; clicking it provides the required gesture.
+
+**Font controls:** In display mode (`isDisplay=true`), the `Projector` A−/A+ buttons are hidden — the presenter dashboard owns font size. Both sides still sync fontScale bidirectionally via the channel.
+
+---
+
 ## `@sdarm/ui` shared components
 
 All public-facing apps (`web`, `songbook`, `treasures`, `events`) import from `@sdarm/ui`. **Check here before building something from scratch** — the hero, footer, nav, and quote band are already done.

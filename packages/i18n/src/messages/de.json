@@ -192,6 +192,7 @@
       "reader": "Leser",
       "chords": "Akkorde",
       "projector": "Projektor",
+      "presenter": "Präsentator",
       "fullscreen": "Vollbild",
       "sheetMusic": "Noten"
     },
@@ -209,6 +210,18 @@
       "nextPart": "Nächster Teil",
       "decreaseFont": "Schriftgröße verkleinern",
       "increaseFont": "Schriftgröße vergrößern"
+    },
+    "presenter": {
+      "close": "Präsentation schließen",
+      "fullscreen": "Vollbild auf Display",
+      "currentSlide": "Aktuelle Folie",
+      "nextSlide": "Nächste Folie",
+      "previous": "Zurück",
+      "next": "Weiter",
+      "decreaseFont": "Schriftgröße verkleinern",
+      "increaseFont": "Schriftgröße vergrößern",
+      "titleSlide": "Titel",
+      "endOfSong": "Lied beendet"
     },
     "partTypes": {
       "verse": "Strophe",
