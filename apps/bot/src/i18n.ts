@@ -19,15 +19,9 @@ export interface Strings {
   btn_settings: string;
   btn_contact_link: string;
   btn_back_menu: string;
-  btn_back_list: string;
-  btn_switch: string;
   btn_resume: (title: string) => string;
-  btn_show_chords: string;
-  btn_hide_chords: string;
   btn_search_global: string;
   btn_retry: string;
-  btn_open_song: string;
-  btn_open_website: string;
   btn_mute_notifications: string;
   btn_unmute_notifications: string;
 
@@ -82,16 +76,10 @@ export const STR: Strings = {
   btn_about: 'About',
   btn_settings: 'Settings',
   btn_contact_link: 'Contact',
-  btn_back_menu: '‹ Menu',
-  btn_back_list: '‹ Back to list',
-  btn_switch: 'Songbooks',
+  btn_back_menu: '↑',
   btn_resume: (title) => `Resume · ${title}`,
-  btn_show_chords: 'Show chords',
-  btn_hide_chords: 'Hide chords',
   btn_search_global: 'Search all collections',
   btn_retry: 'Try again',
-  btn_open_song: 'Open',
-  btn_open_website: 'Open on website',
   btn_mute_notifications: 'Stop notifications',
   btn_unmute_notifications: 'Enable notifications',
 

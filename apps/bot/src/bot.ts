@@ -107,19 +107,22 @@ function songKeyboard(
   hasChords: boolean,
   songUrl: string | null,
 ): InlineKeyboard {
+  // Single icon row beneath the song.
+  // With chords:    [ ◇/◆ ] [ ‹ ] [ ↑ ] [ □ ]
+  // Without chords:         [ ‹ ] [ ↑ ] [ □ ]
+  //   ◇ → tap turns chords on, becomes ◆ (filled = currently shown)
+  //   ‹ → back to song list of this songbook
+  //   ↑ → up to the songbook list
+  //   □ → open the song full-screen as a Telegram Mini App
   const kb = new InlineKeyboard();
 
   if (hasChords) {
     const next = showChords ? 0 : 1;
-    kb.text(showChords ? STR.btn_hide_chords : STR.btn_show_chords, `chord:${songId}:${page}:${next}`).row();
+    kb.text(showChords ? '◆' : '◇', `chord:${songId}:${page}:${next}`);
   }
-
-  // Two-up nav: back to list + jump to songbooks (Menu reachable via Songbooks → ‹ Menu)
-  kb.text(STR.btn_back_list, `sb:${songbookSlug}:${page}`).text(STR.btn_switch, 'sb_list').row();
-
-  // Open the song as a Telegram Mini App (full-screen, themed, no browser switch).
-  // Bot domain must be registered in @BotFather → Mini App settings → Domain.
-  if (songUrl) kb.webApp(STR.btn_open_website, songUrl);
+  kb.text('‹', `sb:${songbookSlug}:${page}`);
+  kb.text('↑', 'sb_list');
+  if (songUrl) kb.webApp('□', songUrl);
 
   return kb;
 }
@@ -314,7 +317,7 @@ async function showNumericSearchInBook(
   const kb = new InlineKeyboard();
   for (const s of items) kb.text(`№${s.number} · ${s.title}`, `song:${s.id}:0`).row();
   kb.text(STR.btn_search_global, `gs:${cbId}`).row();
-  kb.text(STR.btn_back_list, `sb:${slug}:0`).text(STR.btn_back_menu, 'main_menu');
+  kb.text('‹', `sb:${slug}:0`).text(STR.btn_back_menu, 'main_menu');
 
   await ctx.reply(formatInBookSearchResults(items, number, bookTitle, total, STR), {
     parse_mode: 'MarkdownV2',

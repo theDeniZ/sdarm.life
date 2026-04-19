@@ -78,10 +78,8 @@ async function broadcastSong(
 ): Promise<void> {
   const text = formatNewSongMessage(song);
   const songUrl = `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}?embed=1`;
-  const kb = new InlineKeyboard()
-    .webApp(STR.btn_open_song, songUrl)
-    .row()
-    .text(STR.btn_mute_notifications, 'notify_mute');
+  // [ □ ] open as Mini App   [ − ] mute future notifications
+  const kb = new InlineKeyboard().webApp('□', songUrl).text('−', 'notify_mute');
 
   for (const chatId of subscribers) {
     try {
