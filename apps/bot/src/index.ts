@@ -24,7 +24,6 @@ import { createBot } from './bot';
 import { createApiClient } from './api';
 import { runNotifyCron } from './notify';
 import { logError } from './logger';
-import { handleAdmin } from './admin';
 import type { Env } from './types';
 
 function logFatal(context: string, message: string): void {
@@ -32,7 +31,7 @@ function logFatal(context: string, message: string): void {
 }
 
 export default {
-  async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+  async fetch(request: Request, env: Env): Promise<Response> {
     if (!env.BOT_TOKEN) {
       logFatal('worker.fetch', 'BOT_TOKEN is not set');
       return new Response('Service Unavailable', { status: 503 });
@@ -41,10 +40,6 @@ export default {
       logFatal('worker.fetch', 'BOT_SECRET is not set');
       return new Response('Service Unavailable', { status: 503 });
     }
-
-    // /admin/* — bearer-auth HTTP surface for status / force-notify.
-    const adminResponse = await handleAdmin(request, env, ctx);
-    if (adminResponse) return adminResponse;
 
     if (request.method !== 'POST') {
       return new Response('Method Not Allowed', { status: 405 });
