@@ -18,6 +18,21 @@ import { purgeCache } from '../../middleware/cache';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
 
+/**
+ * Cached endpoints that become stale whenever a song is created, updated,
+ * or deleted. Keep this list in sync with the cache TTLs in src/index.ts.
+ * The song's own `/songs/:id` entry is purged separately where relevant.
+ */
+function songMutationPurgePaths(songbookSlug: string): string[] {
+  return [
+    '/api/v1/songbooks',                              // list with songCount
+    `/api/v1/songbooks/${songbookSlug}`,              // detail with songCount
+    `/api/v1/songbooks/${songbookSlug}/songs`,        // paginated song list
+    '/api/v1/songs/recent',                            // bot-cron notify feed
+    '/api/v1/songs/search',                            // global search index
+  ];
+}
+
 // ── Songbooks ─────────────────────────────────────────────────────────────────
 
 const SongbookBody = z.object({
@@ -148,7 +163,7 @@ router.openapi(
     const song = await repo.createSong(db, c.req.valid('json'));
     const full = (await repo.getSongById(db, song.id))!;
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, [`/api/v1/songbooks/${full.songbook.slug}/songs`], c.env);
+    purgeCache(c.executionCtx, origin, songMutationPurgePaths(full.songbook.slug), c.env);
     return c.json(full, 201);
   },
 );
@@ -176,7 +191,7 @@ router.openapi(
     const origin = new URL(c.req.url).origin;
     purgeCache(c.executionCtx, origin, [
       `/api/v1/songs/${full.id}`,
-      `/api/v1/songbooks/${full.songbook.slug}/songs`,
+      ...songMutationPurgePaths(full.songbook.slug),
     ], c.env);
     return c.json(full, 200);
   },
@@ -201,7 +216,7 @@ router.openapi(
     await Promise.all(sheetKeys.map((key) => c.env.IMAGES.delete(key)));
     const origin = new URL(c.req.url).origin;
     const paths = [`/api/v1/songs/${id}`];
-    if (song) paths.push(`/api/v1/songbooks/${song.songbook.slug}/songs`);
+    if (song) paths.push(...songMutationPurgePaths(song.songbook.slug));
     purgeCache(c.executionCtx, origin, paths, c.env);
     return c.json({ ok: true as const }, 200);
   },
@@ -237,7 +252,7 @@ router.openapi(
     const song = await repo.getSongById(db, songId);
     if (song) {
       const origin = new URL(c.req.url).origin;
-      purgeCache(c.executionCtx, origin, [`/api/v1/songs/${songId}`], c.env);
+      purgeCache(c.executionCtx, origin, [`/api/v1/songs/${songId}`, '/api/v1/songs/search'], c.env);
     }
     return c.json(part, 201);
   },
@@ -263,7 +278,12 @@ router.openapi(
     const part = await repo.updateSongPart(db, c.req.valid('param').partId, c.req.valid('json'));
     if (!part) return c.json({ error: 'Not found' }, 404);
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`], c.env);
+    purgeCache(
+      c.executionCtx,
+      origin,
+      [`/api/v1/songs/${c.req.valid('param').id}`, '/api/v1/songs/search'],
+      c.env,
+    );
     return c.json(part, 200);
   },
 );
@@ -283,7 +303,12 @@ router.openapi(
     const db = drizzle(c.env.DB);
     await repo.deleteSongPart(db, c.req.valid('param').partId);
     const origin = new URL(c.req.url).origin;
-    purgeCache(c.executionCtx, origin, [`/api/v1/songs/${c.req.valid('param').id}`], c.env);
+    purgeCache(
+      c.executionCtx,
+      origin,
+      [`/api/v1/songs/${c.req.valid('param').id}`, '/api/v1/songs/search'],
+      c.env,
+    );
     return c.json({ ok: true as const }, 200);
   },
 );

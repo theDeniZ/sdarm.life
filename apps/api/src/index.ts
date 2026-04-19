@@ -19,6 +19,7 @@ import adminSongbooksRouter from './routes/admin/songbooks';
 import adminTreasuresRouter from './routes/admin/treasures';
 import adminApiKeysRouter from './routes/admin/api-keys';
 import adminEmailRouter from './routes/admin/email';
+import adminCacheRouter from './routes/admin/cache';
 import treasuresRouter from './routes/treasures';
 import bookRequestRouter from './routes/book-request';
 
@@ -55,8 +56,11 @@ v1.route('/config', configRouter); // No cache — handled by KV
 v1.route('/images', imagesRouter);
 v1.route('', subscribersRouter); // /subscribe + /unsubscribe
 
-v1.use('/songbooks', cached(3600)); // 1 hour — songbook list
-v1.use('/songbooks/*', cached(3600)); // 1 hour — songbook detail + songs
+// 5 min TTL — songbook/song lists change whenever the admin adds a song.
+// Admin mutations fire purgeCache() for the exact paths, but query-string
+// variants (different pagination) still need the short TTL fallback.
+v1.use('/songbooks', cached(300));
+v1.use('/songbooks/*', cached(300));
 v1.route('/songbooks', songbooksRouter);
 
 v1.use('/songs/search', cached(300)); // 5 min — search results vary by query, shorter TTL
@@ -83,6 +87,7 @@ admin.route('/subscribers', adminSubscribersRouter);
 admin.route('', adminSongbooksRouter);
 admin.route('', adminTreasuresRouter);
 admin.route('', adminEmailRouter);
+admin.route('/cache', adminCacheRouter);
 
 v1.route('/admin', admin);
 app.route('/api/v1', v1);
