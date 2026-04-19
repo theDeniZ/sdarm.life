@@ -18,7 +18,7 @@ const args = process.argv.slice(2);
 const apiUrl = args[args.indexOf('--api-url') + 1] ?? 'http://localhost:8787/api/v1';
 const apiKey = args[args.indexOf('--api-key') + 1] ?? 'dev';
 
-const raw = JSON.parse(readFileSync(join(__dirname, 'epub-meta.json'), 'utf8'));
+const raw = JSON.parse(readFileSync(join(__dirname, 'de-books.json'), 'utf8'));
 
 const valid = raw.filter((entry) => !entry.error && entry.title && entry.language);
 

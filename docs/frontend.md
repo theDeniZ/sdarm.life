@@ -8,15 +8,19 @@
 | `[locale]/layout.tsx` | Server (async) | Locale layout — validates locale, wraps in `<NextIntlClientProvider>`, renders `<html lang={locale}><body>` |
 | `[locale]/page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
 | `[locale]/posts/[slug]/page.tsx` | Server (async) | Post detail page |
-| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN). |
-| `HeroSection` | **Client** | Featured-posts strip carousel with per-slide color tints, fog animation, deco-circle, side label counter |
-| `NewsSection` | **Client** | CSS-columns masonry grid with `IntersectionObserver` stagger fade-in |
+| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and secret 5-click logo theme toggle. |
+| `HeroSection` | **Client** | Featured-posts strip carousel with per-slide color tints, fog animation, deco-circle, side label counter. Includes "Receive a gift" button that opens `BookRequestModal`. |
+| `NewsSection` | **Client** | Static illustrated masonry grid — live news posts + static faith/event cards. Wired to API for news and latest video post. |
 | `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
-| `Footer` | **Client** (`@sdarm/ui`) | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, sunset clock. Uses `useTranslations('common.footer')`. Accepts `apiUrl` prop (passed from server via `process.env.API_URL`). |
+| `ScriptureVerseSection` | **Client** | Daily rotating Scripture verse with `QuoteShareModal`. Verse rotated hourly from `lib/verses.ts` (DE + EN). |
+| `GlaubensLongRead` | **Client** | 25 SDA Reform faith articles with accordion and hanging number layout. Detail content from sta-ref.de. |
+| `GlaubensReader` | **Client** | EpubReader-style layout (toolbar + sidebar + content) for the GlaubensGrid — used on the About page. |
+| `QuoteShareModal` | **Client** | Canvas-rendered verse share images. Themes: dark/light/paper. Formats: landscape (16:9), square (1:1), portrait (4:5). |
+| `Footer` | **Client** (`@sdarm/ui`) | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, location-aware sunset clock. Uses `useTranslations('common.footer')`. |
 
 **Not rendered on home page** (files kept for future use): `VideoSection`, `SongbookSection`, `AboutSection`, `BgCanvas`.
 
-`page.tsx` fetches in parallel: featured posts, 8 news posts, config — `cache: 'no-store'`. All return `null` on error → components fall back to static data silently.
+`page.tsx` fetches in parallel: featured posts, news posts, latest video post, config — `cache: 'no-store'`. All return `null` on error → components fall back to static data silently.
 
 Data mappers: `toHeroPost`, `toNewsPost`, `toFooterConfig`.
 
@@ -83,11 +87,12 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 3. **Sunset clock** — SVG arc ring + countdown label
 
 **Sunset clock logic:**
-- On mount, fetches today + tomorrow sunrise/sunset from `https://api.sunrisesunset.io/json?lat=48.8922&lng=8.6944&timezone=Europe/Berlin`
+- On mount, fetches today + tomorrow sunrise/sunset from `https://api.sunrisesunset.io/json?lat=…&lng=…&timezone=…`
+- Location resolved via Nominatim (`nominatim.openstreetmap.org`) from a user-entered postal code (worldwide, not DE-only). Last chosen location persisted to `localStorage`.
+- Timezone determined dynamically via `Intl.DateTimeFormat().resolvedOptions().timeZone` (browser timezone, not hardcoded `Europe/Berlin`).
 - Parses `"HH:MM AM/PM"` strings → milliseconds since midnight
 - Updates every 15 s via `setInterval`; SVG ring transition is `1s linear`
 - SVG ring: `r=76`, `CIRC ≈ 477.52px`, `strokeDashoffset = CIRC * (1 - progress)`
-- Location hardcoded: Pforzheim, Baden-Württemberg (no `site_config` key)
 
 **4 Sabbath-aware states** (determined by `new Date().getDay()` + time of day):
 
@@ -102,11 +107,36 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 
 **Fallback:** API fetch failure is silently swallowed; clock stays at `'–:––'` / `'…'` placeholder.
 
+### ThemeProvider
+
+`ThemeProvider` (from `@sdarm/ui`) is a `'use client'` component that manages the light/dark theme toggle. Place it once in `[locale]/layout.tsx`, rendered before `{children}`.
+
+- On mount: reads `localStorage` key `sdarm-theme` and applies `data-theme` attribute to `<html>`.
+- Listens for custom event `sdarm:toggle-theme` (dispatched by Navbar's secret 5-click logo) and toggles between `dark` and `light`.
+- Light theme overrides are defined in `packages/ui/src/styles/tokens.css` via `[data-theme="light"]` selector.
+
+```tsx
+// [locale]/layout.tsx
+import { ThemeProvider } from '@sdarm/ui';
+// ...
+<body>
+  <ThemeProvider />
+  {children}
+</body>
+```
+
+### SEO and structured data (`apps/web`)
+
+- **`app/sitemap.ts`** — dynamic `sitemap.xml` generated at request time. Fetches all published post slugs from the API and produces `sitemap` entries for both `de` and `en` locales.
+- **`app/robots.ts`** — `robots.txt` that allows all crawlers and points to the sitemap.
+- **`[locale]/layout.tsx`** — injects `Organization` and `WebSite` JSON-LD structured data via `<script type="application/ld+json">`.
+- **Page-level metadata** — home, about, and post pages export `generateMetadata()` with `openGraph` image/title/description and `alternates.canonical` + `alternates.languages` (hreflang).
+
 ### Layout notes
 
 - Never add `export const runtime = 'edge'` to `layout.tsx` — set it only on individual page files.
 - Root `layout.tsx` is minimal: imports CSS, returns `{children}`. No `<html>` or `<body>` tags — those are in the `[locale]/layout.tsx`.
-- `[locale]/layout.tsx` validates the locale, calls `setRequestLocale()`, wraps children in `<NextIntlClientProvider messages={messages}>`, and renders `<html lang={locale}><body>`.
+- `[locale]/layout.tsx` validates the locale, calls `setRequestLocale()`, wraps children in `<NextIntlClientProvider messages={messages}>`, renders `<ThemeProvider />`, then `<html lang={locale}><body>`.
 - All page files under `[locale]/` receive `params: Promise<{ locale: string }>` and call `setRequestLocale(locale)` at the top. Server components use `getTranslations()`, client components use `useTranslations()`.
 
 ---
@@ -175,6 +205,7 @@ import '@sdarm/ui/src/styles/index.css';
 
 | Component | Import | Notes |
 |---|---|---|
+| `ThemeProvider` | `@sdarm/ui` | Client component. Place once in `[locale]/layout.tsx`. Reads/writes `localStorage` and sets `data-theme` on `<html>`. No visible output. |
 | `ConnectedNavbar` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads nav translations internally. Use in every locale layout. |
 | `ConnectedFooter` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads footer translations + `apiUrl` from env internally. Use in every locale layout. |
 | `PageHero` | `@sdarm/ui` | Full-bleed dark landing hero. Pass `title` (ReactNode), `eyebrow?`, `subtitle?`, `decoration?` (SVG), `scrollHint?`. Already has grain, fog, deco-circle, entrance animations — **do not re-implement these**. |

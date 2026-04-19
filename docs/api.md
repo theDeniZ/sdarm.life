@@ -24,6 +24,7 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays. 404 if not found. |
 | `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |
+| `POST` | `/api/v1/book-request` | Submit a free-book delivery request. Body: `{ name, email, phone?, land (DE/AT/CH), street, plz, city, books[] (min 1), wish?, language? }`. Sends a formatted email to `info@sdarm.life` via Resend (background, non-blocking). Rate-limited: 2 requests per IP per minute. Returns `{ ok: true }` (201). |
 
 ## Admin routes
 
@@ -68,6 +69,17 @@ Require `Authorization: Bearer <key>` on every request.
 **Image usage** — `GET /admin/images` cross-references `posts` (`cover_key`, `thumb_key`) and `site_config` to compute `usedIn` per image. Each item: `{ key, size, uploaded, usedIn: { type, label }[] }`. `?unused=1` filters to images not referenced in either table.
 
 **CORS origins:** `https://sdarm.life`, `https://admin.sdarm.life`, `http://localhost:3000`, `http://localhost:3001`
+
+## Rate limiting
+
+IP-based rate limiting is applied on mutation endpoints to prevent spam. Implemented in `middleware/rate-limit.ts` — KV-backed, uses `CF-Connecting-IP` as the key, 1-minute sliding window.
+
+| Endpoint | Limit |
+|---|---|
+| `POST /subscribe` | 3 requests / IP / minute |
+| `POST /book-request` | 2 requests / IP / minute |
+
+Returns `429` with `{ error: "Too many requests. Please try again later." }` when the limit is exceeded. KV read/write failures fail open (request is allowed through) to avoid breaking the endpoint.
 
 ## Auth model
 

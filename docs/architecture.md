@@ -162,6 +162,7 @@ packages/ui/src/
     Footer.tsx           — 3-col: contact+subscribe, nav links, sunset clock
     PageHero.tsx         — full-bleed landing hero: grain, glow, fog, deco-circle, decoration slot, scroll hint
     ScriptureVerseSection.tsx — centered quote band: large italic text + reference tag
+    ThemeProvider.tsx    — client component; reads/writes localStorage, sets data-theme on <html>
     ComingSoon.tsx       — placeholder section for unreleased pages
     Pagination.tsx       — generic offset pagination (styling left to consumer)
   styles/
