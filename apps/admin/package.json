@@ -12,6 +12,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.2.11",
+    "@fontsource/dm-serif-display": "^5.2.8",
+    "@fontsource/lexend": "^5.2.11",
+    "@fontsource/oswald": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
+    "@fontsource/raleway": "^5.2.8",
     "@sdarm/db": "workspace:*",
     "@sdarm/types": "workspace:*",
     "@sdarm/ui": "workspace:*",

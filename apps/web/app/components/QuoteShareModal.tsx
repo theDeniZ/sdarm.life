@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useCallback, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 type Fmt = 'story' | 'post' | 'wide';
 type ThemeId = 'dark' | 'vanilla' | 'sand' | 'mahog';
@@ -259,6 +260,7 @@ export default function QuoteShareModal({ open, text, ref_, onClose }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [fmt, setFmt] = useState<Fmt>('story');
   const [theme, setTheme] = useState<ThemeId>('dark');
+  const t = useTranslations('web.releases.quote');
 
   const render = useCallback(() => {
     if (canvasRef.current) renderCanvas(canvasRef.current, text, ref_, fmt, theme);
@@ -306,7 +308,7 @@ export default function QuoteShareModal({ open, text, ref_, onClose }: Props) {
       aria-modal="true"
     >
       <div className="qsm-panel">
-        <button className="qsm-close" onClick={onClose} aria-label="Schließen" />
+        <button className="qsm-close" onClick={onClose} aria-label={t('close')} />
 
         <div className="qsm-preview-wrap" data-preview-theme={theme}>
           <canvas ref={canvasRef} className="qsm-canvas" />

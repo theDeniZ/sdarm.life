@@ -33,6 +33,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'monthly' as const,
       priority: 0.8,
     })),
+    ...LOCALES.map((l) => ({
+      url: `${BASE}/${l}/kontakt`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
+    })),
     ...LOCALES.map((l) => ({ url: `${BASE}/${l}/impressum`, changeFrequency: 'yearly' as const, priority: 0.2 })),
     ...LOCALES.map((l) => ({ url: `${BASE}/${l}/datenschutz`, changeFrequency: 'yearly' as const, priority: 0.2 })),
   ];

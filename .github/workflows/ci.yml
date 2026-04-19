@@ -6,6 +6,44 @@ on:
     branches: [main, develop]
 
 jobs:
+  validate-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Check commit count
+        run: |
+          # Count commits in this PR (commits in head that are not in base)
+          COMMIT_COUNT=$(git rev-list --count ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
+          echo "Found $COMMIT_COUNT commit(s) in PR"
+          if [ $COMMIT_COUNT -ne 1 ]; then
+            echo "❌ Error: PR must contain exactly 1 commit, found $COMMIT_COUNT"
+            exit 1
+          fi
+      - name: Check conventional commit format
+        run: |
+          # Get the commit message
+          COMMIT_MSG=$(git log -1 --pretty=%B ${{ github.event.pull_request.head.sha }})
+          echo "Validating commit message:"
+          echo "$COMMIT_MSG"
+
+          # Conventional commit pattern: type(scope)?: message
+          # where type is one of: feat, fix, docs, style, refactor, perf, test, chore, ci, build, revert
+          if ! echo "$COMMIT_MSG" | grep -qE '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build|revert)(\(.+\))?!?: .{1,}'; then
+            echo "❌ Error: Commit message does not follow conventional commit format"
+            echo ""
+            echo "Expected format: <type>(<scope>)?: <message>"
+            echo "Examples:"
+            echo "  feat: add dark mode support"
+            echo "  feat(api): add new endpoint"
+            echo "  fix(ui): resolve button alignment"
+            echo "  docs: update README"
+            exit 1
+          fi
+          echo "✅ Commit format is valid"
+
   lint:
     runs-on: ubuntu-latest
     steps:

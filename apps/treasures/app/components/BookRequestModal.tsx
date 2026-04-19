@@ -122,7 +122,7 @@ export default function BookRequestModal({ open, onClose, apiUrl }: Props) {
   return (
     <div className="br-overlay" onClick={handleOverlayClick}>
       <div className="br-modal" ref={modalRef}>
-        <button className="br-close" onClick={handleClose} aria-label="Schließen">
+        <button className="br-close" onClick={handleClose} aria-label={t('closeAria')}>
           ✕
         </button>
 

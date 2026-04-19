@@ -1,5 +1,9 @@
 # sdarm.life — Claude Context
 
+⚠️ **CRITICAL RULE:** All Claude documentation files, comments, and content must be written in **English only**. No exceptions. German, French, or any other language is forbidden in these files. (The user-facing web content in `apps/` uses `de` and `en` — this rule applies to dev context only.)
+
+---
+
 Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Cloudflare.
 
 ## Apps
@@ -11,6 +15,7 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | `@sdarm/api` | `api.sdarm.life` | Hono Cloudflare Worker |
 | `@sdarm/events` | `events.sdarm.life` | Next.js 15 events landing page |
 | `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 15 analog treasures site |
+| `@sdarm/songbook` | `songs.sdarm.life` | Next.js 15 songbook site |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
 | `@sdarm/types` | — | Shared API response DTO interfaces |
 | `@sdarm/ui` | — | Shared React components + dark museum CSS design system |
@@ -30,8 +35,9 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | Pages (admin) | `sdarm-admin` |
 | Pages (events) | `sdarm-events` |
 | Pages (treasures) | `sdarm-treasures` |
+| Pages (songbook) | `sdarm-songbook` |
 
-Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV namespace), `CF_CLIENT_ID` (secret), `CF_CLIENT_SECRET` (secret).
+Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV namespace). Secrets: `API_KEY`, `RESEND_API_KEY`, `CF_ZONE_ID?`, `CF_PURGE_TOKEN?`.
 
 ## Domain routing
 
@@ -43,6 +49,9 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 | `images.sdarm.life` | R2 public bucket | Public |
 | `events.sdarm.life` | `apps/events` | Public |
 | `treasures.sdarm.life` | `apps/treasures` | Public |
+| `songs.sdarm.life` | `apps/songbook` | Public |
+
+⚠️ **READ FIRST:** @docs/gitflow.md
 
 @docs/schema.md
 @docs/api.md
@@ -50,6 +59,7 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 @docs/architecture.md
 @docs/conventions.md
 @docs/gotchas.md
+@docs/dsgvo.md
 
 ## Agent patterns
 

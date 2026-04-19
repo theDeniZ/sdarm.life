@@ -1,26 +1,47 @@
 export const runtime = 'edge';
 
 import Link from 'next/link';
-import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
-import { useTranslations, useLocale } from 'next-intl';
+import { getLocale, getTranslations } from 'next-intl/server';
+import { ConnectedFooter } from '@sdarm/ui';
 
-export default function NotFound() {
-  const t = useTranslations('common.notFound');
-  const locale = useLocale();
+export default async function NotFound() {
+  // not-found is rendered at the [locale] boundary, so getLocale() resolves
+  // to the active request locale; defaulted to 'de' if the request is outside
+  // an active locale segment.
+  let locale = 'de';
+  try {
+    locale = await getLocale();
+  } catch {
+    // keep default
+  }
+  const t = await getTranslations({ locale, namespace: 'common.notFound' });
+  const eyebrow = t('eyebrow');
+  const eyebrowText = eyebrow.startsWith('404') ? eyebrow.replace(/^404\s*[·•]\s*/, '') : eyebrow;
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
-      <ConnectedNavbar />
-      <div className="page" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <section style={{ textAlign: 'center', padding: '2rem' }}>
-          <h1 style={{ fontSize: '4rem', margin: '0 0 1rem 0', color: '#c0392b' }}>404</h1>
-          <h2 style={{ fontSize: '2rem', margin: '0 0 1rem 0', color: '#1a1a1a' }}>{t('title')}</h2>
-          <p style={{ fontSize: '1.1rem', color: '#555', margin: '1rem 0 2rem 0' }}>{t('description')}</p>
-          <Link href={`/${locale}`} className="btn-donate" style={{ marginTop: '1rem' }}>
-            {t('home')}
-          </Link>
-        </section>
-      </div>
-      <ConnectedFooter />
-    </div>
+    <>
+      <main className="nf-page">
+        <div className="nf-container">
+          <div className="nf-number" aria-hidden="true">
+            404
+          </div>
+          <p className="nf-eyebrow">{eyebrowText}</p>
+          <h1 className="nf-title">{t.rich('title', { em: (chunks) => <em>{chunks}</em> })}</h1>
+
+          <blockquote className="nf-verse">
+            <p>«&nbsp;{t('verseText')}&nbsp;»</p>
+            <cite>— {t('verseRef')}</cite>
+          </blockquote>
+
+          <p className="nf-back-prompt">{t('backPrompt')}</p>
+          <nav className="nf-links">
+            <Link href={`/${locale}`}>{t('homeLink')}</Link>
+            <Link href={`/${locale}/about`}>{t('aboutLink')}</Link>
+            <Link href={`/${locale}/kontakt`}>{t('kontaktLink')}</Link>
+          </nav>
+        </div>
+      </main>
+      <ConnectedFooter locale={locale} />
+    </>
   );
 }

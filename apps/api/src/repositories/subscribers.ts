@@ -1,11 +1,13 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { subscribers } from '@sdarm/db';
-import { desc, count, eq } from 'drizzle-orm';
+import { desc, count, eq, isNotNull } from 'drizzle-orm';
 
 type DB = ReturnType<typeof drizzle>;
 
-export async function listAllSubscribers(db: DB) {
-	return db.select().from(subscribers).orderBy(desc(subscribers.createdAt));
+export async function listAllConfirmedSubscribers(db: DB) {
+	return db.select().from(subscribers)
+		.where(isNotNull(subscribers.confirmedAt))
+		.orderBy(desc(subscribers.createdAt));
 }
 
 export async function listSubscribers(db: DB, opts: { limit?: number; offset?: number }) {
@@ -19,6 +21,25 @@ export async function listSubscribers(db: DB, opts: { limit?: number; offset?: n
 
 export async function createSubscriber(db: DB, email: string, token: string, language: string) {
 	await db.insert(subscribers).values({ email, token, language });
+}
+
+/**
+ * Marks a subscriber as confirmed by their DOI token. Idempotent.
+ * Returns 'confirmed' on first successful confirmation (caller should send the welcome email),
+ * 'already' if the token was already confirmed, or 'invalid' if no such token exists.
+ */
+export async function confirmSubscriber(db: DB, token: string): Promise<
+	| { status: 'confirmed'; sub: { email: string; language: string; token: string } }
+	| { status: 'already'; sub: { email: string; language: string; token: string } }
+	| { status: 'invalid' }
+> {
+	const [sub] = await db.select().from(subscribers).where(eq(subscribers.token, token)).limit(1);
+	if (!sub) return { status: 'invalid' };
+	if (sub.confirmedAt) return { status: 'already', sub };
+	await db.update(subscribers)
+		.set({ confirmedAt: new Date() })
+		.where(eq(subscribers.token, token));
+	return { status: 'confirmed', sub };
 }
 
 export async function unsubscribeByToken(db: DB, token: string) {

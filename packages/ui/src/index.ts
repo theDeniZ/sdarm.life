@@ -10,3 +10,6 @@ export { default as PageHero } from './components/PageHero';
 export type { PageHeroProps } from './components/PageHero';
 export { default as ScriptureVerseSection } from './components/ScriptureVerseSection';
 export type { ScriptureVerseSectionProps } from './components/ScriptureVerseSection';
+export { default as CommunityMap } from './components/CommunityMap';
+export type { Location, CountryCode } from './data/locations';
+export { LOCATIONS, COUNTRY_NAMES, locationsByCountry, googleMapsUrl } from './data/locations';

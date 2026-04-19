@@ -25,6 +25,7 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |
 | `POST` | `/api/v1/book-request` | Submit a free-book delivery request. Body: `{ name, email, phone?, land (DE/AT/CH), street, plz, city, books[] (min 1), wish?, language? }`. Sends a formatted email to `info@sdarm.life` via Resend (background, non-blocking). Rate-limited: 2 requests per IP per minute. Returns `{ ok: true }` (201). |
+| `GET` | `/api/v1/geocode` | Geocode proxy. `?q=` (1–100 chars, required), `?limit=N` (1–10, default 3). Forwards to Nominatim with the project User-Agent and caches the upstream JSON in KV for 30 days. Hides the user's IP from OpenStreetMap (DSGVO). Response: `X-Cache: HIT|MISS`; upstream errors return `[]` to keep the autocomplete resilient. |
 
 ## Admin routes
 
@@ -97,7 +98,7 @@ Admin routes require `Authorization: Bearer <key>` on every request.
 
 **Key management:** `GET/POST/DELETE /api/v1/admin/api-keys` — list, create (returns plaintext once), revoke. These routes are mounted outside the OpenAPI spec (no Swagger docs).
 
-**Bootstrap:** `API_KEY` Worker secret + `NEXT_PUBLIC_API_KEY` admin Pages env var. Synced via `sync-secrets` CI job. Local dev: both set to `dev` in `apps/api/.dev.vars` and `apps/admin/.env.local`.
+**Bootstrap:** `API_KEY` Worker secret + `API_KEY` admin Pages env var (server-only, same value). Synced via `sync-secrets` CI job. Local dev: both set to `dev` in `apps/api/.dev.vars` and `apps/admin/.env.local`. The admin browser bundle never sees `API_KEY` — calls go same-origin to `admin.sdarm.life/api/v1/*` and the [proxy route handler](../apps/admin/app/api/v1/%5B...path%5D/route.ts) attaches the bearer server-side.
 
 ## Response contract
 

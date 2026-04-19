@@ -2,7 +2,7 @@ import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../../types';
 import { ErrorSchema, OkSchema } from '../../schemas';
-import { listAllSubscribers } from '../../repositories/subscribers';
+import { listAllConfirmedSubscribers } from '../../repositories/subscribers';
 import { updatesEmail } from '../../emails/updates';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -81,7 +81,7 @@ router.openapi(
 		const db = drizzle(c.env.DB);
 		const apiBase = new URL(c.req.url).origin;
 
-		const all = await listAllSubscribers(db);
+		const all = await listAllConfirmedSubscribers(db);
 		const targets = locale ? all.filter((s) => s.language === locale) : all;
 
 		if (targets.length === 0) return c.json({ sent: 0 }, 200);
