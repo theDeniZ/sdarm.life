@@ -11,3 +11,4 @@ dist
 .DS_Store
 **/.obsidian
 _tests
+.claude/scheduled_tasks.lock
