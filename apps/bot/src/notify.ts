@@ -77,7 +77,7 @@ async function broadcastSong(
   webUrl: string,
 ): Promise<void> {
   const text = formatNewSongMessage(song);
-  const songUrl = `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}`;
+  const songUrl = `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}?embed=1`;
   const kb = new InlineKeyboard()
     .webApp(STR.btn_open_song, songUrl)
     .row()

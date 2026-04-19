@@ -1283,28 +1283,23 @@ a {
 /* Sheet display */
 [data-theme='light'] .sheet-display { background: var(--bg-section); }
 
-/* ─── Telegram Mini App ───────────────────────────────────────────────────────
- * Class is applied to <html> by TelegramBoot when window.Telegram.WebApp.initData
- * is present. Goal: hide chrome that Telegram itself already provides (top bar,
- * back button) and reclaim the full viewport for the song reader.
+/* ─── Embed mode (?embed=1) ───────────────────────────────────────────────────
+ * Triggered by EmbedBoot when the URL carries ?embed=1.
+ * Used by the bot's "Open" button to render a clean, single-purpose song view
+ * without the navbar, the reader sidebar, or the reader toolbar.
+ * Outside ?embed=1, none of these rules apply.
  */
-html.tg-mini-app .navbar-wrap,
-html.tg-mini-app .reader-toolbar-bar,
-html.tg-mini-app .reader-sidebar,
-html.tg-mini-app .sidebar-overlay {
+html.embed .navbar-wrap,
+html.embed .reader-toolbar-bar,
+html.embed .reader-sidebar,
+html.embed .sidebar-overlay {
   display: none !important;
 }
 
-html.tg-mini-app .reader-wrap {
+html.embed .reader-wrap {
   padding-top: 0 !important;
 }
 
-html.tg-mini-app .reader-body {
+html.embed .reader-body {
   margin-left: 0 !important;
-}
-
-/* Honour iPhone safe-area insets in full-screen Telegram Mini App */
-html.tg-mini-app body {
-  padding: env(safe-area-inset-top) env(safe-area-inset-right)
-    env(safe-area-inset-bottom) env(safe-area-inset-left);
 }

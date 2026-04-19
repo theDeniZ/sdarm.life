@@ -248,7 +248,7 @@ async function showSong(
   const text = formatSong(song, STR, showChords);
   const hasChords = songHasChords(song);
   const songUrl = webUrl
-    ? `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}`
+    ? `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}?embed=1`
     : null;
 
   if (text.length <= TG_MSG_LIMIT) {
@@ -597,7 +597,7 @@ export function createBot(env: Env): Bot {
       const text = formatSong(song, STR, showChords);
       const hasChords = songHasChords(song);
       const songUrl = webUrl
-        ? `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}`
+        ? `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}?embed=1`
         : null;
       await ctx.editMessageText(text, {
         parse_mode: 'MarkdownV2',

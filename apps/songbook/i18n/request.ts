@@ -1,8 +1,9 @@
 import { getRequestConfig } from 'next-intl/server';
 import { routing } from './routing';
+import de from '@sdarm/i18n/messages/de';
 import en from '@sdarm/i18n/messages/en';
 
-const messages = { en } as const;
+const messages = { de, en } as const;
 
 export default getRequestConfig(async ({ requestLocale }) => {
   let locale = await requestLocale;
