@@ -11,7 +11,7 @@ This file overrides anything in the parent CLAUDE.md or general defaults — whe
 2. **No standard emojis ever — Unicode glyphs only.** Anywhere: buttons, headers, body, errors, logs.
    - **Forbidden**: anything pictographic, colored on a typical platform, or rendered as a system emoji. Examples: 📚 🔍 🎵 🌐 ✉️ 🎸 📝 🏠 🌍 ⚠ ⏳ ◀️ ▶️ 🇷🇺 🇬🇧 ✍️ 📖 🎶 ▶ ◀ (with `\uFE0F` variation selector)
    - **Allowed glyphs** (verified to render as plain text on Telegram desktop + iOS):
-     - Punctuation / structure: `·` `—` `–` `‹` `›` `«` `»` `№` `©` `±` `≡`
+     - Punctuation / structure: `·` `—` `–` `‹` `›` `«` `»` `№` `©` `±`
      - Arrows: `→` `←` `↑` `↓` `⟶` `⟵` `↗` `↘`
      - Geometry: `◆` `◇` `◈` `■` `□` `▲` `△` `▼` `▽` `●` `○`
      - Decorative (use sparingly as accents): `★` `☆` `❖` `✦` `✧` `✓` `✗`

@@ -89,7 +89,7 @@ function songsKeyboard(
     .text('‹', hasPrev ? `sb:${slug}:${page - 1}` : 'noop')
     .text(`${page + 1}/${pages}`, 'noop')
     .text('›', hasNext ? `sb:${slug}:${page + 1}` : 'noop')
-    .text('≡', 'sb_list');
+    .text('↑', 'sb_list');
   return kb;
 }
 
