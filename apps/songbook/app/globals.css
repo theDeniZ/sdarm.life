@@ -1283,31 +1283,62 @@ a {
 /* Sheet display */
 [data-theme='light'] .sheet-display { background: var(--bg-section); }
 
-/* ─── Embed mode (?embed=1) ───────────────────────────────────────────────────
- * Triggered by EmbedBoot when the URL carries ?embed=1.
- * Used by the bot's "Open" button to render a clean, single-purpose song view
- * without the navbar, the reader sidebar, or the reader toolbar.
- * Outside ?embed=1, none of these rules apply.
+/* ─── Embed mode (?embed=1 OR inside Telegram WebApp) ────────────────────────
+ * EmbedBoot adds the .embed class to <html> when either signal is detected.
+ * Goal: render the song page as a single, clean .reader-content block —
+ * everything else (navbar, sidebar, toolbars, breadcrumbs, mode switcher) is
+ * stripped, and the wrapper covers the entire viewport.
+ *
+ * Outside embed mode none of these rules apply, so the regular site visit
+ * at songs.sdarm.life keeps the full chrome.
  */
+
+/* Hide every chrome element on the path AROUND .reader-content */
 html.embed .navbar-wrap,
 html.embed .reader-toolbar-bar,
 html.embed .reader-sidebar,
 html.embed .sidebar-overlay,
+html.embed .reader-breadcrumb,
+html.embed .reader-icon-btn,
 html.embed .mode-bar {
   display: none !important;
 }
 
+/* Make the path TO .reader-content fill the viewport — fixed-position so
+   no parent margin/padding leaks into the embed view. */
+html.embed body {
+  margin: 0 !important;
+  padding: 0 !important;
+  background: var(--dark) !important;
+}
+
 html.embed .reader-wrap {
-  padding-top: 0 !important;
+  position: fixed !important;
+  inset: 0 !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  background: var(--dark) !important;
+  z-index: 1000;
 }
 
 html.embed .reader-body {
-  margin-left: 0 !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: block !important;
+  height: 100% !important;
 }
 
-/* Tighten the song view inside embed — Telegram already provides screen padding */
+html.embed .reader-main {
+  width: 100% !important;
+  height: 100dvh !important;
+  padding: 0 !important;
+  display: block !important;
+  overflow-y: auto !important;
+}
+
 html.embed .reader-content {
-  padding: 1.5rem 1.25rem 3rem !important;
+  max-width: none !important;
+  padding: 1.25rem 1.25rem 3rem !important;
 }
 
 html.embed .song-header {

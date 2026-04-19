@@ -1,5 +1,6 @@
 import { Suspense } from 'react';
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
@@ -38,9 +39,14 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body>
+        {/* Telegram Mini App SDK — populates window.Telegram.WebApp inside Telegram clients.
+            Outside Telegram it's a tiny no-op script. EmbedBoot uses it to detect
+            "we're inside Telegram" and force embed mode even when ?embed=1 is missing
+            (e.g. lost across a locale redirect). */}
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
         <ThemeProvider />
-        {/* Adds .embed class on <html> when ?embed=1 — used by the bot's
-            "Open" button to hide chrome (navbar/sidebar/toolbar) for a clean view. */}
+        {/* Adds .embed class on <html> when ?embed=1 OR running inside Telegram —
+            CSS in globals.css then strips everything except .reader-content. */}
         <Suspense fallback={null}>
           <EmbedBoot />
         </Suspense>
