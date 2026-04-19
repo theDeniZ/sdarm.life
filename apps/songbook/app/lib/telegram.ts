@@ -137,7 +137,6 @@ export function useBackButton(onBack: () => void, deps: unknown[] = []): void {
       tg.BackButton.offClick(onBack);
       tg.BackButton.hide();
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, deps);
 }
 

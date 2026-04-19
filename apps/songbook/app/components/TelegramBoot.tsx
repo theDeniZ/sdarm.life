@@ -30,13 +30,10 @@ export default function TelegramBoot() {
   // System Back button → close the Mini App (user returns to bot chat).
   // This is a fine default for the song reader — future enhancement could
   // call window.history.back() first when there's in-app history to walk.
-  useBackButton(
-    () => {
-      const tg = getTelegramWebApp();
-      tg?.close();
-    },
-    [webApp?.initData],
-  );
+  useBackButton(() => {
+    const tg = getTelegramWebApp();
+    tg?.close();
+  }, [webApp?.initData]);
 
   return null;
 }
