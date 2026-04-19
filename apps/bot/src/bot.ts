@@ -79,14 +79,17 @@ function songsKeyboard(
     kb.text(`№${s.number} · ${s.title}`, `song:${s.id}:${page}`).row();
   }
 
-  // Pagination row: ‹ · n/m · › (all in one line)
-  kb.row();
-  if (page > 0) kb.text('‹', `sb:${slug}:${page - 1}`);
-  kb.text(`${page + 1}/${pages}`, 'noop');
-  if ((page + 1) * PAGE_SIZE < total) kb.text('›', `sb:${slug}:${page + 1}`);
-
-  // Single back path: → Songbooks (which itself has ‹ Menu)
-  kb.row().text(STR.btn_switch, 'sb_list');
+  // Single 4-button nav row: [‹] [N/M] [›] [≡]
+  // ‹ and › always render — on edge pages they route to noop so the layout
+  // stays the same shape regardless of which page you're on.
+  // ≡ jumps back to the songbook list (replaces the old standalone "Songbooks" row).
+  const hasPrev = page > 0;
+  const hasNext = (page + 1) * PAGE_SIZE < total;
+  kb.row()
+    .text('‹', hasPrev ? `sb:${slug}:${page - 1}` : 'noop')
+    .text(`${page + 1}/${pages}`, 'noop')
+    .text('›', hasNext ? `sb:${slug}:${page + 1}` : 'noop')
+    .text('≡', 'sb_list');
   return kb;
 }
 
