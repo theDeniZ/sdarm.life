@@ -34,7 +34,7 @@ export interface Strings {
   about_body: string;
   settings_body: string;
   notify_status: (on: boolean) => string;
-  notify_new_song_header: string;
+  notify_new_song_headers: readonly string[];
   notify_muted_confirm: string;
   notify_unmuted_confirm: string;
 
@@ -100,7 +100,13 @@ export const STR: Strings = {
   ].join('\n'),
   settings_body: '*Settings*',
   notify_status: (on) => (on ? '_New\\-song notifications: on_' : '_New\\-song notifications: off_'),
-  notify_new_song_header: 'New song added',
+  notify_new_song_headers: [
+    'Update in the songbook 🔥',
+    'A new hymn has joined the collection ✨',
+    'New addition now in the songbook 🔥',
+    'Fresh update ✨',
+    'A new hymn has joined the collection 🔥',
+  ],
   notify_muted_confirm: '_Notifications muted\\. You can re\\-enable them in About\\._',
   notify_unmuted_confirm: '_Notifications enabled\\._',
 

@@ -93,8 +93,12 @@ async function broadcastSong(
 }
 
 function formatNewSongMessage(song: RecentSong): string {
+  // Pick the header deterministically from song.id so every subscriber sees
+  // the same variant for a given song, and retries stay consistent.
+  const headers = STR.notify_new_song_headers;
+  const header = headers[song.id % headers.length];
   const lines = [
-    `*${STR.notify_new_song_header}*`,
+    `*${esc(header)}*`,
     '',
     `*№${song.number} · ${esc(song.title)}*`,
     `_${esc(song.songbook.title)}_`,
