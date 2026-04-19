@@ -34,7 +34,12 @@ interface RecentSong {
   songbook: { id: number; title: string; slug: string };
 }
 
-export async function runNotifyCron(bot: Bot, api: ApiClient, kv: KVNamespace): Promise<void> {
+export async function runNotifyCron(
+  bot: Bot,
+  api: ApiClient,
+  kv: KVNamespace,
+  webUrl: string,
+): Promise<void> {
   const recent = (await api.getRecentSongs(RECENT_FETCH_LIMIT)) as RecentSong[];
   if (recent.length === 0) return;
 
@@ -59,16 +64,22 @@ export async function runNotifyCron(bot: Bot, api: ApiClient, kv: KVNamespace): 
   }
 
   for (const song of fresh) {
-    await broadcastSong(bot, song, subscribers);
+    await broadcastSong(bot, song, subscribers, webUrl);
   }
 
   await kv.put(LAST_SEEN_KEY, String(highestId));
 }
 
-async function broadcastSong(bot: Bot, song: RecentSong, subscribers: number[]): Promise<void> {
+async function broadcastSong(
+  bot: Bot,
+  song: RecentSong,
+  subscribers: number[],
+  webUrl: string,
+): Promise<void> {
   const text = formatNewSongMessage(song);
+  const songUrl = `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}`;
   const kb = new InlineKeyboard()
-    .text(STR.btn_open_song, `song:${song.id}:0`)
+    .webApp(STR.btn_open_song, songUrl)
     .row()
     .text(STR.btn_mute_notifications, 'notify_mute');
 

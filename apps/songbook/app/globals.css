@@ -1282,3 +1282,29 @@ a {
 
 /* Sheet display */
 [data-theme='light'] .sheet-display { background: var(--bg-section); }
+
+/* ─── Telegram Mini App ───────────────────────────────────────────────────────
+ * Class is applied to <html> by TelegramBoot when window.Telegram.WebApp.initData
+ * is present. Goal: hide chrome that Telegram itself already provides (top bar,
+ * back button) and reclaim the full viewport for the song reader.
+ */
+html.tg-mini-app .navbar-wrap,
+html.tg-mini-app .reader-toolbar-bar,
+html.tg-mini-app .reader-sidebar,
+html.tg-mini-app .sidebar-overlay {
+  display: none !important;
+}
+
+html.tg-mini-app .reader-wrap {
+  padding-top: 0 !important;
+}
+
+html.tg-mini-app .reader-body {
+  margin-left: 0 !important;
+}
+
+/* Honour iPhone safe-area insets in full-screen Telegram Mini App */
+html.tg-mini-app body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right)
+    env(safe-area-inset-bottom) env(safe-area-inset-left);
+}

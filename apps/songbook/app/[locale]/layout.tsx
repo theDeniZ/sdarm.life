@@ -1,14 +1,23 @@
-import type { Metadata } from 'next';
+import type { Metadata, Viewport } from 'next';
+import Script from 'next/script';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
-import { locales } from '@sdarm/i18n';
-import type { Locale } from '@sdarm/i18n';
 import { ConnectedNavbar, ThemeProvider } from '@sdarm/ui';
+import { SONGBOOK_LOCALES, type SongbookLocale } from '../../i18n/routing';
+import TelegramBoot from '../components/TelegramBoot';
 
 export function generateStaticParams() {
-  return locales.map((locale) => ({ locale }));
+  return SONGBOOK_LOCALES.map((locale) => ({ locale }));
 }
+
+// Mini App: cover the safe-area + notch on iPhone, prevent zoom on input focus
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  viewportFit: 'cover',
+};
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -28,15 +37,20 @@ export default async function LocaleLayout({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  if (!locales.includes(locale as Locale)) notFound();
+  if (!SONGBOOK_LOCALES.includes(locale as SongbookLocale)) notFound();
   setRequestLocale(locale);
 
   const messages = await getMessages();
 
   return (
     <html lang={locale}>
+      <head>
+        {/* Telegram Mini App SDK — exposes window.Telegram.WebApp inside Telegram clients */}
+        <Script src="https://telegram.org/js/telegram-web-app.js" strategy="beforeInteractive" />
+      </head>
       <body>
         <ThemeProvider />
+        <TelegramBoot />
         <NextIntlClientProvider messages={messages}>
           <ConnectedNavbar locale={locale} />
           {children}

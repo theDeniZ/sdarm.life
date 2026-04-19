@@ -70,8 +70,9 @@ export default {
     }
     const bot = createBot(env);
     const api = createApiClient(env.API_URL ?? 'https://api.sdarm.life/api/v1');
+    const webUrl = env.WEB_URL ?? 'https://songs.sdarm.life';
     ctx.waitUntil(
-      runNotifyCron(bot, api, env.RATE_KV).catch((err) => {
+      runNotifyCron(bot, api, env.RATE_KV, webUrl).catch((err) => {
         logError('cron.notify', err);
       }),
     );

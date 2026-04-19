@@ -114,8 +114,9 @@ function songKeyboard(
   // Two-up nav: back to list + jump to songbooks (Menu reachable via Songbooks → ‹ Menu)
   kb.text(STR.btn_back_list, `sb:${songbookSlug}:${page}`).text(STR.btn_switch, 'sb_list').row();
 
-  // Optional outbound link to read the song on the web (better for long lyrics)
-  if (songUrl) kb.url(STR.btn_open_website, songUrl);
+  // Open the song as a Telegram Mini App (full-screen, themed, no browser switch).
+  // Bot domain must be registered in @BotFather → Mini App settings → Domain.
+  if (songUrl) kb.webApp(STR.btn_open_website, songUrl);
 
   return kb;
 }
