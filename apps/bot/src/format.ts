@@ -40,7 +40,6 @@ export function splitMessage(text: string, limit: number): string[] {
   let current = '';
   for (const line of text.split('\n')) {
     if (line.length > limit) {
-      // Pathological line — flush current and hard-split.
       if (current) {
         chunks.push(current);
         current = '';
@@ -77,7 +76,6 @@ function stripChords(text: string): string {
 function buildChordLine(line: string): { chordLine: string; textLine: string } | null {
   if (!hasChordAnnotations(line)) return null;
 
-  // Split on chord markers while keeping them as tokens
   const tokens = line.split(/(\[[A-G][^\]]{0,10}\])/);
   let chordRow = '';
   let textRow = '';
@@ -88,10 +86,8 @@ function buildChordLine(line: string): { chordLine: string; textLine: string } |
       const chord = m[1];
       const col = textRow.length;
       if (chordRow.length < col) {
-        // Pad chord row to reach the target column
         chordRow = chordRow.padEnd(col);
       } else if (chordRow.length > 0 && chordRow.length >= col) {
-        // Two chords with no text between them — add a separator space
         chordRow += ' ';
       }
       chordRow += chord;
@@ -103,11 +99,6 @@ function buildChordLine(line: string): { chordLine: string; textLine: string } |
   return { chordLine: chordRow.trimEnd(), textLine: textRow };
 }
 
-/**
- * Format a multi-line lyrics string with chords positioned above the
- * corresponding syllables. Lines without chord annotations are passed through
- * unchanged. The result is intended for a ``` code block (no MarkdownV2 escaping).
- */
 function formatLyricsWithChords(lyrics: string): string {
   return lyrics
     .split('\n')
@@ -121,7 +112,8 @@ function formatLyricsWithChords(lyrics: string): string {
 // ── Song detail ───────────────────────────────────────────────────────────────
 
 /**
- * Format a full song for display in Telegram (MarkdownV2).
+ * Format a full song for display in Telegram (MarkdownV2). No emojis — header
+ * is title + meta line + optional author/copyright line, then parts.
  *
  * @param showChords  When true, chord annotations are rendered above the
  *                    corresponding syllables inside a ``` code block.
@@ -140,10 +132,15 @@ export function formatSong(song: SongDto, t: Strings, showChords: boolean): stri
 
   const lines: string[] = [];
 
-  lines.push(`🎵 *${esc(song.title)}* \\(№ ${song.number}\\)`);
-  lines.push(`📖 _${esc(song.songbook.title)}_`);
-  if (song.author) lines.push(`✍️ _${esc(song.author)}_`);
-  if (song.copyright) lines.push(`© _${esc(song.copyright)}_`);
+  lines.push(`*${esc(song.title)}*`);
+  lines.push(`№${song.number} · _${esc(song.songbook.title)}_`);
+
+  // Combine author + copyright on a single italic meta line when present
+  const meta: string[] = [];
+  if (song.author) meta.push(`by ${esc(song.author)}`);
+  if (song.copyright) meta.push(`© ${esc(song.copyright)}`);
+  if (meta.length) lines.push(`_${meta.join(' · ')}_`);
+
   lines.push('');
 
   let verseIndex = 0;
@@ -162,7 +159,6 @@ export function formatSong(song: SongDto, t: Strings, showChords: boolean): stri
     const partHasChords = hasChordAnnotations(part.lyrics);
 
     if (showChords && partHasChords) {
-      // Render inside a ``` code block — content is NOT MarkdownV2-escaped
       lines.push('```');
       lines.push(formatLyricsWithChords(part.lyrics));
       lines.push('```');
@@ -187,13 +183,10 @@ export function formatSongList(
   t: Strings,
 ): string {
   const pages = Math.ceil(total / limit);
-  const lines: string[] = [
-    `📖 *${esc(songbook.title)}*`,
+  return [
+    `*${esc(songbook.title)}*`,
     t.song_list_meta(songbook.language, total, page + 1, pages),
-    '',
-    ...items.map((s) => `*№${s.number}* ${esc(s.title)}`),
-  ];
-  return lines.join('\n');
+  ].join('\n');
 }
 
 // ── Search results ────────────────────────────────────────────────────────────
@@ -201,7 +194,7 @@ export function formatSongList(
 /** Render a list of search-result rows. Songbook label appended only when present. */
 function renderResultRows(items: ReadonlyArray<{ number: number; title: string; songbook?: { title: string } }>): string[] {
   return items.map((s) =>
-    s.songbook ? `*№${s.number}* ${esc(s.title)} — _${esc(s.songbook.title)}_` : `*№${s.number}* ${esc(s.title)}`,
+    s.songbook ? `*№${s.number}* · ${esc(s.title)} — _${esc(s.songbook.title)}_` : `*№${s.number}* · ${esc(s.title)}`,
   );
 }
 
