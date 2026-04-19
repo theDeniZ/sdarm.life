@@ -14,4 +14,7 @@ export interface Env {
   /** Public songbook web app URL — used for "Open on website" buttons.
    *  Default: https://songs.sdarm.life. Song page: `${WEB_URL}/en/songbooks/{slug}/{id}`. */
   WEB_URL?: string;
+  /** Optional dedicated bearer token for the /admin/* HTTP endpoints.
+   *  Falls back to BOT_SECRET if unset. Set via `wrangler secret put ADMIN_TOKEN`. */
+  ADMIN_TOKEN?: string;
 }
