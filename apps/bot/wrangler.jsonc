@@ -22,10 +22,13 @@
   //   BOT_TOKEN  — Telegram Bot API token from @BotFather
   //   BOT_SECRET — random string used to verify Telegram webhook requests (min 16 chars)
   //
-  // Optional env var:
-  //   API_URL — override API base URL (default: https://api.sdarm.life/api/v1)
+  // Optional env vars:
+  //   API_URL              — override API base URL (default: https://api.sdarm.life/api/v1)
+  //   CONTACT_URL          — Telegram contact link shown in the menu
+  //   RATE_LIMIT_PER_MIN   — override per-user requests/minute (default: 20)
 
   "vars": {
-    "API_URL": "https://api.sdarm.life/api/v1"
+    "API_URL": "https://api.sdarm.life/api/v1",
+    "CONTACT_URL": "https://t.me/maestr_os"
   }
 }

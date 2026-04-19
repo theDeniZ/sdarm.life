@@ -1,4 +1,4 @@
-import { Bot, InlineKeyboard } from 'grammy';
+import { Bot, GrammyError, InlineKeyboard } from 'grammy';
 import type { Context } from 'grammy';
 import type { SongbookDto } from '@sdarm/types';
 import type { Env } from './types';
@@ -7,21 +7,38 @@ import { isRateLimited, DEFAULT_RATE_LIMIT_PER_MINUTE } from './rate-limit';
 import { getSession, saveSession } from './session';
 import { getT, DEFAULT_LANG, detectLangFromCode, type Lang, type Strings } from './i18n';
 import { logError } from './logger';
-import { formatSong, formatSongList, formatSearchResults, formatSongbookList, esc } from './format';
+import {
+  formatSong,
+  formatSongList,
+  formatSearchResults,
+  formatInBookSearchResults,
+  songHasChords as songHasChordsFn,
+  splitMessage,
+} from './format';
+import { storeCallbackPayload, readCallbackPayload } from './cb-store';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
-const SONGS_PER_PAGE = 15;
-const MAX_SEARCH_RESULTS = 20;
-const CONTACT_URL = 'https://t.me/maestr_os';
+/** Single pagination size used everywhere — songbook lists and search results alike. */
+const PAGE_SIZE = 15;
 
-// Callback parameter bounds — accept only sane values to avoid pathological input
-const MAX_SONG_ID = 10_000_000;
-const MAX_PAGE = 1000;
+/** Telegram message body cap (4096 bytes incl. MarkdownV2). Reserved tail for hints. */
+const TG_MSG_LIMIT = 4096;
+const HINT_RESERVE = 200;
+
+const DEFAULT_CONTACT_URL = 'https://t.me/maestr_os';
+
+// Callback parameter bounds. Bounds are encoded in the regex itself so the parsed
+// integer is guaranteed safe — no separate range check needed.
+//   id   = up to 7 digits  →  ≤ 9_999_999
+//   page = up to 4 digits  →  ≤ 9_999  (only first ~150 KV pages reachable in practice)
+const ID_DIGITS = '\\d{1,7}';
+const PAGE_DIGITS = '\\d{1,4}';
 const SLUG_RE = /^[a-zA-Z0-9-]{1,100}$/;
 const NUMERIC_RE = /^\d{1,6}$/;
+const CB_ID_RE = /^[0-9a-f]{8}$/;
 
-// ── Session helpers ───────────────────────────────────────────────────────────
+// ── Language helper ───────────────────────────────────────────────────────────
 
 /**
  * Resolve the user's interface language.
@@ -38,7 +55,6 @@ async function ensureUserLang(kv: KVNamespace, ctx: Context): Promise<Lang> {
     if (session.lang) return session.lang;
     const detected = detectLangFromCode(ctx.from?.language_code);
     if (detected) {
-      // Best-effort persist so subsequent requests skip detection
       saveSession(kv, userId, { lang: detected }).catch(() => {});
       return detected;
     }
@@ -50,7 +66,7 @@ async function ensureUserLang(kv: KVNamespace, ctx: Context): Promise<Lang> {
 
 // ── Keyboard builders ─────────────────────────────────────────────────────────
 
-function mainMenuKeyboard(t: Strings, resume?: { title: string }): InlineKeyboard {
+function mainMenuKeyboard(t: Strings, contactUrl: string, resume?: { title: string }): InlineKeyboard {
   const kb = new InlineKeyboard();
 
   if (resume) {
@@ -61,7 +77,7 @@ function mainMenuKeyboard(t: Strings, resume?: { title: string }): InlineKeyboar
   kb.text(t.btn_songbooks, 'sb_list').row();
   kb.text(t.btn_search, 'search_hint').row();
   kb.text(t.btn_lang, 'lang_choose').row();
-  kb.url(t.btn_contact, CONTACT_URL);
+  kb.url(t.btn_contact, contactUrl);
   return kb;
 }
 
@@ -82,7 +98,7 @@ function songsKeyboard(
   total: number,
 ): InlineKeyboard {
   const kb = new InlineKeyboard();
-  const pages = Math.ceil(total / SONGS_PER_PAGE);
+  const pages = Math.ceil(total / PAGE_SIZE);
 
   for (const s of items) {
     kb.text(`№${s.number} ${s.title}`, `song:${s.id}:${page}`).row();
@@ -91,7 +107,7 @@ function songsKeyboard(
   kb.row();
   if (page > 0) kb.text('◀️', `sb:${slug}:${page - 1}`);
   kb.text(`${page + 1}/${pages}`, 'noop');
-  if ((page + 1) * SONGS_PER_PAGE < total) kb.text('▶️', `sb:${slug}:${page + 1}`);
+  if ((page + 1) * PAGE_SIZE < total) kb.text('▶️', `sb:${slug}:${page + 1}`);
 
   kb.row().text(t.btn_switch, 'sb_list').row().text(t.btn_home, 'main_menu');
   return kb;
@@ -110,10 +126,10 @@ function songKeyboard(
   songId: number,
   showChords: boolean,
   hasChords: boolean,
+  contactUrl: string,
 ): InlineKeyboard {
   const kb = new InlineKeyboard();
 
-  // Chord toggle — only shown when the song has chord annotations
   if (hasChords) {
     const next = showChords ? 0 : 1;
     kb.text(showChords ? t.btn_hide_chords : t.btn_show_chords, `chord:${songId}:${page}:${next}`).row();
@@ -121,13 +137,13 @@ function songKeyboard(
 
   kb.text(t.btn_back_list, `sb:${songbookSlug}:${page}`).row();
   kb.text(t.btn_switch_short, 'sb_list').row();
-  kb.url(t.btn_contact_short, CONTACT_URL);
+  kb.url(t.btn_contact_short, contactUrl);
   return kb;
 }
 
 function searchResultsKeyboard(
   t: Strings,
-  items: { id: number; number: number; title: string; songbook: { slug: string } }[],
+  items: { id: number; number: number; title: string }[],
 ): InlineKeyboard {
   const kb = new InlineKeyboard();
   for (const s of items) {
@@ -147,7 +163,7 @@ function langKeyboard(t: Strings, current?: Lang): InlineKeyboard {
 
 // ── Screen renderers ──────────────────────────────────────────────────────────
 
-async function showMainMenu(ctx: Context, kv: KVNamespace): Promise<void> {
+async function showMainMenu(ctx: Context, kv: KVNamespace, contactUrl: string): Promise<void> {
   const userId = ctx.from?.id;
   const session = userId ? await getSession(kv, userId) : {};
   const lang = session.lang ?? (await ensureUserLang(kv, ctx));
@@ -157,13 +173,14 @@ async function showMainMenu(ctx: Context, kv: KVNamespace): Promise<void> {
 
   await editOrReply(ctx, t.welcome, {
     parse_mode: 'MarkdownV2',
-    reply_markup: mainMenuKeyboard(t, resume),
+    reply_markup: mainMenuKeyboard(t, contactUrl, resume),
   });
 }
 
 async function showSongbooks(ctx: Context, api: ApiClient, t: Strings): Promise<void> {
   const books = await api.getSongbooks();
-  await editOrReply(ctx, formatSongbookList(books, t), {
+  const text = books.length === 0 ? t.songbooks_empty : t.songbooks_header;
+  await editOrReply(ctx, text, {
     parse_mode: 'MarkdownV2',
     reply_markup: songbooksKeyboard(t, books),
   });
@@ -177,10 +194,10 @@ async function showSongs(
   page: number,
   t: Strings,
 ): Promise<void> {
-  const offset = page * SONGS_PER_PAGE;
+  const offset = page * PAGE_SIZE;
   const [songbook, { items, total }] = await Promise.all([
     api.getSongbook(slug),
-    api.getSongs(slug, { limit: SONGS_PER_PAGE, offset }),
+    api.getSongs(slug, { limit: PAGE_SIZE, offset }),
   ]);
 
   if (items.length === 0) {
@@ -193,15 +210,15 @@ async function showSongs(
     saveSession(kv, userId, { sbSlug: slug, sbTitle: songbook.title, sbPage: page }).catch(() => {});
   }
 
-  await editOrReply(ctx, formatSongList(items, songbook, page, total, SONGS_PER_PAGE, t), {
+  await editOrReply(ctx, formatSongList(items, songbook, page, total, PAGE_SIZE, t), {
     parse_mode: 'MarkdownV2',
     reply_markup: songsKeyboard(t, items, slug, page, total),
   });
 }
 
 /**
- * Open a song as a new message (from song list taps).
- * Short songs (≤ 4096 chars) get a chord toggle button.
+ * Open a song as a new message (from song-list taps).
+ * Short songs (≤ TG_MSG_LIMIT) get a chord toggle button.
  * Long songs are split into chunks; toggle is unavailable (multi-message
  * editing is impractical) and the user is told why.
  */
@@ -211,31 +228,33 @@ async function showSong(
   id: number,
   backPage: number,
   t: Strings,
+  contactUrl: string,
   showChords = false,
 ): Promise<void> {
   const song = await api.getSong(id);
   const text = formatSong(song, t, showChords);
-  const songHasChords = song.parts.some((p) => /\[[A-G][^\]]{0,10}\]/.test(p.lyrics));
+  const hasChords = songHasChordsFn(song);
 
-  if (text.length <= 4096) {
+  if (text.length <= TG_MSG_LIMIT) {
     await ctx.reply(text, {
       parse_mode: 'MarkdownV2',
-      reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, songHasChords),
+      reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, hasChords, contactUrl),
     });
     return;
   }
 
   // Long song: split, no chord toggle, explain why on the last chunk.
-  // Use a tighter limit so the hint fits inside the final chunk.
-  const HINT_RESERVE = 200;
-  const chunks = splitMessage(text, songHasChords ? 4096 - HINT_RESERVE : 4096);
+  // Reserve room for the hint so it always fits within Telegram's cap.
+  const chunks = splitMessage(text, hasChords ? TG_MSG_LIMIT - HINT_RESERVE : TG_MSG_LIMIT);
   for (let i = 0; i < chunks.length; i++) {
     const isLast = i === chunks.length - 1;
     let body = chunks[i];
-    if (isLast && songHasChords) body += '\n\n' + t.long_song_no_chords;
+    if (isLast && hasChords) body += '\n\n' + t.long_song_no_chords;
     await ctx.reply(body, {
       parse_mode: 'MarkdownV2',
-      ...(isLast ? { reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, false) } : {}),
+      ...(isLast
+        ? { reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, false, contactUrl) }
+        : {}),
     });
   }
 }
@@ -247,7 +266,7 @@ async function showSearch(ctx: Context, api: ApiClient, query: string, t: String
     return;
   }
 
-  const { items, total } = await api.searchSongs(trimmed, { limit: MAX_SEARCH_RESULTS });
+  const { items, total } = await api.searchSongs(trimmed, { limit: PAGE_SIZE });
   const text = formatSearchResults(items, trimmed, total, t);
   const kb =
     items.length > 0 ? searchResultsKeyboard(t, items) : new InlineKeyboard().text(t.btn_back_menu, 'main_menu');
@@ -256,54 +275,44 @@ async function showSearch(ctx: Context, api: ApiClient, query: string, t: String
 }
 
 /**
- * Context-aware numeric search.
- * If the user is currently browsing a songbook and types a pure number,
- * try matching by song number inside that book first. Falls back to global
- * search when the book has no such number.
+ * Context-aware numeric search inside the user's currently-active songbook.
+ * Returns true when results were found and rendered; false to let the caller
+ * fall back to a global search.
+ *
+ * The "search globally" button stores its query in KV (via cb-store) instead
+ * of inlining it in `callback_data`, since UTF-8 cyrillic queries can blow
+ * past Telegram's 64-byte callback limit.
  */
 async function showNumericSearchInBook(
   ctx: Context,
   api: ApiClient,
+  kv: KVNamespace,
   slug: string,
   bookTitle: string,
   number: string,
   t: Strings,
 ): Promise<boolean> {
-  const { items, total } = await api.getSongs(slug, { q: number, limit: SONGS_PER_PAGE });
+  const { items, total } = await api.getSongs(slug, { q: number, limit: PAGE_SIZE });
   if (items.length === 0) return false;
 
-  // Render as a search-results screen scoped to this songbook + offer global fallback
-  const lines = [
-    t.search_in_book_header(esc(number), esc(bookTitle)),
-    ...items.map((s) => `*№${s.number}* ${esc(s.title)}`),
-  ];
-  if (total > items.length) {
-    lines.unshift(t.search_truncated(items.length, total).trimEnd());
-  }
+  const cbId = await storeCallbackPayload(kv, number);
   const kb = new InlineKeyboard();
   for (const s of items) kb.text(`№${s.number} ${s.title}`, `song:${s.id}:0`).row();
-  kb.text(t.btn_search_global, `gs:${number}`).row();
+  kb.text(t.btn_search_global, `gs:${cbId}`).row();
   kb.text(t.btn_back_menu, 'main_menu');
 
-  await ctx.reply(lines.join('\n'), { parse_mode: 'MarkdownV2', reply_markup: kb });
+  await ctx.reply(formatInBookSearchResults(items, number, bookTitle, total, t), {
+    parse_mode: 'MarkdownV2',
+    reply_markup: kb,
+  });
   return true;
 }
 
-// ── Utility ───────────────────────────────────────────────────────────────────
+// ── Utilities ────────────────────────────────────────────────────────────────
 
-function splitMessage(text: string, limit: number): string[] {
-  const chunks: string[] = [];
-  let current = '';
-  for (const line of text.split('\n')) {
-    if ((current + '\n' + line).length > limit) {
-      if (current) chunks.push(current);
-      current = line;
-    } else {
-      current = current ? current + '\n' + line : line;
-    }
-  }
-  if (current) chunks.push(current);
-  return chunks;
+/** True when a Telegram error is the harmless "message is not modified" 400. */
+function isNotModifiedError(err: unknown): boolean {
+  return err instanceof GrammyError && err.description.includes('message is not modified');
 }
 
 async function editOrReply(
@@ -314,20 +323,12 @@ async function editOrReply(
   if (ctx.callbackQuery) {
     try {
       await ctx.editMessageText(text, extra);
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (!msg.includes('not modified')) throw err;
+    } catch (err) {
+      if (!isNotModifiedError(err)) throw err;
     }
   } else {
     await ctx.reply(text, extra);
   }
-}
-
-function parseBoundedInt(raw: string, max: number): number | null {
-  if (!/^\d+$/.test(raw)) return null;
-  const n = parseInt(raw, 10);
-  if (!Number.isFinite(n) || n < 0 || n > max) return null;
-  return n;
 }
 
 // ── Bot factory ───────────────────────────────────────────────────────────────
@@ -336,7 +337,11 @@ export function createBot(env: Env): Bot {
   const bot = new Bot(env.BOT_TOKEN);
   const api = createApiClient(env.API_URL ?? 'https://api.sdarm.life/api/v1');
   const kv = env.RATE_KV;
-  const rateLimit = parseBoundedInt(env.RATE_LIMIT_PER_MIN ?? '', 10_000) ?? DEFAULT_RATE_LIMIT_PER_MINUTE;
+  const contactUrl = env.CONTACT_URL ?? DEFAULT_CONTACT_URL;
+  const rateLimit = (() => {
+    const raw = parseInt(env.RATE_LIMIT_PER_MIN ?? '', 10);
+    return Number.isFinite(raw) && raw > 0 && raw <= 10_000 ? raw : DEFAULT_RATE_LIMIT_PER_MINUTE;
+  })();
 
   // ── Security: ignore other bots ───────────────────────────────────────────
   bot.use(async (ctx, next) => {
@@ -367,7 +372,7 @@ export function createBot(env: Env): Bot {
     // Remove any persistent Reply keyboard left over from older bot versions
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     await ctx.reply('🎵', { reply_markup: { remove_keyboard: true } as any }).catch(() => {});
-    await showMainMenu(ctx, kv);
+    await showMainMenu(ctx, kv, contactUrl);
   });
 
   bot.command('help', async (ctx) => {
@@ -421,12 +426,12 @@ export function createBot(env: Env): Bot {
 
     try {
       // If the user is browsing a songbook AND typed a pure number,
-      // search within that songbook first; fall back to global search if empty.
+      // search within that songbook first; fall back to global if empty.
       const userId = ctx.from?.id;
       if (userId && NUMERIC_RE.test(text)) {
         const session = await getSession(kv, userId);
         if (session.sbSlug && session.sbTitle) {
-          const handled = await showNumericSearchInBook(ctx, api, session.sbSlug, session.sbTitle, text, t);
+          const handled = await showNumericSearchInBook(ctx, api, kv, session.sbSlug, session.sbTitle, text, t);
           if (handled) return;
         }
       }
@@ -441,7 +446,7 @@ export function createBot(env: Env): Bot {
 
   bot.callbackQuery('main_menu', async (ctx) => {
     await ctx.answerCallbackQuery();
-    await showMainMenu(ctx, kv);
+    await showMainMenu(ctx, kv, contactUrl);
   });
 
   bot.callbackQuery('sb_list', async (ctx) => {
@@ -463,14 +468,14 @@ export function createBot(env: Env): Bot {
       const session = await getSession(kv, userId);
       const t = getT(session.lang ?? (await ensureUserLang(kv, ctx)));
       if (session.sbSlug && SLUG_RE.test(session.sbSlug)) {
-        const page = Math.min(Math.max(session.sbPage ?? 0, 0), MAX_PAGE);
+        const page = Math.min(Math.max(session.sbPage ?? 0, 0), 9999);
         await showSongs(ctx, api, kv, session.sbSlug, page, t);
       } else {
-        await showMainMenu(ctx, kv);
+        await showMainMenu(ctx, kv, contactUrl);
       }
     } catch (err) {
       logError('cb:resume', err, { userId });
-      await showMainMenu(ctx, kv);
+      await showMainMenu(ctx, kv, contactUrl);
     }
   });
 
@@ -492,7 +497,6 @@ export function createBot(env: Env): Bot {
     if (userId) await saveSession(kv, userId, { lang });
     const t = getT(lang);
     const name = lang === 'ru' ? 'Русский 🇷🇺' : 'English 🇬🇧';
-    // Edit the language-selection message in place with a confirmation + back button
     await editOrReply(ctx, t.lang_set(name), {
       parse_mode: 'MarkdownV2',
       reply_markup: new InlineKeyboard().text(t.btn_back_menu, 'main_menu'),
@@ -512,25 +516,32 @@ export function createBot(env: Env): Bot {
     await ctx.answerCallbackQuery();
   });
 
-  // gs:{query} — explicit "search globally" button from in-book numeric results
-  bot.callbackQuery(/^gs:(.+)$/, async (ctx) => {
+  // gs:{cbId} — explicit "search globally" button from in-book numeric results.
+  // Query is stored in KV under a short id (UTF-8 queries don't fit in 64-byte callback_data).
+  bot.callbackQuery(/^gs:([0-9a-f]{8})$/, async (ctx) => {
     await ctx.answerCallbackQuery();
-    const query = ctx.match[1].slice(0, 100);
+    const cbId = ctx.match[1];
+    if (!CB_ID_RE.test(cbId)) return;
     const t = getT(await ensureUserLang(kv, ctx));
     try {
+      const query = await readCallbackPayload(kv, cbId);
+      if (!query) {
+        await ctx.reply(t.search_prompt, { parse_mode: 'MarkdownV2' });
+        return;
+      }
       await showSearch(ctx, api, query, t);
     } catch (err) {
-      logError('cb:gs', err, { userId: ctx.from?.id, query });
+      logError('cb:gs', err, { userId: ctx.from?.id, cbId });
       await ctx.reply(t.err_search, { parse_mode: 'MarkdownV2' });
     }
   });
 
   // sb:{slug}:{page}
-  bot.callbackQuery(/^sb:([^:]+):(\d+)$/, async (ctx) => {
+  bot.callbackQuery(new RegExp(`^sb:([^:]+):(${PAGE_DIGITS})$`), async (ctx) => {
     await ctx.answerCallbackQuery();
     const slug = ctx.match[1];
-    const page = parseBoundedInt(ctx.match[2], MAX_PAGE);
-    if (!SLUG_RE.test(slug) || page === null) return;
+    if (!SLUG_RE.test(slug)) return;
+    const page = parseInt(ctx.match[2], 10);
     const t = getT(await ensureUserLang(kv, ctx));
     try {
       await showSongs(ctx, api, kv, slug, page, t);
@@ -541,14 +552,14 @@ export function createBot(env: Env): Bot {
   });
 
   // song:{id}:{page}  — opens song as a NEW message
-  bot.callbackQuery(/^song:(\d+):(\d+)$/, async (ctx) => {
+  bot.callbackQuery(new RegExp(`^song:(${ID_DIGITS}):(${PAGE_DIGITS})$`), async (ctx) => {
     await ctx.answerCallbackQuery();
-    const id = parseBoundedInt(ctx.match[1], MAX_SONG_ID);
-    const backPage = parseBoundedInt(ctx.match[2], MAX_PAGE);
-    if (id === null || id < 1 || backPage === null) return;
+    const id = parseInt(ctx.match[1], 10);
+    const backPage = parseInt(ctx.match[2], 10);
+    if (id < 1) return;
     const t = getT(await ensureUserLang(kv, ctx));
     try {
-      await showSong(ctx, api, id, backPage, t, false);
+      await showSong(ctx, api, id, backPage, t, contactUrl, false);
     } catch (err) {
       logError('cb:song', err, { userId: ctx.from?.id, songId: id });
       await ctx.reply(t.err_song, { parse_mode: 'MarkdownV2' });
@@ -556,27 +567,25 @@ export function createBot(env: Env): Bot {
   });
 
   // chord:{id}:{page}:{0|1}  — toggle chords by EDITING the current song message
-  bot.callbackQuery(/^chord:(\d+):(\d+):(0|1)$/, async (ctx) => {
+  bot.callbackQuery(new RegExp(`^chord:(${ID_DIGITS}):(${PAGE_DIGITS}):(0|1)$`), async (ctx) => {
     await ctx.answerCallbackQuery();
-    const id = parseBoundedInt(ctx.match[1], MAX_SONG_ID);
-    const backPage = parseBoundedInt(ctx.match[2], MAX_PAGE);
-    if (id === null || id < 1 || backPage === null) return;
+    const id = parseInt(ctx.match[1], 10);
+    const backPage = parseInt(ctx.match[2], 10);
+    if (id < 1) return;
     const showChords = ctx.match[3] === '1';
     const t = getT(await ensureUserLang(kv, ctx));
     try {
       const song = await api.getSong(id);
       const text = formatSong(song, t, showChords);
-      const songHasChords = song.parts.some((p) => /\[[A-G][^\]]{0,10}\]/.test(p.lyrics));
+      const hasChords = songHasChordsFn(song);
       await ctx.editMessageText(text, {
         parse_mode: 'MarkdownV2',
-        reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, songHasChords),
+        reply_markup: songKeyboard(t, song.songbook.slug, backPage, song.id, showChords, hasChords, contactUrl),
       });
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : String(err);
-      if (!msg.includes('not modified')) {
-        logError('cb:chord', err, { userId: ctx.from?.id, songId: id });
-        await ctx.reply(t.err_song, { parse_mode: 'MarkdownV2' });
-      }
+    } catch (err) {
+      if (isNotModifiedError(err)) return;
+      logError('cb:chord', err, { userId: ctx.from?.id, songId: id });
+      await ctx.reply(t.err_song, { parse_mode: 'MarkdownV2' });
     }
   });
 

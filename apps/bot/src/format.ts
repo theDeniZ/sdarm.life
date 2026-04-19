@@ -2,6 +2,16 @@ import type { SongDto, SongListItemDto, SongSearchResultDto, SongbookDto } from 
 import type { Strings } from './i18n';
 
 /**
+ * Inline chord annotation matcher. Matches things like `[G]`, `[Am]`, `[C#m7]`, `[F/C]`.
+ * Single source of truth — every consumer (parts of bot.ts, format.ts) imports this.
+ *
+ * Use `CHORD_RE` for `.test()` (non-global, no lastIndex baggage)
+ * and `CHORD_RE_GLOBAL` for `.replace()`.
+ */
+export const CHORD_RE = /\[[A-G][^\]]{0,10}\]/;
+export const CHORD_RE_GLOBAL = /\[[A-G][^\]]{0,10}\]/g;
+
+/**
  * Escape all MarkdownV2 special characters so they render as literal text.
  * Must be applied to every piece of user-supplied or dynamic data before
  * embedding it in a MarkdownV2 message.
@@ -11,18 +21,47 @@ export function esc(text: string): string {
   return text.replace(/[_*[\]()~`>#+\-=|{}.!\\]/g, '\\$&');
 }
 
-/**
- * Strip inline chord annotations like [G], [Am], [C#m7], [F/C] from a line.
- */
-function stripChords(text: string): string {
-  return text.replace(/\[[A-G][^\]]{0,10}\]/g, '').replace(/  +/g, ' ').trim();
+export function hasChordAnnotations(text: string): boolean {
+  return CHORD_RE.test(text);
+}
+
+/** True when any part of the song contains chord annotations. */
+export function songHasChords(song: Pick<SongDto, 'parts'>): boolean {
+  return song.parts.some((p) => hasChordAnnotations(p.lyrics));
 }
 
 /**
- * Check whether a lyrics string contains any chord annotations.
+ * Split a long MarkdownV2 message into chunks that each fit within `limit` chars.
+ * Splits on newline boundaries when possible; falls back to a hard mid-line split
+ * for pathological lines longer than `limit` (so we never overflow Telegram's cap).
  */
-function hasChordAnnotations(text: string): boolean {
-  return /\[[A-G][^\]]{0,10}\]/.test(text);
+export function splitMessage(text: string, limit: number): string[] {
+  const chunks: string[] = [];
+  let current = '';
+  for (const line of text.split('\n')) {
+    if (line.length > limit) {
+      // Pathological line — flush current and hard-split.
+      if (current) {
+        chunks.push(current);
+        current = '';
+      }
+      for (let i = 0; i < line.length; i += limit) chunks.push(line.slice(i, i + limit));
+      continue;
+    }
+    if ((current + '\n' + line).length > limit) {
+      if (current) chunks.push(current);
+      current = line;
+    } else {
+      current = current ? current + '\n' + line : line;
+    }
+  }
+  if (current) chunks.push(current);
+  return chunks;
+}
+
+/** Strip inline chord annotations like [G], [Am], [C#m7], [F/C] from a line. */
+function stripChords(text: string): string {
+  return text.replace(CHORD_RE_GLOBAL, '').replace(/  +/g, ' ').trim();
 }
 
 /**
@@ -159,29 +198,27 @@ export function formatSongList(
 
 // ── Search results ────────────────────────────────────────────────────────────
 
-export function formatSearchResults(
-  items: SongSearchResultDto[],
+/** Render a list of search-result rows. Songbook label appended only when present. */
+function renderResultRows(items: ReadonlyArray<{ number: number; title: string; songbook?: { title: string } }>): string[] {
+  return items.map((s) =>
+    s.songbook ? `*№${s.number}* ${esc(s.title)} — _${esc(s.songbook.title)}_` : `*№${s.number}* ${esc(s.title)}`,
+  );
+}
+
+export function formatSearchResults(items: SongSearchResultDto[], query: string, total: number, t: Strings): string {
+  if (items.length === 0) return t.search_no_results(esc(query));
+  const note = total > items.length ? t.search_truncated(items.length, total) : '';
+  return note + [t.search_header(esc(query)), ...renderResultRows(items)].join('\n');
+}
+
+/** Same as `formatSearchResults` but scoped to a single songbook (no per-row songbook label). */
+export function formatInBookSearchResults(
+  items: SongListItemDto[],
   query: string,
+  bookTitle: string,
   total: number,
   t: Strings,
 ): string {
-  if (items.length === 0) {
-    return t.search_no_results(esc(query));
-  }
-
   const note = total > items.length ? t.search_truncated(items.length, total) : '';
-
-  const lines: string[] = [
-    t.search_header(esc(query)),
-    ...items.map((s) => `*№${s.number}* ${esc(s.title)} — _${esc(s.songbook.title)}_`),
-  ];
-
-  return note + lines.join('\n');
-}
-
-// ── Songbook list ─────────────────────────────────────────────────────────────
-
-export function formatSongbookList(books: SongbookDto[], t: Strings): string {
-  if (books.length === 0) return t.songbooks_empty;
-  return t.songbooks_header;
+  return note + [t.search_in_book_header(esc(query), esc(bookTitle)), ...renderResultRows(items)].join('\n');
 }
