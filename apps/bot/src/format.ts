@@ -132,8 +132,8 @@ export function formatSong(song: SongDto, t: Strings, showChords: boolean): stri
 
   const lines: string[] = [];
 
-  lines.push(`*${esc(song.title)}*`);
-  lines.push(`№${song.number} · _${esc(song.songbook.title)}_`);
+  lines.push(`*№${song.number} · ${esc(song.title)}*`);
+  lines.push(`_${esc(song.songbook.title)}_`);
 
   // Combine author + copyright on a single italic meta line when present
   const meta: string[] = [];
@@ -143,8 +143,8 @@ export function formatSong(song: SongDto, t: Strings, showChords: boolean): stri
 
   lines.push('');
 
-  // Render each part as a self-contained block, then join with a thin separator
-  // (em-dash on its own line) so verses/choruses aren't a wall of text.
+  // Render each part as a self-contained block. A single blank line between
+  // parts is enough separation — no em-dash, no double gap.
   const partBlocks: string[] = [];
   let verseIndex = 0;
 
@@ -171,7 +171,7 @@ export function formatSong(song: SongDto, t: Strings, showChords: boolean): stri
     partBlocks.push(block.join('\n'));
   }
 
-  lines.push(partBlocks.join('\n\n—\n\n'));
+  lines.push(partBlocks.join('\n\n'));
 
   return lines.join('\n').trimEnd();
 }
