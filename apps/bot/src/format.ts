@@ -143,6 +143,9 @@ export function formatSong(song: SongDto, t: Strings, showChords: boolean): stri
 
   lines.push('');
 
+  // Render each part as a self-contained block, then join with a thin separator
+  // (em-dash on its own line) so verses/choruses aren't a wall of text.
+  const partBlocks: string[] = [];
   let verseIndex = 0;
 
   for (const part of song.parts) {
@@ -154,20 +157,21 @@ export function formatSong(song: SongDto, t: Strings, showChords: boolean): stri
       label = partLabels[part.type] ?? esc(part.label);
     }
 
-    lines.push(`*${esc(label)}*`);
-
+    const block: string[] = [`*${esc(label)}*`];
     const partHasChords = hasChordAnnotations(part.lyrics);
 
     if (showChords && partHasChords) {
-      lines.push('```');
-      lines.push(formatLyricsWithChords(part.lyrics));
-      lines.push('```');
+      block.push('```');
+      block.push(formatLyricsWithChords(part.lyrics));
+      block.push('```');
     } else {
-      lines.push(esc(stripChords(part.lyrics)));
+      block.push(esc(stripChords(part.lyrics)));
     }
 
-    lines.push('');
+    partBlocks.push(block.join('\n'));
   }
+
+  lines.push(partBlocks.join('\n\n—\n\n'));
 
   return lines.join('\n').trimEnd();
 }

@@ -20,18 +20,20 @@ export interface Strings {
   btn_back_menu: string;
   btn_back_list: string;
   btn_switch: string;
-  btn_home: string;
   btn_resume: (title: string) => string;
   btn_show_chords: string;
   btn_hide_chords: string;
   btn_search_global: string;
   btn_retry: string;
   btn_open_song: string;
+  btn_open_website: string;
   btn_mute_notifications: string;
   btn_unmute_notifications: string;
 
   // ── Screens ───────────────────────────────────────────────────────────────
-  welcome: string;
+  welcome_header: string;
+  welcome_stats: (collections: number, songs: number) => string;
+  welcome_cta: string;
   songbooks_header: string;
   songbooks_empty: string;
   about_body: string;
@@ -68,7 +70,6 @@ export interface Strings {
   err_general: string;
   rate_limit: string;
   min_chars: string;
-  long_song_no_chords: string;
   help: string;
 }
 
@@ -81,18 +82,21 @@ export const STR: Strings = {
   btn_back_menu: '‹ Menu',
   btn_back_list: '‹ Back to list',
   btn_switch: 'Songbooks',
-  btn_home: 'Menu',
   btn_resume: (title) => `Resume · ${title}`,
   btn_show_chords: 'Show chords',
   btn_hide_chords: 'Hide chords',
   btn_search_global: 'Search all collections',
   btn_retry: 'Try again',
   btn_open_song: 'Open',
+  btn_open_website: 'Open on website',
   btn_mute_notifications: 'Stop notifications',
   btn_unmute_notifications: 'Enable notifications',
 
   // Screens
-  welcome: '*Breezify*\n_pocket hymnbook_\n\nBrowse or search:',
+  welcome_header: '*Breezify*\n_pocket hymnbook_',
+  welcome_stats: (collections, songs) =>
+    `_${collections} ${collections === 1 ? 'collection' : 'collections'} · ${songs} songs_`,
+  welcome_cta: 'Browse or search:',
   songbooks_header: '*Collections*\n\n_Pick one:_',
   songbooks_empty: 'No collections yet\\.',
   about_body: [
@@ -144,7 +148,6 @@ export const STR: Strings = {
   err_general: 'Something went wrong\\. Try again in a moment\\.',
   rate_limit: 'Too fast — wait about a minute and retry\\.',
   min_chars: '_Type at least 2 characters\\._',
-  long_song_no_chords: '_This song is too long for inline chord toggle\\._',
 
   help: [
     '*Breezify · pocket hymnbook*',

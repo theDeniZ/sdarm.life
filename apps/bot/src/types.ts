@@ -11,4 +11,7 @@ export interface Env {
   RATE_LIMIT_PER_MIN?: string;
   /** Telegram URL for the contact button (default: https://t.me/maestr_os). */
   CONTACT_URL?: string;
+  /** Public songbook web app URL — used for "Open on website" buttons.
+   *  Default: https://songs.sdarm.life. Song page: `${WEB_URL}/en/songbooks/{slug}/{id}`. */
+  WEB_URL?: string;
 }

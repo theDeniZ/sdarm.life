@@ -30,11 +30,13 @@
   //
   // Optional env vars:
   //   API_URL              — override API base URL (default: https://api.sdarm.life/api/v1)
+  //   WEB_URL              — public songbook web app URL (used for "Open on website" buttons)
   //   CONTACT_URL          — Telegram contact link shown in the menu
   //   RATE_LIMIT_PER_MIN   — override per-user requests/minute (default: 20)
 
   "vars": {
     "API_URL": "https://api.sdarm.life/api/v1",
+    "WEB_URL": "https://songs.sdarm.life",
     "CONTACT_URL": "https://t.me/maestr_os"
   }
 }

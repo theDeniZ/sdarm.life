@@ -23,11 +23,11 @@ import { recordUser, isUserMuted, muteUser, unmuteUser } from './users';
 /** Single pagination size used everywhere — songbook lists and search results alike. */
 const PAGE_SIZE = 15;
 
-/** Telegram message body cap (4096 bytes incl. MarkdownV2). Reserved tail for hints. */
+/** Telegram message body cap (4096 bytes incl. MarkdownV2). */
 const TG_MSG_LIMIT = 4096;
-const HINT_RESERVE = 200;
 
 const DEFAULT_CONTACT_URL = 'https://t.me/maestr_os';
+const DEFAULT_WEB_URL = 'https://songs.sdarm.life';
 
 // Callback parameter bounds. Bounds are encoded in the regex itself so the parsed
 // integer is guaranteed safe — no separate range check needed.
@@ -83,8 +83,8 @@ function songsKeyboard(
   kb.text(`${page + 1}/${pages}`, 'noop');
   if ((page + 1) * PAGE_SIZE < total) kb.text('›', `sb:${slug}:${page + 1}`);
 
-  // Footer nav: switch + home in one row
-  kb.row().text(STR.btn_switch, 'sb_list').text(STR.btn_home, 'main_menu');
+  // Single back path: → Songbooks (which itself has ‹ Menu)
+  kb.row().text(STR.btn_switch, 'sb_list');
   return kb;
 }
 
@@ -100,6 +100,7 @@ function songKeyboard(
   songId: number,
   showChords: boolean,
   hasChords: boolean,
+  songUrl: string | null,
 ): InlineKeyboard {
   const kb = new InlineKeyboard();
 
@@ -108,9 +109,12 @@ function songKeyboard(
     kb.text(showChords ? STR.btn_hide_chords : STR.btn_show_chords, `chord:${songId}:${page}:${next}`).row();
   }
 
-  // Two-up nav: back to list + jump to songbooks
+  // Two-up nav: back to list + jump to songbooks (Menu reachable via Songbooks → ‹ Menu)
   kb.text(STR.btn_back_list, `sb:${songbookSlug}:${page}`).text(STR.btn_switch, 'sb_list').row();
-  kb.text(STR.btn_home, 'main_menu');
+
+  // Optional outbound link to read the song on the web (better for long lyrics)
+  if (songUrl) kb.url(STR.btn_open_website, songUrl);
+
   return kb;
 }
 
@@ -144,12 +148,26 @@ async function showAbout(ctx: Context, kv: KVNamespace, contactUrl: string): Pro
 
 // ── Screen renderers ──────────────────────────────────────────────────────────
 
-async function showMainMenu(ctx: Context, kv: KVNamespace): Promise<void> {
+async function showMainMenu(ctx: Context, api: ApiClient, kv: KVNamespace): Promise<void> {
   const userId = ctx.from?.id;
   const session = userId ? await getSession(kv, userId) : {};
   const resume = session.sbSlug && session.sbTitle ? { title: session.sbTitle } : undefined;
 
-  await editOrReply(ctx, STR.welcome, {
+  // Stats line — single cached API call. Silent fallback if the API is down.
+  let stats = '';
+  try {
+    const books = await api.getSongbooks();
+    if (books.length > 0) {
+      const total = books.reduce((sum, b) => sum + b.songCount, 0);
+      stats = `\n${STR.welcome_stats(books.length, total)}`;
+    }
+  } catch {
+    // Welcome should still render if /songbooks errors out
+  }
+
+  const text = `${STR.welcome_header}${stats}\n\n${STR.welcome_cta}`;
+
+  await editOrReply(ctx, text, {
     parse_mode: 'MarkdownV2',
     reply_markup: mainMenuKeyboard(resume),
   });
@@ -194,45 +212,48 @@ async function showSongs(
 }
 
 /**
- * Open a song as a new message (from song-list taps).
- * Short songs (≤ TG_MSG_LIMIT) get a chord toggle button.
- * Long songs are split into chunks; toggle is unavailable (multi-message
- * editing is impractical) and the user is told why **at the top**.
+ * Open a song. Always edits in place (when triggered by a callback) so the
+ * chat doesn't grow with every tap — the songbook list message becomes the
+ * song, and tapping back turns it into the list again.
+ *
+ * Short songs (≤ TG_MSG_LIMIT) fit in the single edited message.
+ * Long songs: edit current message with the first chunk + keyboard, then
+ * post chunks 2..N as new messages (no keyboard) below. Toggle is disabled
+ * for long songs since we can't atomically edit a multi-message render.
  */
 async function showSong(
   ctx: Context,
   api: ApiClient,
   id: number,
   backPage: number,
+  webUrl: string | null,
   showChords = false,
 ): Promise<void> {
   const song = await api.getSong(id);
   const text = formatSong(song, STR, showChords);
   const hasChords = songHasChords(song);
+  const songUrl = webUrl
+    ? `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}`
+    : null;
 
   if (text.length <= TG_MSG_LIMIT) {
-    await ctx.reply(text, {
+    await editOrReply(ctx, text, {
       parse_mode: 'MarkdownV2',
-      reply_markup: songKeyboard(song.songbook.slug, backPage, song.id, showChords, hasChords),
+      reply_markup: songKeyboard(song.songbook.slug, backPage, song.id, showChords, hasChords, songUrl),
     });
     return;
   }
 
-  // Long song: surface the "no chord toggle" hint up top so the user sees it
-  // before scrolling through several messages, not after.
-  if (hasChords) {
-    await ctx.reply(STR.long_song_no_chords, { parse_mode: 'MarkdownV2' });
-  }
-
+  // Long song: edit current → first chunk with full keyboard; then reply tail chunks.
+  // Tail messages are orphan in chat (no keyboard); the website button on the first
+  // chunk is the recommended escape hatch for actually reading the whole thing.
   const chunks = splitMessage(text, TG_MSG_LIMIT);
-  for (let i = 0; i < chunks.length; i++) {
-    const isLast = i === chunks.length - 1;
-    await ctx.reply(chunks[i], {
-      parse_mode: 'MarkdownV2',
-      ...(isLast
-        ? { reply_markup: songKeyboard(song.songbook.slug, backPage, song.id, showChords, false) }
-        : {}),
-    });
+  await editOrReply(ctx, chunks[0], {
+    parse_mode: 'MarkdownV2',
+    reply_markup: songKeyboard(song.songbook.slug, backPage, song.id, false, false, songUrl),
+  });
+  for (let i = 1; i < chunks.length; i++) {
+    await ctx.reply(chunks[i], { parse_mode: 'MarkdownV2' });
   }
 }
 
@@ -314,6 +335,7 @@ export function createBot(env: Env): Bot {
   const api = createApiClient(env.API_URL ?? 'https://api.sdarm.life/api/v1');
   const kv = env.RATE_KV;
   const contactUrl = env.CONTACT_URL ?? DEFAULT_CONTACT_URL;
+  const webUrl = env.WEB_URL ?? DEFAULT_WEB_URL;
   const rateLimit = (() => {
     const raw = parseInt(env.RATE_LIMIT_PER_MIN ?? '', 10);
     return Number.isFinite(raw) && raw > 0 && raw <= 10_000 ? raw : DEFAULT_RATE_LIMIT_PER_MINUTE;
@@ -347,7 +369,7 @@ export function createBot(env: Env): Bot {
     // Track this user as a notification subscriber (idempotent).
     const userId = ctx.from?.id;
     if (userId) recordUser(kv, userId).catch((err) => logError('recordUser', err, { userId }));
-    await showMainMenu(ctx, kv);
+    await showMainMenu(ctx, api, kv);
   });
 
   bot.command('help', async (ctx) => {
@@ -414,7 +436,7 @@ export function createBot(env: Env): Bot {
 
   bot.callbackQuery('main_menu', async (ctx) => {
     await ctx.answerCallbackQuery();
-    await showMainMenu(ctx, kv);
+    await showMainMenu(ctx, api, kv);
   });
 
   bot.callbackQuery('about', async (ctx) => {
@@ -472,11 +494,11 @@ export function createBot(env: Env): Bot {
         const page = Math.min(Math.max(session.sbPage ?? 0, 0), 9999);
         await showSongs(ctx, api, kv, session.sbSlug, page);
       } else {
-        await showMainMenu(ctx, kv);
+        await showMainMenu(ctx, api, kv);
       }
     } catch (err) {
       logError('cb:resume', err, { userId });
-      await showMainMenu(ctx, kv);
+      await showMainMenu(ctx, api, kv);
     }
   });
 
@@ -532,7 +554,7 @@ export function createBot(env: Env): Bot {
     const backPage = parseInt(ctx.match[2], 10);
     if (id < 1) return;
     try {
-      await showSong(ctx, api, id, backPage, false);
+      await showSong(ctx, api, id, backPage, webUrl, false);
     } catch (err) {
       logError('cb:song', err, { userId: ctx.from?.id, songId: id });
       await ctx.reply(STR.err_song, { parse_mode: 'MarkdownV2' });
@@ -550,9 +572,12 @@ export function createBot(env: Env): Bot {
       const song = await api.getSong(id);
       const text = formatSong(song, STR, showChords);
       const hasChords = songHasChords(song);
+      const songUrl = webUrl
+        ? `${webUrl}/en/songbooks/${encodeURIComponent(song.songbook.slug)}/${song.id}`
+        : null;
       await ctx.editMessageText(text, {
         parse_mode: 'MarkdownV2',
-        reply_markup: songKeyboard(song.songbook.slug, backPage, song.id, showChords, hasChords),
+        reply_markup: songKeyboard(song.songbook.slug, backPage, song.id, showChords, hasChords, songUrl),
       });
     } catch (err) {
       if (isNotModifiedError(err)) return;
