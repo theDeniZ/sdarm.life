@@ -108,10 +108,10 @@ function songKeyboard(
   songUrl: string | null,
 ): InlineKeyboard {
   // Single icon row beneath the song.
-  // With chords:    [ ♩ / ♩✓ ] [ ‹ ] [ ↑ ] [ □ ]
+  // With chords:    [ ♫ / ♫✓ ] [ ‹ ] [ ↑ ] [ □ ]
   // Without chords:            [ ‹ ] [ ↑ ] [ □ ]
-  //   ♩  → quarter-note glyph, the universal "music" icon
-  //        (tap to show chords; becomes ♩✓ when chords are currently on)
+  //   ♫  → beamed eighth notes — the universal "music" icon
+  //        (tap to show chords; becomes ♫✓ when chords are currently on)
   //   ‹  → back to song list of this songbook
   //   ↑  → up to the songbook list
   //   □  → open the song full-screen as a Telegram Mini App
@@ -119,7 +119,7 @@ function songKeyboard(
 
   if (hasChords) {
     const next = showChords ? 0 : 1;
-    kb.text(showChords ? '♩✓' : '♩', `chord:${songId}:${page}:${next}`);
+    kb.text(showChords ? '♫✓' : '♫', `chord:${songId}:${page}:${next}`);
   }
   kb.text('‹', `sb:${songbookSlug}:${page}`);
   kb.text('↑', 'sb_list');

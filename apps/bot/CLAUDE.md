@@ -15,8 +15,8 @@ This file overrides anything in the parent CLAUDE.md or general defaults — whe
      - Arrows: `→` `←` `↑` `↓` `⟶` `⟵` `↗` `↘`
      - Geometry: `◆` `◇` `◈` `■` `□` `▲` `△` `▼` `▽` `●` `○`
      - Decorative (use sparingly as accents): `★` `☆` `❖` `✦` `✧` `✓` `✗`
-     - Music (text-rendered on Telegram desktop + iOS — NOT in Unicode emoji list): `♩` `♯` `♭` `♮`
-       - **Do NOT use** `♪` `♫` `♬` — Apple pictographizes these to colored emoji.
+     - Music: `♩` `♫` `♯` `♭` `♮` — user-approved for this bot. `♪` `♬` may
+       render as colored emoji on iOS, so prefer the approved ones above.
    - **Before adding a new glyph**: test how it renders on iOS — Apple aggressively pictographizes anything that *looks* like a symbol. If it shows up colored/emoji-style, drop it.
    - Decoration belongs in typography (bold/italic, line breaks, separators), not pictograms.
    - **Custom Telegram Premium emoji** are allowed only after we ship a designed sticker pack with stable IDs. Until then, stick to the Unicode list above.
