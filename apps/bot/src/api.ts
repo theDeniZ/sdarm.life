@@ -54,6 +54,11 @@ export function createApiClient(baseUrl: string = DEFAULT_API_URL) {
       const params = new URLSearchParams({ q, limit: String(limit), offset: String(offset) });
       return get<ListResponse<SongSearchResultDto>>(`/songs/search?${params}`);
     },
+
+    /** Most recently added songs across all songbooks (DESC by created_at). */
+    getRecentSongs(limit: number = 20): Promise<unknown> {
+      return get<unknown>(`/songs/recent?limit=${limit}`);
+    },
   };
 }
 

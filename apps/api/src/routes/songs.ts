@@ -1,7 +1,7 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../types';
-import { ErrorSchema, listOf, PaginationQuery, SongSchema, SongSearchResultSchema } from '../schemas';
+import { ErrorSchema, listOf, PaginationQuery, SongRecentSchema, SongSchema, SongSearchResultSchema } from '../schemas';
 import * as repo from '../repositories/songs';
 
 // ── Search router ─────────────────────────────────────────────────────────────
@@ -31,6 +31,35 @@ songSearchRouter.openapi(searchSongsRoute, async (c) => {
   const db = drizzle(c.env.DB);
   const { q, limit, offset } = c.req.valid('query');
   return c.json(await repo.searchSongsGlobal(db, { q, limit, offset }), 200);
+});
+
+// ── Recent songs router ───────────────────────────────────────────────────────
+// Mounted at /songs/recent in index.ts — literal path, must come before /songs/{id}.
+// Used by the bot's notification cron.
+
+export const songRecentRouter = new OpenAPIHono<{ Bindings: Bindings }>();
+
+const listRecentSongsRoute = createRoute({
+  method: 'get',
+  path: '/',
+  tags: ['Songbooks'],
+  request: {
+    query: z.object({
+      limit: z.coerce.number().min(1).max(100).optional().openapi({ example: 20 }),
+    }),
+  },
+  responses: {
+    200: {
+      content: { 'application/json': { schema: z.array(SongRecentSchema) } },
+      description: 'Recently added songs across all songbooks (most recent first).',
+    },
+  },
+});
+
+songRecentRouter.openapi(listRecentSongsRoute, async (c) => {
+  const db = drizzle(c.env.DB);
+  const { limit } = c.req.valid('query');
+  return c.json(await repo.listRecentSongs(db, { limit }), 200);
 });
 
 // ── Single song router ────────────────────────────────────────────────────────

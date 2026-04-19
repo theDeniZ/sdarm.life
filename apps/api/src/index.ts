@@ -10,7 +10,7 @@ import configRouter from './routes/config';
 import imagesRouter from './routes/images';
 import subscribersRouter from './routes/subscribers';
 import songbooksRouter from './routes/songbooks';
-import songsRouter, { songSearchRouter } from './routes/songs';
+import songsRouter, { songSearchRouter, songRecentRouter } from './routes/songs';
 import adminPostsRouter from './routes/admin/posts';
 import adminConfigRouter from './routes/admin/config';
 import adminImagesRouter from './routes/admin/images';
@@ -61,6 +61,9 @@ v1.route('/songbooks', songbooksRouter);
 
 v1.use('/songs/search', cached(300)); // 5 min — search results vary by query, shorter TTL
 v1.route('/songs/search', songSearchRouter); // literal path — must be mounted before /songs/{id}
+
+v1.use('/songs/recent', cached(60)); // 1 min — bot cron polls every 10 min, fresh results matter
+v1.route('/songs/recent', songRecentRouter); // literal path — must be mounted before /songs/{id}
 
 v1.use('/songs/*', cached(3600));    // 1 hour — individual songs
 v1.route('/songs', songsRouter);

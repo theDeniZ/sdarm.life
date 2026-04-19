@@ -26,12 +26,19 @@ export interface Strings {
   btn_hide_chords: string;
   btn_search_global: string;
   btn_retry: string;
+  btn_open_song: string;
+  btn_mute_notifications: string;
+  btn_unmute_notifications: string;
 
   // ── Screens ───────────────────────────────────────────────────────────────
   welcome: string;
   songbooks_header: string;
   songbooks_empty: string;
   about_body: string;
+  about_notify_status: (on: boolean) => string;
+  notify_new_song_header: string;
+  notify_muted_confirm: string;
+  notify_unmuted_confirm: string;
 
   // ── Search ────────────────────────────────────────────────────────────────
   search_hint: string;
@@ -80,6 +87,9 @@ export const STR: Strings = {
   btn_hide_chords: 'Hide chords',
   btn_search_global: 'Search all collections',
   btn_retry: 'Try again',
+  btn_open_song: 'Open',
+  btn_mute_notifications: 'Stop notifications',
+  btn_unmute_notifications: 'Enable notifications',
 
   // Screens
   welcome: '*Breezify*\n_pocket hymnbook_\n\nBrowse or search:',
@@ -93,6 +103,10 @@ export const STR: Strings = {
     '',
     'Found a bug or want to add a song? Tap *Contact* below\\.',
   ].join('\n'),
+  about_notify_status: (on) => (on ? '_New\\-song notifications: on_' : '_New\\-song notifications: off_'),
+  notify_new_song_header: 'New song added',
+  notify_muted_confirm: '_Notifications muted\\. You can re\\-enable them in About\\._',
+  notify_unmuted_confirm: '_Notifications enabled\\._',
 
   // Search
   search_hint: [

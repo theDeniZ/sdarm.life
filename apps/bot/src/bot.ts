@@ -16,6 +16,7 @@ import {
   splitMessage,
 } from './format';
 import { storeCallbackPayload, readCallbackPayload } from './cb-store';
+import { recordUser, isUserMuted, muteUser, unmuteUser } from './users';
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 
@@ -122,8 +123,23 @@ function searchResultsKeyboard(items: { id: number; number: number; title: strin
   return kb;
 }
 
-function aboutKeyboard(contactUrl: string): InlineKeyboard {
-  return new InlineKeyboard().url(STR.btn_contact_link, contactUrl).row().text(STR.btn_back_menu, 'main_menu');
+function aboutKeyboard(contactUrl: string, muted: boolean): InlineKeyboard {
+  return new InlineKeyboard()
+    .url(STR.btn_contact_link, contactUrl)
+    .row()
+    .text(muted ? STR.btn_unmute_notifications : STR.btn_mute_notifications, 'notify_toggle')
+    .row()
+    .text(STR.btn_back_menu, 'main_menu');
+}
+
+async function showAbout(ctx: Context, kv: KVNamespace, contactUrl: string): Promise<void> {
+  const userId = ctx.from?.id;
+  const muted = userId ? await isUserMuted(kv, userId) : false;
+  const body = `${STR.about_body}\n\n${STR.about_notify_status(!muted)}`;
+  await editOrReply(ctx, body, {
+    parse_mode: 'MarkdownV2',
+    reply_markup: aboutKeyboard(contactUrl, muted),
+  });
 }
 
 // ── Screen renderers ──────────────────────────────────────────────────────────
@@ -328,8 +344,9 @@ export function createBot(env: Env): Bot {
   // ── Commands ───────────────────────────────────────────────────────────────
 
   bot.command('start', async (ctx) => {
-    // Remove any persistent Reply keyboard left over from older bot versions.
-    // Done via the menu render itself — no separate empty-message hack needed.
+    // Track this user as a notification subscriber (idempotent).
+    const userId = ctx.from?.id;
+    if (userId) recordUser(kv, userId).catch((err) => logError('recordUser', err, { userId }));
     await showMainMenu(ctx, kv);
   });
 
@@ -338,7 +355,7 @@ export function createBot(env: Env): Bot {
   });
 
   bot.command('about', async (ctx) => {
-    await ctx.reply(STR.about_body, { parse_mode: 'MarkdownV2', reply_markup: aboutKeyboard(contactUrl) });
+    await showAbout(ctx, kv, contactUrl);
   });
 
   bot.command('songbooks', async (ctx) => {
@@ -402,10 +419,37 @@ export function createBot(env: Env): Bot {
 
   bot.callbackQuery('about', async (ctx) => {
     await ctx.answerCallbackQuery();
-    await editOrReply(ctx, STR.about_body, {
-      parse_mode: 'MarkdownV2',
-      reply_markup: aboutKeyboard(contactUrl),
-    });
+    await showAbout(ctx, kv, contactUrl);
+  });
+
+  // notify_toggle — flip mute state from the About page
+  bot.callbackQuery('notify_toggle', async (ctx) => {
+    const userId = ctx.from?.id;
+    if (!userId) {
+      await ctx.answerCallbackQuery();
+      return;
+    }
+    const muted = await isUserMuted(kv, userId);
+    if (muted) {
+      await unmuteUser(kv, userId);
+      await ctx.answerCallbackQuery({ text: 'Notifications enabled' });
+    } else {
+      await muteUser(kv, userId);
+      await ctx.answerCallbackQuery({ text: 'Notifications muted' });
+    }
+    await showAbout(ctx, kv, contactUrl);
+  });
+
+  // notify_mute — quick mute from a notification message itself
+  bot.callbackQuery('notify_mute', async (ctx) => {
+    const userId = ctx.from?.id;
+    if (!userId) {
+      await ctx.answerCallbackQuery();
+      return;
+    }
+    await muteUser(kv, userId);
+    await ctx.answerCallbackQuery({ text: 'Notifications muted' });
+    await ctx.reply(STR.notify_muted_confirm, { parse_mode: 'MarkdownV2' });
   });
 
   bot.callbackQuery('sb_list', async (ctx) => {

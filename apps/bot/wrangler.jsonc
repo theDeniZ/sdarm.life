@@ -8,6 +8,12 @@
     "enabled": true
   },
 
+  // New-song notification cron — every 10 minutes.
+  // Polls /api/v1/songs/recent, broadcasts diff to all subscribed users.
+  "triggers": {
+    "crons": ["*/10 * * * *"]
+  },
+
   // Rate-limiting KV namespace.
   // Create with: wrangler kv namespace create BOT_RATE_KV
   // Then replace the id below with the output ID.

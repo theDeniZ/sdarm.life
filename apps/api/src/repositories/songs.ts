@@ -1,4 +1,4 @@
-import { and, asc, eq, like, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, like, or, sql } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import { songbooks, songParts, songSheets, songs } from '@sdarm/db';
 
@@ -131,6 +131,35 @@ export async function getSongById(db: DrizzleD1Database, id: number) {
     parts: parts.map(({ songId: _s, ...p }) => p),
     sheets: sheets.map(({ songId: _s, uploadedAt: _u, ...sh }) => sh),
   };
+}
+
+/**
+ * Most recently created songs across all songbooks.
+ * Used by the bot's notification cron to discover newly added songs.
+ * Ordered by `created_at DESC, id DESC` so a tied second resolves deterministically.
+ */
+export async function listRecentSongs(db: DrizzleD1Database, opts: { limit?: number } = {}) {
+  const { limit = 20 } = opts;
+  const rows = await db
+    .select({
+      id: songs.id,
+      number: songs.number,
+      title: songs.title,
+      author: songs.author,
+      createdAt: songs.createdAt,
+      sbId: songbooks.id,
+      sbTitle: songbooks.title,
+      sbSlug: songbooks.slug,
+    })
+    .from(songs)
+    .innerJoin(songbooks, eq(songs.songbookId, songbooks.id))
+    .orderBy(desc(songs.createdAt), desc(songs.id))
+    .limit(limit);
+
+  return rows.map(({ sbId, sbTitle, sbSlug, ...r }) => ({
+    ...r,
+    songbook: { id: sbId, title: sbTitle, slug: sbSlug },
+  }));
 }
 
 export async function searchSongsGlobal(
