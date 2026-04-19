@@ -155,7 +155,7 @@ export const STR: Strings = {
     "_Or just type — I\\'ll find it\\._",
     '',
     '*Icons*',
-    '`♯ ♯✓` · show / hide chords',
+    '`♩ ♩✓` · show / hide chords',
     '`‹ ›` · previous / next page',
     '`↑` · go up one level',
     '`□` · open full screen',
