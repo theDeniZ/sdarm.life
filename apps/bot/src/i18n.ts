@@ -77,7 +77,7 @@ export const STR: Strings = {
   btn_settings: 'Settings',
   btn_contact_link: 'Contact',
   btn_back_menu: '↑',
-  btn_resume: (title) => `Resume · ${title}`,
+  btn_resume: (title) => title,
   btn_search_global: 'Search all collections',
   btn_retry: 'Try again',
   btn_mute_notifications: 'Stop notifications',
