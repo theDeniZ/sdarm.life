@@ -1292,7 +1292,8 @@ a {
 html.embed .navbar-wrap,
 html.embed .reader-toolbar-bar,
 html.embed .reader-sidebar,
-html.embed .sidebar-overlay {
+html.embed .sidebar-overlay,
+html.embed .mode-bar {
   display: none !important;
 }
 
@@ -1302,4 +1303,13 @@ html.embed .reader-wrap {
 
 html.embed .reader-body {
   margin-left: 0 !important;
+}
+
+/* Tighten the song view inside embed — Telegram already provides screen padding */
+html.embed .reader-content {
+  padding: 1.5rem 1.25rem 3rem !important;
+}
+
+html.embed .song-header {
+  margin-bottom: 1rem !important;
 }
