@@ -49,8 +49,10 @@ function mainMenuKeyboard(resume?: { title: string }): InlineKeyboard {
     kb.text(STR.btn_resume(label), 'resume').row();
   }
 
-  // Two short labels per row — primary actions side by side
-  kb.text(STR.btn_songbooks, 'sb_list').text(STR.btn_search, 'search_hint').row();
+  // Each action on its own row — full-width buttons read better than narrow side-by-side ones
+  kb.text(STR.btn_songbooks, 'sb_list').row();
+  kb.text(STR.btn_search, 'search_hint').row();
+  kb.text(STR.btn_settings, 'settings').row();
   kb.text(STR.btn_about, 'about');
   return kb;
 }
@@ -127,22 +129,34 @@ function searchResultsKeyboard(items: { id: number; number: number; title: strin
   return kb;
 }
 
-function aboutKeyboard(contactUrl: string, muted: boolean): InlineKeyboard {
+function aboutKeyboard(contactUrl: string): InlineKeyboard {
   return new InlineKeyboard()
     .url(STR.btn_contact_link, contactUrl)
     .row()
+    .text(STR.btn_back_menu, 'main_menu');
+}
+
+async function showAbout(ctx: Context, contactUrl: string): Promise<void> {
+  await editOrReply(ctx, STR.about_body, {
+    parse_mode: 'MarkdownV2',
+    reply_markup: aboutKeyboard(contactUrl),
+  });
+}
+
+function settingsKeyboard(muted: boolean): InlineKeyboard {
+  return new InlineKeyboard()
     .text(muted ? STR.btn_unmute_notifications : STR.btn_mute_notifications, 'notify_toggle')
     .row()
     .text(STR.btn_back_menu, 'main_menu');
 }
 
-async function showAbout(ctx: Context, kv: KVNamespace, contactUrl: string): Promise<void> {
+async function showSettings(ctx: Context, kv: KVNamespace): Promise<void> {
   const userId = ctx.from?.id;
   const muted = userId ? await isUserMuted(kv, userId) : false;
-  const body = `${STR.about_body}\n\n${STR.about_notify_status(!muted)}`;
+  const body = `${STR.settings_body}\n\n${STR.notify_status(!muted)}`;
   await editOrReply(ctx, body, {
     parse_mode: 'MarkdownV2',
-    reply_markup: aboutKeyboard(contactUrl, muted),
+    reply_markup: settingsKeyboard(muted),
   });
 }
 
@@ -377,7 +391,11 @@ export function createBot(env: Env): Bot {
   });
 
   bot.command('about', async (ctx) => {
-    await showAbout(ctx, kv, contactUrl);
+    await showAbout(ctx, contactUrl);
+  });
+
+  bot.command('settings', async (ctx) => {
+    await showSettings(ctx, kv);
   });
 
   bot.command('songbooks', async (ctx) => {
@@ -441,10 +459,15 @@ export function createBot(env: Env): Bot {
 
   bot.callbackQuery('about', async (ctx) => {
     await ctx.answerCallbackQuery();
-    await showAbout(ctx, kv, contactUrl);
+    await showAbout(ctx, contactUrl);
   });
 
-  // notify_toggle — flip mute state from the About page
+  bot.callbackQuery('settings', async (ctx) => {
+    await ctx.answerCallbackQuery();
+    await showSettings(ctx, kv);
+  });
+
+  // notify_toggle — flip mute state from the Settings page
   bot.callbackQuery('notify_toggle', async (ctx) => {
     const userId = ctx.from?.id;
     if (!userId) {
@@ -459,7 +482,7 @@ export function createBot(env: Env): Bot {
       await muteUser(kv, userId);
       await ctx.answerCallbackQuery({ text: 'Notifications muted' });
     }
-    await showAbout(ctx, kv, contactUrl);
+    await showSettings(ctx, kv);
   });
 
   // notify_mute — quick mute from a notification message itself

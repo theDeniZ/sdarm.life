@@ -16,6 +16,7 @@ export interface Strings {
   btn_songbooks: string;
   btn_search: string;
   btn_about: string;
+  btn_settings: string;
   btn_contact_link: string;
   btn_back_menu: string;
   btn_back_list: string;
@@ -37,7 +38,8 @@ export interface Strings {
   songbooks_header: string;
   songbooks_empty: string;
   about_body: string;
-  about_notify_status: (on: boolean) => string;
+  settings_body: string;
+  notify_status: (on: boolean) => string;
   notify_new_song_header: string;
   notify_muted_confirm: string;
   notify_unmuted_confirm: string;
@@ -78,6 +80,7 @@ export const STR: Strings = {
   btn_songbooks: 'Songbooks',
   btn_search: 'Search',
   btn_about: 'About',
+  btn_settings: 'Settings',
   btn_contact_link: 'Contact',
   btn_back_menu: '‹ Menu',
   btn_back_list: '‹ Back to list',
@@ -107,7 +110,8 @@ export const STR: Strings = {
     '',
     'Found a bug or want to add a song? Tap *Contact* below\\.',
   ].join('\n'),
-  about_notify_status: (on) => (on ? '_New\\-song notifications: on_' : '_New\\-song notifications: off_'),
+  settings_body: '*Settings*',
+  notify_status: (on) => (on ? '_New\\-song notifications: on_' : '_New\\-song notifications: off_'),
   notify_new_song_header: 'New song added',
   notify_muted_confirm: '_Notifications muted\\. You can re\\-enable them in About\\._',
   notify_unmuted_confirm: '_Notifications enabled\\._',
@@ -152,7 +156,7 @@ export const STR: Strings = {
   help: [
     '*Breezify · pocket hymnbook*',
     '',
-    '`/start` · `/songbooks` · `/about`',
+    '`/start` · `/songbooks` · `/settings` · `/about`',
     '',
     '*Search:*',
     '`42` · number',
