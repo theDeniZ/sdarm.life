@@ -39,6 +39,17 @@ export default async function LocaleLayout({
   return (
     <html lang={locale}>
       <body>
+        {/* Pre-hydration embed class: if ?embed=1 is in the URL, tag <html>
+            synchronously so the first paint already hides the chrome. Avoids
+            the flash of full-site UI inside Telegram's WebView before React
+            hydrates. EmbedBoot still adds the class from Telegram WebApp
+            initData for cases where ?embed=1 is lost (locale redirects). */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html:
+              "try{if(new URLSearchParams(location.search).get('embed')==='1')document.documentElement.classList.add('embed')}catch(e){}",
+          }}
+        />
         {/* Telegram Mini App SDK — populates window.Telegram.WebApp inside Telegram clients.
             Outside Telegram it's a tiny no-op script. EmbedBoot uses it to detect
             "we're inside Telegram" and force embed mode even when ?embed=1 is missing

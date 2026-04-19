@@ -1284,28 +1284,23 @@ a {
 [data-theme='light'] .sheet-display { background: var(--bg-section); }
 
 /* ─── Embed mode (?embed=1 OR inside Telegram WebApp) ────────────────────────
- * EmbedBoot adds the .embed class to <html> when either signal is detected.
- * Goal: render the song page as a single, clean .reader-content block —
- * everything else (navbar, sidebar, toolbars, breadcrumbs, mode switcher) is
- * stripped, and the wrapper covers the entire viewport.
+ * The inline <script> in [locale]/layout.tsx adds .embed to <html> instantly
+ * from ?embed=1. EmbedBoot adds it later from Telegram WebApp.initData.
  *
- * Outside embed mode none of these rules apply, so the regular site visit
- * at songs.sdarm.life keeps the full chrome.
+ * Goal: render the song page as a single, clean .reader-content block. This
+ * is an ALLOWLIST — only elements on the path body > .reader-wrap >
+ * .reader-body > .reader-main > .reader-content are kept. Any chrome added
+ * later (new navbars, banners, drawers) is hidden by default without a rule.
  */
 
-/* Hide every chrome element on the path AROUND .reader-content */
-html.embed .navbar-wrap,
-html.embed .reader-toolbar-bar,
-html.embed .reader-sidebar,
-html.embed .sidebar-overlay,
-html.embed .reader-breadcrumb,
-html.embed .reader-icon-btn,
-html.embed .mode-bar {
+html.embed body > *:not(.reader-wrap),
+html.embed .reader-wrap > *:not(.reader-body),
+html.embed .reader-body > *:not(.reader-main),
+html.embed .reader-main > *:not(.reader-content),
+html.embed .song-view > .mode-bar {
   display: none !important;
 }
 
-/* Make the path TO .reader-content fill the viewport — fixed-position so
-   no parent margin/padding leaks into the embed view. */
 html.embed body {
   margin: 0 !important;
   padding: 0 !important;
