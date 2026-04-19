@@ -4,7 +4,7 @@ import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchConfig, r2url, WEB_URL } from '../../lib/api';
 import ScriptureVerseSection from '../../components/ScriptureVerseSection';
-import GlaubensLongRead from '../../components/GlaubensLongRead';
+import GlaubensLongRead, { type GlaubensArticle } from '../../components/GlaubensLongRead';
 
 export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
@@ -65,6 +65,9 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
 
   const config = await fetchConfig();
 
+  const tGlaubens = await getTranslations('web.about.glaubens');
+  const articles = tGlaubens.raw('articles') as GlaubensArticle[];
+
   const imageUrl =
     (config?.about_image_key ? r2url(config.about_image_key, { w: 800 }) : null) ??
     'https://images.unsplash.com/photo-1438232992991-995b671e5cdf?w=800&q=85&fit=crop';
@@ -91,7 +94,12 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </section>
 
-      <GlaubensLongRead />
+      <GlaubensLongRead
+        articles={articles}
+        ariaNav={tGlaubens('navAria')}
+        ariaOpen={tGlaubens('openAria')}
+        ariaClose={tGlaubens('closeAria')}
+      />
 
       <ScriptureVerseSection locale={locale} />
 

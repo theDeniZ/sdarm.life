@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Serif+Display:ital@0;1&family=Bebas+Neue&family=Oswald:wght@200;300&family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&display=swap');
+/* Shared fonts inherited from @sdarm/ui tokens.css. Only treasures-specific fonts declared here: */
+@import '@fontsource/lora/400.css';
+@import '@fontsource/lora/400-italic.css';
+@import '@fontsource/lora/500.css';
+@import '@fontsource/inter/300.css';
+@import '@fontsource/inter/400.css';
 
 *,
 *::before,
@@ -302,7 +307,7 @@ a {
 }
 
 .item-lang {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 0.72rem;
   color: rgba(201, 169, 110, 0.55);
   letter-spacing: 0.1em;
@@ -719,6 +724,7 @@ a {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 20;
   overflow: hidden;
   background: var(--reader-bg);
   transition: background 0.25s, color 0.25s;

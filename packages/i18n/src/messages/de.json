@@ -1,7 +1,6 @@
 {
   "common": {
     "nav": {
-      "news": "Neues",
       "songs": "Lieder",
       "events": "Events",
       "treasures": "Schätze",
@@ -17,12 +16,13 @@
       "orgRegion": "Deutschland & Österreich",
       "newsletter": "Newsletter",
       "emailPlaceholder": "E-Mail-Adresse",
-      "subscribeSuccess": "Vielen Dank für Ihre Anmeldung!",
+      "subscribeButton": "Abonnieren",
+      "subscribeSuccess": "Bitte bestätigen Sie Ihre Anmeldung per E-Mail.",
       "subscribeDuplicate": "Diese E-Mail ist bereits registriert.",
       "subscribeError": "Fehler. Bitte versuchen Sie es später.",
       "locationPlaceholder": "Stadt oder PLZ",
       "locationUpdateAria": "Standort aktualisieren",
-      "copyright": "© {year} SDARM.life — Siebenten-Tags-Adventisten Reformationsbewegung",
+      "copyright": "© {year} SDARM.life",
       "allRightsReserved": "Alle Rechte vorbehalten"
     },
     "clock": {
@@ -38,11 +38,16 @@
     "comingSoon": "Demnächst",
     "back": "← Zurück",
     "notFound": {
-      "title": "Seite nicht gefunden",
-      "description": "Die angeforderte Seite existiert nicht.",
-      "home": "Zur Startseite"
+      "eyebrow": "404 · Verloren gegangen",
+      "title": "Diese Seite hat sich <em>verirrt</em>",
+      "verseText": "Welcher ist unter euch, der hundert Schafe hat, und wenn er deren eines verliert, der nicht die neunundneunzig in der Wüste lasse und hingehe nach dem verlorenen, bis er es findet?",
+      "verseRef": "Lukas 15,4",
+      "backPrompt": "Hier sind ein paar Wege zurück:",
+      "homeLink": "Startseite",
+      "aboutLink": "Glauben",
+      "kontaktLink": "Kontakt"
     },
-    "langSwitchAria": "Switch to {lang}"
+    "langSwitchAria": "Wechseln zu {lang}"
   },
   "web": {
     "metadata": {
@@ -59,10 +64,49 @@
     "verse": {
       "eyebrow": "Wort der Stunde"
     },
+    "heroWelcome": {
+      "badge": "Seit 1925 · Bibeltreu · Weltweit",
+      "title": "Gott <em>liebt</em> dich sehr",
+      "subtitle": "Die Siebenten-Tags-Adventisten Reformationsbewegung — bibelgegründet, sabbathaltend, weltweit verbunden.",
+      "ctaPrimary": "Über uns",
+      "ctaSecondary": "Kontakt"
+    },
+    "releases": {
+      "title": "Releases",
+      "book": {
+        "label": "Bibliothek · Neu",
+        "titleFallback": "Aktuelle Lektüre",
+        "authorFallback": "Aus unserer Bibliothek",
+        "sub": "{author} — jetzt in der Bibliothek verfügbar"
+      },
+      "faith": {
+        "label": "Glaube · 25 Punkte",
+        "title": "Grundlagen unseres Glaubens",
+        "sub": "jetzt entdecken"
+      },
+      "quote": {
+        "saveImage": "Als Bild speichern",
+        "close": "Schließen"
+      }
+    },
     "post": {
       "content": "Inhalt",
       "video": "Video",
       "morePosts": "Weitere Beiträge"
+    },
+    "kontakt": {
+      "eyebrow": "Kontakt",
+      "heroTitle": "Schreiben Sie <em>uns</em>",
+      "heroSubtitle": "Per E-Mail, über soziale Netzwerke oder besuchen Sie eine unserer Gemeinden in Deutschland, Österreich oder der Schweiz.",
+      "scrollHint": "Mehr",
+      "onlineEyebrow": "Online",
+      "onlineTitle": "Direkt schreiben",
+      "onlineSubtitle": "Wir antworten in der Regel innerhalb von ein bis zwei Werktagen.",
+      "vorOrtEyebrow": "Vor Ort",
+      "vorOrtTitle": "Wo wir uns <em>treffen</em>",
+      "vorOrtSubtitle": "Sabbatgottesdienst jeden Samstag — schauen Sie gerne vorbei.",
+      "directions": "Wegbeschreibung",
+      "address": "Adresse"
     },
     "about": {
       "title": "Über uns",
@@ -78,7 +122,432 @@
       "glaubensTitle": "Punkte unseres Glaubens",
       "glaubensSub": "25 Grundsätze, die unser Denken und Leben prägen.",
       "metaTitle": "Über uns – Siebenten-Tags-Adventisten Reformationsbewegung",
-      "metaDescription": "Lernen Sie die Siebenten-Tags-Adventisten Reformationsbewegung kennen – 25 Glaubensgrundsätze, Sabbat-Beobachtung, die Reformationsbotschaft und bibeltreues Christentum in Deutschland & Österreich."
+      "metaDescription": "Lernen Sie die Siebenten-Tags-Adventisten Reformationsbewegung kennen – 25 Glaubensgrundsätze, Sabbat-Beobachtung, die Reformationsbotschaft und bibeltreues Christentum in Deutschland & Österreich.",
+      "glaubens": {
+        "navAria": "Glaubenspunkte Navigation",
+        "openAria": "Ausführlichere Darstellung",
+        "closeAria": "Schließen",
+        "articles": [
+          {
+            "num": "01",
+            "navLabel": "Gott, der Vater",
+            "titlePrefix": "Gott, der ",
+            "accent": "Vater",
+            "titleSuffix": "",
+            "body": "Es gibt nur einen Gott, den ewigen Vater, den Schöpfer, eine Persönlichkeit, ein geistiges Wesen, unendlich in Liebe und Weisheit, allmächtig, allgegenwärtig, allwissend, unsterblich.",
+            "refs": "2Mo 20,2 · Jes 45,5–12 · Joh 4,24 · Ps 139,1–12",
+            "detail": [
+              {
+                "text": "Die Bibel offenbart einen Gott aus drei göttlichen Persönlichkeiten: Vater, Sohn und Heiliger Geist — in Einheit handelnd. Gott ist ewig, unsterblich, unsichtbar, allgegenwärtig, allwissend, allmächtig, unveränderlich, heilig, gerecht, barmherzig und Liebe.",
+                "refs": "5Mo 6,4 · 1Kor 8,4 · 1Mo 1,26 · 2Kor 13,13 · Eph 2,18 · Ps 90,2 · 1Tim 1,17 · Ps 139,7–12 · Joh 3,16 · 1Joh 4,8"
+              },
+              {
+                "text": "Der Vater ist die erste Person der Gottheit. Durch Christus und den Heiligen Geist ist er Schöpfer und Erhalter aller Dinge. Er ist Vater für alle, die Christus als persönlichen Erlöser annehmen und seinen Geboten gehorchen. Das auffallendste Merkmal des Vaters — und das Herzstück des Erlösungsplans — ist seine Liebe.",
+                "refs": "Mt 3,17; 11,25 · Joh 15,1 · Hebr 1,1–3 · Kol 1,15–17 · Mt 5,48 · Joh 1,12–13 · Röm 8,15–17 · Joh 3,16 · 1Joh 4,8–13"
+              }
+            ]
+          },
+          {
+            "num": "02",
+            "navLabel": "Jesus Christus, der Sohn",
+            "titlePrefix": "Jesus Christus, der ",
+            "accent": "Sohn",
+            "titleSuffix": "",
+            "body": "Jesus Christus ist der Sohn Gottes, in seiner Natur eins mit dem ewigen Vater. Durch Christus wurde alles geschaffen. Er starb für unsere Sünden am Kreuz, stand vom Tode wieder auf und fuhr hinauf zum Vater, um für uns zu vermitteln.",
+            "refs": "Hebr 1,1–3 · Kol 1,15–17 · Joh 1,14 · 1Tim 2,5 · Hebr 7,25",
+            "detail": [
+              {
+                "text": "Jesus Christus ist der Sohn Gottes, in seiner Natur eins mit dem ewigen Vater. Durch Christus wurde alles geschaffen. Er behielt die göttliche Natur, nahm die menschliche Natur an — ohne Sünde. Er starb für unsere Sünden am Kreuz, stand vom Tode wieder auf und fuhr hinauf zum Vater, um für uns zu vermitteln.",
+                "refs": "Hebr 1,1–3.5 · Kol 1,15–17 · Mt 1,18–23 · Joh 1,14 · 1Tim 2,5; 3,16 · Hebr 7,25 · Joh 14,6 · Apg 4,12"
+              }
+            ]
+          },
+          {
+            "num": "03",
+            "navLabel": "Der Heilige Geist",
+            "titlePrefix": "Der Heilige ",
+            "accent": "Geist",
+            "titleSuffix": "",
+            "body": "Der Heilige Geist ist Christi Stellvertreter auf Erden und ist eines Sinnes mit dem Vater und dem Sohn. Er ist der Erneuerer im Werk der Erlösung. Diese drei Persönlichkeiten — Vater, Sohn und Heiliger Geist — bilden die Gottheit.",
+            "refs": "Joh 3,5–8 · Joh 14,16.26 · 2Kor 13,14 · Mt 28,19",
+            "detail": [
+              {
+                "text": "Der Heilige Geist, Stellvertreter Christi und des Vaters, ist die dritte Person der Gottheit. Er ist, neben Christus, die größte aller Gaben Gottes für den Menschen. Das erste Werk des Heiligen Geistes ist es, uns unserer Sünden zu überführen und uns zu Christus zu führen.",
+                "refs": "Joh 14,16–18; 16,8 · Mt 28,19–20 · 1Joh 3,24; 4,12–13 · Eph 3,16–17 · Röm 8,9–11"
+              },
+              {
+                "text": "Durch den Heiligen Geist ist Christus allen Menschen erreichbar. Unsere Einheit mit Christus durch den Heiligen Geist ist das Pfand für unsere Auferstehung. Bevor jemand die Gaben des Geistes empfängt, muss er zuerst die Frucht des Heiligen Geistes in seinem Leben offenbaren.",
+                "refs": "Röm 8,9–11 · Joh 11,25–26 · 1Joh 4,13 · Eph 1,13–14 · Gal 5,22–25 · 1Kor 12,7–11"
+              }
+            ]
+          },
+          {
+            "num": "04",
+            "navLabel": "Die Heilige Schrift",
+            "titlePrefix": "Die Heilige ",
+            "accent": "Schrift",
+            "titleSuffix": "",
+            "body": "Die Heilige Schrift, bestehend aus dem Alten und Neuen Testament, ist das Wort Gottes. Sie entstand durch göttliche Eingebung, enthält die vollständige Offenbarung des Willens Gottes und ist die einzige unfehlbare Regel des Glaubens und der Praxis.",
+            "refs": "Joh 5,39 · 2Pet 1,19–21 · 2Tim 3,15–17 · Mt 22,29",
+            "detail": [
+              {
+                "text": "Die Heilige Schrift, Gottes Schreiben der Liebe, erklärt den Ursprung, den Fall und die Erlösung der Menschheit. Sie beinhaltet die völlig ausreichende Offenbarung des Willens Gottes — unser einziger unfehlbarer Maßstab des Glaubens und der Taten. Daher muss unser Stand vor Gott und unsere Beziehung zueinander auf einem „So spricht der Herr\" gegründet sein.",
+                "refs": "Joh 5,39 · Ps 89,35 · Mt 22,29 · Lk 24,44–45 · Ps 119,104–105 · Jes 8,20 · 2Tim 3,15–17 · Joh 8,32; 17,17"
+              },
+              {
+                "text": "Durch die Hilfe des Heiligen Geistes erklärt sich die Bibel selbst und braucht keine menschliche Überlieferung, um sie auszulegen. Wenn wir im Einklang mit der Heiligen Schrift leben, gehören uns die Verheißungen und Segnungen des Herrn.",
+                "refs": "Jes 28,10; 34,16 · 2Pet 1,19–21 · Joh 16,13 · Lk 11,28 · Mt 4,4; 7,24–25 · Joh 6,63"
+              }
+            ]
+          },
+          {
+            "num": "05",
+            "navLabel": "Die Zehn Gebote",
+            "titlePrefix": "Die Zehn ",
+            "accent": "Gebote",
+            "titleSuffix": "",
+            "body": "Das Moralgesetz, die Zehn Gebote aus 2. Mose 20, sind der Ausdruck des Willens Gottes. Es umfasst die Pflichten gegenüber Gott und dem Nächsten, bleibt unveränderlich und für alle Menschen zu allen Zeiten verbindlich.",
+            "refs": "Mt 5,17–20 · 1Joh 2,3–6 · Röm 2,13",
+            "detail": [
+              {
+                "text": "Das Moralgesetz, die Zehn Gebote aus 2. Mose 20,1–17, sind der Ausdruck des Willens Gottes. Es umfasst die Pflichten gegenüber Gott und dem Nächsten, bleibt unveränderlich und für alle Menschen zu allen Zeiten verbindlich und hat Vorrang vor menschlichen Gesetzen.",
+                "refs": "Mt 5,17–20; 7,21; 19,17; 22,36–40 · 1Joh 2,3–6; 5,1–3 · Röm 2,13"
+              },
+              {
+                "text": "Das Übertreten eines Gebotes bedeutet Sünde. Die Sünde hat den Tod als Lohn. Erlösung kommt durch Christus, nicht durch Gesetzeserfüllung — sie befähigt jedoch zum Gehorsam und befreit von der Verdammnis.",
+                "refs": "Joh 8,11 · Hebr 10,26"
+              }
+            ]
+          },
+          {
+            "num": "06",
+            "navLabel": "Der Sabbat",
+            "titlePrefix": "Der ",
+            "accent": "Sabbat",
+            "titleSuffix": "",
+            "body": "Das vierte Gebot fordert die Beobachtung des siebenten Tags — des Sabbat. Er ist ein heiliger Ruhetag, der an die Schöpfung erinnert und Neuschöpfung, Erlösung und Heiligung bedeutet.",
+            "refs": "1Mo 2,1–3 · 2Mo 20,8–11 · Hes 20,12 · Mk 2,28",
+            "detail": [
+              {
+                "text": "Das vierte Gebot des Moralgesetzes Gottes fordert die Beobachtung des siebenten Tags — des Sabbat. Er ist ein heiliger Ruhetag, der an die Schöpfung erinnert und Neuschöpfung, Erlösung und Heiligung bedeutet. Er ist ein geistliches Einsetzen, dem Gottesdienst und dem Bibelstudium gewidmet.",
+                "refs": "1Mo 2,1–3 · 2Mo 20,1–17 · Hes 20,12 · Jes 58,13–14 · Mk 2,28 · Hebr 4,1–10"
+              },
+              {
+                "text": "Die wahre Sabbatbeobachtung erfordert das Aufhören jeder weltlichen Arbeit von Freitagsuntergang bis Samstagabend. Die Vorbereitungen müssen vor Sabbatbeginn abgeschlossen sein.",
+                "refs": "3Mo 23,32 · 2Mo 16,22–23 · Lk 23,54 · Mk 16,1"
+              },
+              {
+                "text": "Da Christus und die Apostel — sowohl vor als auch nach der Kreuzigung und Auferstehung — den Sabbat gehalten haben, ist und bleibt er der wahre Ruhetag.",
+                "refs": "Lk 23,56 · Apg 13,42.44; 16,13; 17,2; 18,4; 22,12; 25,7–8"
+              }
+            ]
+          },
+          {
+            "num": "07",
+            "navLabel": "Die Sonntagsheiligung",
+            "titlePrefix": "Die ",
+            "accent": "Sonntagsheiligung",
+            "titleSuffix": "",
+            "body": "Der erste Tag der Woche, allgemein Sonntag genannt, war im Altertum der Anbetung der Sonne geweiht. In der Heiligen Schrift findet sich kein biblisches Fundament für die Sonntagsheiligung.",
+            "refs": "Mt 15,9.13",
+            "detail": [
+              {
+                "text": "Der erste Tag der Woche, allgemein Sonntag genannt, war im Altertum der Anbetung der Sonne geweiht. Als das Christentum von den apostolischen Lehren abwich, wich der siebente Tag dem ersten Tag der Woche. Der Sonntag wurde — zusammen mit anderen heidnischen Bräuchen — von der christlichen Kirche übernommen.",
+                "refs": "Mt 15,9.13"
+              },
+              {
+                "text": "In der Heiligen Schrift findet sich kein biblisches Fundament für die Sonntagsheiligung."
+              }
+            ]
+          },
+          {
+            "num": "08",
+            "navLabel": "Das Zeremonialgesetz",
+            "titlePrefix": "Das ",
+            "accent": "Zeremonialgesetz",
+            "titleSuffix": "",
+            "body": "Das Zeremonialgesetz des Alten Testaments wies auf den Messias. Es kennzeichnete das Werk Christi, und seine Anforderungen endeten am Kreuz.",
+            "refs": "Hebr 10,1.9–10 · Kol 2,14.16 · Gal 4,10–11",
+            "detail": [
+              {
+                "text": "Das Zeremonialgesetz des Alten Testaments, dem jüdischen Volk eingeschärft, wies auf den Messias. Es kennzeichnete das Werk Christi, und seine Anforderungen endeten am Kreuz. Dieses Zeremonialgesetz — einschließlich der Zeremonial-Sabbate und jüdischen Feste — darf nicht mit dem Moralgesetz und dem Sabbat des vierten Gebotes verwechselt werden.",
+                "refs": "Hebr 10,1.9–10 · Kol 2,14.16 · Gal 4,10–11"
+              }
+            ]
+          },
+          {
+            "num": "09",
+            "navLabel": "Die Gnade und ihre Mittel",
+            "titlePrefix": "Die ",
+            "accent": "Gnade",
+            "titleSuffix": " und ihre Mittel",
+            "body": "Gnade bedeutet „unverdiente Gunst\". Gott beweist seine Liebe, indem er dem sündigen Menschen unverdient Erlösung vom Tode durch Jesus Christus anbietet.",
+            "refs": "Röm 10,13–18 · Joh 14,26 · 2Kor 5,17–20 · Apg 2,38–42",
+            "detail": [
+              {
+                "text": "Gnade bedeutet „unverdiente Gunst\". Der Mensch muss die Folgen der Sünde — den Tod — tragen. Gott beweist seine Liebe, indem er dem sündigen Menschen unverdient Erlösung vom Tode durch Jesus Christus anbietet. Die Erlösung geschieht, wenn Sünder zu Christus gezogen werden durch: a) das Wort Gottes, b) den Heiligen Geist, c) den Evangeliumsdienst.",
+                "refs": "Röm 10,13–18 · Joh 14,26; 16,13 · 2Kor 5,17–20 · Apg 2,38–42"
+              }
+            ]
+          },
+          {
+            "num": "10",
+            "navLabel": "Die Wiedergeburt",
+            "titlePrefix": "Die ",
+            "accent": "Wiedergeburt",
+            "titleSuffix": "",
+            "body": "Um der Sünde und ihren Folgen zu entfliehen, muss der Mensch die Erfahrung der Wiedergeburt machen — eine Lebensumwandlung. Das neue Leben kommt durch den Glauben an Jesus Christus.",
+            "refs": "Mt 1,21 · Joh 3,3 · Röm 2,4 · 1Pet 1,22 · Gal 2,20",
+            "detail": [
+              {
+                "text": "Um der Sünde und ihren Folgen zu entfliehen, muss der Mensch die Erfahrung der Wiedergeburt machen — eine Lebensumwandlung. Wenn Menschen Buße tun und dem Geist erlauben, auf ihre Herzen einzuwirken, verlangen sie nach einem gehorsamen Leben nach dem Willen Gottes. Die Schrift nennt diese Erfahrung „Wiedergeburt\". Das neue Leben kommt durch den Glauben an Jesus Christus.",
+                "refs": "Mt 1,21 · Joh 3,3 · Röm 2,4 · Joh 16,8 · Apg 2,37–38 · 1Joh 2,3.6 · Joh 16,13 · 1Pet 1,22 · Gal 2,20 · Hebr 12,2 · Röm 1,17 · Phil 4,13"
+              }
+            ]
+          },
+          {
+            "num": "11",
+            "navLabel": "Die Taufe",
+            "titlePrefix": "Die ",
+            "accent": "Taufe",
+            "titleSuffix": "",
+            "body": "Diejenigen, die das zurechnungsfähige Alter erreicht haben und die Wiedergeburt erlebt haben, sollten durch Untertauchen im Namen des Vaters, des Sohnes und des Heiligen Geistes getauft werden.",
+            "refs": "Apg 2,38 · Mk 16,16 · Röm 6,3–9 · Kol 2,12",
+            "detail": [
+              {
+                "text": "Diejenigen, die das zurechnungsfähige Alter erreicht haben und die Wiedergeburt erlebt haben, sollten durch Untertauchen im Namen des Vaters, des Sohnes und des Heiligen Geistes getauft werden. Dies stellt den Tod, das Begräbnis und die Auferstehung Christi dar sowie den Tod des „alten Selbst\" und die Auferstehung des „neuen Selbst\" zu einem erneuerten Leben in Christus.",
+                "refs": "Apg 2,38 · Mk 16,16 · Röm 6,3–9 · Kol 2,12"
+              }
+            ]
+          },
+          {
+            "num": "12",
+            "navLabel": "Die Verordnung der Demut",
+            "titlePrefix": "Die Verordnung der ",
+            "accent": "Demut",
+            "titleSuffix": "",
+            "body": "Die Fußwaschung ist eine Verordnung der Demut, welche dem heiligen Abendmahl vorausgeht. Christus setzte diese Verordnung ein, um Demut, Gleichheit, brüderliche Liebe und Einigkeit in Christus zu lehren.",
+            "refs": "Joh 13,1–17 · Mt 5,23–24",
+            "detail": [
+              {
+                "text": "Die Fußwaschung ist eine Verordnung der Demut, welche dem heiligen Abendmahl vorausgeht. Christus setzte diese Verordnung ein und übergab sie der christlichen Gemeinde, um Demut, Gleichheit, brüderliche Liebe und Einigkeit in Christus zu lehren. Eine Versöhnung unter den Gläubigen soll dieser Praxis vorausgehen.",
+                "refs": "Joh 13,1–17 · Mt 5,23–24"
+              }
+            ]
+          },
+          {
+            "num": "13",
+            "navLabel": "Das heilige Abendmahl",
+            "titlePrefix": "Das heilige ",
+            "accent": "Abendmahl",
+            "titleSuffix": "",
+            "body": "Wenn Gläubige ungesäuertes Brot und unvergorenen Wein nehmen — als Sinnbilder des Leibes und Blutes Christi —, gedenken sie seiner Leiden und seines Todes.",
+            "refs": "Mt 26,26–28 · 1Kor 10,16–17 · 1Kor 11,23–29",
+            "detail": [
+              {
+                "text": "Wenn Gläubige ungesäuertes Brot und unvergorenen Wein nehmen — als Sinnbilder des Leibes und Blutes Christi —, gedenken sie seiner Leiden und seines Todes. Die Bedeutung dieser Verordnung zeigt an, dass nur Mitglieder, die in gutem und regelmäßigem Verhältnis zum Leib Christi stehen, teilnehmen dürfen.",
+                "refs": "Mt 26,26–28 · 1Kor 10,16–17; 12,20 · Lk 22,11 · 1Kor 11,23–29"
+              }
+            ]
+          },
+          {
+            "num": "14",
+            "navLabel": "Das Untersuchungsgericht",
+            "titlePrefix": "Das ",
+            "accent": "Untersuchungsgericht",
+            "titleSuffix": "",
+            "body": "Die Prophezeiung der 2300 Abend und Morgen aus Daniel 8,14 endete im Jahre 1844, als das Untersuchungsgericht begann. Es betrifft die Prüfung der himmlischen Aufzeichnungen über alle, die sich zu Gott bekannt haben.",
+            "refs": "Pred 12,14 · Dan 7,9–10 · Offb 14,6–7 · Mt 22,11–14",
+            "detail": [
+              {
+                "text": "Die Prophezeiung der 2300 Abend und Morgen (Jahre) aus Daniel 8,14 endete im Jahre 1844, als die „Reinigung des Heiligtums\" oder das Untersuchungsgericht begann. Dieses Gericht betrifft die Prüfung der himmlischen Aufzeichnungen über alle, die sich zu Gott bekannt haben — durch alle Zeitalter hindurch. Das Ergebnis dieser Untersuchung bestimmt das Schicksal jeder Seele: ewiges Leben oder ewiger Tod.",
+                "refs": "Pred 12,14 · Dan 7,9–10 · Lk 20,35 · Offb 14,6–7; 22,12 · Mt 22,11–14"
+              }
+            ]
+          },
+          {
+            "num": "15",
+            "navLabel": "Die gegenwärtige Wahrheit",
+            "titlePrefix": "Die gegenwärtige ",
+            "accent": "Wahrheit",
+            "titleSuffix": "",
+            "body": "Die dreifache Engelsbotschaft aus Offenbarung 14,6–12 ist gegenwärtige Wahrheit. Diese Botschaft bereitet eine besondere Gruppe — die 144.000 — auf das zweite Kommen Christi vor.",
+            "refs": "Offb 7,1–4 · Offb 14,1–12 · Offb 18,1–4",
+            "detail": [
+              {
+                "text": "Die dreifache Engelsbotschaft aus Offenbarung 14,6–12 und die Botschaft des anderen Engels aus Offenbarung 18,1–4 sind gegenwärtige Wahrheit. Diese Botschaft bereitet eine besondere Gruppe — die 144.000 — auf das zweite Kommen Christi vor.",
+                "refs": "Hes 9,1–7 · Offb 7,1–4; 14,1–12; 18,1–4"
+              }
+            ]
+          },
+          {
+            "num": "16",
+            "navLabel": "Die Gabe der Prophezeiung",
+            "titlePrefix": "Die Gabe der ",
+            "accent": "Prophezeiung",
+            "titleSuffix": "",
+            "body": "In diesen letzten Tagen wurde die Gabe der Prophezeiung in Christi Gemeinde wiederhergestellt. Diese Gabe dient nicht als Ersatz für die Bibel, sondern als Führer des Überrests Gottes.",
+            "refs": "4Mo 12,6 · Am 3,7 · Eph 4,8–11 · 1Thess 5,20–21",
+            "detail": [
+              {
+                "text": "In diesen letzten Tagen wurde die Gabe der Prophezeiung in Christi Gemeinde wiederhergestellt, wie Gott es in Apostelgeschichte 2,17–21 verheißen hat. Diese Gabe dient nicht als Ersatz für oder Ergänzung zur Bibel, sondern als Führer und Kennzeichen des Überrests Gottes. Die inspirierten Schriften lenken die Aufmerksamkeit auf die biblischen Grundsätze als Fundament unseres Glaubens und Lebens und schützen uns vor falscher Auslegung der Schrift.",
+                "refs": "4Mo 12,6 · 2Chr 20,20 · Spr 29,18 · Hos 12,13 · Am 3,7 · Eph 4,8–11 · 1Thess 5,20–21"
+              }
+            ]
+          },
+          {
+            "num": "17",
+            "navLabel": "Die Ehe",
+            "titlePrefix": "Die ",
+            "accent": "Ehe",
+            "titleSuffix": "",
+            "body": "Die Ehe wurde von Gott eingesetzt und von Christus geehrt, um zwei Menschen lebenslang zu binden. Scheidung zur Wiederheirat sowie Verbindungen mit Ungläubigen widersprechen den göttlichen Grundsätzen der Ehe.",
+            "refs": "Lk 16,18 · Röm 7,1–3 · 1Kor 7,11.39 · 2Kor 6,14",
+            "detail": [
+              {
+                "text": "Die Ehe wurde von Gott eingesetzt und von Christus geehrt, um zwei Menschen lebenslang zu binden. Scheidung zur Wiederheirat, leichtfertige standesamtliche Ehe sowie Verbindungen mit Ungläubigen widersprechen den göttlichen Grundsätzen der Ehe.",
+                "refs": "Lk 16,18 · Röm 7,1–3 · 1Kor 7,11.39 · 2Kor 6,14"
+              }
+            ]
+          },
+          {
+            "num": "18",
+            "navLabel": "Gesundheits- und Kleiderreform",
+            "titlePrefix": "",
+            "accent": "Gesundheits-",
+            "titleSuffix": " und Kleiderreform",
+            "body": "Weil eines Christen Körper der Tempel des Heiligen Geistes ist, schützen Gläubige ihre Gesundheit durch Befolgen der Naturgesetze, Meiden schädlicher Nahrung und Üben der Mäßigung.",
+            "refs": "1Kor 3,16–17 · Phil 4,5",
+            "detail": [
+              {
+                "text": "Weil eines Christen Körper der Tempel des Heiligen Geistes ist, werden sie ihre Gesundheit schützen wollen. Gläubige schützen ihre Gesundheit, indem sie den Gesetzen der Natur folgen, gesundheitsschädliche Nahrungsmittel meiden, unnatürliche Gewohnheiten ablegen und Mäßigung üben.",
+                "refs": "1Kor 3,16–17 · Phil 4,5"
+              },
+              {
+                "text": "Die Beschaffenheit der Kleidung zeugt vom Charakter. Bescheidenheit und Selbstrespekt erfordern, dass wir von unanständigen Moden der Welt Abstand halten.",
+                "refs": "1Pet 3,1–5 · Jes 3,16–24 · 1Kor 11,15 · 1Tim 2,9"
+              }
+            ]
+          },
+          {
+            "num": "19",
+            "navLabel": "Haltung zur irdischen Regierung",
+            "titlePrefix": "Haltung zur ",
+            "accent": "irdischen",
+            "titleSuffix": " Regierung",
+            "body": "Christen müssen göttliche und menschliche Autorität respektieren und alle gerechten irdischen Gesetze befolgen. Wenn jedoch menschliches Gesetz dem Gesetz Gottes widerspricht, muss der Christ entscheiden: Gott oder Menschen gehorchen.",
+            "refs": "Mt 22,21 · Röm 13,3–7 · 1Pet 2,17 · Apg 5,29",
+            "detail": [
+              {
+                "text": "Christen müssen göttliche und menschliche Autorität respektieren und gewissenhaft alle gerechten irdischen Gesetze befolgen. Wenn jedoch menschliches Gesetz dem Gesetz Gottes widerspricht, muss der Christ persönlich entscheiden: Gott oder Menschen gehorchen? Das christliche Gewissen verbietet die Beteiligung an politischer Tätigkeit.",
+                "refs": "Mt 22,21 · Röm 13,3–7 · 1Pet 2,17 · Apg 5,29 · 2Kor 6,14–17 · Jes 8,12"
+              }
+            ]
+          },
+          {
+            "num": "20",
+            "navLabel": "Der Leib Christi, seine Gemeinde",
+            "titlePrefix": "Der Leib Christi, seine ",
+            "accent": "Gemeinde",
+            "titleSuffix": "",
+            "body": "Die Gemeinde Christi ist ein sichtbarer und organisierter Leib. Die Gemeinde überträgt Autorität auf gewählte Amtsträger, nicht um zu herrschen, sondern um zu dienen und den Leib Christi aufzubauen.",
+            "refs": "Joh 10,16 · 1Kor 12,12–27 · Eph 4,11–16 · Mt 18,15–18",
+            "detail": [
+              {
+                "text": "Die Gemeinde Christi ist ein sichtbarer und organisierter Leib — keine zerstreuten Einzelgänger. Die Gemeinde überträgt Autorität auf gewählte Amtsträger, nicht um über die Gemeinschaft zu herrschen, sondern um ihr zu dienen und den Leib Christi aufzubauen. Sie hat die Vollmacht, Mitglieder durch Taufe und Bekenntnis aufzunehmen und andere bei Bedarf auszuschließen.",
+                "refs": "Joh 10,16; 11,52 · 1Kor 10,17; 12,12–27 · Eph 4,11–16 · Offb 1,20 · Mt 16,19; 18,15–18 · 1Kor 5,11.13"
+              }
+            ]
+          },
+          {
+            "num": "21",
+            "navLabel": "Zehnten und Gaben",
+            "titlePrefix": "",
+            "accent": "Zehnten",
+            "titleSuffix": " und Gaben",
+            "body": "Zehnten und Gaben zur Unterstützung des Predigtamtes und zur Verkündigung des Evangeliums zu geben ist die Pflicht des Christen.",
+            "refs": "Mal 3,7–10 · Mt 23,23 · 1Kor 9,14 · 2Kor 9,6–7",
+            "detail": [
+              {
+                "text": "Alles gehört Gott. Wir sind Verwalter, die Rechenschaft ablegen über unsere Güter, Fähigkeiten, Zeit und Ressourcen. Die Pflicht, den Zehnten zurückzugeben — ein Zehntel aller Einnahmen — ist die Anerkennung seiner Eigentümerschaft. Das Zurückhalten des Zehnten übertritt das achte Gebot.",
+                "refs": "Ps 24,1 · 1Chr 29,11–12 · 1Kor 4,1–2 · Mt 25,14–30 · 3Mo 27,30–33 · Mt 23,23 · 1Kor 9,14 · Mal 3,8–9"
+              },
+              {
+                "text": "Über den Zehnten hinaus sind die übrigen neun Zehntel für freiwillige Unterstützung des Werkes Gottes bestimmt, gemäß unserer Liebe zu ihm. Großzügigkeit spiegelt unsere Liebe zu Gott wider und schafft geistliches Leben in der Gemeinschaft.",
+                "refs": "Mal 3,10–11 · 2Mo 25,2 · 5Mo 16,16–17 · Spr 3,9–10; 11,24–25 · 2Kor 9,6–7"
+              }
+            ]
+          },
+          {
+            "num": "22",
+            "navLabel": "Das zweite Kommen Christi",
+            "titlePrefix": "Das ",
+            "accent": "zweite",
+            "titleSuffix": " Kommen Christi",
+            "body": "Die menschliche Gnadenzeit endet kurz vor dem zweiten Kommen Christi, welches buchstäblich, persönlich, sichtbar, hörbar und weltweit sein wird.",
+            "refs": "Lk 17,29–30 · 2Thess 1,6–10 · Mt 24,27.31 · Joh 14,1–3 · Apg 1,9–11",
+            "detail": [
+              {
+                "text": "Die menschliche Gnadenzeit endet kurz vor dem zweiten Kommen Christi, welches buchstäblich, persönlich, sichtbar, hörbar und weltweit sein wird.",
+                "refs": "Lk 13,23–25; 17,29–30 · Jes 11,4; 66,15 · 2Thess 1,6–10 · Mt 24,27.31 · Joh 14,1–3 · Apg 1,9–11 · 1Thess 4,15–17 · Offb 1,7"
+              }
+            ]
+          },
+          {
+            "num": "23",
+            "navLabel": "Natur des Menschen und Zustand der Toten",
+            "titlePrefix": "Natur des Menschen und Zustand der ",
+            "accent": "Toten",
+            "titleSuffix": "",
+            "body": "Der Mensch ist von Natur aus sterblich, kann aber durch die Verheißung Christi bei seiner Wiederkunft Unsterblichkeit erlangen. Beim Tod fallen Gerechte wie Gottlose in einen Schlaf — einen Zustand der Bewusstlosigkeit, bis zur Auferstehung.",
+            "refs": "1Mo 2,7 · Hiob 4,17 · Pred 9,5–6 · Joh 5,28–29 · 1Kor 15,53–54",
+            "detail": [
+              {
+                "text": "Der Mensch wurde von Gottes Hand als eine lebendige Seele erschaffen. Durch Ungehorsam wurde er von der Quelle des Lebens getrennt. Daher ist er von Natur aus sterblich, kann aber durch die Verheißung Christi bei seiner Wiederkunft tatsächlich Unsterblichkeit erlangen.",
+                "refs": "1Mo 2,7; 3,22–24 · Hiob 4,17 · 1Joh 2,25 · Joh 11,25–26 · Röm 2,7 · 2Tim 1,10 · 1Kor 15,53–54"
+              },
+              {
+                "text": "Beim Tod fallen Gerechte wie Gottlose in einen Schlaf — einen Zustand der Bewusstlosigkeit, Stille und Untätigkeit. Die Toten verbleiben im Grab bis zur gerechten oder ungerechten Auferstehung. Die Gottlosen befinden sich nicht an einem Ort der Qual, sondern werden bis zum Gerichtstag aufbewahrt. Die Gerechten sind nicht im Himmel, sondern erwarten die Auferstehung aus dem Grab bei Christi Wiederkunft.",
+                "refs": "Pred 9,5–6.10 · Ps 6,5; 89,48; 146,4 · Offb 20,13 · 2Pet 2,9 · Joh 5,28–29 · Dan 12,13 · Apg 2,29.34 · 2Tim 4,7–8"
+              }
+            ]
+          },
+          {
+            "num": "24",
+            "navLabel": "Das Millennium",
+            "titlePrefix": "Das ",
+            "accent": "Millennium",
+            "titleSuffix": "",
+            "body": "Nach dem zweiten Kommen Christi folgt eine Periode von tausend Jahren. Während dieser Zeit sind die Gerechten mit Gott im Himmel, während die Gottlosen im Staub der verwüsteten Erde verbleiben.",
+            "refs": "Offb 20,4–5 · Jes 24,1–6 · 1Kor 6,2–3 · Mal 4,1.3",
+            "detail": [
+              {
+                "text": "Nach dem zweiten Kommen Christi folgt eine Periode von tausend Jahren — allgemein das Millennium genannt. Während dieser Zeit sind die Gerechten mit Gott im Himmel, während die Gottlosen im Staub der verwüsteten Erde verbleiben. Während die Erde wüst liegt, richten die Gerechten die Gottlosen. Am Ende des Millenniums werden die Gottlosen auferstehen, um vom Feuer verzehrt zu werden.",
+                "refs": "Joh 14,3 · Offb 7,9; 14,1; 20,4–5 · Jes 24,1–6 · Jer 4,23–27 · 1Kor 6,2–3 · Joh 5,29 · Mal 4,1.3 · Mt 10,28 · 2Pet 3,7–10 · Ps 37,10"
+              }
+            ]
+          },
+          {
+            "num": "25",
+            "navLabel": "Die neue Erde",
+            "titlePrefix": "Die ",
+            "accent": "neue",
+            "titleSuffix": " Erde",
+            "body": "Nachdem die Erde durch das Feuer von Sünde gereinigt ist, wird Gott alle Dinge neu machen und die Schönheit Edens auf Erden wiederherstellen. Diese neue Erde wird das ewige Heim der Erlösten, mit Gott als dem obersten Herrscher.",
+            "refs": "2Pet 3,13 · Offb 21,1–7 · Mt 5,5 · 1Kor 2,9",
+            "detail": [
+              {
+                "text": "Nachdem die Erde am Ende des Millenniums durch Feuer gereinigt ist, wird die Verheißung einer neuen Erde erfüllt. Die Erde wird erlöst und in ihren ursprünglichen paradiesischen Zustand wiederhergestellt. Alle Dinge werden neu gemacht. Die Verheißung an Abraham umfasst die ganze Erde, nicht nur Kanaan.",
+                "refs": "2Pet 3,13 · Offb 21,1–7; 22,1–5 · Jes 65,17–25; 11,1–11 · 1Mo 12,7; 17,7–8 · Hebr 11,9–10.13–16 · Mt 5,5 · Ps 37,11.29"
+              },
+              {
+                "text": "Auf der neuen Erde wird es kein Leid mehr geben, denn das Erste ist vergangen. Sünde und ihr Urheber werden nicht mehr existieren. Gottes Volk wird freie Gemeinschaft mit dem Vater und dem Sohn genießen — und jeden Sabbat werden alle vor Gott zusammenkommen.",
+                "refs": "Offb 21,4; 22,3–5 · Jes 66,22–23 · Dan 7,27 · 1Kor 2,9"
+              }
+            ]
+          }
+        ]
+      }
     },
     "uberUns": {
       "eyebrow": "Wer wir sind",
@@ -128,12 +597,19 @@
       "success": "Sie wurden erfolgreich abgemeldet.",
       "error": "Der Link ist ungültig oder abgelaufen."
     },
+    "confirm": {
+      "loading": "Anmeldung wird bestätigt…",
+      "invalidLink": "Ungültiger Bestätigungslink.",
+      "success": "Vielen Dank! Ihre Anmeldung zum Newsletter ist jetzt bestätigt.",
+      "already": "Ihre Anmeldung wurde bereits bestätigt.",
+      "error": "Der Link ist ungültig oder abgelaufen. Bitte melden Sie sich erneut an."
+    },
     "legal": {
       "impressum": {
         "title": "Impressum",
         "metaTitle": "Impressum – sdarm.life",
         "section1Title": "Angaben gemäß § 5 TMG",
-        "section1Body": "Gemeinschaft der Siebenten-Tags-Adventisten Reformationsbewegung e.\u00a0V.\nEisenbahnstr. 6\nD-65439 Flörsheim/M",
+        "section1Body": "Gemeinschaft der Siebenten-Tags-Adventisten Reformationsbewegung e. V.\nEisenbahnstr. 6\nD-65439 Flörsheim/M",
         "section2Title": "Kontakt",
         "section3Title": "Vereinsregister",
         "section3Body": "Registergericht: Amtsgericht Wiesbaden\nRegisternummer: VR 6992",
@@ -147,20 +623,20 @@
         "title": "Datenschutzerklärung",
         "metaTitle": "Datenschutzerklärung – sdarm.life",
         "section1Title": "Verantwortlicher",
-        "section1Body": "Gemeinschaft der Siebenten-Tags-Adventisten Reformationsbewegung e.\u00a0V.\nEisenbahnstr. 6, D-65439 Flörsheim/M",
+        "section1Body": "Gemeinschaft der Siebenten-Tags-Adventisten Reformationsbewegung e. V.\nEisenbahnstr. 6, D-65439 Flörsheim/M",
         "section2Title": "Newsletter",
         "section2Body": "Wenn Sie unseren Newsletter abonnieren, speichern wir Ihre E-Mail-Adresse sowie den Zeitpunkt der Anmeldung. Die Verarbeitung erfolgt auf Grundlage Ihrer Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO. Sie können das Abonnement jederzeit über den Abmeldelink in jeder Newsletter-E-Mail widerrufen.",
         "section3Title": "Cookies & lokaler Speicher",
-        "section3Body": "Diese Website setzt keine eigenen Cookies. Cloudflare kann als technischer Dienstleister ein funktional notwendiges Cookie (__cf_bm) zum Schutz vor automatisierten Zugriffen setzen. Dieses Cookie erfordert keine Einwilligung (Art.\u00a06 Abs.\u00a01 lit.\u00a0f DSGVO).",
-        "section3LocalStorage": "Im Bücher-Bereich speichert diese Website Leseeinstellungen (Thema, Schriftgröße, Schriftart, Zeilenabstand) im lokalen Speicher des Browsers (localStorage). Diese Daten verbleiben ausschließlich auf Ihrem Gerät, werden nicht an Server übertragen und enthalten keine personenbezogenen Daten. Die Speicherung dient ausschließlich dem Komfort der Nutzung und erfordert keine Einwilligung (§\u00a025 Abs.\u00a02 Nr.\u00a02 TTDSG). Sie können diese Einstellungen jederzeit über die Browsereinstellungen löschen.",
+        "section3Body": "Diese Website setzt keine eigenen Cookies. Cloudflare kann als technischer Dienstleister ein funktional notwendiges Cookie (__cf_bm) zum Schutz vor automatisierten Zugriffen setzen. Dieses Cookie erfordert keine Einwilligung (Art. 6 Abs. 1 lit. f DSGVO).",
+        "section3LocalStorage": "Im Bücher-Bereich speichert diese Website Leseeinstellungen (Thema, Schriftgröße, Schriftart, Zeilenabstand) im lokalen Speicher des Browsers (localStorage). Diese Daten verbleiben ausschließlich auf Ihrem Gerät, werden nicht an Server übertragen und enthalten keine personenbezogenen Daten. Die Speicherung dient ausschließlich dem Komfort der Nutzung und erfordert keine Einwilligung (§ 25 Abs. 2 Nr. 2 TTDSG). Sie können diese Einstellungen jederzeit über die Browsereinstellungen löschen.",
         "section4Title": "Hosting & Analyse",
-        "section4Body": "Diese Website wird über Cloudflare Pages gehostet. Cloudflare kann dabei technische Zugriffsdaten (z.\u00a0B. IP-Adresse, Zeitpunkt des Abrufs) verarbeiten. Websitestatistiken werden über Cloudflare Web Analytics erfasst — cookiefrei, ohne Nutzerprofile und ohne personenbezogene Daten.",
+        "section4Body": "Diese Website wird über Cloudflare Pages gehostet. Cloudflare kann dabei technische Zugriffsdaten (z. B. IP-Adresse, Zeitpunkt des Abrufs) verarbeiten. Websitestatistiken werden über Cloudflare Web Analytics erfasst — cookiefrei, ohne Nutzerprofile und ohne personenbezogene Daten.",
         "cloudflarePrivacy": "Datenschutzerklärung von Cloudflare",
         "section5Title": "Externe Inhalte (E-Books)",
-        "section5Body": "Auf der Plattform \u201eSchätze\u201c können digitale Bücher im EPUB-Format direkt im Browser gelesen werden. Beim Öffnen eines Buches stellt Ihr Browser eine direkte Verbindung zum externen Dateiserver her (derzeit: egwwritings.org, betrieben von der Ellen G. White Estate, Inc., USA), von dem die EPUB-Datei bezogen wird. Dabei wird Ihre IP-Adresse sowie der Zeitpunkt des Abrufs an diesen Drittanbieter übermittelt. Die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an der Bereitstellung des angeforderten Inhalts (Art.\u00a06 Abs.\u00a01 lit.\u00a0f DSGVO). Weitere Informationen finden Sie in der",
+        "section5Body": "Auf der Plattform „Schätze“ können digitale Bücher im EPUB-Format direkt im Browser gelesen werden. Beim Öffnen eines Buches stellt Ihr Browser eine direkte Verbindung zum externen Dateiserver her (derzeit: egwwritings.org, betrieben von der Ellen G. White Estate, Inc., USA), von dem die EPUB-Datei bezogen wird. Dabei wird Ihre IP-Adresse sowie der Zeitpunkt des Abrufs an diesen Drittanbieter übermittelt. Die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an der Bereitstellung des angeforderten Inhalts (Art. 6 Abs. 1 lit. f DSGVO). Weitere Informationen finden Sie in der",
         "section5PrivacyLink": "Datenschutzerklärung der Ellen G. White Estate",
         "section6Title": "Buchanfrage (Geschenk erhalten)",
-        "section6Body": "Wenn Sie über das Formular \u201eGeschenk erhalten\u201c Bücher anfordern, verarbeiten wir folgende Daten: Name, E-Mail-Adresse, Postanschrift (Straße, PLZ, Stadt), Land sowie optional Telefonnummer und eine persönliche Mitteilung. Rechtsgrundlage ist Ihre Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO. Die Daten werden ausschließlich für die Bearbeitung und den Versand der Anfrage verwendet und nach Abschluss des Versands gelöscht. Sie können Ihre Einwilligung jederzeit per E-Mail widerrufen:",
+        "section6Body": "Wenn Sie über das Formular „Geschenk erhalten“ Bücher anfordern, verarbeiten wir folgende Daten: Name, E-Mail-Adresse, Postanschrift (Straße, PLZ, Stadt), Land sowie optional Telefonnummer und eine persönliche Mitteilung. Rechtsgrundlage ist Ihre Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO. Die Daten werden ausschließlich für die Bearbeitung und den Versand der Anfrage verwendet und nach Abschluss des Versands gelöscht. Sie können Ihre Einwilligung jederzeit per E-Mail widerrufen:",
         "section7Title": "Ihre Rechte",
         "section7Body": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer gespeicherten Daten sowie das Recht auf Datenübertragbarkeit. Wenden Sie sich dazu an"
       }
@@ -272,51 +748,52 @@
       "scriptureRef": "Psalm 119,111"
     },
     "bookRequest": {
-        "bannerEyebrow": "Kostenlose Bücher",
-        "bannerTitle": "Lies, was die Welt verschweigt",
-        "bannerSubtitle": "Klassische Bücher der Reformationsbewegung — kostenlos, direkt zu Ihnen nach Hause.",
-        "cta": "Geschenk erhalten",
-        "modalTitle": "Ihre Bücher warten auf Sie",
-        "modalSubtitle": "Nur wenige Felder — und wir schicken Ihnen das Paket kostenlos nach Hause.",
-        "notice": "Ein Geschenk pro Adresse — damit möglichst viele Menschen davon profitieren können.",
-        "fieldLand": "Wo leben Sie?",
-        "landPlaceholder": "Land wählen …",
-        "fieldName": "Wie heißen Sie?",
-        "namePlaceholder": "Vor- und Nachname",
-        "fieldEmail": "Ihre E-Mail",
-        "emailPlaceholder": "damit wir Ihnen Bescheid geben können",
-        "fieldPhone": "Handynummer",
-        "phonePlaceholder": "+49 …",
-        "fieldStreet": "Wohin liefern wir?",
-        "streetPlaceholder": "Straße und Hausnummer",
-        "fieldPlz": "PLZ",
-        "plzPlaceholder": "10115",
-        "fieldCity": "Stadt",
-        "cityPlaceholder": "Ihre Stadt",
-        "fieldBooks": "Welche Bücher möchten Sie entdecken?",
-        "fieldWish": "Noch ein Wunsch?",
-        "wishPlaceholder": "Schreiben Sie uns gerne etwas …",
-        "dsgvoNotice": "Ihre Daten (Name, Adresse, E-Mail) werden ausschließlich für die Bearbeitung und den Versand dieser Buchanfrage verarbeitet. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO. Nach Abschluss des Versands werden Ihre Daten gelöscht. Sie können Ihre Einwilligung jederzeit widerrufen (info@sdarm.life).",
-        "consent": "Ich willige in die Verarbeitung meiner Daten für den einmaligen Buchversand ein. Ich habe die",
-        "consentPrivacyLink": "Datenschutzerklärung",
-        "submit": "Ja, ich möchte diese Bücher!",
-        "submitNote": "Kostenlos · Kein Spam · Kein Haken",
-        "successTitle": "Ihr Wunsch ist angekommen!",
-        "successBody": "Wir freuen uns, Ihnen diese Bücher zusenden zu dürfen. In 2–15 Werktagen sind sie bei Ihnen.",
-        "successClose": "Wunderbar, danke!",
-        "optional": "optional",
-        "required": "*",
-        "books": {
-          "wegZuChristus": "Der Weg zu Christus – E. G. White",
-          "grosserKampf": "Der Große Kampf (Tragödie der Zeitalter) – E. G. White",
-          "lebenJesu": "Das Leben Jesu – E. G. White",
-          "bibel": "Die Bibel"
-        },
-        "errorMinBook": "Bitte wählen Sie mindestens ein Buch aus.",
-        "errorSubmit": "Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut.",
-        "landDe": "Deutschland",
-        "landAt": "Österreich",
-        "landCh": "Schweiz"
-      }
+      "bannerEyebrow": "Kostenlose Bücher",
+      "bannerTitle": "Lies, was die Welt verschweigt",
+      "bannerSubtitle": "Klassische Bücher der Reformationsbewegung — kostenlos, direkt zu Ihnen nach Hause.",
+      "cta": "Geschenk erhalten",
+      "modalTitle": "Ihre Bücher warten auf Sie",
+      "modalSubtitle": "Nur wenige Felder — und wir schicken Ihnen das Paket kostenlos nach Hause.",
+      "notice": "Ein Geschenk pro Adresse — damit möglichst viele Menschen davon profitieren können.",
+      "fieldLand": "Wo leben Sie?",
+      "landPlaceholder": "Land wählen …",
+      "fieldName": "Wie heißen Sie?",
+      "namePlaceholder": "Vor- und Nachname",
+      "fieldEmail": "Ihre E-Mail",
+      "emailPlaceholder": "damit wir Ihnen Bescheid geben können",
+      "fieldPhone": "Handynummer",
+      "phonePlaceholder": "+49 …",
+      "fieldStreet": "Wohin liefern wir?",
+      "streetPlaceholder": "Straße und Hausnummer",
+      "fieldPlz": "PLZ",
+      "plzPlaceholder": "10115",
+      "fieldCity": "Stadt",
+      "cityPlaceholder": "Ihre Stadt",
+      "fieldBooks": "Welche Bücher möchten Sie entdecken?",
+      "fieldWish": "Noch ein Wunsch?",
+      "wishPlaceholder": "Schreiben Sie uns gerne etwas …",
+      "dsgvoNotice": "Ihre Daten (Name, Adresse, E-Mail) werden ausschließlich für die Bearbeitung und den Versand dieser Buchanfrage verarbeitet. Rechtsgrundlage: Art. 6 Abs. 1 lit. a DSGVO. Nach Abschluss des Versands werden Ihre Daten gelöscht. Sie können Ihre Einwilligung jederzeit widerrufen (info@sdarm.life).",
+      "consent": "Ich willige in die Verarbeitung meiner Daten für den einmaligen Buchversand ein. Ich habe die",
+      "consentPrivacyLink": "Datenschutzerklärung",
+      "submit": "Ja, ich möchte diese Bücher!",
+      "submitNote": "Kostenlos · Kein Spam · Kein Haken",
+      "successTitle": "Ihr Wunsch ist angekommen!",
+      "successBody": "Wir freuen uns, Ihnen diese Bücher zusenden zu dürfen. In 2–15 Werktagen sind sie bei Ihnen.",
+      "successClose": "Wunderbar, danke!",
+      "closeAria": "Schließen",
+      "optional": "optional",
+      "required": "*",
+      "books": {
+        "wegZuChristus": "Der Weg zu Christus – E. G. White",
+        "grosserKampf": "Der Große Kampf (Tragödie der Zeitalter) – E. G. White",
+        "lebenJesu": "Das Leben Jesu – E. G. White",
+        "bibel": "Die Bibel"
+      },
+      "errorMinBook": "Bitte wählen Sie mindestens ein Buch aus.",
+      "errorSubmit": "Etwas ist schiefgelaufen. Bitte versuchen Sie es später erneut.",
+      "landDe": "Deutschland",
+      "landAt": "Österreich",
+      "landCh": "Schweiz"
+    }
   }
 }

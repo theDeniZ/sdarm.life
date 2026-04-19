@@ -162,7 +162,7 @@ Add the following to your MCP client config (e.g. `~/.claude/claude_desktop_conf
 }
 ```
 
-This exposes all **public** routes as MCP tools. To also enable **admin** routes (create/edit/delete posts, manage images, config, subscribers), add the auth headers:
+This exposes all **public** routes as MCP tools. To also enable **admin** routes (create/edit/delete posts, manage images, config, subscribers), add the auth header:
 
 ```json
 {
@@ -175,15 +175,14 @@ This exposes all **public** routes as MCP tools. To also enable **admin** routes
         "https://api.sdarm.life/api/openapi.json"
       ],
       "env": {
-        "HEADER_CF-Access-Client-Id": "<CF_CLIENT_ID>",
-        "HEADER_CF-Access-Client-Secret": "<CF_CLIENT_SECRET>"
+        "HEADER_Authorization": "Bearer <API_KEY>"
       }
     }
   }
 }
 ```
 
-> `CF_CLIENT_ID` and `CF_CLIENT_SECRET` are the same secrets used by the admin app. Contact the project owner if you need access.
+> `API_KEY` is issued via `POST /api/v1/admin/api-keys` (see `apps/api/src/routes/admin/api-keys.ts`). Contact the project owner if you need one.
 
 ### How it works
 

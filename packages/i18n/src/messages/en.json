@@ -1,7 +1,6 @@
 {
   "common": {
     "nav": {
-      "news": "News",
       "songs": "Songs",
       "events": "Events",
       "treasures": "Treasures",
@@ -17,12 +16,13 @@
       "orgRegion": "Germany & Austria",
       "newsletter": "Newsletter",
       "emailPlaceholder": "Email address",
-      "subscribeSuccess": "Thank you for subscribing!",
+      "subscribeButton": "Subscribe",
+      "subscribeSuccess": "Please confirm your subscription via the email we just sent you.",
       "subscribeDuplicate": "This email is already registered.",
       "subscribeError": "Error. Please try again later.",
       "locationPlaceholder": "City or ZIP",
       "locationUpdateAria": "Update location",
-      "copyright": "© {year} SDARM.life — Seventh Day Adventist Reform Movement",
+      "copyright": "© {year} SDARM.life",
       "allRightsReserved": "All rights reserved"
     },
     "clock": {
@@ -38,9 +38,14 @@
     "comingSoon": "Coming soon",
     "back": "← Back",
     "notFound": {
-      "title": "Page not found",
-      "description": "The requested page does not exist.",
-      "home": "Go to home"
+      "eyebrow": "404 · Lost",
+      "title": "This page has <em>wandered</em> off",
+      "verseText": "What man of you, having a hundred sheep, if he lose one of them, doth not leave the ninety and nine in the wilderness, and go after that which is lost, until he find it?",
+      "verseRef": "Luke 15:4",
+      "backPrompt": "Here are a few ways back:",
+      "homeLink": "Home",
+      "aboutLink": "Beliefs",
+      "kontaktLink": "Contact"
     },
     "langSwitchAria": "Switch to {lang}"
   },
@@ -59,10 +64,49 @@
     "verse": {
       "eyebrow": "Word of the Hour"
     },
+    "heroWelcome": {
+      "badge": "Since 1925 · Faithful to Scripture · Worldwide",
+      "title": "God <em>loves</em> you deeply",
+      "subtitle": "The Seventh Day Adventist Reform Movement — Bible-grounded, Sabbath-keeping, globally connected.",
+      "ctaPrimary": "About us",
+      "ctaSecondary": "Contact"
+    },
+    "releases": {
+      "title": "Releases",
+      "book": {
+        "label": "Library · New",
+        "titleFallback": "Current Reading",
+        "authorFallback": "From our library",
+        "sub": "{author} — now available in the library"
+      },
+      "faith": {
+        "label": "Faith · 25 Points",
+        "title": "Foundations of our faith",
+        "sub": "discover now"
+      },
+      "quote": {
+        "saveImage": "Save as image",
+        "close": "Close"
+      }
+    },
     "post": {
       "content": "Content",
       "video": "Video",
       "morePosts": "More posts"
+    },
+    "kontakt": {
+      "eyebrow": "Contact",
+      "heroTitle": "Write to <em>us</em>",
+      "heroSubtitle": "By email, on social media, or visit one of our congregations in Germany, Austria, or Switzerland.",
+      "scrollHint": "More",
+      "onlineEyebrow": "Online",
+      "onlineTitle": "Write directly",
+      "onlineSubtitle": "We typically reply within one to two business days.",
+      "vorOrtEyebrow": "In person",
+      "vorOrtTitle": "Where we <em>meet</em>",
+      "vorOrtSubtitle": "Sabbath service every Saturday — you are welcome.",
+      "directions": "Get directions",
+      "address": "Address"
     },
     "about": {
       "title": "About us",
@@ -78,7 +122,432 @@
       "glaubensTitle": "Points of Our Faith",
       "glaubensSub": "25 principles that shape our thinking and living.",
       "metaTitle": "About Us – Seventh Day Adventist Reform Movement",
-      "metaDescription": "Meet the Seventh Day Adventist Reform Movement – 25 principles of faith, Sabbath observance, the Reformation message and Bible-based Christianity in Germany & Austria."
+      "metaDescription": "Meet the Seventh Day Adventist Reform Movement – 25 principles of faith, Sabbath observance, the Reformation message and Bible-based Christianity in Germany & Austria.",
+      "glaubens": {
+        "navAria": "Faith Articles Navigation",
+        "openAria": "Expand details",
+        "closeAria": "Close",
+        "articles": [
+          {
+            "num": "01",
+            "navLabel": "God, the Father",
+            "titlePrefix": "God, the ",
+            "accent": "Father",
+            "titleSuffix": "",
+            "body": "There is but one God, the eternal Father, the Creator; a personal, spiritual Being, infinite in love and wisdom, omnipotent, omniscient, immortal.",
+            "refs": "Exodus 20:2, 3 · Isaiah 45:5-12, 18, 20-22 · John 4:24 · Psalm 139:1-12",
+            "detail": [
+              {
+                "text": "The Bible reveals one God existing in three divine Persons: the Father, the Son, and the Holy Spirit — acting in unity. God is eternal, immortal, invisible, omnipresent, omniscient, omnipotent, unchangeable, holy, righteous, merciful, and love.",
+                "refs": "Deuteronomy 6:4 · 1 Corinthians 8:4 · Genesis 1:26 · 2 Corinthians 13:13 · Ephesians 2:18 · Psalm 90:2 · 1 Timothy 1:17 · Psalm 139:7-12 · John 3:16 · 1 John 4:8"
+              },
+              {
+                "text": "The Father is the first Person of the Godhead. Through Christ and the Holy Spirit He is the Creator and Sustainer of all things. He is Father to all who receive Christ as their personal Saviour and obey His commandments. The most outstanding attribute of the Father — and the very heart of the plan of redemption — is His love.",
+                "refs": "Matthew 3:17; 11:25 · John 15:1 · Hebrews 1:1-3 · Colossians 1:15-17 · Matthew 5:48 · John 1:12-13 · Romans 8:15-17 · John 3:16 · 1 John 4:8-13"
+              }
+            ]
+          },
+          {
+            "num": "02",
+            "navLabel": "Jesus Christ, the Son",
+            "titlePrefix": "Jesus Christ, the ",
+            "accent": "Son",
+            "titleSuffix": "",
+            "body": "Jesus Christ is the Son of God, one in nature with the eternal Father. Through Christ all things were created. He died for our sins on the cross, rose again from the dead, and ascended to the Father where He lives to make intercession for us.",
+            "refs": "Hebrews 1:1-3 · Colossians 1:15-17 · John 1:14 · 1 Timothy 2:5 · Hebrews 7:25",
+            "detail": [
+              {
+                "text": "Jesus Christ is the Son of God, one in nature with the eternal Father. Through Christ all things were created. Retaining His divine nature, Christ took upon Himself human nature, was made flesh, and lived on earth as a man but without sin, being an example for us. He died for our sins on the cross, rose again from the dead, and ascended to the Father, where He lives to make intercession for us.",
+                "refs": "Hebrews 1:1-3, 5 · Colossians 1:15-17 · Matthew 1:18-23 · John 1:14 · 1 Timothy 2:5; 3:16 · Hebrews 7:25 · John 14:6 · Acts 4:12"
+              }
+            ]
+          },
+          {
+            "num": "03",
+            "navLabel": "The Holy Spirit",
+            "titlePrefix": "The Holy ",
+            "accent": "Spirit",
+            "titleSuffix": "",
+            "body": "The Holy Spirit is Christ's representative upon earth, and is one in purpose with the Father and the Son. He is the Regenerator in the work of redemption. These three Persons — Father, Son, and Holy Spirit — are the Godhead.",
+            "refs": "John 3:5-8 · John 14:16, 26 · 2 Corinthians 13:14 · Matthew 28:19",
+            "detail": [
+              {
+                "text": "The Holy Spirit, the representative of Christ and of the Father, is the third Person of the Godhead. He is, next to Christ, the greatest of all the gifts of God to man. The first work of the Holy Spirit is to convict us of sin and to lead us to Christ.",
+                "refs": "John 14:16-18; 16:8 · Matthew 28:19-20 · 1 John 3:24; 4:12-13 · Ephesians 3:16-17 · Romans 8:9-11"
+              },
+              {
+                "text": "Through the Holy Spirit, Christ is made available to all people. Our union with Christ through the Holy Spirit is the pledge of our resurrection. Before anyone receives the gifts of the Spirit, he must first manifest the fruit of the Holy Spirit in his life.",
+                "refs": "Romans 8:9-11 · John 11:25-26 · 1 John 4:13 · Ephesians 1:13-14 · Galatians 5:22-25 · 1 Corinthians 12:7-11"
+              }
+            ]
+          },
+          {
+            "num": "04",
+            "navLabel": "The Scriptures",
+            "titlePrefix": "The ",
+            "accent": "Scriptures",
+            "titleSuffix": "",
+            "body": "The Holy Scriptures, both Old and New Testaments, are the word of God. They were given by inspiration of God, contain the all-sufficient revelation of God's will to man, and are the only unerring rule of faith and practice.",
+            "refs": "John 5:39 · 2 Peter 1:19-21 · 2 Timothy 3:15-17 · Matthew 22:29",
+            "detail": [
+              {
+                "text": "The Holy Scriptures, God's love letter, explain the origin, fall, and redemption of humanity. They contain the all-sufficient revelation of God's will — our only unerring standard of faith and practice. Therefore, our standing before God and our relationship with one another must be grounded on a \"Thus saith the Lord.\"",
+                "refs": "John 5:39 · Psalm 89:34 · Matthew 22:29 · Luke 24:44-45 · Psalm 119:104-105 · Isaiah 8:20 · 2 Timothy 3:15-17 · John 8:32; 17:17"
+              },
+              {
+                "text": "Through the help of the Holy Spirit the Bible explains itself and needs no human tradition to interpret it. When we live in harmony with the Scriptures, the promises and blessings of the Lord belong to us.",
+                "refs": "Isaiah 28:10; 34:16 · 2 Peter 1:19-21 · John 16:13 · Luke 11:28 · Matthew 4:4; 7:24-25 · John 6:63"
+              }
+            ]
+          },
+          {
+            "num": "05",
+            "navLabel": "The Ten Commandments",
+            "titlePrefix": "The Ten ",
+            "accent": "Commandments",
+            "titleSuffix": "",
+            "body": "The moral law, the Ten Commandments of Exodus 20, is an expression of God's will. It covers the duty of man to God and to his fellowmen, is unchangeable, and binding upon all men in every age.",
+            "refs": "Matthew 5:17-20 · 1 John 2:3-6 · Romans 2:13",
+            "detail": [
+              {
+                "text": "The moral law, the Ten Commandments of Exodus 20:1-17, is an expression of God's will. It covers the duty of man to God and to his fellowmen, is unchangeable, binding upon all men in every age, and overrules all human laws.",
+                "refs": "Matthew 5:17-20; 7:21; 19:17; 22:36-40 · 1 John 2:3-6; 5:1-3 · Romans 2:13"
+              },
+              {
+                "text": "Transgression of any commandment is sin, and the wages of sin is death. We are not saved by obedience to the law but through Christ, that through His strength we may render obedience and escape condemnation.",
+                "refs": "John 8:11 · Hebrews 10:26"
+              }
+            ]
+          },
+          {
+            "num": "06",
+            "navLabel": "The Sabbath",
+            "titlePrefix": "The ",
+            "accent": "Sabbath",
+            "titleSuffix": "",
+            "body": "The fourth commandment of God's moral law requires the observance of the seventh-day Sabbath. It is a sacred day of rest, a memorial of creation and a sign of re-creation and redemption as well as sanctification.",
+            "refs": "Genesis 2:1-3 · Exodus 20:8-11 · Ezekiel 20:12 · Mark 2:28",
+            "detail": [
+              {
+                "text": "The fourth commandment of God's moral law requires the observance of the seventh-day Sabbath. It is a sacred day of rest, a memorial of creation and a sign of re-creation and redemption as well as sanctification. It is a spiritual institution dedicated to religious worship and study.",
+                "refs": "Genesis 2:1-3 · Exodus 20:1-17 · Ezekiel 20:12 · Isaiah 58:13, 14 · Mark 2:28 · Hebrews 4:1-10"
+              },
+              {
+                "text": "True Sabbath observance requires cessation of all secular work from sunset Friday until sunset Saturday. Preparation for the Sabbath is to be completed on Friday before the Sabbath begins.",
+                "refs": "Leviticus 23:32 · Exodus 16:22, 23 · Luke 23:54 · Mark 16:1"
+              },
+              {
+                "text": "Since Christ and the apostles always — both before and after the crucifixion and resurrection — observed the Sabbath, it is and remains the true day of rest.",
+                "refs": "Luke 23:56 · Acts 13:42, 44; 16:13; 17:2; 18:4; 22:12; 25:7, 8"
+              }
+            ]
+          },
+          {
+            "num": "07",
+            "navLabel": "Sunday Worship",
+            "titlePrefix": "",
+            "accent": "Sunday",
+            "titleSuffix": " Worship",
+            "body": "The first day of the week, commonly called Sunday, was dedicated anciently to the worship of the sun. Sunday observance is not found in the Bible.",
+            "refs": "Matthew 15:9, 13",
+            "detail": [
+              {
+                "text": "The first day of the week, commonly called Sunday, was dedicated anciently to the worship of the sun. As the Christian church fell away from the true doctrine of the apostolic days, the seventh-day Sabbath was gradually displaced by the first day. Sunday, with other pagan institutions, was eventually adopted by the Christian church.",
+                "refs": "Matthew 15:9, 13"
+              },
+              {
+                "text": "Sunday observance is not found in the Bible."
+              }
+            ]
+          },
+          {
+            "num": "08",
+            "navLabel": "The Ceremonial Law",
+            "titlePrefix": "The Ceremonial ",
+            "accent": "Law",
+            "titleSuffix": "",
+            "body": "The ceremonial law of the Old Testament pointed forward to the Messiah. It typified the work of Christ, and its requirements ceased at the cross.",
+            "refs": "Hebrews 10:1, 9, 10 · Colossians 2:14, 16 · Galatians 4:10, 11",
+            "detail": [
+              {
+                "text": "The ceremonial law of the Old Testament, enjoined upon the Jewish people, pointed forward to the Messiah. It typified the work of Christ, and its requirements ceased at the cross. The ceremonial law, which includes the ceremonial sabbaths and Jewish holidays, should not be confused with the moral law and the Sabbath day of the fourth commandment.",
+                "refs": "Hebrews 10:1, 9, 10 · Colossians 2:14, 16 · Galatians 4:10, 11"
+              }
+            ]
+          },
+          {
+            "num": "09",
+            "navLabel": "Grace and the Means of Grace",
+            "titlePrefix": "",
+            "accent": "Grace",
+            "titleSuffix": " and the Means of Grace",
+            "body": "Grace means \"unmerited favor.\" God manifests His love by extending salvation from death through Jesus Christ to undeserving sinful man.",
+            "refs": "Romans 10:13-18 · John 14:26 · 2 Corinthians 5:17-20 · Acts 2:38-42",
+            "detail": [
+              {
+                "text": "Grace means \"unmerited favor.\" Because of sin, mankind must suffer the consequences of death. God manifests His love by extending salvation from death through Jesus Christ to undeserving sinful man. Salvation is accomplished when sinners are drawn to Christ through: (a) the Word of God, (b) the Holy Spirit, and (c) the ministry of the gospel.",
+                "refs": "Romans 10:13-18 · John 14:26; 16:13 · 2 Corinthians 5:17-20 · Acts 2:38-42"
+              }
+            ]
+          },
+          {
+            "num": "10",
+            "navLabel": "The New Birth",
+            "titlePrefix": "The ",
+            "accent": "New Birth",
+            "titleSuffix": "",
+            "body": "In order to be saved from sin and its consequences, man must experience a new birth, a transformation of life. The new life thereafter is maintained by our faith in Jesus Christ.",
+            "refs": "Matthew 1:21 · John 3:3 · Romans 2:4 · 1 Peter 1:22 · Galatians 2:20",
+            "detail": [
+              {
+                "text": "In order to be saved from sin and its consequences, man must experience a new birth, a transformation of life. As an individual repents of his sins and as he yields to the work of the Holy Spirit upon his heart, he experiences a desire to live in obedience to God's will. The Bible calls this experience \"the new birth.\" The new life thereafter is maintained by our faith in Jesus Christ.",
+                "refs": "Matthew 1:21 · John 3:3 · Romans 2:4 · John 16:8 · Acts 2:37, 38 · 1 John 2:3, 6 · John 16:13 · 1 Peter 1:22 · Galatians 2:20 · Hebrews 12:2 · Romans 1:17 · Philippians 4:13"
+              }
+            ]
+          },
+          {
+            "num": "11",
+            "navLabel": "Baptism",
+            "titlePrefix": "",
+            "accent": "Baptism",
+            "titleSuffix": "",
+            "body": "Those who have reached an age of accountability and have been \"born again\" should be baptized by immersion in the name of the Father, the Son, and the Holy Spirit.",
+            "refs": "Acts 2:38 · Mark 16:16 · Romans 6:3-9 · Colossians 2:12",
+            "detail": [
+              {
+                "text": "Those who have reached an age of accountability and have been \"born again\" should be baptized by immersion in the name of the Father, the Son, and the Holy Spirit. This represents the death, burial, and resurrection of Jesus Christ, as well as the death of the \"old man\" and the resurrection of the \"new man\" to a new life in Christ.",
+                "refs": "Acts 2:38 · Mark 16:16 · Romans 6:3-9 · Colossians 2:12"
+              }
+            ]
+          },
+          {
+            "num": "12",
+            "navLabel": "The Ordinance of Humility",
+            "titlePrefix": "The Ordinance of ",
+            "accent": "Humility",
+            "titleSuffix": "",
+            "body": "The washing of feet is an ordinance of humility which precedes the communion service. It was instituted by Christ to teach humility, equality, brotherly love, and unity in Christ.",
+            "refs": "John 13:1-17 · Matthew 5:23, 24",
+            "detail": [
+              {
+                "text": "The washing of feet is an ordinance of humility which precedes the communion service. It was instituted by Christ, and enjoined upon the Christian church to teach humility, equality, brotherly love, and unity in Christ. Reconciliation between brethren should precede the ordinance.",
+                "refs": "John 13:1-17 · Matthew 5:23, 24"
+              }
+            ]
+          },
+          {
+            "num": "13",
+            "navLabel": "The Holy Communion",
+            "titlePrefix": "The Holy ",
+            "accent": "Communion",
+            "titleSuffix": "",
+            "body": "By partaking of the unleavened bread and the unfermented wine which represent the body and blood of Jesus Christ, the believer commemorates His suffering and death.",
+            "refs": "Matthew 26:26-28 · 1 Corinthians 10:16, 17 · 1 Corinthians 11:23-29",
+            "detail": [
+              {
+                "text": "By partaking of the unleavened bread and the unfermented wine which represent the body and blood of Jesus Christ, the believer commemorates His suffering and death. The significance of this ordinance implies that it be shared only by members in good and regular standing in the body of Christ.",
+                "refs": "Matthew 26:26-28 · 1 Corinthians 10:16, 17; 12:20 · Luke 22:11 · 1 Corinthians 11:23-29"
+              }
+            ]
+          },
+          {
+            "num": "14",
+            "navLabel": "The Investigative Judgment",
+            "titlePrefix": "The Investigative ",
+            "accent": "Judgment",
+            "titleSuffix": "",
+            "body": "The prophecy of the 2300 days of Daniel 8:14 ended in 1844, when the investigative judgment began. It concerns the examination of the heavenly records of all who have professed the name of God.",
+            "refs": "Ecclesiastes 12:14 · Daniel 7:9, 10 · Revelation 14:6, 7 · Matthew 22:11-14",
+            "detail": [
+              {
+                "text": "The prophecy of the 2300 days (years) of Daniel 8:14 ended in 1844, when the \"cleansing of the sanctuary,\" or the investigative judgment, began. This refers to the pre-Advent examination of the heavenly records of the lives of the professed children of God through the ages. The result of this investigation determines the destiny of each soul: either for eternal life or eternal death.",
+                "refs": "Ecclesiastes 12:14 · Daniel 7:9, 10 · Luke 20:35 · Revelation 14:6, 7; 22:12 · Matthew 22:11-14"
+              }
+            ]
+          },
+          {
+            "num": "15",
+            "navLabel": "Present Truth",
+            "titlePrefix": "Present ",
+            "accent": "Truth",
+            "titleSuffix": "",
+            "body": "The three angels' messages of Revelation 14:6-12 are present truth. These messages are to prepare a special group of people — the 144,000 — for the second coming of Christ.",
+            "refs": "Revelation 7:1-4 · Revelation 14:1-12 · Revelation 18:1-4",
+            "detail": [
+              {
+                "text": "The three angels' messages of Revelation 14:6-12, together with the message of the other angel of Revelation 18:1-4, are present truth. These messages are to prepare a special group of people — 144,000 in number — for the second coming of Christ.",
+                "refs": "Ezekiel 9:1-7 · Revelation 7:1-4; 14:1-12; 18:1-4"
+              }
+            ]
+          },
+          {
+            "num": "16",
+            "navLabel": "The Gift of Prophecy",
+            "titlePrefix": "The Gift of ",
+            "accent": "Prophecy",
+            "titleSuffix": "",
+            "body": "In these last days the gift of prophecy was restored to Christ's church, not as a replacement of or an addition to the Bible but as a guide and a mark of distinction to the remnant people of God.",
+            "refs": "Numbers 12:6 · Amos 3:7 · Ephesians 4:8-11 · 1 Thessalonians 5:20, 21",
+            "detail": [
+              {
+                "text": "In keeping with the promise of God in Acts 2:17-21, the gift of prophecy was restored to Christ's church in these last days, not as a replacement of or an addition to the Bible but as a guide and a mark of distinction to the remnant people of God. Inspired writings turn our attention to the principles of the Bible as our rule of faith and practice, and help to safeguard us from misinterpreting the Word of God.",
+                "refs": "Numbers 12:6 · 2 Chronicles 20:20 · Proverbs 29:18 · Hosea 12:13 · Amos 3:7 · Ephesians 4:8-11 · 1 Thessalonians 5:20, 21"
+              }
+            ]
+          },
+          {
+            "num": "17",
+            "navLabel": "Marriage",
+            "titlePrefix": "",
+            "accent": "Marriage",
+            "titleSuffix": "",
+            "body": "Marriage was ordained by God and honored by Christ to bind both man and woman for life. Neither divorce for the purpose of remarriage, nor common-law marriage, nor marriage with unbelievers is within the divine principle of marriage.",
+            "refs": "Luke 16:18 · Romans 7:1-3 · 1 Corinthians 7:11, 39 · 2 Corinthians 6:14",
+            "detail": [
+              {
+                "text": "Marriage was ordained by God and honored by Christ to bind both man and woman for life. Neither divorce for the purpose of remarriage, nor common-law marriage, nor marriage with unbelievers is within the divine principle of marriage.",
+                "refs": "Luke 16:18 · Romans 7:1-3 · 1 Corinthians 7:11, 39 · 2 Corinthians 6:14"
+              }
+            ]
+          },
+          {
+            "num": "18",
+            "navLabel": "Health and Dress Reform",
+            "titlePrefix": "",
+            "accent": "Health",
+            "titleSuffix": " and Dress Reform",
+            "body": "Because a Christian's body is the temple of the Holy Spirit, the believer will want to safeguard their health by following natural law, discarding health-destroying habits, and being moderate in the use of things that are good.",
+            "refs": "1 Corinthians 3:16, 17 · Philippians 4:5",
+            "detail": [
+              {
+                "text": "Because a Christian's body is the temple of the Holy Spirit, the believer will want to safeguard their health by following natural law, discarding health-destroying articles of food and unnatural habits of life, and being moderate in the use of those things which are good.",
+                "refs": "1 Corinthians 3:16, 17 · Philippians 4:5"
+              },
+              {
+                "text": "Habits of dress are an index of the character. Christian modesty and self-respect require us to abstain from the extravagant fashions of the world.",
+                "refs": "1 Peter 3:1-5 · Isaiah 3:16-24 · 1 Corinthians 11:15 · 1 Timothy 2:9"
+              }
+            ]
+          },
+          {
+            "num": "19",
+            "navLabel": "Our Attitude Toward Earthly Governments",
+            "titlePrefix": "Our Attitude Toward ",
+            "accent": "Earthly",
+            "titleSuffix": " Governments",
+            "body": "The Christian is obliged to respect divine and human authority. He obeys all righteous laws of earthly governments from a good conscience. If the requirements of human laws conflict with the law of God, then the Christian must decide: Shall I obey God or man?",
+            "refs": "Matthew 22:21 · Romans 13:3-7 · 1 Peter 2:17 · Acts 5:29",
+            "detail": [
+              {
+                "text": "The Christian is obliged to respect divine and human authority. He obeys all righteous laws of earthly governments from a good conscience. If the requirements of human laws are in conflict with the law of God, then the Christian must decide for himself or herself: Shall I obey God or man? Our Christian conscience forbids us to have any part in political activities.",
+                "refs": "Matthew 22:21 · Romans 13:3-7 · 1 Peter 2:17 · Acts 5:29 · 2 Corinthians 6:14-17 · Isaiah 8:12"
+              }
+            ]
+          },
+          {
+            "num": "20",
+            "navLabel": "The Body of Christ, His Church",
+            "titlePrefix": "The Body of Christ, His ",
+            "accent": "Church",
+            "titleSuffix": "",
+            "body": "The church of Christ is a visible and organized body, not scattered individuals. The church delegates a portion of its authority to elected officers, not to lord it over the church, but to serve the church and edify the body of Christ.",
+            "refs": "John 10:16 · 1 Corinthians 12:12-27 · Ephesians 4:11-16 · Matthew 18:15-18",
+            "detail": [
+              {
+                "text": "The church of Christ is a visible and organized body, not scattered individuals. The church delegates a portion of its authority to elected officers, not to lord it over the church, but to serve the church and edify the body of Christ. The church has the authority to accept members by baptism and profession of faith and to disconnect members for cause.",
+                "refs": "John 10:16; 11:52 · 1 Corinthians 10:17; 12:12-27 · Ephesians 4:11-16 · Revelation 1:20 · Matthew 16:19; 18:15-18 · 1 Corinthians 5:11, 13"
+              }
+            ]
+          },
+          {
+            "num": "21",
+            "navLabel": "Tithes and Offerings",
+            "titlePrefix": "",
+            "accent": "Tithes",
+            "titleSuffix": " and Offerings",
+            "body": "The giving of tithes and offerings for the support of the ministry and the preaching of the Gospel is a Christian duty.",
+            "refs": "Malachi 3:7-10 · Matthew 23:23 · 1 Corinthians 9:14 · 2 Corinthians 9:6, 7",
+            "detail": [
+              {
+                "text": "Everything belongs to God. We are stewards who must give account of our goods, talents, time, and resources. The duty of returning the tithe — a tenth of all income — is the acknowledgment of His ownership. Withholding the tithe is a transgression of the eighth commandment.",
+                "refs": "Psalm 24:1 · 1 Chronicles 29:11, 12 · 1 Corinthians 4:1, 2 · Matthew 25:14-30 · Leviticus 27:30-33 · Matthew 23:23 · 1 Corinthians 9:14 · Malachi 3:8, 9"
+              },
+              {
+                "text": "Beyond the tithe, the remaining nine tenths are meant for free-will support of God's work, according to our love for Him. Generosity reflects our love for God and creates spiritual life in the community.",
+                "refs": "Malachi 3:10, 11 · Exodus 25:2 · Deuteronomy 16:16, 17 · Proverbs 3:9, 10; 11:24, 25 · 2 Corinthians 9:6, 7"
+              }
+            ]
+          },
+          {
+            "num": "22",
+            "navLabel": "The Second Coming of Christ",
+            "titlePrefix": "The ",
+            "accent": "Second",
+            "titleSuffix": " Coming of Christ",
+            "body": "Human probation closes shortly before the second coming of Christ, which will be literal, personal, visible, audible, and universal.",
+            "refs": "Luke 17:29, 30 · 2 Thessalonians 1:6-10 · Matthew 24:27, 31 · John 14:1-3 · Acts 1:9-11",
+            "detail": [
+              {
+                "text": "Human probation closes shortly before the second coming of Christ, which will be literal, personal, visible, audible, and universal.",
+                "refs": "Luke 13:23-25; 17:29, 30 · Isaiah 11:4; 66:15 · 2 Thessalonians 1:6-10 · Matthew 24:27, 31 · John 14:1-3 · Acts 1:9-11 · 1 Thessalonians 4:15-17 · Revelation 1:7"
+              }
+            ]
+          },
+          {
+            "num": "23",
+            "navLabel": "The Nature of Man and the State of the Dead",
+            "titlePrefix": "The Nature of Man and the State of the ",
+            "accent": "Dead",
+            "titleSuffix": "",
+            "body": "Man is mortal by nature, but he may obtain immortality through Christ at His second coming. At death, whether righteous or unrighteous, man enters into a sleep — a state of unconsciousness — until the resurrection.",
+            "refs": "Genesis 2:7 · Job 4:17 · Ecclesiastes 9:5, 6 · John 5:28, 29 · 1 Corinthians 15:53, 54",
+            "detail": [
+              {
+                "text": "Man was created by the hand of God as a living soul. Through disobedience he was separated from the source of life. Therefore, he is mortal by nature; but he may obtain immortality through Christ: in promise, immediately; and in actuality at His second coming.",
+                "refs": "Genesis 2:7; 3:22-24 · Job 4:17 · 1 John 2:25 · John 11:25, 26 · Romans 2:7 · 2 Timothy 1:10 · 1 Corinthians 15:53, 54"
+              },
+              {
+                "text": "At death, whether he be good or evil, man enters into a sleep, a state of unconsciousness, silence, and inactivity. The dead remain in the grave until the resurrection of the just and of the unjust. The unjust are not in a place of torment, but are \"reserved unto the day of judgment to be punished.\" And the righteous are not in heaven, but remain in the grave till the resurrection at the coming of Christ.",
+                "refs": "Ecclesiastes 9:5, 6, 10 · Psalms 6:5; 89:48; 146:4 · Revelation 20:13 · 2 Peter 2:9 · John 5:28, 29 · Daniel 12:13 · Acts 2:29, 34 · 2 Timothy 4:7, 8"
+              }
+            ]
+          },
+          {
+            "num": "24",
+            "navLabel": "The Millennium",
+            "titlePrefix": "The ",
+            "accent": "Millennium",
+            "titleSuffix": "",
+            "body": "After the second coming of Christ there will be a one-thousand-year period, commonly called the millennium. During this time, while the righteous are in heaven with Christ, the wicked remain in the dust of the desolated earth.",
+            "refs": "Revelation 20:4, 5 · Isaiah 24:1-6 · 1 Corinthians 6:2, 3 · Malachi 4:1, 3",
+            "detail": [
+              {
+                "text": "After the second coming of Christ there will be a one-thousand-year period, commonly called the millennium. During this time, while the righteous are in heaven with Christ, the wicked remain in the dust of the desolated earth. While the earth is desolate, the righteous ones will judge the wicked. At the end of the millennium, the wicked are resurrected to be destroyed by fire.",
+                "refs": "John 14:3 · Revelation 7:9; 14:1; 20:4, 5 · Isaiah 24:1-6 · Jeremiah 4:23-27 · 1 Corinthians 6:2, 3 · John 5:29 · Malachi 4:1, 3 · Matthew 10:28 · 2 Peter 3:7-10 · Psalm 37:10"
+              }
+            ]
+          },
+          {
+            "num": "25",
+            "navLabel": "The New Earth",
+            "titlePrefix": "The ",
+            "accent": "New",
+            "titleSuffix": " Earth",
+            "body": "After this earth has been cleansed by fire at the end of the millennium, God will make all things new and restore the beauty of Eden. The new earth will be the eternal home of the redeemed, with God as its supreme ruler.",
+            "refs": "2 Peter 3:13 · Revelation 21:1-7 · Matthew 5:5 · 1 Corinthians 2:9",
+            "detail": [
+              {
+                "text": "After this earth has been cleansed by fire at the end of the millennium, the promise given to our spiritual forefathers with reference to the new earth will be fulfilled. This earth will be redeemed and restored to its original condition, and all things will be made new. The inheritance promised to Abraham and his spiritual descendants encompasses the whole earth, not only Canaan.",
+                "refs": "2 Peter 3:13 · Revelation 21:1-7; 22:1-5 · Isaiah 65:17-25; 11:1-11 · Genesis 12:7; 17:7, 8 · Hebrews 11:9, 10, 13-16 · Matthew 5:5 · Psalm 37:11, 29"
+              },
+              {
+                "text": "On the new earth there will be no more suffering, for the former things are passed away. Sin and its author have ceased to exist, and the great controversy is ended. The people of God are privileged to hold open communion with the Father and the Son, and from one Sabbath to another all shall come before God to worship.",
+                "refs": "Revelation 21:4; 22:3-5 · Isaiah 66:22, 23 · Daniel 7:27 · 1 Corinthians 2:9"
+              }
+            ]
+          }
+        ]
+      }
     },
     "uberUns": {
       "eyebrow": "Who we are",
@@ -128,13 +597,20 @@
       "success": "You have been successfully unsubscribed.",
       "error": "The link is invalid or has expired."
     },
+    "confirm": {
+      "loading": "Confirming your subscription…",
+      "invalidLink": "Invalid confirmation link.",
+      "success": "Thank you! Your subscription to the newsletter is now confirmed.",
+      "already": "Your subscription was already confirmed.",
+      "error": "The link is invalid or has expired. Please subscribe again."
+    },
     "legal": {
       "courtesyNote": "This is a courtesy translation. The legally binding version is the German original.",
       "impressum": {
         "title": "Legal Notice",
         "metaTitle": "Legal Notice – sdarm.life",
         "section1Title": "Information according to § 5 TMG",
-        "section1Body": "Community of Seventh Day Adventist Reform Movement e.\u00a0V.\nEisenbahnstr. 6\nD-65439 Flörsheim/M",
+        "section1Body": "Community of Seventh Day Adventist Reform Movement e. V.\nEisenbahnstr. 6\nD-65439 Flörsheim/M",
         "section2Title": "Contact",
         "section3Title": "Register of Associations",
         "section3Body": "Registration court: Amtsgericht Wiesbaden\nRegistration number: VR 6992",
@@ -147,17 +623,17 @@
         "title": "Privacy Policy",
         "metaTitle": "Privacy Policy – sdarm.life",
         "section1Title": "Data Controller",
-        "section1Body": "Community of Seventh Day Adventist Reform Movement e.\u00a0V.\nEisenbahnstr. 6, D-65439 Flörsheim/M",
+        "section1Body": "Community of Seventh Day Adventist Reform Movement e. V.\nEisenbahnstr. 6, D-65439 Flörsheim/M",
         "section2Title": "Newsletter",
         "section2Body": "When you subscribe to our newsletter, we store your email address and the time of registration. Processing is based on your consent pursuant to Art. 6(1)(a) GDPR. You may revoke your subscription at any time using the unsubscribe link in each newsletter email.",
         "section3Title": "Cookies & Local Storage",
-        "section3Body": "This website does not set its own cookies. Cloudflare, as a technical service provider, may set a functionally necessary cookie (__cf_bm) for protection against automated access. This cookie does not require consent (Art.\u00a06(1)(f) GDPR).",
-        "section3LocalStorage": "The book reader stores reading preferences (theme, font size, typeface, line spacing) in the browser's local storage (localStorage). This data remains solely on your device, is not transmitted to any server, and contains no personal data. The storage serves exclusively for user convenience and does not require consent (§\u00a025(2)(2) TTDSG). You can delete these settings at any time via your browser settings.",
+        "section3Body": "This website does not set its own cookies. Cloudflare, as a technical service provider, may set a functionally necessary cookie (__cf_bm) for protection against automated access. This cookie does not require consent (Art. 6(1)(f) GDPR).",
+        "section3LocalStorage": "The book reader stores reading preferences (theme, font size, typeface, line spacing) in the browser's local storage (localStorage). This data remains solely on your device, is not transmitted to any server, and contains no personal data. The storage serves exclusively for user convenience and does not require consent (§ 25(2)(2) TTDSG). You can delete these settings at any time via your browser settings.",
         "section4Title": "Hosting & Analytics",
         "section4Body": "This website is hosted via Cloudflare Pages. Cloudflare may process technical access data (e.g. IP address, time of access). Website statistics are collected via Cloudflare Web Analytics — cookie-free, without user profiles and without personal data.",
         "cloudflarePrivacy": "Cloudflare Privacy Policy",
         "section5Title": "External Content (E-Books)",
-        "section5Body": "The \u201cTreasures\u201d platform allows digital books in EPUB format to be read directly in the browser. When opening a book, your browser establishes a direct connection to the external file server (currently: egwwritings.org, operated by the Ellen G. White Estate, Inc., USA) from which the EPUB file is retrieved. In doing so, your IP address and the time of access are transmitted to this third-party provider. Processing is based on our legitimate interest in delivering the requested content (Art.\u00a06(1)(f) GDPR). For more information, please see the",
+        "section5Body": "The “Treasures” platform allows digital books in EPUB format to be read directly in the browser. When opening a book, your browser establishes a direct connection to the external file server (currently: egwwritings.org, operated by the Ellen G. White Estate, Inc., USA) from which the EPUB file is retrieved. In doing so, your IP address and the time of access are transmitted to this third-party provider. Processing is based on our legitimate interest in delivering the requested content (Art. 6(1)(f) GDPR). For more information, please see the",
         "section5PrivacyLink": "Ellen G. White Estate Privacy Policy",
         "section6Title": "Book Request (Receive a Gift)",
         "section6Body": "When you request books through the \"Receive a Gift\" form, we process the following data: name, email address, postal address (street, postal code, city), country, and optionally phone number and a personal message. The legal basis is your consent pursuant to Art. 6(1)(a) GDPR. The data is used solely for processing and shipping your request and will be deleted after delivery is complete. You may revoke your consent at any time by email:",
@@ -272,51 +748,52 @@
       "scriptureRef": "Psalm 119:111"
     },
     "bookRequest": {
-        "bannerEyebrow": "Free Books",
-        "bannerTitle": "Read what the world keeps silent",
-        "bannerSubtitle": "Classic books of the Reform Movement — free, delivered directly to your home.",
-        "cta": "Receive a gift",
-        "modalTitle": "Your books are waiting",
-        "modalSubtitle": "Just a few fields — and we will send you the package free of charge.",
-        "notice": "One gift per address — so that as many people as possible can benefit.",
-        "fieldLand": "Where do you live?",
-        "landPlaceholder": "Select country …",
-        "fieldName": "What is your name?",
-        "namePlaceholder": "First and last name",
-        "fieldEmail": "Your email",
-        "emailPlaceholder": "so we can keep you informed",
-        "fieldPhone": "Mobile number",
-        "phonePlaceholder": "+49 …",
-        "fieldStreet": "Where should we deliver?",
-        "streetPlaceholder": "Street and house number",
-        "fieldPlz": "Postal code",
-        "plzPlaceholder": "10115",
-        "fieldCity": "City",
-        "cityPlaceholder": "Your city",
-        "fieldBooks": "Which books would you like to discover?",
-        "fieldWish": "Any other wishes?",
-        "wishPlaceholder": "Feel free to write us something …",
-        "dsgvoNotice": "Your data (name, address, email) will be processed solely for the purpose of handling and shipping this book request. Legal basis: Art. 6(1)(a) GDPR. Your data will be deleted after shipping is complete. You may revoke your consent at any time (info@sdarm.life).",
-        "consent": "I consent to the processing of my data for this one-time book shipment. I have read the",
-        "consentPrivacyLink": "Privacy Policy",
-        "submit": "Yes, I want these books!",
-        "submitNote": "Free · No spam · No catch",
-        "successTitle": "Your request has arrived!",
-        "successBody": "We are delighted to send you these books. They will arrive within 2–15 working days.",
-        "successClose": "Wonderful, thank you!",
-        "optional": "optional",
-        "required": "*",
-        "books": {
-          "wegZuChristus": "Steps to Christ – E. G. White",
-          "grosserKampf": "The Great Controversy – E. G. White",
-          "lebenJesu": "The Desire of Ages – E. G. White",
-          "bibel": "The Bible"
-        },
-        "errorMinBook": "Please select at least one book.",
-        "errorSubmit": "Something went wrong. Please try again later.",
-        "landDe": "Germany",
-        "landAt": "Austria",
-        "landCh": "Switzerland"
-      }
+      "bannerEyebrow": "Free Books",
+      "bannerTitle": "Read what the world keeps silent",
+      "bannerSubtitle": "Classic books of the Reform Movement — free, delivered directly to your home.",
+      "cta": "Receive a gift",
+      "modalTitle": "Your books are waiting",
+      "modalSubtitle": "Just a few fields — and we will send you the package free of charge.",
+      "notice": "One gift per address — so that as many people as possible can benefit.",
+      "fieldLand": "Where do you live?",
+      "landPlaceholder": "Select country …",
+      "fieldName": "What is your name?",
+      "namePlaceholder": "First and last name",
+      "fieldEmail": "Your email",
+      "emailPlaceholder": "so we can keep you informed",
+      "fieldPhone": "Mobile number",
+      "phonePlaceholder": "+49 …",
+      "fieldStreet": "Where should we deliver?",
+      "streetPlaceholder": "Street and house number",
+      "fieldPlz": "Postal code",
+      "plzPlaceholder": "10115",
+      "fieldCity": "City",
+      "cityPlaceholder": "Your city",
+      "fieldBooks": "Which books would you like to discover?",
+      "fieldWish": "Any other wishes?",
+      "wishPlaceholder": "Feel free to write us something …",
+      "dsgvoNotice": "Your data (name, address, email) will be processed solely for the purpose of handling and shipping this book request. Legal basis: Art. 6(1)(a) GDPR. Your data will be deleted after shipping is complete. You may revoke your consent at any time (info@sdarm.life).",
+      "consent": "I consent to the processing of my data for this one-time book shipment. I have read the",
+      "consentPrivacyLink": "Privacy Policy",
+      "submit": "Yes, I want these books!",
+      "submitNote": "Free · No spam · No catch",
+      "successTitle": "Your request has arrived!",
+      "successBody": "We are delighted to send you these books. They will arrive within 2–15 working days.",
+      "successClose": "Wonderful, thank you!",
+      "closeAria": "Close",
+      "optional": "optional",
+      "required": "*",
+      "books": {
+        "wegZuChristus": "Steps to Christ – E. G. White",
+        "grosserKampf": "The Great Controversy – E. G. White",
+        "lebenJesu": "The Desire of Ages – E. G. White",
+        "bibel": "The Bible"
+      },
+      "errorMinBook": "Please select at least one book.",
+      "errorSubmit": "Something went wrong. Please try again later.",
+      "landDe": "Germany",
+      "landAt": "Austria",
+      "landCh": "Switzerland"
+    }
   }
 }

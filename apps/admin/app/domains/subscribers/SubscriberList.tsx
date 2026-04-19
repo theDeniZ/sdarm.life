@@ -25,6 +25,7 @@ export default function SubscriberList() {
           <thead>
             <tr>
               <th>Email</th>
+              <th>Status</th>
               <th>Subscribed</th>
               <th>Actions</th>
             </tr>
@@ -33,6 +34,13 @@ export default function SubscriberList() {
             {items.map((sub) => (
               <tr key={sub.id}>
                 <td>{sub.email}</td>
+                <td>
+                  {sub.confirmedAt ? (
+                    <span title={`Confirmed ${fmtDate(sub.confirmedAt)}`}>✓ Confirmed</span>
+                  ) : (
+                    <span style={{ color: '#c0392b' }}>⏳ Pending</span>
+                  )}
+                </td>
                 <td>{fmtDate(sub.createdAt)}</td>
                 <td>
                   <button className="btn-danger" onClick={() => handleRemove(sub)}>

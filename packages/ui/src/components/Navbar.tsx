@@ -19,6 +19,7 @@ export default function Navbar({
   treasuresUrl?: string;
 }) {
   const [scrolled, setScrolled] = useState(false);
+  const [overDark, setOverDark] = useState(false);
   const [activeHref, setActiveHref] = useState('');
   const [menuOpen, setMenuOpen] = useState(false);
   const t = useTranslations('common.nav');
@@ -36,12 +37,11 @@ export default function Navbar({
   }
 
   const navLinks = [
-    { label: t('news'), href: `${webUrl}/#neuigkeiten`, external: true },
     { label: t('songs'), href: songbookUrl, external: true },
     { label: t('events'), href: eventsUrl, external: true },
     { label: t('treasures'), href: treasuresUrl, external: true },
     { label: t('about'), href: `${webUrl}/about`, external: true },
-    { label: t('contact'), href: `${webUrl}/#kontakt`, external: true },
+    { label: t('contact'), href: `${webUrl}/kontakt`, external: true },
   ];
 
   useEffect(() => {
@@ -52,13 +52,44 @@ export default function Navbar({
     return () => window.removeEventListener('scroll', onScroll);
   }, [pathname]);
 
+  // Adaptive contrast: navbar text flips to "always-dark" colors while it
+  // overlaps any [data-nav-overlay="dark"] section (e.g. cosmic hero).
+  useEffect(() => {
+    const navHeight = 72;
+    function update() {
+      const els = document.querySelectorAll<HTMLElement>('[data-nav-overlay="dark"]');
+      let over = false;
+      els.forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top < navHeight && r.bottom > 0) over = true;
+      });
+      setOverDark(over);
+    }
+    update();
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
+    };
+  }, [pathname]);
+
   useEffect(() => {
     const host = window.location.hostname;
-    if (host.includes('treasures')) setActiveHref(treasuresUrl);
-    else if (host.includes('songs') || host.includes('songbook')) setActiveHref(songbookUrl);
-    else if (host.includes('events')) setActiveHref(eventsUrl);
-    else setActiveHref(webUrl);
-  }, [webUrl, songbookUrl, eventsUrl, treasuresUrl]);
+    if (host.includes('treasures')) {
+      setActiveHref(treasuresUrl);
+    } else if (host.includes('songs') || host.includes('songbook')) {
+      setActiveHref(songbookUrl);
+    } else if (host.includes('events')) {
+      setActiveHref(eventsUrl);
+    } else if (pathname.match(/^\/(de|en)\/kontakt(\/|$)/)) {
+      setActiveHref(`${webUrl}/kontakt`);
+    } else if (pathname.match(/^\/(de|en)\/about(\/|$)/)) {
+      setActiveHref(`${webUrl}/about`);
+    } else {
+      setActiveHref(webUrl);
+    }
+  }, [webUrl, songbookUrl, eventsUrl, treasuresUrl, pathname]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -90,7 +121,7 @@ export default function Navbar({
 
   return (
     <>
-      <nav className={scrolled ? 'scrolled' : ''}>
+      <nav className={`${scrolled ? 'scrolled' : ''}${overDark ? ' over-dark' : ''}`.trim()}>
         <Link href={webUrl} className="nav-logo" onClick={handleLogoClick}>
           SDARM<span>.life</span>
         </Link>

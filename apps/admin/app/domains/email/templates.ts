@@ -1,9 +1,6 @@
 // Templates pre-fill the HTML textarea in the EmailComposer.
 // UNSUBSCRIBE_URL is left as a visible placeholder for the admin to replace.
 
-const FONT_IMPORT =
-  "@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');";
-
 const UNSUBSCRIBE_URL = 'https://api.sdarm.life/api/v1/unsubscribe?token=TOKEN';
 
 const i18n = {
@@ -46,7 +43,6 @@ function layout(content: string, t: (typeof i18n)['de']): string {
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <style>
-    ${FONT_IMPORT}
     body { margin:0; padding:0; background:#0c0b09; -webkit-font-smoothing:antialiased; }
     @media only screen and (max-width:640px) {
       .ew { width:100% !important; }

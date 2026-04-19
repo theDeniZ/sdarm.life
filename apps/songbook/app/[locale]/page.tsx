@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { PageHero, ScriptureVerseSection, ConnectedFooter } from '@sdarm/ui';
+import { PageHero, ScriptureVerseSection } from '@sdarm/ui';
 import { fetchSongbooks } from '../lib/api';
 
 export const runtime = 'edge';
@@ -58,7 +58,6 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
         text="Singet dem HERRN ein neues Lied; singet dem HERRN, alle Welt!"
         reference="Psalm 96,1"
       />
-      <ConnectedFooter locale={locale} />
     </>
   );
 }

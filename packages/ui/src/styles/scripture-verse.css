@@ -120,13 +120,45 @@
   .scripture-verse-glyph { font-size: 4rem; }
 }
 
-/* ── Light theme ── */
+/* ── Light theme ──
+   On cream bg, low-alpha gold (used in dark theme) becomes near-invisible.
+   We deepen all decorative elements to a darker warm-brown gold and bump
+   alpha so they read clearly. */
 [data-theme='light'] .scripture-verse {
   background: var(--bg-section);
+}
+[data-theme='light'] .scripture-verse::before {
+  background: radial-gradient(ellipse 80% 100% at 0% 50%, rgba(160, 110, 50, 0.1) 0%, transparent 70%);
+}
+[data-theme='light'] .scripture-verse-eyebrow {
+  color: rgba(140, 100, 50, 0.78);
+}
+[data-theme='light'] .scripture-verse-bar {
+  background: linear-gradient(
+    to bottom,
+    rgba(140, 100, 50, 0.78) 0%,
+    rgba(140, 100, 50, 0.18) 85%,
+    transparent 100%
+  );
+}
+[data-theme='light'] .scripture-verse-glyph {
+  color: rgba(140, 100, 50, 0.65);
+  text-shadow: 0 0 50px rgba(160, 110, 50, 0.18);
 }
 [data-theme='light'] .scripture-verse-text {
   color: rgba(28, 28, 38, 0.86);
 }
+[data-theme='light'] .scripture-verse-ref {
+  color: rgba(140, 100, 50, 0.85);
+}
 [data-theme='light'] .scripture-verse-link:hover .scripture-verse-text {
   color: rgba(14, 14, 20, 0.98);
+}
+[data-theme='light'] .scripture-verse-link:hover .scripture-verse-bar {
+  background: linear-gradient(
+    to bottom,
+    rgba(140, 100, 50, 0.95) 0%,
+    rgba(140, 100, 50, 0.22) 85%,
+    transparent 100%
+  );
 }

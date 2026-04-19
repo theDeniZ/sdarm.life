@@ -1,8 +1,4 @@
 import type { PostDto, ConfigDto, ListResponse, TreasureDto, SongbookDto } from '@sdarm/types';
-import { formatDate } from './format';
-import type { HeroPost } from '../components/HeroSection';
-import type { NewsPost } from '../components/NewsSection';
-import type { FooterConfig } from '../components/Footer';
 
 export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
@@ -60,38 +56,14 @@ export async function fetchConfig(): Promise<ConfigDto | null> {
   }
 }
 
-export function toHeroPost(post: PostDto): HeroPost {
-  return {
-    title: post.title,
-    meta: `${formatDate(post.publishedAt)}${post.author ? ` · ${post.author}` : ''}`,
-    excerpt: post.excerpt ?? '',
-    body: post.body ?? '',
-    imageUrl: r2url(post.coverKey, { w: 1200, q: 85 }) ?? FALLBACK_IMG,
-    thumbUrl: r2url(post.thumbKey, { w: 300, h: 200 }) ?? r2url(post.coverKey, { w: 300, h: 200 }) ?? FALLBACK_IMG,
-    imageAlt: post.coverAlt ?? post.title,
-    slug: post.slug,
-  };
-}
-
-export function toNewsPost(post: PostDto): NewsPost {
-  return {
-    id: String(post.id),
-    title: post.title,
-    date: formatDate(post.publishedAt),
-    author: post.author ?? '',
-    body: post.excerpt ?? post.body ?? '',
-    imageUrl: r2url(post.coverKey, { w: 600, h: 400 }) ?? FALLBACK_IMG,
-    imageAlt: post.coverAlt ?? post.title,
-    href: `/posts/${post.slug}`,
-  };
-}
-
+// Releases section data — only what needs API. Faith / Quote / YouVersion /
+// Event cards are static and don't need any data injection.
 export interface NewsData {
   book: { title: string; author: string | null; href: string } | null;
   song: { title: string; songCount: number; href: string } | null;
-  sermon: { title: string; author: string | null; date: string; href: string } | null;
-  study: { title: string; href: string } | null;
   eventsUrl: string;
+  aboutUrl: string;
+  youVersionUrl: string;
 }
 
 export async function fetchTreasures(params: string): Promise<TreasureDto[] | null> {
@@ -112,14 +84,4 @@ export async function fetchSongbooks(): Promise<SongbookDto[] | null> {
   } catch {
     return null;
   }
-}
-
-export function toFooterConfig(config: ConfigDto): FooterConfig {
-  return {
-    donation_url: config.donation_url ?? undefined,
-    facebook_url: config.facebook_url ?? undefined,
-    whatsapp_url: config.whatsapp_url ?? undefined,
-    instagram_url: config.instagram_url ?? undefined,
-    youtube_url: config.youtube_url ?? undefined,
-  };
 }

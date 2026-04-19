@@ -846,7 +846,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
           <button
             className="epub-icon-btn"
             onClick={() => setSidebarOpen((v) => !v)}
-            aria-label="Inhaltsverzeichnis umschalten"
+            aria-label={locale === 'de' ? 'Inhaltsverzeichnis umschalten' : 'Toggle table of contents'}
           >
             <svg viewBox="0 0 18 18" fill="none">
               <line x1="2" y1="4" x2="16" y2="4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -856,7 +856,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
           </button>
           <div className="epub-breadcrumb">
             <Link href={`/${locale}`} className="epub-breadcrumb__link">
-              Schätze
+              {locale === 'de' ? 'Schätze' : 'Treasures'}
             </Link>
             <span className="epub-breadcrumb__sep" aria-hidden="true">
               ›
@@ -873,7 +873,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             <button
               className={`epub-icon-btn${settingsOpen ? ' epub-icon-btn--active' : ''}`}
               onClick={() => setSettingsOpen((v) => !v)}
-              aria-label="Leseeinstellungen"
+              aria-label={locale === 'de' ? 'Leseeinstellungen' : 'Reading settings'}
             >
               <svg viewBox="0 0 18 18" fill="none">
                 <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" />
@@ -996,7 +996,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                     className="epub-sidebar__search-arrow"
                     disabled={activeSearchIdx === 0}
                     onClick={() => goToSearchResult(activeSearchIdx - 1)}
-                    aria-label="Previous result"
+                    aria-label={locale === 'de' ? 'Vorheriges Ergebnis' : 'Previous result'}
                   >
                     ↑
                   </button>
@@ -1004,7 +1004,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                     className="epub-sidebar__search-arrow"
                     disabled={activeSearchIdx >= searchResults.length - 1}
                     onClick={() => goToSearchResult(activeSearchIdx + 1)}
-                    aria-label="Next result"
+                    aria-label={locale === 'de' ? 'Nächstes Ergebnis' : 'Next result'}
                   >
                     ↓
                   </button>
@@ -1017,7 +1017,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                 {locale === 'de' ? 'Ergebnisse' : 'Results'} ({searchResults.length})
               </div>
             ) : (
-              <div className="epub-sidebar__toc-label">Kapitel</div>
+              <div className="epub-sidebar__toc-label">{locale === 'de' ? 'Kapitel' : 'Chapters'}</div>
             )}
 
             {searchResults.length > 0 ? (
@@ -1061,7 +1061,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             className="epub-float-btn epub-float-btn--prev"
             onClick={() => setCurrentIdx((i) => i - 1)}
             disabled={currentIdx === 0}
-            aria-label="Voriges Kapitel"
+            aria-label={locale === 'de' ? 'Voriges Kapitel' : 'Previous chapter'}
           >
             <svg viewBox="0 0 10 16" fill="none">
               <line x1="8" y1="1" x2="2" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -1084,7 +1084,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             className="epub-float-btn epub-float-btn--next"
             onClick={() => setCurrentIdx((i) => i + 1)}
             disabled={currentIdx === chapters.length - 1}
-            aria-label="Nächstes Kapitel"
+            aria-label={locale === 'de' ? 'Nächstes Kapitel' : 'Next chapter'}
           >
             <svg viewBox="0 0 10 16" fill="none">
               <line x1="2" y1="1" x2="8" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />

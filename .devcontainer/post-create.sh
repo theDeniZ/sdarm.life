@@ -20,9 +20,8 @@ echo "⚙️ Creating env files..."
 
 if [ ! -f apps/api/.dev.vars ]; then
 	cat > apps/api/.dev.vars << 'EOF'
-# Cloudflare Secrets - fill in for local testing
-# CF_CLIENT_ID=your_id
-# CF_CLIENT_SECRET=your_secret
+# Worker secrets for local development
+API_KEY=dev
 EOF
 	echo "✅ Created apps/api/.dev.vars"
 fi
@@ -37,10 +36,12 @@ fi
 
 if [ ! -f apps/admin/.env.local ]; then
 	cat > apps/admin/.env.local << 'EOF'
-# Add any local env vars for admin app here
-NEXT_PUBLIC_API_URL=http://localhost:8787
-NEXT_PUBLIC_CF_CLIENT_ID=dev
-NEXT_PUBLIC_CF_CLIENT_SECRET=dev
+# Server-side only — the admin Next.js app proxies requests through
+# /app/api/v1/[...path]/route.ts, which attaches Authorization server-side.
+# Never use NEXT_PUBLIC_* for API_KEY: it would leak into the browser bundle.
+API_URL=http://localhost:8787
+API_KEY=dev
+NEXT_PUBLIC_R2_URL=http://localhost:8787/api/v1/images
 EOF
 	echo "✅ Created apps/admin/.env.local"
 fi

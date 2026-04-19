@@ -12,6 +12,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/lora": "^5.2.8",
     "@sdarm/types": "workspace:*",
     "@sdarm/ui": "workspace:*",
     "jszip": "^3.10.1",

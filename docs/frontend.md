@@ -9,7 +9,8 @@
 | `[locale]/page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
 | `[locale]/posts/[slug]/page.tsx` | Server (async) | Post detail page |
 | `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and secret 5-click logo theme toggle. |
-| `HeroSection` | **Client** | Featured-posts strip carousel with per-slide color tints, fog animation, deco-circle, side label counter. Includes "Receive a gift" button that opens `BookRequestModal`. |
+| `HeroWelcome` | **Server** (async) | 3D Earth landing hero — renders `<PlanetEarth />` with grain overlay, badge, title, subtitle, and CTA link to `/{locale}/about`. Uses `web.heroWelcome` i18n namespace. |
+| `PlanetEarth` | **Client** | Three.js WebGL globe with day/night textures, atmosphere shader, cloud layer. Self-hosted textures in `/public/textures/` (MIT, no CDN, DSGVO clean). |
 | `NewsSection` | **Client** | Static illustrated masonry grid — live news posts + static faith/event cards. Wired to API for news and latest video post. |
 | `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
 | `ScriptureVerseSection` | **Client** | Daily rotating Scripture verse with `QuoteShareModal`. Verse rotated hourly from `lib/verses.ts` (DE + EN). |
@@ -22,7 +23,7 @@
 
 `page.tsx` fetches in parallel: featured posts, news posts, latest video post, config — `cache: 'no-store'`. All return `null` on error → components fall back to static data silently.
 
-Data mappers: `toHeroPost`, `toNewsPost`, `toFooterConfig`.
+Data mappers: `toNewsPost`, `toFooterConfig`.
 
 ### Post detail page (`[locale]/posts/[slug]/page.tsx`)
 
@@ -32,28 +33,21 @@ Server component with edge runtime. Fetches single post + up to 5 other posts + 
 
 CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overlay`, `.post-back`, `.post-meta`, `.post-section`, `.post-section-label`, `.post-body`, `.post-video`, `.post-video-card`, `.post-video-play`, `.post-more-title`, `.post-grid`, `.post-card`, `.post-card-img`, `.post-card-title`, `.post-card-meta`.
 
-### HeroSection carousel
+### HeroWelcome
 
-`'use client'` strip carousel. Receives only **featured** posts (`isFeatured = true`) via `posts?: HeroPost[]`. Falls back to a static placeholder if array is empty.
+Server component (async). Renders the home page landing hero — no client bundle, no interactivity of its own.
 
-**`HeroPost` interface:**
+**What it renders:**
+- `<PlanetEarth />` — the Three.js WebGL globe (Client component, lazy-loaded)
+- Grain overlay div
+- Badge line (decorative dot + translated eyebrow text)
+- `<h1>` with gold italic accent via `t.rich()` and `<em>`
+- Subtitle paragraph
+- `<Link>` CTA button pointing to `/{locale}/about`
 
-| Field | Source | Used in |
-|---|---|---|
-| `title` | `posts.title` | Hero content h1 |
-| `meta` | formatted date + author | Side label eyebrow |
-| `body` | `posts.body` | Hero content paragraph |
-| `excerpt` | `posts.excerpt` | Strip card preview text (falls back to `title`) |
-| `imageUrl` | R2 cover key → URL | Kept in type but not rendered (no photo hero bg) |
-| `thumbUrl` | R2 thumb key → URL | Strip card thumbnail via `<Image>` |
-| `imageAlt` | `posts.cover_alt` | Alt text |
-| `slug` | `posts.slug` | React key |
+**i18n namespace:** `web.heroWelcome` (keys: `badge`, `title`, `subtitle`, `cta`).
 
-**Visual layers (bottom to top):** `.hero-base` (dark gradient) → `.hero-tint` (per-slide radial color tints, cross-fade on slide change) → `.fog` (animated pseudo-element blobs) → `.sculpture` (decorative radial glow) → `.deco-circle` (pulsing ring) → `.side-label` (eyebrow + counter) → `.hero-content` (title + subtitle) → `.strip-wrap` (card strip).
-
-**Behaviour:** 5 s auto-cycle, progress bar restarted via React `key`, hero text cross-fade (420 ms), tints cross-fade (1.1 s). Strip cards use flex-grow animation with `.active` / `.leaving` classes. Card numbers use Bebas Neue font.
-
-**Admin note:** `excerpt` is labelled **"Preview Text"** in PostForm — it drives the strip card text, not a traditional excerpt.
+**CSS class prefix:** `hero-welcome-*` — all classes are defined in `apps/web/app/globals.css`: `hero-welcome`, `hero-welcome-bg`, `hero-welcome-planet`, `hero-welcome-grain`, `hero-welcome-content`, `hero-welcome-badge`, `hero-welcome-badge-dot`, `hero-welcome-title`, `hero-welcome-sub`, `hero-welcome-cta`, `hero-welcome-cta-label`.
 
 ### NewsSection masonry gallery
 
@@ -87,12 +81,19 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 3. **Sunset clock** — SVG arc ring + countdown label
 
 **Sunset clock logic:**
-- On mount, fetches today + tomorrow sunrise/sunset from `https://api.sunrisesunset.io/json?lat=…&lng=…&timezone=…`
-- Location resolved via Nominatim (`nominatim.openstreetmap.org`) from a user-entered postal code (worldwide, not DE-only). Last chosen location persisted to `localStorage`.
-- Timezone determined dynamically via `Intl.DateTimeFormat().resolvedOptions().timeZone` (browser timezone, not hardcoded `Europe/Berlin`).
-- Parses `"HH:MM AM/PM"` strings → milliseconds since midnight
-- Updates every 15 s via `setInterval`; SVG ring transition is `1s linear`
+- Sunrise/sunset times computed locally via `suncalc` (no third-party API call → DSGVO clean)
+- Default location: Pforzheim, Baden-Württemberg. Persisted user picks override the default via `localStorage.sdarm_sunset_location`
+- Updates every 1 s via `setInterval`; SVG ring transition is `0.9s` cubic-bezier
 - SVG ring: `r=76`, `CIRC ≈ 477.52px`, `strokeDashoffset = CIRC * (1 - progress)`
+
+**Location state ownership:**
+Footer is the single owner of `current: StoredLocation = { lat, lng, name, slug? }`. The `<CommunityMap />` and the location autocomplete input are presentational consumers — they call `onPick(loc)` to change the current location. Storage helpers live in [packages/ui/src/lib/sunset-location.ts](../packages/ui/src/lib/sunset-location.ts) (`readStoredLocation`, `writeStoredLocation`, `findLocationSlug`). No CustomEvents, no global event-bus.
+
+**CommunityMap user-marker:**
+A single golden ring + dot is rendered at `current.lat/lng` whenever the picked location falls inside the map BBOX (Europe view). For locations outside the BBOX (e.g. Tokyo via Nominatim search), no marker is rendered but the sunset widget still works. The marker is the only visual indicator of "this is the picked location" — there is no separate active-pin highlight on LOCATION pins.
+
+**Location autocomplete input:**
+The input under the clock searches via `GET /api/v1/geocode?q=…&limit=N` — a KV-cached proxy to Nominatim that hides the user's IP from OpenStreetMap (DSGVO). Picking any suggestion calls `handlePickLocation`, which runs `findLocationSlug(name)` against `LOCATIONS` so a typed match (e.g. "Frankfurt") highlights the corresponding congregation pin via the user-marker landing on it.
 
 **4 Sabbath-aware states** (determined by `new Date().getDay()` + time of day):
 
@@ -304,7 +305,7 @@ The `<em>` inside `title` renders in `--gold` italic. Use `t.rich()` with `{ em:
 
 **Fetch at the page level, map to component types, pass down as props.** Sections do not fetch independently.
 
-**Mapper functions** (`toHeroPost`, `toNewsPost`, etc.) convert `PostDto` shapes into component-specific types. If used by one page only, they live in that page file. If used by two or more pages, move to `lib/api.ts`. Keep them pure.
+**Mapper functions** (`toNewsPost`, `toFooterConfig`, etc.) convert `PostDto` shapes into component-specific types. If used by one page only, they live in that page file. If used by two or more pages, move to `lib/api.ts`. Keep them pure.
 
 **Fetch errors are silent.** Fetchers return `null` on any error; components render a static fallback. Do not propagate fetch errors to the UI.
 
@@ -328,10 +329,9 @@ R2 images are served through Cloudflare Image Transformations in production. `r2
 
 | Context | Transform |
 |---|---|
-| Hero cover / post detail cover | `w: 1200, q: 85` |
+| Post detail cover | `w: 1200, q: 85` |
 | News cards | `w: 600, h: 400` |
 | Related post cards | `w: 400, h: 300` |
-| Hero strip thumbnails | `w: 300, h: 200` |
 | About page image | `w: 800` |
 | Songbook sheet images | `w: 1200, q: 90` |
 | Songbook sheet PDFs | no transform |

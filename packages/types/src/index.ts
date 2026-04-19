@@ -27,6 +27,7 @@ export interface SubscriberDto {
   id: number;
   email: string;
   language: string;
+  confirmedAt: string | null;
   createdAt: string;
 }
 
