@@ -242,18 +242,49 @@ export default function Footer({
   });
 
   // Restore from localStorage on mount (client-only — server has no localStorage).
+  // Allow overriding via query params for screenshot tests: ?screenshotLocation=Pforzheim&screenshotTime=14:30
   useEffect(() => {
-    const saved = readStoredLocation();
-    if (saved) setCurrent(saved);
+    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+    const screenshotLocation = params.get('screenshotLocation');
+    if (screenshotLocation) {
+      // Fixed location for testing
+      setCurrent({
+        lat: 48.895,
+        lng: 8.681,
+        name: screenshotLocation,
+        slug: 'pforzheim',
+      });
+    } else {
+      const saved = readStoredLocation();
+      if (saved) setCurrent(saved);
+    }
   }, []);
 
   const sunData = useMemo(() => fetchSunData(current.lat, current.lng), [current.lat, current.lng]);
 
   useEffect(() => {
     function tick() {
-      const now = nowMs();
+      const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+      const screenshotTime = params.get('screenshotTime');
+
+      let now: number;
+      if (screenshotTime) {
+        // For screenshots, use fixed time: HH:MM format
+        const [h, m] = screenshotTime.split(':').map(Number);
+        now = (h * 3600 + m * 60) * 1000;
+      } else {
+        now = nowMs();
+      }
+
       const dow = new Date().getDay();
-      setClock(computeClock(sunData, now, dow, clockT));
+      const state = computeClock(sunData, now, dow, clockT);
+
+      // Override display time directly when in screenshot mode
+      if (screenshotTime) {
+        state.timeVal = screenshotTime;
+      }
+
+      setClock(state);
     }
     tick();
     const id = setInterval(tick, 1000);

@@ -3,6 +3,11 @@ set -e
 
 echo "🚀 Setting up sdarm.life dev environment..."
 
+# Initialize Git LFS
+echo "🗄️  Initializing Git LFS..."
+git lfs install
+echo "✅ Git LFS initialized"
+
 # Install project dependencies
 echo "📚 Installing project dependencies..."
 pnpm install
@@ -10,6 +15,11 @@ pnpm install
 # Generate Wrangler types for the API
 echo "🔧 Generating Wrangler types for API..."
 pnpm --filter @sdarm/api cf-typegen
+
+# Install Playwright browsers
+echo "🎭 Installing Playwright browsers..."
+pnpm exec playwright install chromium
+echo "✅ Playwright browsers installed"
 
 # Build packages
 echo "🏗️ Building packages (db, types)..."

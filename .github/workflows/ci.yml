@@ -58,6 +58,29 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo lint
 
+  playwright:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:screenshots
+        env:
+          CI: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-results
+          path: tests/screenshot/results
+          retention-days: 7
+
   build-api:
     needs: lint
     runs-on: ubuntu-latest
@@ -172,7 +195,7 @@ jobs:
 
   migrate:
     if: github.ref == 'refs/heads/main'
-    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures]
+    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, playwright]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -193,7 +216,7 @@ jobs:
 
   sync-secrets:
     if: github.ref == 'refs/heads/main'
-    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures]
+    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, playwright]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

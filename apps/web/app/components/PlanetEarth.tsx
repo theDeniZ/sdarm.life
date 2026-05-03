@@ -206,6 +206,10 @@ function Earth() {
   );
 
   useFrame((_, delta) => {
+    // Skip animation during screenshot tests (Playwright sets ?screenshot=1)
+    if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('screenshot')) {
+      return;
+    }
     if (earthRef.current) earthRef.current.rotation.y += delta * SETTINGS.ROTATION_SPEED;
   });
 
