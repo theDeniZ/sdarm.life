@@ -6,6 +6,7 @@
 	},
 	"features": {
 		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/git-lfs:1": {},
 		"ghcr.io/devcontainers/features/github-cli:1": {}
 	},
 	"customizations": {
@@ -31,7 +32,8 @@
 				"esbenp.prettier-vscode",
 				"bradlc.vscode-tailwindcss",
 				"vitest.explorer",
-				"github.copilot"
+				"github.copilot",
+				"ms-playwright.playwright"
 			]
 		}
 	},

@@ -60,6 +60,7 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 @docs/conventions.md
 @docs/gotchas.md
 @docs/dsgvo.md
+@docs/testing.md
 
 ## Agent patterns
 
