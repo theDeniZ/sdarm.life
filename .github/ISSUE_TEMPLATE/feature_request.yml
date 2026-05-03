@@ -6,59 +6,30 @@ body:
   - type: markdown
     attributes:
       value: |
-        Thanks for the idea! Tell us what you'd like to see.
+        Thanks for the idea! Use a user story format to help us understand what you need.
 
   - type: input
-    id: title
+    id: story
     attributes:
-      label: "What's the feature?"
-      placeholder: "e.g., Add dark theme toggle to all pages"
-      description: "A short, clear summary"
+      label: "User story"
+      placeholder: "As a [user], I want [feature], in order to [benefit], unlike today when [current state]"
+      description: "Frame your request as a user story to clarify the need"
     validations:
       required: true
 
   - type: textarea
-    id: use_case
+    id: description
     attributes:
-      label: "Why do you want this?"
+      label: "Description"
       placeholder: |
-        Example:
-        - I want to read long posts at night without eye strain
-        - Users have asked for this multiple times
-        - This would improve accessibility for low-vision users
-      description: "The problem you're trying to solve or the user need"
+        Add any additional context:
+        - How it should work
+        - Expected flow or outcome
+        - Acceptance criteria (optional, as checklist)
+        - Screenshots, design ideas, or links to similar features
+      description: "Details about the feature, however you want to explain it"
     validations:
       required: true
-
-  - type: textarea
-    id: expected_behavior
-    attributes:
-      label: "What would it look like?"
-      placeholder: |
-        Example:
-        - Button in the navbar to toggle theme
-        - All colors automatically adjust
-        - Preference saved in browser localStorage
-      description: "How should it work? What's the expected flow or outcome?"
-    validations:
-      required: true
-
-  - type: textarea
-    id: acceptance_criteria
-    attributes:
-      label: "How do we know it's done? (optional)"
-      placeholder: |
-        - [ ] Theme toggle visible on all pages
-        - [ ] Light theme passes WCAG AA contrast
-        - [ ] Preference persists across sessions
-      description: "Any specific requirements or acceptance criteria"
-
-  - type: textarea
-    id: context
-    attributes:
-      label: "Additional context (optional)"
-      placeholder: "Screenshots, links to similar features, design ideas, technical notes..."
-      description: "Anything else that would help us understand the request"
 
   - type: dropdown
     id: app
