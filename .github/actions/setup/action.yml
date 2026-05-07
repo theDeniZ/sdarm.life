@@ -1,0 +1,14 @@
+name: Setup
+description: Configure pnpm 10 and Node 20, install workspace dependencies. Must be called after actions/checkout.
+runs:
+  using: composite
+  steps:
+    - uses: pnpm/action-setup@v3
+      with:
+        version: '10'
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: pnpm
+    - run: pnpm install --frozen-lockfile
+      shell: bash

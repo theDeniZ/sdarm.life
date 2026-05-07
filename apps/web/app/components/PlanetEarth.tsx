@@ -243,11 +243,13 @@ function Earth() {
 }
 
 export default function PlanetEarth() {
+  const isScreenshot = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('screenshot');
   return (
     <Canvas
       camera={{ position: SETTINGS.CAMERA_POSITION, fov: SETTINGS.CAMERA_FOV }}
       style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}
       gl={{ antialias: true, alpha: true }}
+      frameloop={isScreenshot ? 'demand' : 'always'}
     >
       <Suspense fallback={null}>
         <Earth />
