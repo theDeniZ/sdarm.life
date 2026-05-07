@@ -15,7 +15,6 @@ jobs:
           fetch-depth: 0
       - name: Check commit count
         run: |
-          # Count commits in this PR (commits in head that are not in base)
           COMMIT_COUNT=$(git rev-list --count ${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }})
           echo "Found $COMMIT_COUNT commit(s) in PR"
           if [ $COMMIT_COUNT -ne 1 ]; then
@@ -24,7 +23,6 @@ jobs:
           fi
       - name: Check conventional commit format
         run: |
-          # Get the commit message
           COMMIT_MSG=$(git log -1 --pretty=%B ${{ github.event.pull_request.head.sha }})
           echo "Validating commit message:"
           echo "$COMMIT_MSG"
@@ -48,29 +46,25 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - run: pnpm turbo lint
 
   playwright:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: ./.github/actions/setup
+      - uses: actions/cache@v4
+        id: playwright-cache
         with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec playwright install --with-deps chromium
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Install Playwright browser
+        if: steps.playwright-cache.outputs.cache-hit != 'true'
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright OS dependencies
+        if: steps.playwright-cache.outputs.cache-hit == 'true'
+        run: pnpm exec playwright install-deps chromium
       - run: pnpm test:screenshots
         env:
           CI: true
@@ -86,150 +80,64 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - run: pnpm turbo build --filter=@sdarm/api
 
-  build-web:
+  # web, songbook, events, treasures — identical build pattern
+  build-pages:
     needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/web pages:build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: web-dist
-          path: apps/web/.vercel/output/static
+    strategy:
+      matrix:
+        include:
+          - filter: '@sdarm/web'
+            artifact: web-dist
+            path: apps/web/.vercel/output/static
+          - filter: '@sdarm/songbook'
+            artifact: songbook-dist
+            path: apps/songbook/.vercel/output/static
+          - filter: '@sdarm/events'
+            artifact: events-dist
+            path: apps/events/.vercel/output/static
+          - filter: '@sdarm/treasures'
+            artifact: treasures-dist
+            path: apps/treasures/.vercel/output/static
+    uses: ./.github/workflows/_build-pages.yml
+    with:
+      filter: ${{ matrix.filter }}
+      artifact-name: ${{ matrix.artifact }}
+      dist-path: ${{ matrix.path }}
 
   build-admin:
     needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/admin pages:build
-        env:
-          NEXT_PUBLIC_API_KEY: ${{ secrets.API_KEY }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: admin-dist
-          path: apps/admin/.vercel/output/static
+    uses: ./.github/workflows/_build-pages.yml
+    with:
+      filter: '@sdarm/admin'
+      artifact-name: admin-dist
+      dist-path: apps/admin/.vercel/output/static
+    secrets:
+      NEXT_PUBLIC_API_KEY: ${{ secrets.API_KEY }}
 
   build-admin-staging:
     if: github.ref == 'refs/heads/develop'
     needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/admin pages:build
-        env:
-          NEXT_PUBLIC_R2_URL: https://pub-c4c25f24fea94eb6b545ddd517ccd10d.r2.dev
-          NEXT_PUBLIC_API_KEY: ${{ secrets.STAGING_API_KEY }}
-      - uses: actions/upload-artifact@v4
-        with:
-          name: admin-dist-staging
-          path: apps/admin/.vercel/output/static
+    uses: ./.github/workflows/_build-pages.yml
+    with:
+      filter: '@sdarm/admin'
+      artifact-name: admin-dist-staging
+      dist-path: apps/admin/.vercel/output/static
+      next-public-r2-url: https://pub-c4c25f24fea94eb6b545ddd517ccd10d.r2.dev
+    secrets:
+      NEXT_PUBLIC_API_KEY: ${{ secrets.STAGING_API_KEY }}
 
-  build-songbook:
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/songbook pages:build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: songbook-dist
-          path: apps/songbook/.vercel/output/static
-
-  build-events:
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/events pages:build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: events-dist
-          path: apps/events/.vercel/output/static
-
-  build-treasures:
-    needs: lint
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm --filter @sdarm/treasures pages:build
-      - uses: actions/upload-artifact@v4
-        with:
-          name: treasures-dist
-          path: apps/treasures/.vercel/output/static
+  # ── Staging pipeline (develop only) ──────────────────────────────────────────
 
   migrate-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, build-admin-staging, playwright]
+    needs: [build-api, build-pages, build-admin, build-admin-staging, playwright]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -239,22 +147,14 @@ jobs:
 
   sync-secrets-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, build-admin-staging, playwright]
+    needs: [build-api, build-pages, build-admin, build-admin-staging, playwright]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - name: Sync secrets to staging Worker
         working-directory: apps/api
-        run: |
-          echo "${{ secrets.STAGING_API_KEY }}" | npx wrangler secret put API_KEY --env staging
+        run: echo "${{ secrets.STAGING_API_KEY }}" | npx wrangler secret put API_KEY --env staging
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -265,14 +165,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -280,105 +173,37 @@ jobs:
           workingDirectory: apps/api
           command: deploy --env staging
 
-  deploy-web-staging:
+  deploy-pages-staging:
     if: github.ref == 'refs/heads/develop'
     needs: deploy-api-staging
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: web-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=web-sdarm-life-staging
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    strategy:
+      matrix:
+        include:
+          - artifact: web-dist
+            project: web-sdarm-life-staging
+          - artifact: admin-dist-staging
+            project: admin-sdarm-life-staging
+          - artifact: songbook-dist
+            project: songs-sdarm-life-staging
+          - artifact: events-dist
+            project: events-sdarm-life-staging
+          - artifact: treasures-dist
+            project: treasures-sdarm-life-staging
+    uses: ./.github/workflows/_deploy-pages.yml
+    with:
+      artifact-name: ${{ matrix.artifact }}
+      project-name: ${{ matrix.project }}
+    secrets: inherit
 
-  deploy-admin-staging:
-    if: github.ref == 'refs/heads/develop'
-    needs: deploy-api-staging
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: admin-dist-staging
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=admin-sdarm-life-staging
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  deploy-songbook-staging:
-    if: github.ref == 'refs/heads/develop'
-    needs: deploy-api-staging
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: songbook-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=songs-sdarm-life-staging
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  deploy-events-staging:
-    if: github.ref == 'refs/heads/develop'
-    needs: deploy-api-staging
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: events-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=events-sdarm-life-staging
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  deploy-treasures-staging:
-    if: github.ref == 'refs/heads/develop'
-    needs: deploy-api-staging
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: treasures-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=treasures-sdarm-life-staging
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+  # ── Production pipeline (main only) ──────────────────────────────────────────
 
   migrate:
     if: github.ref == 'refs/heads/main'
-    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, playwright]
+    needs: [build-api, build-pages, build-admin, playwright]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -388,18 +213,11 @@ jobs:
 
   sync-secrets:
     if: github.ref == 'refs/heads/main'
-    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, playwright]
+    needs: [build-api, build-pages, build-admin, playwright]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
@@ -416,101 +234,31 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
-        with:
-          version: 10
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
+      - uses: ./.github/actions/setup
       - uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/api
 
-  deploy-web:
+  deploy-pages:
     if: github.ref == 'refs/heads/main'
     needs: deploy-api
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: web-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=web-sdarm-life
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  deploy-admin:
-    if: github.ref == 'refs/heads/main'
-    needs: deploy-api
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: admin-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=admin-sdarm-life
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  deploy-songbook:
-    if: github.ref == 'refs/heads/main'
-    needs: deploy-api
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: songbook-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=songs-sdarm-life
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  deploy-events:
-    if: github.ref == 'refs/heads/main'
-    needs: deploy-api
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: events-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=events-sdarm-life
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-
-  deploy-treasures:
-    if: github.ref == 'refs/heads/main'
-    needs: deploy-api
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - uses: actions/download-artifact@v4
-        with:
-          name: treasures-dist
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=treasures-sdarm-life
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    strategy:
+      matrix:
+        include:
+          - artifact: web-dist
+            project: web-sdarm-life
+          - artifact: admin-dist
+            project: admin-sdarm-life
+          - artifact: songbook-dist
+            project: songs-sdarm-life
+          - artifact: events-dist
+            project: events-sdarm-life
+          - artifact: treasures-dist
+            project: treasures-sdarm-life
+    uses: ./.github/workflows/_deploy-pages.yml
+    with:
+      artifact-name: ${{ matrix.artifact }}
+      project-name: ${{ matrix.project }}
+    secrets: inherit
