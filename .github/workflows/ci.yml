@@ -136,6 +136,29 @@ jobs:
           name: admin-dist
           path: apps/admin/.vercel/output/static
 
+  build-admin-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @sdarm/admin pages:build
+        env:
+          NEXT_PUBLIC_R2_URL: https://pub-c4c25f24fea94eb6b545ddd517ccd10d.r2.dev
+          NEXT_PUBLIC_API_KEY: ${{ secrets.STAGING_API_KEY }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: admin-dist-staging
+          path: apps/admin/.vercel/output/static
+
   build-songbook:
     needs: lint
     runs-on: ubuntu-latest
@@ -192,6 +215,155 @@ jobs:
         with:
           name: treasures-dist
           path: apps/treasures/.vercel/output/static
+
+  migrate-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, build-admin-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: d1 migrations apply sdarm-db-staging --remote
+
+  sync-secrets-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, build-admin-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Sync secrets to staging Worker
+        working-directory: apps/api
+        run: |
+          echo "${{ secrets.STAGING_API_KEY }}" | npx wrangler secret put API_KEY --env staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-api-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: [migrate-staging, sync-secrets-staging]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v3
+        with:
+          version: 10
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: deploy --env staging
+
+  deploy-web-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: deploy-api-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: web-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=web-sdarm-life-staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-admin-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: deploy-api-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: admin-dist-staging
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=admin-sdarm-life-staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-songbook-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: deploy-api-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: songbook-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=songs-sdarm-life-staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-events-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: deploy-api-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: events-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=events-sdarm-life-staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+
+  deploy-treasures-staging:
+    if: github.ref == 'refs/heads/develop'
+    needs: deploy-api-staging
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - uses: actions/download-artifact@v4
+        with:
+          name: treasures-dist
+          path: dist
+      - run: npx wrangler pages deploy dist --project-name=treasures-sdarm-life-staging
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
   migrate:
     if: github.ref == 'refs/heads/main'
