@@ -218,7 +218,7 @@ jobs:
 
   migrate-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, build-admin-staging]
+    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, build-admin-staging, playwright]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -235,11 +235,11 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/api
-          command: d1 migrations apply sdarm-db-staging --remote
+          command: d1 migrations apply sdarm-db-staging --remote --env staging
 
   sync-secrets-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, build-admin-staging]
+    needs: [build-api, build-web, build-admin, build-songbook, build-events, build-treasures, build-admin-staging, playwright]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
