@@ -140,7 +140,7 @@ When in doubt about which file to update, update the one closest to what changed
 
 ## Git strategy
 
-⚠️ **See [gitflow.md](gitflow.md) for the complete and binding rules.** This is not optional.
+⚠️ **Reference for manual use.** See [gitflow.md](gitflow.md) for complete guidelines on how you should work with git. Claude does not automatically commit, push, or perform git operations — use this when you want to work with git or need help.
 
 **TL;DR:**
 - **Every change starts with a GitHub Issue.** Assign yourself before starting work.

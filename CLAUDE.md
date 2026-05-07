@@ -57,7 +57,7 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 | `treasures.sdarm.life` | `apps/treasures` | Public |
 | `songs.sdarm.life` | `apps/songbook` | Public |
 
-⚠️ **READ FIRST:** @docs/gitflow.md
+⚠️ **Reference for manual git work:** @docs/gitflow.md — guidelines for how you work with git. Claude does not automatically commit or push.
 
 @docs/schema.md
 @docs/api.md

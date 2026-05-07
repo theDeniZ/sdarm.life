@@ -1,6 +1,8 @@
-# Git Flow — Strict Rules
+# Git Flow — User Guidelines
 
-⚠️ **This is the law.** These rules are non-negotiable for maintaining a clean, linear history.
+⚠️ **For reference and manual use.** These are the rules YOU follow when working with git — Claude does not automatically commit, push, or perform git operations. Use this guide when you want to work with git or need information about the workflow.
+
+These rules are non-negotiable for maintaining a clean, linear history.
 
 ---
 
