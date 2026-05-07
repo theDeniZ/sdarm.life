@@ -28,5 +28,30 @@
 			"binding": "KV",
 			"id": "f5ccbc653cc746898fd1e0be864310da"
 		}
-	]
+	],
+	"env": {
+		"staging": {
+			"name": "sdarm-api-staging",
+			"d1_databases": [
+				{
+					"binding": "DB",
+					"database_name": "sdarm-db-staging",
+					"database_id": "4e65db11-657d-4e2c-b1fc-d45b2ddb6a65",
+					"migrations_dir": "../../packages/db/migrations"
+				}
+			],
+			"r2_buckets": [
+				{
+					"binding": "IMAGES",
+					"bucket_name": "sdarm-images-staging"
+				}
+			],
+			"kv_namespaces": [
+				{
+					"binding": "KV",
+					"id": "fd2bf24c939f47da8104e589d9151024"
+				}
+			]
+		}
+	}
 }
