@@ -143,23 +143,27 @@ When in doubt about which file to update, update the one closest to what changed
 ⚠️ **See [gitflow.md](gitflow.md) for the complete and binding rules.** This is not optional.
 
 **TL;DR:**
-- **NEVER commit to `main` or `develop` directly.** Always use feature branches (`feat/*`).
+- **Every change starts with a GitHub Issue.** Assign yourself before starting work.
+- **Branch names:** `feat/<description>` for features, `bugfix/<description>` for bug fixes.
+- **NEVER commit to `main` or `develop` directly.** Always use feature or bugfix branches.
 - **ONE commit per PR, always.** Rebase interactively if needed: `git rebase -i develop`.
 - **Rebase before opening PR.** Ensure linear history: `git rebase develop`.
 - **Fast-forward merge only.** Use "Rebase and merge" on GitHub, never "Create a merge commit."
 - **No force-pushes after PR is open.** Use `--force-with-lease` only on your own branch before PR.
 - **No `--no-verify`.** Fix the hook failure, do not skip it.
+- **All CI checks + at least one approved review** required before merge. Fill out the PR template fully.
 
 **Workflow:**
 
-1. Create feature branch from `develop`: `git checkout -b feat/my-feature develop`
-2. Commit as needed locally.
-3. Before opening PR: `git rebase -i develop` to squash into one commit.
-4. Push: `git push origin feat/my-feature`
-5. Open PR from feature branch → `develop`.
-6. Review & approve.
-7. Merge via GitHub UI (Rebase and merge).
-8. Delete branch: `git branch -d feat/my-feature && git push origin --delete feat/my-feature`
+1. Find or open a GitHub Issue. Assign it to yourself.
+2. Create branch from `develop`: `git checkout -b feat/my-feature develop` (or `bugfix/my-fix`)
+3. Commit as needed locally.
+4. Before opening PR: `git rebase -i develop` to squash into one commit.
+5. Push: `git push origin feat/my-feature`
+6. Open PR → `develop`. Fill out the PR template. Add `Closes #N`.
+7. Ensure CI passes. Request review.
+8. Reviewer approves. Merge via GitHub UI (Rebase and merge).
+9. Delete branch: `git branch -d feat/my-feature && git push origin --delete feat/my-feature`
 
 **Read [gitflow.md](gitflow.md) for full details, common scenarios, and troubleshooting.**
 

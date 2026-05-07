@@ -1,5 +1,11 @@
 # sdarm.life — Claude Context
 
+Following 4 rules are imperative to follow at all times:
+1. Don’t assume. Don’t hide confusion. Surface tradeoffs.
+2. Minimum code that solves the problem. Nothing speculative.
+3. Touch only what you must. Clean up only your own mess.
+4. Define success criteria. Loop until verified.
+
 ⚠️ **CRITICAL RULE:** All Claude documentation files, comments, and content must be written in **English only**. No exceptions. German, French, or any other language is forbidden in these files. (The user-facing web content in `apps/` uses `de` and `en` — this rule applies to dev context only.)
 
 ---

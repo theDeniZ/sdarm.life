@@ -10,7 +10,51 @@
 |---|---|---|
 | `main` | **Production only.** Deployed code. | 🔒 Never touch directly. Merged PRs only. |
 | `develop` | Integration branch for next release. | Merge from feature branches via fast-forward. |
-| `feat/*` | Your work. One feature per branch. | Rebase onto `develop` before PR. |
+| `feat/*` | New feature work. One feature per branch. | Rebase onto `develop` before PR. |
+| `bugfix/*` | Bug fixes tracked via GitHub Issues. One fix per branch. | Rebase onto `develop` before PR. |
+
+---
+
+## GitHub Issues → Branch workflow
+
+Every non-trivial change starts with a GitHub Issue. The issue drives the branch name and the PR description.
+
+### Issue lifecycle
+
+1. **Open an issue** using the bug report or feature request template on GitHub.
+2. **Assign yourself** to the issue when you start working on it. An unassigned open issue is available for anyone to pick up.
+3. **Create a branch** named after the issue type and number:
+   - Feature issue → `feat/<short-description>` (e.g. `feat/bible-search`)
+   - Bug issue → `bugfix/<short-description>` (e.g. `bugfix/song-search-crash`)
+4. **Open a PR** that references the issue with `Closes #N` in the description. At least one PR per issue is required before closing it.
+5. **All checks must pass** and **at least one PR review must be approved** before merging.
+
+### Branch naming convention
+
+```
+feat/<kebab-case-description>     # new features
+bugfix/<kebab-case-description>   # bug fixes
+```
+
+Both branch from `develop` and target `develop` in the PR.
+
+```bash
+# Feature
+git checkout develop && git pull origin develop
+git checkout -b feat/bible-search
+
+# Bug fix
+git checkout develop && git pull origin develop
+git checkout -b bugfix/song-search-crash
+```
+
+### MCP tools for issue and PR work
+
+Claude Code has access to the GitHub MCP. You can use it to:
+
+- **Start work:** look up the issue (`mcp__github__issue_read`), read context, create a branch (`mcp__github__create_branch`).
+- **Open a PR:** push the branch and create the PR (`mcp__github__create_pull_request`) pre-filled with the issue reference and PR template.
+- **Review a PR:** run `/pr-review <PR#>` — the slash command loads the PR diff, evaluates it against all project docs, and posts a structured review with line-bound comments via the GitHub MCP.
 
 ---
 
@@ -178,13 +222,20 @@ git rebase -i origin/develop
 git push origin feat/your-feature
 
 # Open a PR on GitHub: feat/your-feature → develop
-# Add description, link any issues
+# The PR template will load automatically — fill it out.
+# Always include "Closes #N" in the description to link the issue.
 ```
 
-### Step 5: PR review and merge
+### Step 5: PR requirements — all must be met before merge
 
-- Code review feedback? Make changes locally (new commits are fine now), then repeat Step 3 (rebase + squash).
-- Approved? **Merge via GitHub UI** — use "Rebase and merge" or "Squash and merge" to maintain linear history.
+1. **All CI checks pass** — linting, type-check, build.
+2. **At least one approved review** — another person must approve the PR.
+3. **PR template fully filled out** — both the creator checklist and the reviewer checklist must be completed.
+4. **One commit on the branch** — rebase + squash if needed (see rule 3 above).
+
+Code review feedback? Make changes locally (new commits are fine), then repeat Step 3 (rebase + squash) and push with `--force-with-lease`.
+
+Approved? **Merge via GitHub UI** — use "Rebase and merge" or "Squash and merge" to maintain linear history.
 
 ### Step 6: Clean up
 
