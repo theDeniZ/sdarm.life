@@ -16,12 +16,12 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 
 | Package | URL | Stack |
 |---|---|---|
-| `@sdarm/web` | `sdarm.life` | Next.js 15 public site |
-| `@sdarm/admin` | `admin.sdarm.life` | Next.js 15 admin UI |
+| `@sdarm/web` | `sdarm.life` | Next.js 16 public site |
+| `@sdarm/admin` | `admin.sdarm.life` | Next.js 16 admin UI |
 | `@sdarm/api` | `api.sdarm.life` | Hono Cloudflare Worker |
-| `@sdarm/events` | `events.sdarm.life` | Next.js 15 events landing page |
-| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 15 analog treasures site |
-| `@sdarm/songbook` | `songs.sdarm.life` | Next.js 15 songbook site |
+| `@sdarm/events` | `events.sdarm.life` | Next.js 16 events landing page |
+| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 16 analog treasures site |
+| `@sdarm/songbook` | `songs.sdarm.life` | Next.js 16 songbook site |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
 | `@sdarm/types` | — | Shared API response DTO interfaces |
 | `@sdarm/ui` | — | Shared React components + dark museum CSS design system |

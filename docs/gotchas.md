@@ -10,9 +10,10 @@
 
 ## Build / dependencies
 
-- **Next.js version** — both apps use **15.2.2** (not 16). Next.js 16 Turbopack fails inside `vercel build` in a monorepo.
-- **`@cloudflare/next-on-pages`** — requires `vercel@47.0.4` pinned as devDep. Later versions break the build. Requires `nodejs_compat` flag set in the Pages project settings.
-- **`setupDevPlatform` in `next.config.ts`** — use `.then()`, not top-level `await`. Next.js 15 compiles config to CJS.
+- **Next.js version** — all apps use **16.x**. Use `"build": "next build --webpack"` in every app's `package.json` — Turbopack is the Next.js 16 default but fails inside `vercel build` in a pnpm monorepo. The `--webpack` flag bypasses Turbopack for CI/Cloudflare builds while keeping Turbopack for `next dev`.
+- **`turbopack.root` in `next.config.ts`** — required for `next dev` (local development) in a pnpm monorepo. Set to `path.resolve(process.cwd(), '../..')` (the monorepo root). Not needed for production builds since `--webpack` skips Turbopack entirely.
+- **`@cloudflare/next-on-pages`** — **deprecated and archived** (last release 1.13.16, archived Sept 2025). Never supported Next.js 16 officially. Still works with `next build --webpack` as a stopgap; long-term migration target is `@opennextjs/cloudflare`. Requires `nodejs_compat` flag in Pages project settings.
+- **`setupDevPlatform` in `next.config.ts`** — use `.then()`, not top-level `await`. Next.js compiles config to CJS.
 - **`drizzle-orm` in `@sdarm/api`** — must be a direct dependency (not just in `@sdarm/db`). Wrangler bundles per-package and won't hoist workspace deps.
 
 ## Database / Drizzle
