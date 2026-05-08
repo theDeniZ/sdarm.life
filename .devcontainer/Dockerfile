@@ -43,6 +43,11 @@ RUN git config --system credential.helper store && \
 # Set up npm cache directory for better caching
 RUN mkdir -p /home/node/.npm && chown -R node:node /home/node/.npm
 
+# Create Claude Code data directory so Docker initializes the named volume
+# with node:node ownership. Without this the volume mount point is root-owned
+# and tar fails with "Permission denied" during the backup restore.
+RUN mkdir -p /home/node/.claude && chown -R node:node /home/node/.claude
+
 USER node
 
 WORKDIR /workspaces/sdarm.life
