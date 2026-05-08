@@ -5,6 +5,9 @@ on:
   push:
     branches: [main, develop]
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
 jobs:
   validate-pr:
     if: github.event_name == 'pull_request'
