@@ -3,6 +3,22 @@ set -e
 
 echo "🚀 Setting up sdarm.life dev environment..."
 
+# Restore Claude Code data into the persisted named volume on first boot.
+# The tarball is created manually before a rebuild and survives because the
+# workspace is host-bind-mounted. Once restored, the tarball is deleted so
+# we don't keep clobbering the volume on every subsequent rebuild.
+CLAUDE_BACKUP="/workspaces/sdarm.life/.claude-backup.tgz"
+if [ -f "$CLAUDE_BACKUP" ]; then
+	if [ -z "$(ls -A "$HOME/.claude" 2>/dev/null)" ]; then
+		echo "📦 Restoring Claude Code data from $CLAUDE_BACKUP into volume..."
+		tar -xzf "$CLAUDE_BACKUP" -C "$HOME/.claude"
+		rm -f "$CLAUDE_BACKUP"
+		echo "✅ Claude Code data restored; backup tarball removed"
+	else
+		echo "ℹ️  Claude volume already populated; leaving $CLAUDE_BACKUP in place (delete manually if no longer needed)"
+	fi
+fi
+
 # Initialize Git LFS
 echo "🗄️  Initializing Git LFS..."
 git lfs install
