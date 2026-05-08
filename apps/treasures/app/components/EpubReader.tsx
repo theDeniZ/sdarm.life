@@ -252,11 +252,24 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  const [theme, setThemeState] = useState<ReaderTheme>('dark');
+  const [theme, setThemeState] = useState<ReaderTheme>(() => {
+    const saved = localStorage.getItem('sdarm_theme') as ReaderTheme | null;
+    return saved && (saved === 'dark' || saved === 'sepia' || saved === 'light') ? saved : 'dark';
+  });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [fontSize, setFontSizeState] = useState(26);
-  const [fontKey, setFontKeyState] = useState<ReaderFont>('cormorant');
-  const [lineHeight, setLineHeightState] = useState(1.9);
+  const [fontSize, setFontSizeState] = useState(() => {
+    const saved = localStorage.getItem('sdarm_fs');
+    return saved ? Math.max(13, Math.min(32, Number(saved))) : 26;
+  });
+  const [fontKey, setFontKeyState] = useState<ReaderFont>(() => {
+    const saved = localStorage.getItem('sdarm_font') as ReaderFont | null;
+    // eslint-disable-next-line prettier/prettier -- TODO #32: remove unnecessary parens
+    return (saved && FONT_MAP[saved]) ? saved : 'cormorant';
+  });
+  const [lineHeight, setLineHeightState] = useState(() => {
+    const saved = localStorage.getItem('sdarm_lh');
+    return saved ? Number(saved) : 1.9;
+  });
 
   // Search
   const [searchInput, setSearchInput] = useState('');
@@ -283,6 +296,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   useEffect(() => {
     const savedTheme = localStorage.getItem('sdarm_theme') as ReaderTheme | null;
     if (savedTheme && (savedTheme === 'dark' || savedTheme === 'sepia' || savedTheme === 'light')) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move to lazy useState initializer
       setThemeState(savedTheme);
     }
     const savedFs = localStorage.getItem('sdarm_fs');
@@ -451,6 +465,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   useEffect(() => {
     savedRangeRef.current = null;
     clickedHLRef.current = null;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move reset out of effect body
     setHlToolbarPos(null);
 
     async function loadEpub() {
@@ -557,6 +572,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     const trimmed = searchInput.trim();
     if (trimmed.length < 2) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move to event handler or derived state
       setSearchQuery('');
       setSearchResults([]);
       setActiveSearchIdx(0);
@@ -571,6 +587,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   // Search across pre-computed plain text (capped at 200 results)
   useEffect(() => {
     if (!searchQuery || chapterTexts.length === 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move to event handler or derived state
       setSearchResults([]);
       setActiveSearchIdx(0);
       return;
@@ -693,6 +710,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   // Clear toolbar state when navigating to a different chapter
   // (dangerouslySetInnerHTML has already replaced the DOM, so preview spans are gone)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move reset out of effect body
     setHlToolbarPos(null);
     clickedHLRef.current = null;
     savedRangeRef.current = null;
