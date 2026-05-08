@@ -1,4 +1,4 @@
-FROM node:20-bookworm
+FROM node:24-bookworm
 
 # Install additional system dependencies and dev tools
 RUN apt-get update && apt-get install -y --no-install-recommends \
