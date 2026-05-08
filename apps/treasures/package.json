@@ -17,7 +17,7 @@
     "@sdarm/types": "workspace:*",
     "@sdarm/ui": "workspace:*",
     "jszip": "^3.10.1",
-    "next": "15.2.2",
+    "next": "15.5.15",
     "next-intl": "^4.8.3",
     "react": "19.2.3",
     "react-dom": "19.2.3"
