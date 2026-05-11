@@ -12,6 +12,7 @@ import {
   writeStoredLocation,
   type StoredLocation,
 } from '../lib/sunset-location';
+import { useCurrentTheme, withTheme } from '../lib/theme-link';
 
 export interface FooterConfig {
   donation_url?: string | null;
@@ -219,6 +220,7 @@ export default function Footer({
   const t = useTranslations('common.footer');
   const clockT = useTranslations('common.clock');
   const navT = useTranslations('common.nav');
+  const theme = useCurrentTheme();
 
   const facebookUrl = config?.facebook_url ?? '#';
   const instagramUrl = config?.instagram_url ?? '#';
@@ -459,11 +461,11 @@ export default function Footer({
         {/* Column 2: nav links */}
         <div className="footer-nav">
           <div className="footer-nav-links">
-            <Link href={songbookUrl}>{navT('songs')}</Link>
-            <Link href={eventsUrl}>{navT('events')}</Link>
-            <Link href={treasuresUrl}>{navT('treasures')}</Link>
-            <Link href={`${webUrl}/about`}>{navT('about')}</Link>
-            <Link href={`${webUrl}/kontakt`}>{navT('contact')}</Link>
+            <Link href={withTheme(songbookUrl, theme)}>{navT('songs')}</Link>
+            <Link href={withTheme(eventsUrl, theme)}>{navT('events')}</Link>
+            <Link href={withTheme(treasuresUrl, theme)}>{navT('treasures')}</Link>
+            <Link href={withTheme(`${webUrl}/about`, theme)}>{navT('about')}</Link>
+            <Link href={withTheme(`${webUrl}/kontakt`, theme)}>{navT('contact')}</Link>
           </div>
         </div>
 
@@ -546,9 +548,9 @@ export default function Footer({
         </span>
         <span className="footer-copy">{t('copyright', { year: new Date().getFullYear() })}</span>
         <div className="footer-legal">
-          <Link href={`${webUrl}/impressum`}>{navT('imprint')}</Link>
+          <Link href={withTheme(`${webUrl}/impressum`, theme)}>{navT('imprint')}</Link>
           <span>·</span>
-          <Link href={`${webUrl}/datenschutz`}>{navT('privacy')}</Link>
+          <Link href={withTheme(`${webUrl}/datenschutz`, theme)}>{navT('privacy')}</Link>
         </div>
       </div>
     </footer>

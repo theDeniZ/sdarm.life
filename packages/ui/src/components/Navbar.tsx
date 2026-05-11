@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useCurrentTheme, withTheme } from '../lib/theme-link';
 
 export default function Navbar({
   locale,
@@ -24,17 +25,7 @@ export default function Navbar({
   const [menuOpen, setMenuOpen] = useState(false);
   const t = useTranslations('common.nav');
   const pathname = usePathname();
-
-  // Secret theme toggle: 5 rapid clicks on the logo
-  const logoClickTimes = useRef<number[]>([]);
-  function handleLogoClick() {
-    const now = Date.now();
-    logoClickTimes.current = [...logoClickTimes.current, now].filter((t) => now - t < 2000);
-    if (logoClickTimes.current.length >= 5) {
-      logoClickTimes.current = [];
-      window.dispatchEvent(new Event('sdarm:toggle-theme'));
-    }
-  }
+  const theme = useCurrentTheme();
 
   const navLinks = [
     { label: t('songs'), href: songbookUrl, external: true },
@@ -122,13 +113,13 @@ export default function Navbar({
   return (
     <>
       <nav className={`${scrolled ? 'scrolled' : ''}${overDark ? ' over-dark' : ''}`.trim()}>
-        <Link href={webUrl} className="nav-logo" onClick={handleLogoClick}>
+        <Link href={withTheme(webUrl, theme)} className="nav-logo">
           SDARM<span>.life</span>
         </Link>
 
         <div className="nav-links">
           {navLinks.map(({ label, href }) => (
-            <Link key={href} href={href} className={href === activeHref ? 'active' : undefined}>
+            <Link key={href} href={withTheme(href, theme)} className={href === activeHref ? 'active' : undefined}>
               {label}
             </Link>
           ))}
@@ -138,10 +129,25 @@ export default function Navbar({
           <Link href={switchedPath} className="nav-lang" aria-label={`Switch to ${otherLabel}`}>
             {otherLocale.toUpperCase()}
           </Link>
-          <button className="nav-search" aria-label={t('searchAria')}>
-            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.7">
-              <circle cx="7.5" cy="7.5" r="5" />
-              <line x1="11.5" y1="11.5" x2="16" y2="16" />
+          <button
+            className="nav-theme"
+            type="button"
+            aria-label={t('themeToggleAria')}
+            onClick={() => window.dispatchEvent(new Event('sdarm:toggle-theme'))}
+          >
+            <svg className="nav-theme__icon nav-theme__icon--sun" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+              <circle cx="9" cy="9" r="3.2" />
+              <line x1="9" y1="1.5" x2="9" y2="3.5" strokeLinecap="round" />
+              <line x1="9" y1="14.5" x2="9" y2="16.5" strokeLinecap="round" />
+              <line x1="1.5" y1="9" x2="3.5" y2="9" strokeLinecap="round" />
+              <line x1="14.5" y1="9" x2="16.5" y2="9" strokeLinecap="round" />
+              <line x1="3.7" y1="3.7" x2="5.1" y2="5.1" strokeLinecap="round" />
+              <line x1="12.9" y1="12.9" x2="14.3" y2="14.3" strokeLinecap="round" />
+              <line x1="3.7" y1="14.3" x2="5.1" y2="12.9" strokeLinecap="round" />
+              <line x1="12.9" y1="5.1" x2="14.3" y2="3.7" strokeLinecap="round" />
+            </svg>
+            <svg className="nav-theme__icon nav-theme__icon--moon" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.7" aria-hidden="true">
+              <path d="M14.5 11A6 6 0 0 1 7 3.5a6 6 0 1 0 7.5 7.5Z" strokeLinejoin="round" />
             </svg>
           </button>
           <button
@@ -163,7 +169,7 @@ export default function Navbar({
           {navLinks.map(({ label, href }) => (
             <Link
               key={href}
-              href={href}
+              href={withTheme(href, theme)}
               className={href === activeHref ? 'active' : undefined}
               onClick={() => setMenuOpen(false)}
             >

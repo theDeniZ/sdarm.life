@@ -5,6 +5,10 @@ const MOCK_PORT = 8788;
 export default defineConfig({
   testDir: './tests/screenshot',
   snapshotDir: './tests/screenshot/snapshots',
+  // Drop the {platform} segment so darwin-generated baselines (locally) and
+  // linux-generated baselines (CI) live at the same path. Trade-off: any
+  // platform-specific font/AA differences must fit inside maxDiffPixelRatio.
+  snapshotPathTemplate: '{snapshotDir}/{testFileName}-snapshots/{arg}{ext}',
   outputDir: './tests/screenshot/results',
   reporter: 'list',
 
