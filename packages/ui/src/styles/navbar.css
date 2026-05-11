@@ -97,8 +97,8 @@ nav.scrolled {
   color: rgba(201, 169, 110, 0.65);
 }
 
-/* Search */
-.nav-search {
+/* Theme toggle (sun in dark, moon in light) */
+.nav-theme {
   background: none;
   border: none;
   cursor: pointer;
@@ -107,19 +107,30 @@ nav.scrolled {
   height: 44px;
   margin: -10px -2px; /* keep visual size unchanged */
   padding: 0;
-  color: rgba(210, 200, 185, 0.32);
+  color: rgba(210, 200, 185, 0.55);
   transition: color 0.5s ease;
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  position: relative;
 }
-.nav-search:hover {
-  color: rgba(228, 218, 200, 0.8);
+.nav-theme:hover {
+  color: rgba(228, 218, 200, 0.95);
 }
-.nav-search svg {
-  width: 15px;
-  height: 15px;
+.nav-theme__icon {
+  width: 16px;
+  height: 16px;
+}
+/* Icon swap: show the icon for the theme you'll switch TO */
+.nav-theme__icon--moon {
+  display: none;
+}
+[data-theme='light'] .nav-theme__icon--sun {
+  display: none;
+}
+[data-theme='light'] .nav-theme__icon--moon {
+  display: block;
 }
 
 /* ── Burger button (mobile only) ── */
@@ -266,8 +277,7 @@ nav.scrolled {
     padding-right: max(1.1rem, env(safe-area-inset-right));
     gap: 1rem;
   }
-  .nav-links,
-  .nav-search {
+  .nav-links {
     display: none;
   }
   .nav-burger {
@@ -309,11 +319,11 @@ nav.scrolled {
 [data-theme='light'] .nav-lang {
   color: rgba(80, 78, 96, 0.44);
 }
-[data-theme='light'] .nav-search {
-  color: rgba(80, 78, 96, 0.44);
+[data-theme='light'] .nav-theme {
+  color: rgba(80, 78, 96, 0.65);
 }
-[data-theme='light'] .nav-search:hover {
-  color: rgba(28, 28, 38, 0.88);
+[data-theme='light'] .nav-theme:hover {
+  color: rgba(28, 28, 38, 0.95);
 }
 [data-theme='light'] .nav-burger__line {
   background: rgba(28, 28, 38, 0.62);
@@ -346,11 +356,11 @@ nav.scrolled {
 [data-theme='light'] nav.over-dark .nav-lang:hover {
   color: rgba(201, 169, 110, 0.65);
 }
-[data-theme='light'] nav.over-dark .nav-search {
-  color: rgba(210, 200, 185, 0.32);
+[data-theme='light'] nav.over-dark .nav-theme {
+  color: rgba(210, 200, 185, 0.55);
 }
-[data-theme='light'] nav.over-dark .nav-search:hover {
-  color: rgba(228, 218, 200, 0.8);
+[data-theme='light'] nav.over-dark .nav-theme:hover {
+  color: rgba(228, 218, 200, 0.95);
 }
 [data-theme='light'] nav.over-dark .nav-burger__line {
   background: rgba(210, 200, 185, 0.65);

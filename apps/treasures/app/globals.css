@@ -654,13 +654,13 @@ a {
   border-color: rgba(100, 70, 30, 0.2);
 }
 
-/* Search icon */
-[data-theme='sepia'] .nav-search,
-[data-theme='light'] .nav-search {
-  color: rgba(44, 28, 8, 0.5);
+/* Theme toggle icon */
+[data-theme='sepia'] .nav-theme,
+[data-theme='light'] .nav-theme {
+  color: rgba(44, 28, 8, 0.6);
 }
-[data-theme='sepia'] .nav-search:hover,
-[data-theme='light'] .nav-search:hover {
+[data-theme='sepia'] .nav-theme:hover,
+[data-theme='light'] .nav-theme:hover {
   color: var(--gold);
 }
 
@@ -2193,17 +2193,41 @@ nav {
 /* ═══ LIGHT THEME ═══ */
 
 /* Catalog / filter section */
-[data-theme='light'] .filter-section { background: var(--bg-section); }
-[data-theme='light'] .treasures-page { background: var(--dark); }
-[data-theme='light'] .treasure-card { background: var(--bg-card); }
-[data-theme='light'] .treasure-title { color: var(--text-strong); }
-[data-theme='light'] .treasure-author { color: var(--muted); }
-[data-theme='light'] .book-visual { background: #c0b090; }
+[data-theme='light'] .filter-section {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+[data-theme='light'] .filter-pill {
+  color: rgba(0, 0, 0, 0.45);
+}
+[data-theme='light'] .filter-pill:hover {
+  color: rgba(0, 0, 0, 0.75);
+}
+[data-theme='light'] .filter-pill.active {
+  color: var(--gold);
+}
+[data-theme='light'] .filter-sep {
+  background: rgba(0, 0, 0, 0.08);
+}
 
-/* Detail page */
-[data-theme='light'] .treasure-detail { background: var(--dark); }
-[data-theme='light'] .treasure-detail-title { color: var(--text-strong); }
-[data-theme='light'] .treasure-detail-desc { color: var(--text); }
+/* Item cards */
+[data-theme='light'] .item-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+[data-theme='light'] .item-card:hover {
+  background: #ffffff;
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.10),
+    0 0 0 1px rgba(146, 114, 35, 0.10);
+}
+[data-theme='light'] .book-visual {
+  background: linear-gradient(145deg, #f3eee2 0%, #e7dfd0 100%);
+}
+[data-theme='light'] .book-visual::before {
+  background: radial-gradient(ellipse 75% 65% at 50% 30%, rgba(146, 114, 35, 0.08) 0%, transparent 65%);
+}
 
 /* Reader — keep dark always (reading comfort) */
 [data-theme='light'] .epub-reader { background: #1a1814; color: #d6d0c8; }

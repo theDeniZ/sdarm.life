@@ -8,7 +8,7 @@
 | `[locale]/layout.tsx` | Server (async) | Locale layout — validates locale, wraps in `<NextIntlClientProvider>`, renders `<html lang={locale}><body>` |
 | `[locale]/page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
 | `[locale]/posts/[slug]/page.tsx` | Server (async) | Post detail page |
-| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and secret 5-click logo theme toggle. |
+| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and a sun/moon theme toggle that dispatches `sdarm:toggle-theme`. |
 | `HeroWelcome` | **Server** (async) | 3D Earth landing hero — renders `<PlanetEarth />` with grain overlay, badge, title, subtitle, and CTA link to `/{locale}/about`. Uses `web.heroWelcome` i18n namespace. |
 | `PlanetEarth` | **Client** | Three.js WebGL globe with day/night textures, atmosphere shader, cloud layer. Self-hosted textures in `/public/textures/` (MIT, no CDN, DSGVO clean). |
 | `NewsSection` | **Client** | Static illustrated masonry grid — live news posts + static faith/event cards. Wired to API for news and latest video post. |
@@ -108,15 +108,36 @@ The input under the clock searches via `GET /api/v1/geocode?q=…&limit=N` — a
 
 **Fallback:** API fetch failure is silently swallowed; clock stays at `'–:––'` / `'…'` placeholder.
 
-### ThemeProvider
+### ThemeScript + ThemeProvider
 
-`ThemeProvider` (from `@sdarm/ui`) is a `'use client'` component that manages the light/dark theme toggle. Place it once in `[locale]/layout.tsx`, rendered before `{children}`.
+Theme handling is split across two components. Both must be present in every `[locale]/layout.tsx`.
 
-- On mount: reads `localStorage` key `sdarm-theme` and applies `data-theme` attribute to `<html>`.
-- Listens for custom event `sdarm:toggle-theme` (dispatched by Navbar's secret 5-click logo) and toggles between `dark` and `light`.
-- Light theme overrides are defined in `packages/ui/src/styles/tokens.css` via `[data-theme="light"]` selector.
+**`ThemeScript`** — server component that renders a tiny synchronous inline `<script>` into `<head>`. Runs **before first paint** and applies `data-theme` to `<html>`. Reads (in order):
+1. `?theme=dark|light` query param — set by cross-app links (see [Cross-subdomain theme persistence](#cross-subdomain-theme-persistence) below). Wins over storage.
+2. `localStorage.sdarm-theme` — set when the user toggled in the current app.
+
+If the URL carried `?theme=`, the script also writes it to `localStorage` and strips the param via `history.replaceState` so it doesn't litter the address bar.
+
+**`ThemeProvider`** — `'use client'` component placed inside `<body>`. Listens for the `sdarm:toggle-theme` custom event (dispatched by the Navbar sun/moon button) and toggles `data-theme` on `<html>` + persists the new value to `localStorage`.
+
+Together: `ThemeScript` handles the initial render (no flash), `ThemeProvider` handles runtime toggling. The toggle UI is the sun/moon icon in the Navbar — sun shows in dark theme, moon shows in light theme (icon swap is pure CSS, no React state, no hydration concern).
+
+- Storage key: `sdarm-theme`, values `'dark'` | `'light'`.
+- SSR default is `'dark'` — the common case for first-time visitors paints correctly with zero flash. `ThemeScript` only overrides when a visitor has explicitly stored `'light'`.
+- `<html>` is rendered with `suppressHydrationWarning` because `ThemeScript` mutates `data-theme` before React hydrates, which would otherwise emit a hydration mismatch warning (same approach used by `next-themes`).
+- Light theme overrides are defined in `packages/ui/src/styles/tokens.css` via the `[data-theme="light"]` selector.
 
 ```tsx
+// app/layout.tsx (root)
+import { ThemeScript } from '@sdarm/ui';
+// ...
+<html lang={locale} data-theme="dark" suppressHydrationWarning>
+  <head>
+    <ThemeScript />
+  </head>
+  <body>{children}</body>
+</html>
+
 // [locale]/layout.tsx
 import { ThemeProvider } from '@sdarm/ui';
 // ...
@@ -128,6 +149,18 @@ return (
 );
 ```
 
+The `data-theme="dark"` on `<html>` is the SSR default; `ThemeScript` overrides it inline before the browser paints anything if the user has stored `'light'` or arrived via a `?theme=` link.
+
+#### Cross-subdomain theme persistence
+
+`localStorage` is per-origin, so a value written on `sdarm.life` is invisible to `songs.sdarm.life`, `events.sdarm.life`, and `treasures.sdarm.life`. Cookies would solve this but are off-limits in this project (see [docs/dsgvo.md](dsgvo.md)). Instead, the theme rides along on the URL:
+
+- `Navbar`, `Footer`, `NewsSection`, and `ScriptureVerseSection` all import `useCurrentTheme()` + `withTheme()` from `@sdarm/ui` and append `?theme=dark|light` to every cross-app `href`.
+- The destination app's `ThemeScript` reads the param, persists it to `localStorage`, applies it to `<html>` before first paint, and strips it from the URL via `history.replaceState`.
+- Result: the user toggles on `sdarm.life`, clicks "Songs", lands on `songs.sdarm.life` with the same theme — no flash, no extra round trips, no cookies.
+
+When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `withTheme(url, theme)` if the destination is a different subdomain.
+
 ### SEO and structured data (`apps/web`)
 
 - **`app/sitemap.ts`** — dynamic `sitemap.xml` generated at request time. Fetches all published post slugs from the API and produces `sitemap` entries for both `de` and `en` locales.
@@ -138,7 +171,7 @@ return (
 ### Layout notes
 
 - Never add `export const runtime = 'edge'` to any file — `@opennextjs/cloudflare` builds the entire app as a single Worker already on the edge runtime; per-file declarations cause the build to fail (see [gotchas.md](gotchas.md)).
-- Root `layout.tsx` is an async server component. It imports CSS, calls `await getLocale()` from `next-intl/server`, and renders `<html lang={locale} data-theme="light"><body>{children}</body></html>`. Next 16 requires `<html>` and `<body>` to live in the root layout — they cannot be deferred to a child layout (see [gotchas.md](gotchas.md)).
+- Root `layout.tsx` is an async server component. It imports CSS, calls `await getLocale()` from `next-intl/server`, and renders `<html lang={locale} data-theme="dark" suppressHydrationWarning>` with `<ThemeScript />` inside `<head>` and `<body>{children}</body>`. Next 16 requires `<html>` and `<body>` to live in the root layout — they cannot be deferred to a child layout (see [gotchas.md](gotchas.md)).
 - `[locale]/layout.tsx` validates the locale, calls `setRequestLocale()`, and returns a fragment (no `<html>`/`<body>`) containing `<ThemeProvider />` and a `<NextIntlClientProvider>`. In `apps/web`, the provider wraps only `{children}` (JSON-LD `<script>` tags sit outside the provider); in `apps/events`, `apps/songbook`, and `apps/treasures`, the provider wraps `<ConnectedNavbar />`, `{children}`, and `<ConnectedFooter />`.
 - All page files under `[locale]/` receive `params: Promise<{ locale: string }>` and call `setRequestLocale(locale)` at the top. Server components use `getTranslations()`, client components use `useTranslations()`.
 
@@ -266,7 +299,8 @@ import '@sdarm/ui/src/styles/index.css';
 
 | Component | Import | Notes |
 |---|---|---|
-| `ThemeProvider` | `@sdarm/ui` | Client component. Place once in `[locale]/layout.tsx`. Reads/writes `localStorage` and sets `data-theme` on `<html>`. No visible output. |
+| `ThemeScript` | `@sdarm/ui` | Server component. Renders a synchronous inline `<script>` inside `<head>` that reads `localStorage.sdarm-theme` and applies `data-theme` to `<html>` before first paint. Prevents FOUC. |
+| `ThemeProvider` | `@sdarm/ui` | Client component. Place inside `<body>` once per `[locale]/layout.tsx`. Listens for `sdarm:toggle-theme` and toggles `data-theme` on `<html>`. Persists to `localStorage`. No visible output. |
 | `ConnectedNavbar` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads nav translations internally. Use in every locale layout. |
 | `ConnectedFooter` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads footer translations + `apiUrl` from env internally. Use in every locale layout. |
 | `PageHero` | `@sdarm/ui` | Full-bleed dark landing hero. Pass `title` (ReactNode), `eyebrow?`, `subtitle?`, `decoration?` (SVG), `scrollHint?`. Already has grain, fog, deco-circle, entrance animations — **do not re-implement these**. |

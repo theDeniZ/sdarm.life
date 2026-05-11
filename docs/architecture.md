@@ -158,11 +158,12 @@ packages/ui/src/
   components/
     ConnectedNavbar.tsx  — wraps Navbar; accepts locale prop, reads translations server-side
     ConnectedFooter.tsx  — wraps Footer; accepts locale prop, reads translations + apiUrl server-side
-    Navbar.tsx           — fixed nav; transparent → frosted glass on scroll; language switcher
+    Navbar.tsx           — fixed nav; transparent → frosted glass on scroll; language switcher; sun/moon theme toggle (dispatches sdarm:toggle-theme)
     Footer.tsx           — 3-col: contact+subscribe, nav links, sunset clock
     PageHero.tsx         — full-bleed landing hero: grain, glow, fog, deco-circle, decoration slot, scroll hint
     ScriptureVerseSection.tsx — centered quote band: large italic text + reference tag
-    ThemeProvider.tsx    — client component; reads/writes localStorage, sets data-theme on <html>
+    ThemeScript.tsx      — server component; renders inline <script> in <head> that applies the theme (URL ?theme= → localStorage → SSR default) before first paint (prevents FOUC)
+    ThemeProvider.tsx    — client component; listens for sdarm:toggle-theme, toggles data-theme on <html>, persists to localStorage
     ComingSoon.tsx       — placeholder section for unreleased pages
     Pagination.tsx       — generic offset pagination (styling left to consumer)
   styles/

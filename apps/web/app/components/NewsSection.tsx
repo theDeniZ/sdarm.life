@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
+import { useCurrentTheme, withTheme } from '@sdarm/ui';
 import QuoteShareModal from './QuoteShareModal';
 import { pickVerse, type Verse } from '../lib/verses';
 import type { NewsData } from '../lib/api';
@@ -23,6 +24,7 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
   const [modalOpen, setModalOpen] = useState(false);
   const locale = useLocale();
   const t = useTranslations('web.releases');
+  const theme = useCurrentTheme();
   // Empty initial verse so SSR HTML matches client first render — actual
   // hour-based pick happens in useEffect to avoid hydration mismatch.
   const [verse, setVerse] = useState<Verse>({ text: '', ref: '' });
@@ -80,7 +82,7 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
             <div className="masonry-item ratio-phi-h" style={{ position: 'relative' }}>
               {newsData?.book?.href && (
                 <a
-                  href={newsData.book.href}
+                  href={withTheme(newsData.book.href, theme)}
                   style={{ position: 'absolute', inset: 0, zIndex: 20, display: 'block' }}
                   aria-label={newsData.book.title}
                 />
