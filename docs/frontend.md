@@ -120,10 +120,12 @@ The input under the clock searches via `GET /api/v1/geocode?q=…&limit=N` — a
 // [locale]/layout.tsx
 import { ThemeProvider } from '@sdarm/ui';
 // ...
-<body>
-  <ThemeProvider />
-  {children}
-</body>
+return (
+  <>
+    <ThemeProvider />
+    {children}
+  </>
+);
 ```
 
 ### SEO and structured data (`apps/web`)
@@ -135,9 +137,9 @@ import { ThemeProvider } from '@sdarm/ui';
 
 ### Layout notes
 
-- Never add `export const runtime = 'edge'` to `layout.tsx` — set it only on individual page files.
-- Root `layout.tsx` is minimal: imports CSS, returns `{children}`. No `<html>` or `<body>` tags — those are in the `[locale]/layout.tsx`.
-- `[locale]/layout.tsx` validates the locale, calls `setRequestLocale()`, wraps children in `<NextIntlClientProvider messages={messages}>`, renders `<ThemeProvider />`, then `<html lang={locale}><body>`.
+- Never add `export const runtime = 'edge'` to any file — `@opennextjs/cloudflare` builds the entire app as a single Worker already on the edge runtime; per-file declarations cause the build to fail (see [gotchas.md](gotchas.md)).
+- Root `layout.tsx` is an async server component. It imports CSS, calls `await getLocale()` from `next-intl/server`, and renders `<html lang={locale} data-theme="light"><body>{children}</body></html>`. Next 16 requires `<html>` and `<body>` to live in the root layout — they cannot be deferred to a child layout (see [gotchas.md](gotchas.md)).
+- `[locale]/layout.tsx` validates the locale, calls `setRequestLocale()`, and returns a fragment (no `<html>`/`<body>`) containing `<ThemeProvider />` and a `<NextIntlClientProvider>`. In `apps/web`, the provider wraps only `{children}` (JSON-LD `<script>` tags sit outside the provider); in `apps/events`, `apps/songbook`, and `apps/treasures`, the provider wraps `<ConnectedNavbar />`, `{children}`, and `<ConnectedFooter />`.
 - All page files under `[locale]/` receive `params: Promise<{ locale: string }>` and call `setRequestLocale(locale)` at the top. Server components use `getTranslations()`, client components use `useTranslations()`.
 
 ---
