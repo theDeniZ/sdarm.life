@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageHero, ScriptureVerseSection } from '@sdarm/ui';
-import { fetchSongbooks } from '../lib/api';
+import { fetchSongbooks } from '../../lib/api';
 
 const MUSIC_NOTE = (
   <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
