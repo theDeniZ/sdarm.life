@@ -738,14 +738,16 @@
         "en": "Englisch"
       },
       "type": {
-        "book": "Bücher"
+        "book": "Bücher",
+        "bible": "Bibeln"
       },
       "free": "Kostenlos",
       "postBadge": "per Post",
       "readSoon": "Lesen",
       "empty": "Keine Ergebnisse für diese Auswahl.",
       "scriptureText": "Deine Zeugnisse sind mein ewiges Erbe; denn sie sind meines Herzens Wonne.",
-      "scriptureRef": "Psalm 119,111"
+      "scriptureRef": "Psalm 119,111",
+      "biblesTitle": "Heilige Schrift"
     },
     "bookRequest": {
       "bannerEyebrow": "Kostenlose Bücher",

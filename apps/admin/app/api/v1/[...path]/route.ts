@@ -30,10 +30,14 @@ async function proxy(req: Request, ctx: { params: Promise<{ path: string[] }> })
   if (init.body) init.duplex = 'half';
 
   const upstream = await fetch(target, init);
-  return new Response(upstream.body, {
-    status: upstream.status,
-    headers: upstream.headers,
-  });
+  // Node's fetch auto-decompresses the body, so forwarding the upstream's
+  // Content-Encoding header would tell the browser to decode plaintext as gzip.
+  // Wrangler dev advertises gzip on GET responses, which triggers this.
+  const resHeaders = new Headers(upstream.headers);
+  resHeaders.delete('content-encoding');
+  resHeaders.delete('content-length');
+  resHeaders.delete('transfer-encoding');
+  return new Response(upstream.body, { status: upstream.status, headers: resHeaders });
 }
 
 export { proxy as GET, proxy as POST, proxy as PUT, proxy as PATCH, proxy as DELETE, proxy as HEAD, proxy as OPTIONS };

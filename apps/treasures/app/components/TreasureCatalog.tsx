@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { PageHero } from '@sdarm/ui';
 import type { Treasure, TreasureType } from '../lib/api';
@@ -8,7 +8,19 @@ import TreasuresFilterBar, { type CategoryFilter, type Language } from './Treasu
 import TreasureCard from './TreasureCard';
 import BookRequestModal from './BookRequestModal';
 
-const LIMIT = 20;
+const PAGE_SIZE = 8; // 2–3 rows × 3 columns
+
+function pageRange(current: number, total: number): (number | 'ellipsis')[] {
+  if (total <= 7) return Array.from({ length: total }, (_, i) => i + 1);
+  const left = Math.max(2, current - 1);
+  const right = Math.min(total - 1, current + 1);
+  const pages: (number | 'ellipsis')[] = [1];
+  if (left > 2) pages.push('ellipsis');
+  for (let i = left; i <= right; i++) pages.push(i);
+  if (right < total - 1) pages.push('ellipsis');
+  pages.push(total);
+  return pages;
+}
 
 function ScriptureQuote() {
   const t = useTranslations('treasures.catalog');
@@ -23,84 +35,61 @@ function ScriptureQuote() {
   );
 }
 
-export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
+const BANNER_KEY = 'uploads/998516df-c8b7-4492-a11f-7785412673d6.png';
+
+export default function TreasureCatalog({
+  apiUrl,
+  r2Url = 'https://images.sdarm.life',
+}: {
+  apiUrl: string;
+  r2Url?: string;
+}) {
   const tBr = useTranslations('treasures.bookRequest');
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [lang, setLang] = useState<Language>('all');
   const [modalOpen, setModalOpen] = useState(false);
   const [items, setItems] = useState<Treasure[]>([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const gridRef = useRef<HTMLDivElement>(null);
-  const sentinelRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
+  const initializedRef = useRef(false);
 
-  // Mutable state for use inside observers and async closures
-  const filtersRef = useRef({ category: 'all' as CategoryFilter, lang: 'all' as Language });
-  const offsetRef = useRef(0);
-  const totalRef = useRef(0);
-  const loadingRef = useRef(false);
-
-  // Always points to the latest loadMore — updated every render
-  const loadMoreRef = useRef<(reset?: boolean) => void>(() => {});
-
-  async function loadMore(reset = false) {
-    if (loadingRef.current) return;
-    loadingRef.current = true;
-    setLoading(true);
-
-    const { category: cat, lang: lng } = filtersRef.current;
-    const off = reset ? 0 : offsetRef.current;
-    if (reset) offsetRef.current = 0;
-
-    try {
-      const params = new URLSearchParams({ limit: String(LIMIT), offset: String(off) });
+  const fetchPage = useCallback(
+    async (pg: number, cat: CategoryFilter, lng: Language) => {
+      setLoading(true);
+      const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String((pg - 1) * PAGE_SIZE) });
+      params.set('type', 'book');
       if (lng !== 'all') params.set('language', lng);
-      if (cat !== 'all') params.set('type', cat);
-      const res = await fetch(`${apiUrl}/treasures?${params}`);
-      if (res.ok) {
-        const data = (await res.json()) as { items: Treasure[]; total: number };
-        setItems((prev) => (reset ? data.items : [...prev, ...data.items]));
-        totalRef.current = data.total;
-        offsetRef.current = off + data.items.length;
-      }
-    } catch {
-      // Ignore errors for now — could add retry logic or error state if desired
-    }
-
-    loadingRef.current = false;
-    setLoading(false);
-  }
-
-  useEffect(() => {
-    loadMoreRef.current = loadMore;
-  });
-
-  // Initial load
-  useEffect(() => {
-    loadMoreRef.current(true);
-  }, []);
-
-  // Sentinel observer — set up once, reads latest state from refs
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const obs = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && !loadingRef.current && offsetRef.current < totalRef.current) {
-          loadMoreRef.current(false);
+      try {
+        const res = await fetch(`${apiUrl}/treasures?${params}`, { cache: 'no-store' });
+        if (res.ok) {
+          const data = (await res.json()) as { items: Treasure[]; total: number };
+          setItems(data.items);
+          setTotal(data.total);
         }
-      },
-      { rootMargin: '400px' }
-    );
-    obs.observe(sentinel);
-    return () => obs.disconnect();
-  }, []);
+      } catch {
+        // Silently swallow fetch errors; catalog renders with existing items
+      }
+      setLoading(false);
+    },
+    [apiUrl]
+  );
 
-  // Stagger reveal for newly added cards
+  useEffect(() => {
+    if (!initializedRef.current) {
+      initializedRef.current = true;
+      fetchPage(1, 'all', 'all');
+    }
+  }, [fetchPage]);
+
+  // Stagger reveal when items change
   useEffect(() => {
     const grid = gridRef.current;
     if (!grid) return;
-    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.item-card:not(.visible)'));
-    if (!cards.length) return;
+    const cards = Array.from(grid.querySelectorAll<HTMLElement>('.item-card'));
+    cards.forEach((c) => c.classList.remove('visible'));
     const obs = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -119,49 +108,62 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
   }, [items]);
 
   function handleCategoryChange(cat: CategoryFilter) {
-    filtersRef.current.category = cat;
     setCategory(cat);
-    setItems([]);
-    loadMoreRef.current(true);
+    setPage(1);
+    fetchPage(1, cat, lang);
   }
 
   function handleLangChange(lng: Language) {
-    filtersRef.current.lang = lng;
     setLang(lng);
-    setItems([]);
-    loadMoreRef.current(true);
+    setPage(1);
+    fetchPage(1, category, lng);
   }
 
-  // Derive available categories and languages from loaded items
-  const availableCategories = items.length
-    ? ([...new Set(items.map((tr) => tr.type))] as TreasureType[])
+  function handlePageChange(pg: number) {
+    setPage(pg);
+    fetchPage(pg, category, lang);
+    sectionRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  const totalPages = Math.ceil(total / PAGE_SIZE);
+
+  const LANG_ORDER: Record<string, number> = { de: 0, en: 1 };
+  const displayItems = items
+    .filter((tr) => tr.language !== 'ru')
+    .sort((a, b) => (LANG_ORDER[a.language] ?? 9) - (LANG_ORDER[b.language] ?? 9));
+
+  const availableCategories = displayItems.length
+    ? ([...new Set(displayItems.map((tr) => tr.type))] as TreasureType[])
     : (['book'] as TreasureType[]);
-  const availableLanguages = items.length
-    ? ([...new Set(items.map((tr) => tr.language))] as Language[])
+  const availableLanguages = displayItems.length
+    ? ([...new Set(displayItems.map((tr) => tr.language))] as Language[])
     : (['de'] as Language[]);
 
   return (
     <>
-      <PageHero
-        title={tBr('bannerTitle')}
-        centered
-        cta={
-          <button className="br-hero-cta" onClick={() => setModalOpen(true)}>
-            {tBr('cta')}
-            <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-              <polyline
-                points="3,1 8,1 8,6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.4"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-          </button>
-        }
-      />
+      <div className="catalog-hero" style={{ backgroundImage: `url('${r2Url}/${BANNER_KEY}')` }}>
+        <div className="catalog-hero__overlay" />
+        <PageHero
+          title={tBr('bannerTitle')}
+          centered
+          cta={
+            <button className="br-hero-cta" onClick={() => setModalOpen(true)}>
+              {tBr('cta')}
+              <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                <polyline
+                  points="3,1 8,1 8,6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          }
+        />
+      </div>
 
       <BookRequestModal open={modalOpen} onClose={() => setModalOpen(false)} apiUrl={apiUrl} />
 
@@ -174,20 +176,54 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
         onLangChange={handleLangChange}
       />
 
-      <section className="shop-section">
-        <div className="shop-grid" ref={gridRef}>
-          {items.map((tr) => (
-            <TreasureCard key={tr.id} treasure={tr} />
-          ))}
-        </div>
-
-        {loading && (
+      <section className="shop-section" ref={sectionRef}>
+        {loading ? (
           <div className="shop-loading">
             <div className="shop-spinner" />
           </div>
+        ) : (
+          <div className="shop-grid" ref={gridRef}>
+            {displayItems.map((tr) => (
+              <TreasureCard key={tr.id} treasure={tr} />
+            ))}
+          </div>
         )}
 
-        <div ref={sentinelRef} />
+        {totalPages > 1 && !loading && (
+          <div className="shop-pagination" role="navigation" aria-label="Seitennavigation">
+            <button
+              className="shop-pg-btn"
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page <= 1}
+              aria-label="Vorherige Seite"
+            >
+              ←
+            </button>
+            {pageRange(page, totalPages).map((item, i) =>
+              item === 'ellipsis' ? (
+                <span key={`e${i}`} className="shop-pg-ellipsis">
+                  …
+                </span>
+              ) : (
+                <button
+                  key={item}
+                  className={`shop-pg-num${item === page ? ' active' : ''}`}
+                  onClick={() => handlePageChange(item)}
+                >
+                  {item}
+                </button>
+              )
+            )}
+            <button
+              className="shop-pg-btn"
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page >= totalPages}
+              aria-label="Nächste Seite"
+            >
+              →
+            </button>
+          </div>
+        )}
       </section>
 
       <ScriptureQuote />

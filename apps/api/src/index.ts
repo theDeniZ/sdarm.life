@@ -71,7 +71,10 @@ v1.route('/songs/search', songSearchRouter); // literal path — must be mounted
 v1.use('/songs/*', cached(3600));    // 1 hour — individual songs
 v1.route('/songs', songsRouter);
 
-v1.use('/treasures', cached(3600)); // 1 hour — treasure list
+// List endpoint is not cached: every query string (?limit, ?offset, ?type, ?language)
+// produces a separate cache entry, and purgeCache() on admin writes only invalidates
+// the bare path — stale variants survived for up to an hour and rendered with stale
+// coverKey. Detail endpoint stays cached (purge is point-and-shoot by id).
 v1.use('/treasures/*', cached(3600)); // 1 hour — treasure detail
 v1.route('/treasures', treasuresRouter);
 

@@ -738,14 +738,16 @@
         "en": "English"
       },
       "type": {
-        "book": "Books"
+        "book": "Books",
+        "bible": "Bibles"
       },
       "free": "Free",
       "postBadge": "by mail",
       "readSoon": "Read",
       "empty": "No results for this selection.",
       "scriptureText": "Your testimonies are my heritage forever, for they are the joy of my heart.",
-      "scriptureRef": "Psalm 119:111"
+      "scriptureRef": "Psalm 119:111",
+      "biblesTitle": "Holy Scripture"
     },
     "bookRequest": {
       "bannerEyebrow": "Free Books",
