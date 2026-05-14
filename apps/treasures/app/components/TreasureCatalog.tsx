@@ -70,8 +70,9 @@ export default function TreasureCatalog({ apiUrl }: { apiUrl: string }) {
     setLoading(false);
   }
 
-  // eslint-disable-next-line react-hooks/refs -- TODO #34: move into useEffect to avoid mutation during render
-  loadMoreRef.current = loadMore;
+  useEffect(() => {
+    loadMoreRef.current = loadMore;
+  });
 
   // Initial load
   useEffect(() => {
