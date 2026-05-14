@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --port 3003",
+    "dev": "NODE_OPTIONS='--require ../../tools/silence-next-warnings.cjs' next dev --port 3003",
     "build": "next build --webpack",
     "pages:build": "NODE_OPTIONS='--require ../../tools/patch-cp.cjs' npx opennextjs-cloudflare build",
     "preview": "npx opennextjs-cloudflare preview",
