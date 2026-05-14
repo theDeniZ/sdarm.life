@@ -10,7 +10,7 @@ env:
 
 jobs:
   release-rc:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     # Only run on develop branch (schedule always targets default branch, so we guard explicitly)
     if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
     permissions:

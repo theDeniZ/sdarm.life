@@ -10,7 +10,7 @@ env:
 
 jobs:
   build-api:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -49,7 +49,7 @@ jobs:
 
   migrate:
     needs: [build-api, build-pages, build-admin]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -62,7 +62,7 @@ jobs:
 
   sync-secrets:
     needs: [build-api, build-pages, build-admin]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
@@ -78,7 +78,7 @@ jobs:
 
   deploy-api:
     needs: [migrate, sync-secrets]
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     steps:
       - uses: actions/checkout@v6
       - uses: ./.github/actions/setup
