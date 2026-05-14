@@ -263,8 +263,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   });
   const [fontKey, setFontKeyState] = useState<ReaderFont>(() => {
     const saved = localStorage.getItem('sdarm_font') as ReaderFont | null;
-    // eslint-disable-next-line prettier/prettier -- TODO #32: remove unnecessary parens
-    return (saved && FONT_MAP[saved]) ? saved : 'cormorant';
+    return saved && FONT_MAP[saved] ? saved : 'cormorant';
   });
   const [lineHeight, setLineHeightState] = useState(() => {
     const saved = localStorage.getItem('sdarm_lh');
@@ -274,7 +273,6 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   // Search
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<{ chapterIndex: number; snippet: string }[]>([]);
   const [activeSearchIdx, setActiveSearchIdx] = useState(0);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -282,6 +280,27 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     () => chapters.map((ch) => ch.html.replace(/<[^>]+>/g, '').replace(/&[a-zA-Z0-9#]+;/g, ' ')),
     [chapters]
   );
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery || chapterTexts.length === 0) return [];
+    const MAX_RESULTS = 200;
+    const q = searchQuery.toLowerCase();
+    const results: { chapterIndex: number; snippet: string }[] = [];
+    outer: for (let ci = 0; ci < chapterTexts.length; ci++) {
+      const text = chapterTexts[ci];
+      const lower = text.toLowerCase();
+      let pos = 0;
+      while ((pos = lower.indexOf(q, pos)) !== -1) {
+        const start = Math.max(0, pos - 30);
+        const end = Math.min(text.length, pos + q.length + 30);
+        const snippet = (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
+        results.push({ chapterIndex: ci, snippet });
+        if (results.length >= MAX_RESULTS) break outer;
+        pos += q.length;
+      }
+    }
+    return results;
+  }, [searchQuery, chapterTexts]);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const settingsWrapRef = useRef<HTMLDivElement>(null);
@@ -291,21 +310,6 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const [hlShake, setHlShake] = useState(false);
   // retrySignal increments on manual retry to re-trigger the effect
   const [retrySignal, setRetrySignal] = useState(0);
-
-  // Restore all reader prefs from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('sdarm_theme') as ReaderTheme | null;
-    if (savedTheme && (savedTheme === 'dark' || savedTheme === 'sepia' || savedTheme === 'light')) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move to lazy useState initializer
-      setThemeState(savedTheme);
-    }
-    const savedFs = localStorage.getItem('sdarm_fs');
-    if (savedFs) setFontSizeState(Math.max(13, Math.min(32, Number(savedFs))));
-    const savedFont = localStorage.getItem('sdarm_font') as ReaderFont | null;
-    if (savedFont && FONT_MAP[savedFont]) setFontKeyState(savedFont);
-    const savedLh = localStorage.getItem('sdarm_lh');
-    if (savedLh) setLineHeightState(Number(savedLh));
-  }, []);
 
   // Mirror theme to <html data-theme> so body bg and scrollbar also respond
   useEffect(() => {
@@ -465,10 +469,9 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   useEffect(() => {
     savedRangeRef.current = null;
     clickedHLRef.current = null;
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move reset out of effect body
-    setHlToolbarPos(null);
 
     async function loadEpub() {
+      setHlToolbarPos(null);
       try {
         setPhase('downloading');
         setProgress(0);
@@ -550,9 +553,13 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     void loadEpub();
   }, [epubUrl, retrySignal]);
 
-  // Scroll to top when chapter changes
+  // Scroll to top and clear highlight toolbar when chapter changes
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    clickedHLRef.current = null;
+    savedRangeRef.current = null;
+    const t = setTimeout(() => setHlToolbarPos(null), 0);
+    return () => clearTimeout(t);
   }, [currentIdx]);
 
   // Keyboard arrow navigation (only when reader is ready)
@@ -571,46 +578,17 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   useEffect(() => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     const trimmed = searchInput.trim();
-    if (trimmed.length < 2) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move to event handler or derived state
-      setSearchQuery('');
-      setSearchResults([]);
-      setActiveSearchIdx(0);
-      return;
-    }
-    searchDebounceRef.current = setTimeout(() => setSearchQuery(trimmed), 300);
+    searchDebounceRef.current = setTimeout(
+      () => {
+        setSearchQuery(trimmed.length >= 2 ? trimmed : '');
+        setActiveSearchIdx(0);
+      },
+      trimmed.length < 2 ? 0 : 300
+    );
     return () => {
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     };
   }, [searchInput]);
-
-  // Search across pre-computed plain text (capped at 200 results)
-  useEffect(() => {
-    if (!searchQuery || chapterTexts.length === 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move to event handler or derived state
-      setSearchResults([]);
-      setActiveSearchIdx(0);
-      return;
-    }
-    const MAX_RESULTS = 200;
-    const q = searchQuery.toLowerCase();
-    const results: { chapterIndex: number; snippet: string }[] = [];
-    outer: for (let ci = 0; ci < chapterTexts.length; ci++) {
-      const text = chapterTexts[ci];
-      const lower = text.toLowerCase();
-      let pos = 0;
-      while ((pos = lower.indexOf(q, pos)) !== -1) {
-        const start = Math.max(0, pos - 30);
-        const end = Math.min(text.length, pos + q.length + 30);
-        const snippet = (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
-        results.push({ chapterIndex: ci, snippet });
-        if (results.length >= MAX_RESULTS) break outer;
-        pos += q.length;
-      }
-    }
-    setSearchResults(results);
-    setActiveSearchIdx(0);
-  }, [searchQuery, chapterTexts]);
 
   // Text selection → toolbar (works on desktop mouse and mobile touch).
   //
@@ -706,15 +684,6 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
   }, []);
-
-  // Clear toolbar state when navigating to a different chapter
-  // (dangerouslySetInnerHTML has already replaced the DOM, so preview spans are gone)
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect -- TODO #33: move reset out of effect body
-    setHlToolbarPos(null);
-    clickedHLRef.current = null;
-    savedRangeRef.current = null;
-  }, [currentIdx]);
 
   // Restore highlights when chapter changes
   useEffect(() => {
