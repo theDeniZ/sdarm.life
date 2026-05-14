@@ -1,5 +1,8 @@
 export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
-export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
+// R2 is referenced from client components (TreasureCard, MiniBookCard, etc.).
+// process.env.R2_URL is server-only in Next.js, so without NEXT_PUBLIC_ the
+// browser bundle would always fall back to the production URL and 404 in dev.
+export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? process.env.R2_URL ?? 'https://images.sdarm.life';
 
 const TRANSFORMS_ENABLED = process.env.R2_TRANSFORMS !== 'false';
 

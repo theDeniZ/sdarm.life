@@ -23,6 +23,8 @@
     }
   },
   "scripts": {
+    "lint": "turbo lint",
+    "lint:fix": "turbo lint -- --fix",
     "test:screenshots": "playwright test",
     "test:screenshots:update": "playwright test --update-snapshots",
     "test:screenshots:install": "playwright install chromium"

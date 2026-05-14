@@ -6,9 +6,19 @@ const SCREENSHOT_PARAMS = '?screenshot=1&screenshotLocation=Pforzheim&screenshot
 
 forEachTheme('web / home', async (page, theme) => {
   await page.goto(`${BASE}/de${SCREENSHOT_PARAMS}`);
-  // Wait for PlanetEarth WebGL canvas to mount (it uses Suspense fallback={null})
-  await page.waitForSelector('canvas', { timeout: 15_000 }).catch(() => {});
-  await page.waitForTimeout(2000); // allow globe textures to load
+  // Hard waits — no silent catches. If any of these never appear, the screenshot
+  // captures a half-hydrated page (globe missing, cards empty, clock blank).
+  // PlanetEarth WebGL canvas (Suspense fallback is null, so canvas == mounted).
+  await page.waitForSelector('.hero-welcome canvas', { timeout: 30_000 });
+  // NewsSection cards fade in via IntersectionObserver — at least one must land
+  // before we screenshot, otherwise the masonry grid renders as empty veils.
+  await page.waitForSelector('.masonry-item.is-visible', { timeout: 15_000 });
+  // Footer sunset clock hydrates from ?screenshotTime= and splits the value into
+  // spans around a `.sunset-colon`. Until that exists, only the dash placeholder
+  // shows, and the location label is also missing.
+  await page.waitForSelector('.sunset-time-value .sunset-colon', { timeout: 15_000 });
+  // Last short settle for WebGL texture upload + final frame.
+  await page.waitForTimeout(1500);
   await expect(page).toHaveScreenshot(`web-home-${theme}.png`, { fullPage: true });
 });
 

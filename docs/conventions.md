@@ -83,6 +83,17 @@ Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — 
 
 Server-only (no `NEXT_PUBLIC_` prefix). `R2_TRANSFORMS` — same kill switch as `apps/web`.
 
+### `apps/treasures`
+
+| Variable              | Dev (`.env.local`)                    | Production fallback              | Scope      |
+| --------------------- | ------------------------------------- | -------------------------------- | ---------- |
+| `API_URL`             | `http://localhost:8787/api/v1`        | `https://api.sdarm.life/api/v1`  | server-only |
+| `R2_URL`              | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`      | server-only |
+| `NEXT_PUBLIC_R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`      | browser OK  |
+| `R2_TRANSFORMS`       | _(not set)_                           | _(not set — enabled by default)_ | server-only |
+
+`NEXT_PUBLIC_R2_URL` is required because `TreasureCard` and other client components resolve R2 image URLs at runtime. `process.env.R2_URL` is server-only in Next.js and would always fall back to the production URL in the browser bundle, causing 404s in local dev. Set it to the same value as `R2_URL` in `.env.local`. `R2_TRANSFORMS` — same kill switch as `apps/web`.
+
 ### `apps/api` (local dev only)
 
 `apps/api/.dev.vars` (gitignored, auto-loaded by `wrangler dev`):
