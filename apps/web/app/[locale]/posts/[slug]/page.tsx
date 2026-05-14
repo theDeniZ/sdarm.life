@@ -7,7 +7,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchPost, fetchPosts, r2url, FALLBACK_IMG, WEB_URL } from '../../../lib/api';
 import { formatDate } from '../../../lib/format';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const BASE = WEB_URL;

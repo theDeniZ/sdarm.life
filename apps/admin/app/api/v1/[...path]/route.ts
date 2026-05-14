@@ -2,8 +2,6 @@
 // bearer token. Keeps API_KEY out of the browser bundle entirely. Cloudflare
 // Access still gates admin.sdarm.life, so only authorised operators reach here.
 
-export const runtime = 'edge';
-
 const API_BASE = process.env.API_URL ?? 'https://api.sdarm.life';
 
 async function proxy(req: Request, ctx: { params: Promise<{ path: string[] }> }) {

@@ -7,7 +7,6 @@ import ScriptureVerseSection from '../components/ScriptureVerseSection';
 import { fetchTreasures, fetchSongbooks, WEB_URL, TREASURES_URL, SONGBOOK_URL, EVENTS_URL } from '../lib/api';
 import type { NewsData } from '../lib/api';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const BASE = WEB_URL;

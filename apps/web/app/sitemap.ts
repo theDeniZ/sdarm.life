@@ -1,7 +1,5 @@
 import type { MetadataRoute } from 'next';
 
-export const runtime = 'edge';
-
 const BASE = 'https://sdarm.life';
 const LOCALES = ['de', 'en'] as const;
 

@@ -3,8 +3,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PageHero, ScriptureVerseSection } from '@sdarm/ui';
 import { fetchSongbooks } from '../lib/api';
 
-export const runtime = 'edge';
-
 const MUSIC_NOTE = (
   <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
     <ellipse cx="22" cy="102" rx="18" ry="12" fill="rgba(201,169,110,0.9)" transform="rotate(-18 22 102)" />

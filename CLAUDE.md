@@ -37,11 +37,11 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | R2 bucket | `sdarm-images` |
 | KV namespace | `sdarm-kv` — stores site config as single JSON key |
 | Worker | `sdarm-api` |
-| Pages (web) | `sdarm-web` |
-| Pages (admin) | `sdarm-admin` |
-| Pages (events) | `sdarm-events` |
-| Pages (treasures) | `sdarm-treasures` |
-| Pages (songbook) | `sdarm-songbook` |
+| Worker | `sdarm-web` |
+| Worker | `sdarm-admin` |
+| Worker | `sdarm-events` |
+| Worker | `sdarm-treasures` |
+| Worker | `sdarm-songbook` |
 
 Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV namespace). Secrets: `API_KEY`, `RESEND_API_KEY`, `CF_ZONE_ID?`, `CF_PURGE_TOKEN?`.
 

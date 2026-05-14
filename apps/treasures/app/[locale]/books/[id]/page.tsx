@@ -3,8 +3,6 @@ import { setRequestLocale } from 'next-intl/server';
 import { fetchTreasureById } from '../../../lib/api';
 import EpubReader from '../../../components/EpubReader';
 
-export const runtime = 'edge';
-
 export default async function BookPage({ params }: { params: Promise<{ locale: string; id: string }> }) {
   const { locale, id } = await params;
   setRequestLocale(locale);

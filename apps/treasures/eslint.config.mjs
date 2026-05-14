@@ -11,7 +11,16 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    ignores: ['.next/**', '.vercel/**', 'out/**', 'build/**', 'next-env.d.ts', 'pnpm-lock.yaml', '*.lock'],
+    ignores: [
+      '.next/**',
+      '.vercel/**',
+      '.open-next/**',
+      'out/**',
+      'build/**',
+      'next-env.d.ts',
+      'pnpm-lock.yaml',
+      '*.lock',
+    ],
   },
   {
     languageOptions: {

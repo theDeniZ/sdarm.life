@@ -6,7 +6,6 @@ import { fetchConfig, r2url, WEB_URL } from '../../lib/api';
 import ScriptureVerseSection from '../../components/ScriptureVerseSection';
 import GlaubensLongRead, { type GlaubensArticle } from '../../components/GlaubensLongRead';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const BASE = WEB_URL;
