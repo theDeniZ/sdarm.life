@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
 import { ConnectedFooter } from '@sdarm/ui';

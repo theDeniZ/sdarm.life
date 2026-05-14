@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import SongbookForm from '../../domains/songbooks/SongbookForm';
 
 export default function NewSongbookPage() {

@@ -5,9 +5,9 @@
   "scripts": {
     "dev": "next dev --port 3000",
     "build": "next build --webpack",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "preview": "npx wrangler pages dev .vercel/output/static",
-    "deploy": "pnpm pages:build && wrangler pages deploy .vercel/output/static",
+    "pages:build": "NODE_OPTIONS='--require ../../tools/patch-cp.cjs' npx opennextjs-cloudflare build",
+    "preview": "npx opennextjs-cloudflare preview",
+    "deploy": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "eslint"
   },
@@ -27,7 +27,7 @@
     "three": "^0.184.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
+    "@opennextjs/cloudflare": "^1",
     "@eslint/js": "^10.0.1",
     "@sdarm/i18n": "workspace:*",
     "@tailwindcss/postcss": "^4",
@@ -38,6 +38,6 @@
     "tailwindcss": "^4",
     "typescript": "^6",
     "typescript-eslint": "^8.59.2",
-    "vercel": "53.2.0"
+    "wrangler": "^4"
   }
 }

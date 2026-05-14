@@ -53,4 +53,5 @@ jobs:
         with:
           name: ${{ inputs.artifact-name }}
           path: ${{ inputs.dist-path }}
+          include-hidden-files: true
           retention-days: 1

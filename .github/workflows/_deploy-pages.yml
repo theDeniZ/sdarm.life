@@ -1,4 +1,4 @@
-name: Deploy Pages App
+name: Deploy Worker App
 
 on:
   workflow_call:
@@ -6,9 +6,15 @@ on:
       artifact-name:
         required: true
         type: string
-      project-name:
+      app-path:
+        description: Workspace-relative path to the app (e.g. apps/web)
         required: true
         type: string
+      env:
+        description: Wrangler environment to deploy to (e.g. staging). Leave empty for production.
+        required: false
+        type: string
+        default: ''
     secrets:
       CLOUDFLARE_API_TOKEN:
         required: true
@@ -22,14 +28,26 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v6
         with:
           node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
       - uses: actions/download-artifact@v8
         with:
           name: ${{ inputs.artifact-name }}
-          path: dist
-      - run: npx wrangler pages deploy dist --project-name=${{ inputs.project-name }}
+          path: ${{ inputs.app-path }}/.open-next
+      - name: Deploy Worker
+        working-directory: ${{ inputs.app-path }}
+        run: |
+          if [ -n "$DEPLOY_ENV" ]; then
+            npx wrangler deploy --env "$DEPLOY_ENV"
+          else
+            npx wrangler deploy
+          fi
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DEPLOY_ENV: ${{ inputs.env }}

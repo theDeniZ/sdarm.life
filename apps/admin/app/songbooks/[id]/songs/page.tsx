@@ -2,8 +2,6 @@ import { fetchSongbooks } from '../../../domains/songbooks/repository';
 import SongList from '../../../domains/songbooks/SongList';
 import Link from 'next/link';
 
-export const runtime = 'edge';
-
 export default async function SongsPage({ params }: { params: Promise<{ id: string }> }) {
   const id = Number((await params).id);
   const books = await fetchSongbooks();

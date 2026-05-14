@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "main": ".open-next/worker.js",
-  "name": "sdarm-events",
+  "name": "sdarm-web",
   "compatibility_date": "2024-09-23",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -18,7 +18,7 @@
   },
   "env": {
     "staging": {
-      "name": "sdarm-events-staging",
+      "name": "sdarm-web-staging",
       "vars": {
         "API_URL": "https://sdarm-api-staging.mine-a8f.workers.dev/api/v1",
         "R2_URL": "https://images.sdarm.life",

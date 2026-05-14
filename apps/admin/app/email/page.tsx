@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import EmailComposer from '../domains/email/EmailComposer';
 
 export default function EmailPage() {

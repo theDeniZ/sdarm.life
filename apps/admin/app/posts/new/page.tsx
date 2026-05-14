@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import PostForm from '../../domains/posts/PostForm';
 
 export default function NewPostPage() {

@@ -4,8 +4,6 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchConfig } from '../../lib/api';
 import { LOCATIONS, COUNTRY_NAMES, googleMapsUrl, locationsByCountry, type CountryCode } from './data';
 
-export const runtime = 'edge';
-
 const BASE = 'https://sdarm.life';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
