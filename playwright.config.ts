@@ -18,6 +18,11 @@ export default defineConfig({
     colorScheme: 'dark',
     locale: 'de-DE',
     animations: 'disabled',
+    // Prevent Playwright from injecting `caret-color: transparent` on focusable
+    // elements before React hydrates. That inline style causes a hydration
+    // mismatch on Footer inputs (newsletter + location autocomplete).
+    // Screenshots remain caret-free because inputs are not focused during tests.
+    caret: 'initial',
   },
 
   timeout: 90_000,
