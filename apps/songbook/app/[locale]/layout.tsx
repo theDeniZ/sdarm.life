@@ -4,7 +4,7 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { notFound } from 'next/navigation';
 import { locales } from '@sdarm/i18n';
 import type { Locale } from '@sdarm/i18n';
-import { ConnectedNavbar, ConnectedFooter, ThemeProvider } from '@sdarm/ui';
+import { ConnectedNavbar, ThemeProvider } from '@sdarm/ui';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -39,7 +39,6 @@ export default async function LocaleLayout({
       <NextIntlClientProvider messages={messages}>
         <ConnectedNavbar locale={locale} />
         {children}
-        <ConnectedFooter locale={locale} />
       </NextIntlClientProvider>
     </>
   );
