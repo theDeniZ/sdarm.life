@@ -95,7 +95,9 @@ export default function PresenterDashboard({ song, onClose }: Props) {
   const isFontRemote = useRef(false);
 
   useEffect(() => {
-    const ch = new BroadcastChannel('projector');
+    const BC = (globalThis as { BroadcastChannel?: typeof BroadcastChannel }).BroadcastChannel;
+    if (!BC) return;
+    const ch = new BC('projector');
     ch.onmessage = (e) => {
       if (e.data.type === 'ready') {
         // Display window finished loading — push current state so it syncs immediately

@@ -52,7 +52,9 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   const isSlideRemote = useRef(false);
   const isFontRemote = useRef(false);
   useEffect(() => {
-    const ch = new BroadcastChannel('projector');
+    const BC = (globalThis as { BroadcastChannel?: typeof BroadcastChannel }).BroadcastChannel;
+    if (!BC) return;
+    const ch = new BC('projector');
     ch.onmessage = (e) => {
       if (e.data.type === 'slide') {
         isSlideRemote.current = true;
