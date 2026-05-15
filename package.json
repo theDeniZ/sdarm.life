@@ -18,7 +18,8 @@
   },
   "scripts": {
     "test:screenshots": "playwright test",
-    "test:screenshots:update": "playwright test --update-snapshots"
+    "test:screenshots:update": "playwright test --update-snapshots",
+    "test:screenshots:install": "playwright install chromium"
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",

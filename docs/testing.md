@@ -16,12 +16,17 @@ Visual regression tests using Playwright. Tests run against a mock API so no rea
 ## Running tests
 
 ```bash
+# One-time: download the Chromium browser binary
+pnpm test:screenshots:install
+
 # Run all screenshot tests (from monorepo root)
 pnpm test:screenshots
 
 # Update baseline snapshots after intentional visual changes
 pnpm test:screenshots:update
 ```
+
+Only Chromium is installed — `playwright.config.ts` targets a single `chromium` project, so the WebKit and Firefox downloads (and their large set of system libraries) are skipped. The matching `apt` packages for Chromium are baked into [.devcontainer/Dockerfile](../.devcontainer/Dockerfile); CI installs them via `playwright install --with-deps chromium` (see [`.github/workflows/ci.yml`](../.github/workflows/ci.yml) and [`update-snapshots.yml`](../.github/workflows/update-snapshots.yml)).
 
 Playwright starts everything automatically:
 - Mock API server on port 8788
