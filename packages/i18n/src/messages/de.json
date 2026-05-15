@@ -662,7 +662,10 @@
       "songbook": "Gesangbuch",
       "title": "Titel",
       "author": "Autor",
-      "searchByNumberOrTitle": "Nach Nummer oder Titel suchen…"
+      "searchByNumberOrTitle": "Nach Nummer, Titel oder Liedtext suchen…"
+    },
+    "search": {
+      "lyricsMatch": "Liedtext"
     },
     "view": {
       "reader": "Leser",

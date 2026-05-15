@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useTranslations, useLocale } from 'next-intl';
 import type { SongbookDto, SongDto, SongListItemDto, ListResponse } from '@sdarm/types';
 import { fetchSongs, fetchSong } from '@/app/lib/api';
+import { highlightMatch } from '@/app/lib/highlight';
 import SongView from './SongView';
 
 const LIMIT = 50;
@@ -19,6 +20,7 @@ interface Props {
 
 export default function ReaderLayout({ songbook, song: initialSong, initialSongs, slug, apiUrl }: Props) {
   const t = useTranslations('songbook.reader');
+  const tSearch = useTranslations('songbook.search');
   const locale = useLocale();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [q, setQ] = useState('');
@@ -124,17 +126,24 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
             </div>
 
             <div className="reader-sidebar-toc" style={{ opacity: listLoading ? 0.4 : 1 }}>
-              {items.map((s) => (
-                <button
-                  key={s.id}
-                  ref={s.id === currentSong.id ? activeItemRef : null}
-                  className={`reader-toc-item${s.id === currentSong.id ? ' active' : ''}`}
-                  onClick={() => navigateTo(s.id)}
-                >
-                  <span className="reader-toc-num">{s.number}</span>
-                  <span className="reader-toc-name">{s.title}</span>
-                </button>
-              ))}
+              {items.map((s) => {
+                const showHighlight = q.length > 0 && s.matchType === 'title';
+                const showLyricsPill = q.length > 0 && s.matchType === 'lyrics';
+                return (
+                  <button
+                    key={s.id}
+                    ref={s.id === currentSong.id ? activeItemRef : null}
+                    className={`reader-toc-item${s.id === currentSong.id ? ' active' : ''}`}
+                    onClick={() => navigateTo(s.id)}
+                  >
+                    <span className="reader-toc-num">{s.number}</span>
+                    <span className="reader-toc-name">
+                      {showHighlight ? highlightMatch(s.title, q) : s.title}
+                      {showLyricsPill && <span className="song-row__match-pill">{tSearch('lyricsMatch')}</span>}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
 
             {pages > 1 && (

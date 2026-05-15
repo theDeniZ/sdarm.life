@@ -662,7 +662,10 @@
       "songbook": "Songbook",
       "title": "Title",
       "author": "Author",
-      "searchByNumberOrTitle": "Search by number or title…"
+      "searchByNumberOrTitle": "Search by number, title, or lyrics…"
+    },
+    "search": {
+      "lyricsMatch": "Lyrics"
     },
     "view": {
       "reader": "Reader",
