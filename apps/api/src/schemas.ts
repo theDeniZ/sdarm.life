@@ -76,6 +76,7 @@ export const SongListItemSchema = z
     title: z.string(),
     author: z.string().nullable(),
     copyright: z.string().nullable(),
+    matchType: z.enum(['title', 'number', 'lyrics']).nullable().optional(),
   })
   .openapi('SongListItem');
 

@@ -1719,3 +1719,36 @@ a {
 
 /* Sheet display */
 [data-theme='light'] .sheet-display { background: var(--bg-section); }
+
+/* ── Search match highlight (within-songbook) ── */
+.reader-toc-name mark {
+  background: rgba(201, 169, 110, 0.28);
+  color: var(--gold);
+  padding: 0 0.12em;
+  border-radius: 2px;
+}
+.song-row__match-pill {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.1);
+  border: 1px solid rgba(201, 169, 110, 0.28);
+  border-radius: 999px;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+[data-theme='light'] .reader-toc-name mark {
+  background: rgba(255, 226, 125, 0.55);
+  color: #5a3d00;
+}
+[data-theme='light'] .song-row__match-pill {
+  color: #5a3d00;
+  background: rgba(255, 226, 125, 0.35);
+  border-color: rgba(146, 114, 35, 0.4);
+}
