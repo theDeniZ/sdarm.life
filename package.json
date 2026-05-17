@@ -1,6 +1,6 @@
 {
   "name": "sdarm.life",
-  "version": "1.0.0-rc.2",
+  "version": "1.0.0-rc.3",
   "description": "",
   "private": true,
   "main": "index.js",
@@ -9,7 +9,13 @@
   "license": "ISC",
   "packageManager": "pnpm@10.32.0",
   "pnpm": {
-    "onlyBuiltDependencies": ["@parcel/watcher", "@swc/core", "esbuild", "sharp", "workerd"],
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "@swc/core",
+      "esbuild",
+      "sharp",
+      "workerd"
+    ],
     "overrides": {
       "path-to-regexp": ">=8.4.0",
       "esbuild": ">=0.25.0",
