@@ -30,12 +30,12 @@
     "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^10.3.0",
+    "eslint": "^10.4.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "prettier": "^3.0.0",
     "typescript": "^6",
-    "typescript-eslint": "^8.59.3",
+    "typescript-eslint": "^8.59.4",
     "wrangler": "^4"
   }
 }
