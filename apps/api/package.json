@@ -11,18 +11,18 @@
 		"build": "tsc --noEmit"
 	},
 	"devDependencies": {
-		"@cloudflare/vitest-pool-workers": "^0.16.9",
+		"@cloudflare/vitest-pool-workers": "^0.16.10",
 		"@sdarm/db": "workspace:*",
 		"@types/node": "^25.9.1",
 		"typescript": "^6.0.3",
 		"vitest": "~4.1.7",
-		"wrangler": "^4.94.0"
+		"wrangler": "^4.95.0"
 	},
 	"dependencies": {
 		"@hono/swagger-ui": "^0.6.1",
 		"@hono/zod-openapi": "^1.4.0",
 		"drizzle-orm": "^0.45.1",
-		"hono": "^4.12.22",
+		"hono": "^4.12.23",
 		"zod": "^4.4.3"
 	}
 }
