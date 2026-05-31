@@ -53,7 +53,7 @@ export default function SongListClient({ songbook, initial }: Props) {
         <input
           className="search-input"
           type="search"
-          placeholder={t('searchByNumberOrTitle')}
+          placeholder={t('searchByContent')}
           value={q}
           onChange={(e) => {
             setPage(1);
@@ -78,7 +78,12 @@ export default function SongListClient({ songbook, initial }: Props) {
               onClick={() => router.push(`/${locale}/songbooks/${songbook.slug}/${song.id}`)}
             >
               <td className="song-row__num">{song.number}</td>
-              <td className="song-row__title">{song.title}</td>
+              <td className="song-row__title">
+                {song.title}
+                {q && !song.title.toLowerCase().includes(q.toLowerCase()) && !String(song.number).includes(q) && (
+                  <span className="song-match-lyrics">♪</span>
+                )}
+              </td>
               <td className="song-row__author">{song.author ?? ''}</td>
             </tr>
           ))}

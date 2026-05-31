@@ -1490,6 +1490,13 @@ a {
   flex: 1;
   line-height: 1.35;
 }
+.song-match-lyrics,
+.reader-toc-match-lyrics {
+  margin-left: 6px;
+  font-size: 0.75em;
+  opacity: 0.55;
+  vertical-align: middle;
+}
 
 .reader-sidebar-pagination {
   flex-shrink: 0;

@@ -109,7 +109,7 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
               <input
                 className="reader-sidebar-search-input"
                 type="search"
-                placeholder={t('searchPlaceholder')}
+                placeholder={t('searchByContent')}
                 value={q}
                 onChange={(e) => {
                   setPage(1);
@@ -133,6 +133,9 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
                 >
                   <span className="reader-toc-num">{s.number}</span>
                   <span className="reader-toc-name">{s.title}</span>
+                  {q && !s.title.toLowerCase().includes(q.toLowerCase()) && !String(s.number).includes(q) && (
+                    <span className="reader-toc-match-lyrics">♪</span>
+                  )}
                 </button>
               ))}
             </div>

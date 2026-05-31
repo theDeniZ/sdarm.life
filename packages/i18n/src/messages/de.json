@@ -662,7 +662,8 @@
       "songbook": "Gesangbuch",
       "title": "Titel",
       "author": "Autor",
-      "searchByNumberOrTitle": "Nach Nummer oder Titel suchen…"
+      "searchByNumberOrTitle": "Nach Nummer oder Titel suchen…",
+      "searchByContent": "Nach Nummer, Titel oder Inhalt suchen…"
     },
     "view": {
       "reader": "Leser",

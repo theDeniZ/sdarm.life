@@ -77,25 +77,50 @@ export async function listSongs(
   opts: { q?: string; limit?: number; offset?: number },
 ) {
   const { q, limit = 50, offset = 0 } = opts;
-  const filter = q
-    ? and(
-        eq(songs.songbookId, songbookId),
-        or(like(songs.title, `%${q}%`), like(sql`cast(${songs.number} as text)`, `%${q}%`)),
-      )
-    : eq(songs.songbookId, songbookId);
 
-  const [rows, [{ count }]] = await Promise.all([
+  if (!q) {
+    const filter = eq(songs.songbookId, songbookId);
+    const [rows, [{ count }]] = await Promise.all([
+      db
+        .select({ id: songs.id, number: songs.number, title: songs.title, author: songs.author, copyright: songs.copyright })
+        .from(songs)
+        .where(filter)
+        .orderBy(asc(songs.number))
+        .limit(limit)
+        .offset(offset),
+      db.select({ count: sql<number>`count(*)` }).from(songs).where(filter),
+    ]);
+    return { items: rows, total: count };
+  }
+
+  const pattern = `%${q}%`;
+  const filter = and(
+    eq(songs.songbookId, songbookId),
+    or(
+      like(songs.title, pattern),
+      like(sql`cast(${songs.number} as text)`, pattern),
+      like(songParts.lyrics, pattern),
+    ),
+  );
+
+  const [rows, [{ total }]] = await Promise.all([
     db
       .select({ id: songs.id, number: songs.number, title: songs.title, author: songs.author, copyright: songs.copyright })
       .from(songs)
+      .leftJoin(songParts, eq(songParts.songId, songs.id))
       .where(filter)
+      .groupBy(songs.id)
       .orderBy(asc(songs.number))
       .limit(limit)
       .offset(offset),
-    db.select({ count: sql<number>`count(*)` }).from(songs).where(filter),
+    db
+      .select({ total: sql<number>`count(distinct ${songs.id})` })
+      .from(songs)
+      .leftJoin(songParts, eq(songParts.songId, songs.id))
+      .where(filter),
   ]);
 
-  return { items: rows, total: count };
+  return { items: rows, total: total ?? 0 };
 }
 
 export async function getSongById(db: DrizzleD1Database, id: number) {
