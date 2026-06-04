@@ -2315,6 +2315,9 @@
   .masonry-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+  .masonry-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 
   /* Über uns */
   .uber-uns-header {
