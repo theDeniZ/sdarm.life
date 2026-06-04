@@ -9,7 +9,8 @@
     "preview": "npx opennextjs-cloudflare preview",
     "deploy": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare deploy",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "test": "vitest run"
   },
   "dependencies": {
     "@fontsource/lexend": "^5.2.11",
@@ -32,6 +33,7 @@
     "prettier": "^3.0.0",
     "typescript": "^6",
     "typescript-eslint": "^8.60.1",
+    "vitest": "~4.1.8",
     "wrangler": "^4"
   }
 }
