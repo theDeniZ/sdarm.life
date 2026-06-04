@@ -452,6 +452,70 @@ a {
   border-color: var(--gold);
 }
 
+/* ── TRANSPOSE BAR ── */
+.transpose-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+.transpose-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  padding: 0.3rem 0.7rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+  line-height: 1;
+}
+.transpose-btn:hover {
+  border-color: rgba(201, 169, 110, 0.4);
+  color: var(--gold);
+}
+.transpose-btn--reset {
+  font-size: 1rem;
+  padding: 0.2rem 0.55rem;
+  color: var(--muted);
+}
+.transpose-btn--reset:hover {
+  color: var(--gold);
+}
+.transpose-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 4.5rem;
+  justify-content: center;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+.transpose-key {
+  font-weight: 500;
+  color: var(--muted);
+}
+.transpose-key--active {
+  color: var(--gold);
+}
+.transpose-arrow {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.transpose-offset {
+  color: var(--muted);
+}
+.transpose-offset--active {
+  color: var(--gold);
+}
+
 .song-part {
   margin-bottom: 2rem;
 }
