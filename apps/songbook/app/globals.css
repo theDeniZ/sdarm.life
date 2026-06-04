@@ -1696,6 +1696,24 @@ a {
 [data-theme='light'] .part-label { color: var(--muted); }
 [data-theme='light'] .lyrics-line { color: var(--text); }
 
+/* Reader toolbar and sidebar */
+[data-theme='light'] .reader-toolbar-bar {
+  background: var(--bg-card);
+  border-bottom-color: var(--border);
+}
+[data-theme='light'] .reader-sidebar {
+  background: var(--bg-card);
+  border-right-color: var(--border);
+}
+[data-theme='light'] .reader-sidebar-search-input {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: var(--text);
+}
+[data-theme='light'] .reader-sidebar-search-input:focus {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
 /* Projector — keep dark always */
 [data-theme='light'] .projector { background: #0c0b09; color: #d6d0c8; }
 

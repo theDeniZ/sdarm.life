@@ -2573,11 +2573,6 @@ nav {
   background: transparent;
 }
 
-/* Reader — keep dark always (reading comfort) */
-[data-theme='light'] .epub-reader { background: #1a1814; color: #d6d0c8; }
-[data-theme='light'] .reader-toolbar { background: #0e0d0b; }
-[data-theme='light'] .reader-sidebar { background: #12100c; }
-
 /* Book request modal */
 [data-theme='light'] .br-modal {
   background: var(--bg-card);
