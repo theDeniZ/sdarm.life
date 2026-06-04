@@ -94,7 +94,7 @@ export default function SongView({ song }: { song: SongDto }) {
         )}
       </div>
 
-      {mode === 'reader' && <SongReader parts={song.parts} showChords={showChords} />}
+      {mode === 'reader' && <SongReader parts={song.parts} showChords={showChords} songId={song.id} />}
       {mode === 'fullscreen' && <Projector song={song} onClose={() => setMode('reader')} />}
       {mode === 'presenter' && <PresenterDashboard song={song} onClose={closePresenter} />}
       {mode === 'sheets' && <SheetViewer sheets={song.sheets} />}
