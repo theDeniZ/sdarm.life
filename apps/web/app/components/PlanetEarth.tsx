@@ -36,6 +36,10 @@ const SETTINGS = {
 
   ROTATION_SPEED: 0.04,
   AXIS_TILT: 0.32,
+  // SphereGeometry places lon 0° (prime meridian) at +Z (camera side) when rotation.y = 0.
+  // A negative offset rotates the globe so that eastern longitudes face forward:
+  // -0.26 rad ≈ 15°E, centring Europe/Atlantic in the initial view.
+  INITIAL_ROTATION_Y: -0.26,
 
   CAMERA_POSITION: [0, 0.5, 4] as [number, number, number],
   CAMERA_FOV: 35,
@@ -215,7 +219,7 @@ function Earth() {
 
   return (
     <>
-      <mesh ref={earthRef} rotation={[SETTINGS.AXIS_TILT, 0, 0]}>
+      <mesh ref={earthRef} rotation={[SETTINGS.AXIS_TILT, SETTINGS.INITIAL_ROTATION_Y, 0]}>
         <sphereGeometry args={[1, 64, 64]} />
         <shaderMaterial
           ref={earthMatRef}
