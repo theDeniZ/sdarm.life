@@ -633,7 +633,7 @@
         "section4Body": "This website is hosted via Cloudflare Pages. Cloudflare may process technical access data (e.g. IP address, time of access). Website statistics are collected via Cloudflare Web Analytics — cookie-free, without user profiles and without personal data.",
         "cloudflarePrivacy": "Cloudflare Privacy Policy",
         "section5Title": "External Content (E-Books)",
-        "section5Body": "The “Treasures” platform allows digital books in EPUB format to be read directly in the browser. When opening a book, your browser establishes a direct connection to the external file server (currently: egwwritings.org, operated by the Ellen G. White Estate, Inc., USA) from which the EPUB file is retrieved. In doing so, your IP address and the time of access are transmitted to this third-party provider. Processing is based on our legitimate interest in delivering the requested content (Art. 6(1)(f) GDPR). For more information, please see the",
+        "section5Body": "The “Treasures” platform allows digital books in EPUB format to be read directly in the browser. No data is transmitted to external servers when you browse the catalog. Only when you actively open a book does your browser establish a direct connection to the external file server (currently: egwwritings.org, operated by the Ellen G. White Estate, Inc., USA) from which the EPUB file is retrieved. In doing so, your IP address and the time of access are transmitted to this third-party provider in the USA. The legal basis for processing is Art. 6(1)(f) GDPR (legitimate interest in delivering the requested content); for the transfer to the USA, Art. 49(1)(b) GDPR applies (transfer necessary for the performance of a contract at the request of the data subject). For more information, please see the",
         "section5PrivacyLink": "Ellen G. White Estate Privacy Policy",
         "section6Title": "Book Request (Receive a Gift)",
         "section6Body": "When you request books through the \"Receive a Gift\" form, we process the following data: name, email address, postal address (street, postal code, city), country, and optionally phone number and a personal message. The legal basis is your consent pursuant to Art. 6(1)(a) GDPR. The data is used solely for processing and shipping your request and will be deleted after delivery is complete. You may revoke your consent at any time by email:",
@@ -747,7 +747,8 @@
       "empty": "No results for this selection.",
       "scriptureText": "Your testimonies are my heritage forever, for they are the joy of my heart.",
       "scriptureRef": "Psalm 119:111",
-      "biblesTitle": "Holy Scripture"
+      "biblesTitle": "Holy Scripture",
+      "egwDisclaimer": "Some books on this page are the property of <estate>Ellen G. White Estate, Inc.</estate> (USA). The EPUB files are delivered directly from <site>egwwritings.org</site> — we simply provide convenient access."
     },
     "bookRequest": {
       "bannerEyebrow": "Free Books",
@@ -796,6 +797,10 @@
       "landDe": "Germany",
       "landAt": "Austria",
       "landCh": "Switzerland"
+    },
+    "reader": {
+      "egwNotice": "When loading, your browser connects directly to egwwritings.org (USA). More in the",
+      "egwNoticeLink": "Privacy Policy"
     }
   }
 }

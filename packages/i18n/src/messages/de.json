@@ -633,7 +633,7 @@
         "section4Body": "Diese Website wird über Cloudflare Pages gehostet. Cloudflare kann dabei technische Zugriffsdaten (z. B. IP-Adresse, Zeitpunkt des Abrufs) verarbeiten. Websitestatistiken werden über Cloudflare Web Analytics erfasst — cookiefrei, ohne Nutzerprofile und ohne personenbezogene Daten.",
         "cloudflarePrivacy": "Datenschutzerklärung von Cloudflare",
         "section5Title": "Externe Inhalte (E-Books)",
-        "section5Body": "Auf der Plattform „Schätze“ können digitale Bücher im EPUB-Format direkt im Browser gelesen werden. Beim Öffnen eines Buches stellt Ihr Browser eine direkte Verbindung zum externen Dateiserver her (derzeit: egwwritings.org, betrieben von der Ellen G. White Estate, Inc., USA), von dem die EPUB-Datei bezogen wird. Dabei wird Ihre IP-Adresse sowie der Zeitpunkt des Abrufs an diesen Drittanbieter übermittelt. Die Verarbeitung erfolgt auf Grundlage unseres berechtigten Interesses an der Bereitstellung des angeforderten Inhalts (Art. 6 Abs. 1 lit. f DSGVO). Weitere Informationen finden Sie in der",
+        "section5Body": "Auf der Plattform „Schätze“ können digitale Bücher im EPUB-Format direkt im Browser gelesen werden. Beim bloßen Durchsuchen des Katalogs werden keine Daten an externe Server übertragen. Erst wenn Sie aktiv ein Buch öffnen, stellt Ihr Browser eine direkte Verbindung zum externen Dateiserver her (derzeit: egwwritings.org, betrieben von der Ellen G. White Estate, Inc., USA), von dem die EPUB-Datei bezogen wird. Dabei werden Ihre IP-Adresse sowie der Zeitpunkt des Abrufs an diesen Drittanbieter in den USA übermittelt. Rechtsgrundlage für die Datenverarbeitung ist Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an der Bereitstellung des angeforderten Inhalts); für die Übermittlung in die USA gilt Art. 49 Abs. 1 lit. b DSGVO (Erforderlichkeit zur Vertragserfüllung auf Anfrage der betroffenen Person). Weitere Informationen finden Sie in der",
         "section5PrivacyLink": "Datenschutzerklärung der Ellen G. White Estate",
         "section6Title": "Buchanfrage (Geschenk erhalten)",
         "section6Body": "Wenn Sie über das Formular „Geschenk erhalten“ Bücher anfordern, verarbeiten wir folgende Daten: Name, E-Mail-Adresse, Postanschrift (Straße, PLZ, Stadt), Land sowie optional Telefonnummer und eine persönliche Mitteilung. Rechtsgrundlage ist Ihre Einwilligung gemäß Art. 6 Abs. 1 lit. a DSGVO. Die Daten werden ausschließlich für die Bearbeitung und den Versand der Anfrage verwendet und nach Abschluss des Versands gelöscht. Sie können Ihre Einwilligung jederzeit per E-Mail widerrufen:",
@@ -747,7 +747,8 @@
       "empty": "Keine Ergebnisse für diese Auswahl.",
       "scriptureText": "Deine Zeugnisse sind mein ewiges Erbe; denn sie sind meines Herzens Wonne.",
       "scriptureRef": "Psalm 119,111",
-      "biblesTitle": "Heilige Schrift"
+      "biblesTitle": "Heilige Schrift",
+      "egwDisclaimer": "Einige Bücher auf dieser Seite sind Eigentum der <estate>Ellen G. White Estate, Inc.</estate> (USA). Die EPUB-Dateien werden direkt von <site>egwwritings.org</site> bereitgestellt — wir ermöglichen lediglich den bequemen Zugang."
     },
     "bookRequest": {
       "bannerEyebrow": "Kostenlose Bücher",
@@ -796,6 +797,10 @@
       "landDe": "Deutschland",
       "landAt": "Österreich",
       "landCh": "Schweiz"
+    },
+    "reader": {
+      "egwNotice": "Beim Laden verbindet sich Ihr Browser direkt mit egwwritings.org (USA). Mehr in der",
+      "egwNoticeLink": "Datenschutzerklärung"
     }
   }
 }
