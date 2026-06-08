@@ -42,6 +42,7 @@ These are the only external data recipients currently named in [Datenschutzerkl�
 |---|---|---|
 | Cloudflare | Hosting, Web Analytics, CDN | section4 |
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
+| Resend (Resend Inc., USA) | Transactional email (book request notifications, newsletter, welcome emails) | section6 |
 
 **To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 
@@ -51,7 +52,7 @@ These are currently in code but not fully DSGVO-clean:
 
 | # | Item | Status |
 |---|---|---|
-| 1 | **Resend** (email sender) — not named in Datenschutz | Needs disclosure (Art. 28) |
+| 1 | ~~**Resend** (email sender) — not named in Datenschutz~~ | ✅ Disclosed in section6 (PR feat/6-user-db) |
 | 2 | **Unsplash FALLBACK_IMG** | Move to R2 |
 | 3 | **Wikimedia HeroSection fallback** | Move to R2 |
 | 4 | **Double opt-in wording** in Datenschutz | Expand section2Body |

@@ -1,7 +1,9 @@
 import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
+import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../types';
 import { ErrorSchema, OkSchema } from '../schemas';
 import { rateLimit } from '../middleware/rate-limit';
+import { createBookRequest } from '../repositories/book-requests';
 
 /** Escape user-supplied strings before embedding in HTML email content. */
 function escHtml(s: string): string {
@@ -29,7 +31,6 @@ const bookRequestRoute = createRoute({
             street: z.string().min(1),
             plz: z.string().min(1),
             city: z.string().min(1),
-            religion: z.string().optional(),
             books: z.array(z.string()).min(1),
             wish: z.string().optional(),
             language: z.enum(['de', 'en']).optional(),
@@ -52,7 +53,10 @@ const bookRequestRoute = createRoute({
 });
 
 router.openapi(bookRequestRoute, async (c) => {
-  const { name, email, phone, land, street, plz, city, religion, books, wish } = c.req.valid('json');
+  const { name, email, phone, land, street, plz, city, books, wish, language } = c.req.valid('json');
+  const db = drizzle(c.env.DB);
+
+  const record = await createBookRequest(db, { name, email, phone, land, street, plz, city, books, wish, language });
 
   const rows = [
     ['Name', escHtml(name)],
@@ -62,16 +66,20 @@ router.openapi(bookRequestRoute, async (c) => {
     ['Straße', escHtml(street)],
     ['PLZ', escHtml(plz)],
     ['Stadt', escHtml(city)],
-    ['Hintergrund', escHtml(religion ?? '—')],
     ['Bücher', escHtml(books.join(', '))],
     ['Wunsch', escHtml(wish ?? '—')],
   ]
     .map(([k, v]) => `<tr><td style="padding:6px 12px;color:#7a7470;font-size:13px;white-space:nowrap">${k}</td><td style="padding:6px 12px;color:#d6d0c8;font-size:13px">${v}</td></tr>`)
     .join('');
 
+  const adminLink = record
+    ? `<p style="margin-top:24px"><a href="https://admin.sdarm.life/book-requests/${record.id}" style="color:#c9a96e;font-size:13px">Anfrage #${record.id} im Admin öffnen →</a></p>`
+    : '';
+
   const html = `<!DOCTYPE html><html><body style="background:#0c0b09;font-family:Georgia,serif;padding:32px">
 <h2 style="color:#c9a96e;margin-bottom:24px">Neue Buchanfrage</h2>
 <table style="border-collapse:collapse;background:#141210;border:1px solid rgba(201,169,110,0.15);border-radius:6px">${rows}</table>
+${adminLink}
 </body></html>`;
 
   c.executionCtx.waitUntil(

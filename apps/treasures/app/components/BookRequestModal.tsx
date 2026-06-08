@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 
 interface Props {
   open: boolean;
@@ -15,6 +15,7 @@ const BOOKS_KEYS = ['wegZuChristus', 'grosserKampf', 'lebenJesu', 'bibel'] as co
 
 export default function BookRequestModal({ open, onClose, apiUrl }: Props) {
   const t = useTranslations('treasures.bookRequest');
+  const locale = useLocale();
 
   const [land, setLand] = useState('');
   const [name, setName] = useState('');
@@ -110,6 +111,7 @@ export default function BookRequestModal({ open, onClose, apiUrl }: Props) {
           city,
           books: [...selectedBooks].map((k) => t(`books.${k}` as Parameters<typeof t>[0])),
           wish: wish || undefined,
+          language: locale,
         }),
       });
       if (!res.ok) throw new Error(`Server error ${res.status}`);

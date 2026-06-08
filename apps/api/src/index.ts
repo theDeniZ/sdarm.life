@@ -2,7 +2,9 @@ import { Hono } from 'hono';
 import { OpenAPIHono } from '@hono/zod-openapi';
 import { swaggerUI } from '@hono/swagger-ui';
 import { cors } from 'hono/cors';
+import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from './types';
+import { deleteExpiredBookRequests } from './repositories/book-requests';
 import { auth, bootstrapAuth } from './middleware/auth';
 import { cached } from './middleware/cache';
 import postsRouter from './routes/posts';
@@ -19,6 +21,7 @@ import adminSongbooksRouter from './routes/admin/songbooks';
 import adminTreasuresRouter from './routes/admin/treasures';
 import adminApiKeysRouter from './routes/admin/api-keys';
 import adminEmailRouter from './routes/admin/email';
+import adminBookRequestsRouter from './routes/admin/book-requests';
 import treasuresRouter from './routes/treasures';
 import bookRequestRouter from './routes/book-request';
 import geocodeRouter from './routes/geocode';
@@ -91,6 +94,7 @@ admin.route('/subscribers', adminSubscribersRouter);
 admin.route('', adminSongbooksRouter);
 admin.route('', adminTreasuresRouter);
 admin.route('', adminEmailRouter);
+admin.route('', adminBookRequestsRouter);
 
 v1.route('/admin', admin);
 app.route('/api/v1', v1);
@@ -114,4 +118,10 @@ apiKeysApp.use('*', bootstrapAuth);
 apiKeysApp.route('', adminApiKeysRouter);
 app.route('/api/v1/admin/api-keys', apiKeysApp);
 
-export default app;
+// ── Scheduled handler — daily cleanup of expired book requests (90-day retention) ──
+export default {
+  fetch: app.fetch.bind(app),
+  async scheduled(_controller: ScheduledController, env: Bindings) {
+    await deleteExpiredBookRequests(drizzle(env.DB));
+  },
+} satisfies ExportedHandler<Bindings>;
