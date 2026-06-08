@@ -43,3 +43,11 @@
 ## Local dev
 
 - **`.dev.vars` vs `wrangler.jsonc`** — local secrets go in `apps/api/.dev.vars` (auto-loaded by `wrangler dev`). The `dev.vars` field inside `wrangler.jsonc` is not valid.
+
+## Bible / YouVersion
+
+- **Translation code mapping** — we expose human-readable codes (`luther1912`, `kjv`, `synodal`) in URLs; YouVersion uses numeric Bible IDs. The `YOUVERSION_CODE_MAP` constant in `apps/api/src/services/bible/youversion.ts` translates between the two. New YV translations not in the map are exposed via a slugified `{abbreviation}-{language}` code; baked-in D1 codes always win the merge so treasure-side metadata (cover, gradient) is preserved.
+- **USFM book code variants** — eBible (our D1) uses `JOH`, `MAR`, `1JO`, `2JO`, `3JO`, `SOL`, `PHI`. YouVersion uses the standard USFM-3 set (`JHN`, `MRK`, `1JN`, `2JN`, `3JN`, `SNG`, `PHP`). Confirmed live 2026-05-06. The `BOOK_CODE_TO_YV` map in `youversion.ts` translates on every request — never hardcode a YV-side code in route handlers.
+- **YouVersion auth header is `X-YVP-App-Key`** — verified live 2026-05-06. The `developer_id` is *not* required as a query param or header. Only the app-key header is needed.
+- **YouVersion per-bible licensing** — your developer key only grants access to a *subset* of YV's catalog. KJV (id=1) and Synodal (id=400) returned 403 Forbidden with our key, while Luther 1912 (id=51) worked fine. The per-language list endpoint (`/bibles?language_ranges[]=de`) returns metadata for all bibles in that language, but only those licensed to our key actually return passage content. The D1 fallback (Synodal, Luther 1912, KJV) covers the unauthorised cases automatically — users see the same content from D1 when YV refuses the request.
+- **YouVersion passage format** — the chapter endpoint `/v1/bibles/{id}/passages/{book}.{chapter}` returns the full chapter as one HTML string. Verses are delimited by `<span class="yv-v" v="N"></span>` markers (with a sibling `<span class="yv-vlbl">N</span>` for the visible label). We split on the marker, strip the label span, and clean remaining tags to reconstruct the per-verse `[{ verse, text }]` shape our DTOs expect. Only `?format=html` returns these markers; default `format=text` strips them and returns flat prose with no per-verse boundaries — useless for our reader.

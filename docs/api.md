@@ -22,10 +22,27 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number+title. `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/songs/search` | Global search across all songbooks. `?q=` (required, max 100 chars), `?limit=N&offset=N`. Returns `{ items, total }` of `SongSearchResultDto` (id, number, title, author, songbook). |
 | `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays. 404 if not found. |
-| `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
+| `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book\|bible`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. Bible translations are treasures with `type='bible'`. |
 | `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |
 | `POST` | `/api/v1/book-request` | Submit a free-book delivery request. Body: `{ name, email, phone?, land (DE/AT/CH), street, plz, city, books[] (min 1), wish?, language? }`. Sends a formatted email to `info@sdarm.life` via Resend (background, non-blocking). Rate-limited: 2 requests per IP per minute. Returns `{ ok: true }` (201). |
 | `GET` | `/api/v1/geocode` | Geocode proxy. `?q=` (1–100 chars, required), `?limit=N` (1–10, default 3). Forwards to Nominatim with the project User-Agent and caches the upstream JSON in KV for 30 days. Hides the user's IP from OpenStreetMap (DSGVO). Response: `X-Cache: HIT|MISS`; upstream errors return `[]` to keep the autocomplete resilient. |
+| `GET` | `/api/v1/bible/translations` | All Bible translations with treasure-side metadata (title, language, cover). Returns `{ items: BibleTranslationDto[], total }`. Cached 1 day. |
+| `GET` | `/api/v1/bible/translations/:code` | Single translation. `:code` ∈ `synodal\|luther1912\|kjv`. 404 if not found. |
+| `GET` | `/api/v1/bible/translations/:code/books` | All 66 books for a translation in canonical order, with localized name + `chapterCount`. Returns `{ items: BibleBookDto[], total: 66 }`. |
+| `GET` | `/api/v1/bible/translations/:code/books/:bookCode` | Single book metadata. `:bookCode` is USFM 3-letter (eBible variant — `JOH` not `JHN`, `MAR` not `MRK`, `1JO`/`2JO`/`3JO`, `SOL`, `PHI`). 404 if missing. |
+| `GET` | `/api/v1/bible/translations/:code/books/:bookCode/chapters/:n` | Chapter with all verses. Returns `BibleChapterDto` = `{ translation: { code, name }, book, chapter, verses: [{ verse, text }] }`. **`Cache-Control: public, max-age=31536000`** — Bible text never changes. |
+| `GET` | `/api/v1/bible/parallel` | Two translations side-by-side, aligned by verse number. Query: `?a=&b=&book=&chapter=`. Returns `ParallelChapterDto`: `{ bookCode, chapter, a, b, verses: [{ verse, a, b }] }` where verse `a` or `b` is `null` when one side has no verse N. 400 if `a == b`. 404 if any side missing. Cached 1 year. |
+
+### Bible source order (KV → YouVersion → D1)
+
+All `/api/v1/bible/*` endpoints serve verse content via a layered source: KV cache hit, then YouVersion (when `YOUVERSION_API_KEY` is set), then D1 fallback. The DTOs returned to the client are identical regardless of source.
+
+- **KV cache**: keyed under `bible:tr:list:v1`, `bible:tr:{code}:books:v1`, `bible:ch:{code}:{book}:{chapter}:v1`, `bible:par:{a}:{b}:{book}:{chapter}:v1`. TTLs: translation list 1 day, book list 7 days, chapter / parallel 30 days. D1-fallback responses cache for 1 hour only so the next request retries YouVersion.
+- **YouVersion**: server-side fetch from `api.youversion.com/v1/bibles/*`. The API key (`YOUVERSION_API_KEY` Worker secret) is never sent to the client. On any non-2xx, network error, or timeout (5 s), the layer falls back silently to D1.
+- **D1 fallback**: the 3 baked-in translations (`synodal`, `luther1912`, `kjv`) are guaranteed available even without YouVersion access — verses live in the local `bible_verses` table.
+- **`X-Source` response header**: every `/bible/*` response includes `X-Source: kv | youversion | d1` indicating which layer served the request — useful for debugging and dashboards.
+
+To enable YouVersion in production: `wrangler secret put YOUVERSION_API_KEY` and `wrangler secret put YOUVERSION_DEVELOPER_ID`. Local dev: copy `apps/api/.dev.vars.example` to `apps/api/.dev.vars` and fill in the values; absent keys keep the API on the D1-only path.
 
 ## Admin routes
 

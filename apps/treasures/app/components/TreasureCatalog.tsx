@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
+import Link from 'next/link';
 import { PageHero } from '@sdarm/ui';
 import type { Treasure, TreasureType } from '../lib/api';
 import TreasuresFilterBar, { type CategoryFilter, type Language } from './TreasuresFilterBar';
@@ -45,6 +46,7 @@ export default function TreasureCatalog({
   r2Url?: string;
 }) {
   const tBr = useTranslations('treasures.bookRequest');
+  const locale = useLocale();
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [lang, setLang] = useState<Language>('all');
   const [modalOpen, setModalOpen] = useState(false);
@@ -60,7 +62,7 @@ export default function TreasureCatalog({
     async (pg: number, cat: CategoryFilter, lng: Language) => {
       setLoading(true);
       const params = new URLSearchParams({ limit: String(PAGE_SIZE), offset: String((pg - 1) * PAGE_SIZE) });
-      params.set('type', 'book');
+      if (cat !== 'all') params.set('type', cat);
       if (lng !== 'all') params.set('language', lng);
       try {
         const res = await fetch(`${apiUrl}/treasures?${params}`, { cache: 'no-store' });
@@ -132,9 +134,10 @@ export default function TreasureCatalog({
     .filter((tr) => tr.language !== 'ru')
     .sort((a, b) => (LANG_ORDER[a.language] ?? 9) - (LANG_ORDER[b.language] ?? 9));
 
-  const availableCategories = displayItems.length
-    ? ([...new Set(displayItems.map((tr) => tr.type))] as TreasureType[])
-    : (['book'] as TreasureType[]);
+  // Categories are stable: always offer both "Bücher" and "Bibel" chips so the
+  // filter is testable even if the first paginated page contains only one type.
+  const availableCategories: TreasureType[] = ['book', 'bible'];
+  // Languages still derived from loaded items (depends on actual content)
   const availableLanguages = displayItems.length
     ? ([...new Set(displayItems.map((tr) => tr.language))] as Language[])
     : (['de'] as Language[]);
@@ -147,20 +150,36 @@ export default function TreasureCatalog({
           title={tBr('bannerTitle')}
           centered
           cta={
-            <button className="br-hero-cta" onClick={() => setModalOpen(true)}>
-              {tBr('cta')}
-              <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                <polyline
-                  points="3,1 8,1 8,6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+            <div className="br-hero-ctas">
+              <button className="br-hero-cta" onClick={() => setModalOpen(true)}>
+                {tBr('cta')}
+                <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <polyline
+                    points="3,1 8,1 8,6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              <Link href={`/${locale}/bible`} className="br-hero-cta br-hero-cta--ghost">
+                {tBr('bibleCta')}
+                <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <polyline
+                    points="3,1 8,1 8,6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
+            </div>
           }
         />
       </div>

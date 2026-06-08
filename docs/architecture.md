@@ -253,6 +253,12 @@ apps/api/src/
     images.ts          — all DB queries for the images table
     subscribers.ts     — all DB queries for the subscribers table
     treasures.ts       — all DB queries for the treasures table
+    bible.ts           — D1 fallback queries for Bible content (used by services/bible/source.ts)
+  services/
+    bible/
+      youversion.ts    — typed YouVersion HTTP client + DTO mappers + USFM book-code map
+      cache.ts         — KV-backed cache wrapper (bible:tr:list / bible:ch:... keys, TTLs)
+      source.ts        — composite source: KV → YouVersion → D1 fallback; returns [value, 'kv'|'youversion'|'d1']
   middleware/
     auth.ts            — CF Access header verification middleware
   schemas.ts           — shared Zod schemas (PostSchema, ImageSchema, etc.) — source of truth for OpenAPI spec

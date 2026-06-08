@@ -20,6 +20,7 @@ import adminTreasuresRouter from './routes/admin/treasures';
 import adminApiKeysRouter from './routes/admin/api-keys';
 import adminEmailRouter from './routes/admin/email';
 import treasuresRouter from './routes/treasures';
+import bibleRouter from './routes/bible';
 import bookRequestRouter from './routes/book-request';
 import geocodeRouter from './routes/geocode';
 
@@ -77,6 +78,8 @@ v1.route('/songs', songsRouter);
 // coverKey. Detail endpoint stays cached (purge is point-and-shoot by id).
 v1.use('/treasures/*', cached(3600)); // 1 hour — treasure detail
 v1.route('/treasures', treasuresRouter);
+
+v1.route('/bible', bibleRouter); // Bible: cache headers set per-route inside the router
 
 v1.route('', bookRequestRouter); // /book-request
 

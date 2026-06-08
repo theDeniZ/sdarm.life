@@ -1,4 +1,4 @@
-import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 export const KNOWN_CONFIG_KEYS = [
   'donation_url',
@@ -119,7 +119,7 @@ export const treasures = sqliteTable('treasures', {
   title:            text('title').notNull(),
   author:           text('author'),
   description:      text('description'),
-  type:             text('type', { enum: ['book'] }).notNull().default('book'),
+  type:             text('type', { enum: ['book', 'bible'] }).notNull().default('book'),
   language:         text('language').notNull(),
   coverGradient:    text('cover_gradient'),
   coverAccentColor: text('cover_accent_color'),
@@ -134,4 +134,40 @@ export const treasures = sqliteTable('treasures', {
   index('treasures_sort_order_idx').on(t.sortOrder),
   index('treasures_type_idx').on(t.type),
   index('treasures_language_idx').on(t.language),
+]);
+
+export const bibleTranslations = sqliteTable('bible_translations', {
+  id:         integer('id').primaryKey({ autoIncrement: true }),
+  treasureId: integer('treasure_id').notNull().unique().references(() => treasures.id, { onDelete: 'cascade' }),
+  code:       text('code').notNull().unique(),
+  year:       integer('year').notNull(),
+  copyright:  text('copyright'),
+  license:    text('license').notNull(),
+}, (t) => [
+  index('bible_translations_code_idx').on(t.code),
+]);
+
+export const bibleBooks = sqliteTable('bible_books', {
+  id:            integer('id').primaryKey({ autoIncrement: true }),
+  translationId: integer('translation_id').notNull().references(() => bibleTranslations.id, { onDelete: 'cascade' }),
+  code:          text('code').notNull(),
+  number:        integer('number').notNull(),
+  name:          text('name').notNull(),
+  abbreviation:  text('abbreviation').notNull(),
+  testament:     text('testament', { enum: ['OT', 'NT'] }).notNull(),
+  chapterCount:  integer('chapter_count').notNull(),
+}, (t) => [
+  index('bible_books_translation_id_idx').on(t.translationId),
+  uniqueIndex('bible_books_translation_code_uniq').on(t.translationId, t.code),
+]);
+
+export const bibleVerses = sqliteTable('bible_verses', {
+  id:      integer('id').primaryKey({ autoIncrement: true }),
+  bookId:  integer('book_id').notNull().references(() => bibleBooks.id, { onDelete: 'cascade' }),
+  chapter: integer('chapter').notNull(),
+  verse:   integer('verse').notNull(),
+  text:    text('text').notNull(),
+}, (t) => [
+  index('bible_verses_book_chapter_idx').on(t.bookId, t.chapter),
+  uniqueIndex('bible_verses_book_chapter_verse_uniq').on(t.bookId, t.chapter, t.verse),
 ]);

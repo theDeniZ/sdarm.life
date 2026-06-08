@@ -49,7 +49,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <ConnectedNavbar locale={locale} />
       <HeroWelcome locale={locale} />
       <NewsSection newsData={newsData} />
-      <ScriptureVerseSection href={`${TREASURES_URL}/${locale}`} locale={locale} />
+      <ScriptureVerseSection href={`${TREASURES_URL}/${locale}/bible`} locale={locale} />
       <ConnectedFooter locale={locale} />
     </>
   );

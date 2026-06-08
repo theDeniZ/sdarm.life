@@ -72,8 +72,9 @@ export default function TreasureForm({ id, initial = {} }: Props) {
 
       <div className="form-row">
         <label>Type</label>
-        <select value={form.type} onChange={(e) => set('type', e.target.value as 'book')}>
+        <select value={form.type} onChange={(e) => set('type', e.target.value as import('@sdarm/types').TreasureType)}>
           <option value="book">Book</option>
+          <option value="bible">Bible</option>
         </select>
       </div>
 

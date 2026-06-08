@@ -1,28 +1,70 @@
 'use client';
 
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
-import { r2url, type Treasure } from '../lib/api';
-import Book3DCover from './Book3DCover';
+import { useTranslations, useLocale } from 'next-intl';
+import type { Treasure } from '../lib/api';
+
+function Book3D({ treasure }: { treasure: Treasure }) {
+  return (
+    <div className="book-3d">
+      <div
+        className="book-3d-cover"
+        style={{
+          background: treasure.coverGradient ?? undefined,
+          borderColor: treasure.coverAccentColor ? `${treasure.coverAccentColor}38` : undefined,
+        }}
+      >
+        <div
+          className="book-3d-spine"
+          style={{
+            background: treasure.coverAccentColor
+              ? `linear-gradient(to bottom, ${treasure.coverAccentColor}80, ${treasure.coverAccentColor}2e, ${treasure.coverAccentColor}80)`
+              : undefined,
+          }}
+        />
+        <div className="book-3d-content">
+          <div className="book-3d-cross">✦</div>
+          <div className="book-3d-title">{treasure.title}</div>
+          <div className="book-3d-line" />
+          <div className="book-3d-author">{treasure.author}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const LANG_LABEL: Record<string, string> = { ru: 'RU', de: 'DE', en: 'EN' };
 
+// Titles available as physical books via the book request form
+const PHYSICAL_TITLES = new Set([
+  'Das Leben Jesu',
+  'Der Weg zu Christus',
+  'Der große Kampf',
+  'The Desire of Ages',
+  'Steps to Christ',
+  'The Great Controversy',
+]);
+
 export default function TreasureCard({ treasure }: { treasure: Treasure }) {
+  const t = useTranslations('treasures.catalog');
   const locale = useLocale();
 
-  const detailHref = `/${locale}/books/${treasure.id}`;
-  const coverUrl = r2url(treasure.coverKey, { w: 200, q: 85 });
+  const isBible = treasure.type === 'bible';
+  const isPhysical = !isBible && PHYSICAL_TITLES.has(treasure.title);
 
-  return (
-    <Link href={detailHref} className="item-card">
+  const href =
+    isBible && treasure.bibleCode
+      ? `/${locale}/bible/${treasure.bibleCode}`
+      : treasure.epubUrl
+        ? `/${locale}/books/${treasure.id}`
+        : null;
+
+  const inner = (
+    <>
       <div className="item-visual book-visual">
-        <Book3DCover
-          src={coverUrl}
-          alt={treasure.title}
-          title={treasure.title}
-          accentColor={treasure.coverAccentColor}
-          gradient={treasure.coverGradient}
-        />
+        {isBible && <div className="item-badge bible-badge">{t('bibleBadge')}</div>}
+        {isPhysical && <div className="item-badge post-badge">{t('postBadge')}</div>}
+        <Book3D treasure={treasure} />
       </div>
 
       <div className="item-body">
@@ -34,6 +76,16 @@ export default function TreasureCard({ treasure }: { treasure: Treasure }) {
         {treasure.description && <div className="item-desc">{treasure.description}</div>}
         {!treasure.isFree && <div className="item-price">{treasure.price}</div>}
       </div>
-    </Link>
+    </>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="item-card">
+        {inner}
+      </Link>
+    );
+  }
+
+  return <div className="item-card item-card--no-link">{inner}</div>;
 }

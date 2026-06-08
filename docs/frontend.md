@@ -327,6 +327,98 @@ No external image hosts are contacted from the catalog. Covers are uploaded thro
 
 ---
 
+## `apps/treasures` Bible reader
+
+The Bible reader lives inside the Treasures app. Routes:
+
+- `/{locale}/bible` — translation list
+- `/{locale}/bible/{code}` — book index for a translation
+- `/{locale}/bible/{code}/{book}` — chapter grid
+- `/{locale}/bible/{code}/{book}/{chapter}` — chapter reader (`?compare=` for inline parallel, `?projector=1` for the display window)
+
+| Component | Type | Notes |
+|---|---|---|
+| `BibleChapterReader` | **Client** | Default reader; owns presenter open/close, comparison state, `g`-key opens the picker sheet, `j/k` step verses |
+| `BibleParallelReader` | Client | Inline two-column reader (used when `?compare=` set) |
+| `BibleBookIndex` | Client | OT/NT browse grid; embeds `BiblePassagePicker` as the primary search |
+| `BiblePassagePicker` | Client | Smart input — typing `60` lists books with ≥60 chapters; `John 3` jumps to John 3; `John 3:16` jumps to verse 16; pure book names match name/abbreviation/USFM code with diacritic-insensitive normalisation |
+| `BiblePresenterDashboard` | **Client** | Operator panel (portal). Verse strip on the left (click → set verse, shift-click → extend passage), preview on the right. Hosts the passage picker, "Compare with…" select, font controls, blank-screen toggle, fullscreen-request button |
+| `BibleProjector` | Client | Display surface — renders the **whole chapter** as a vertical list; the active range is highlighted and auto-scrolls into view. Single mode = one column; parallel mode = CSS-grid `auto 1fr 1fr` so verse rows stay aligned even when the two translations have very different lengths |
+| `BibleProjectorOnly` | Client | Wrapper rendered when `?projector=1`; passes `isDisplay` and optional `parallel` data to `BibleProjector` |
+| `BibleUnavailable` | Client | Rendered server-side when translation+book exist but the chapter (or parallel chapter) failed to load — i.e. upstream + D1 fallback both unavailable. Shows a friendly message and a Retry button (`window.location.reload()`). |
+| `ContinueReadingBar` | Client | localStorage `bible_last_read` resume link |
+
+### Presenter — multi-window architecture (current contract)
+
+```
+Main screen (operator)               External screen (display)
+┌─────────────────────────┐          ┌──────────────────────────────┐
+│  BiblePresenterDashboard│          │  BibleProjector (?projector=1)│
+│  ─────────────────────  │          │                                │
+│  [PassagePicker]        │          │  v.10  …                       │
+│  v.1 │ Im Anfang…       │──range──▶│  v.11  Im Anfang schuf  ←──┐  │
+│  v.2 │ Und die Erde…    │◀──range──│  v.12  …                    │  │
+│  …                      │──font───▶│                              │  │
+│  [Compare ▼] [▢ Blank]  │──blank──▶│  (black overlay if blanked)  │  │
+│  [⛶] [A−][A+] [×]      │──passage▶│  (navigate via window.location)│  │
+└─────────────────────────┘          └──────────────────────────────┘
+         └────────── BroadcastChannel('bible-projector') ────────────┘
+```
+
+**Channel message types:**
+
+| `type` | Direction | Payload | Effect |
+|---|---|---|---|
+| `ready` | display → operator | — | Display loaded; operator re-pushes `range`, `fontScale`, `blank` for fresh sync |
+| `range` | bidirectional | `{ from: number; to: number }` | Highlight verse `from`..`to` on both sides; display auto-scrolls so `from` sits near the top |
+| `fontScale` | bidirectional | `{ value: number }` | Resize verse text on display; reflected in operator header |
+| `blank` | operator → display | `{ on: boolean }` | Black overlay covers display content; toggled by `b` key or button |
+| `requestFullscreen` | operator → display | — | Display shows a tap-to-fullscreen overlay (browser requires a gesture) |
+| `passage` | operator → display | `{ locale, translationCode, bookCode, chapter, compare }` | Display navigates via `window.location.assign()` to the new chapter (and optional parallel partner) |
+
+**Range selection:** Click a verse in the strip to set both `from` and `to` to that verse (single highlight). Shift-click to extend `to` to a later verse (passage range). Arrow keys step the single verse; Shift+Arrow extends the range. `b` toggles blank screen.
+
+**Parallel mode:** Operator picks a comparison translation from the "Compare with…" select. Operator window calls `/bible/parallel?a=&b=&book=&chapter=` and the dashboard preview renders both columns. The display window is reloaded with `?compare={code}` so its projector page server-side fetches the parallel data and renders the aligned grid. Per-side Psalm chapter remapping is preserved by the API (`parallel.a.chapter` / `parallel.b.chapter`).
+
+**Smart picker (`BiblePassagePicker`):** Parses these inputs in order:
+1. Pure number `N` — list books with `chapterCount >= N`, deep-linking to chapter N
+2. `Book N:V` or `Book N` — fuzzy-match the book fragment, jump to chapter N (and verse V via `#v` anchor)
+3. Plain text — fuzzy-match book name/abbreviation/USFM code
+
+All matches are diacritic-insensitive (NFD normalisation) so `пс` matches "Псалтирь" and `mose` matches "1. Mose".
+
+A visually-hidden `aria-live="polite"` status node announces the result count (or "no matches") whenever the query changes — required for screen-reader parity with the visual dropdown.
+
+**Presenter button availability:** the "Presenter" action is always shown on the chapter reader. `window.screen.isExtended` (when supported) is used only to decide the `title` hint — when no second screen is detected, the hint says the window will open separately for manual placement on a beamer. Browsers without the API still get the button.
+
+**Transient error UI:** chapter and parallel-chapter pages distinguish three outcomes server-side:
+- Translation, book, or out-of-range chapter → `notFound()` (renders `not-found.tsx`)
+- Translation+book exist, chapter in-range, but fetch returned `null` → renders `BibleUnavailable` with a Retry button
+- Otherwise → normal reader
+
+This catches the rare case where the upstream Bible provider is down AND the translation isn't one of the 3 baked-in D1 fallbacks.
+
+**Verse selection in the chapter reader:**
+- Plain click — toggle a single verse (click again to deselect).
+- Shift+click — extend the selection from the anchor (last single-clicked verse) to the clicked verse, contiguous range.
+- Cmd/Ctrl+click — toggle this verse independently, supports non-contiguous selection (e.g. v.9 + v.11).
+- Selection state lives on the chapter reader as a `ReadonlySet<number>`; the same model is used in the presenter dashboard so multi-window sync transports it via the `selection` BroadcastChannel message (`{ verses: number[] }`, replacing the older `range` message).
+
+**Configurable verse copy:** when at least one verse is selected, a "Copy" button + gear-icon settings button appear in the action bar. Clicking Copy formats the selected verses with [`buildCopyText`](../apps/treasures/app/lib/copyVerses.ts) and writes to the clipboard. Settings live in `localStorage` under `bible_copy_options` and cover:
+- Verse numbers on/off
+- Reference line (book chapter:verse) on/off
+- Translation name in parens on/off (only meaningful when the reference line is on)
+- Link style: `none` / `short` (URL on its own line) / `full` (URL on a new line after blank)
+- Verse separator: `newline` (each verse on its own line) / `space` (joined with spaces)
+
+The reference line uses compact range notation: `John 3:16-18` for 16+17+18, `John 3:16,18` for non-contiguous, `John 3:16-17,19` for mixed.
+
+**Action bar position:** the floating action bar uses `position: sticky` with `bottom: 1.5rem` inside `.bible-reader`, so it sticks to the viewport bottom while reading and lifts away with the chapter when the user scrolls into the footer — no overlap with footer content.
+
+**Presenter / projector palette:** `.bible-presenter` and `.bible-projector` pin `--gold`, `--text`, `--text-strong`, `--muted`, `--border` to dark-theme values regardless of the site theme — same pattern as `.site-footer` (see `packages/ui/src/styles/tokens.css`). The presenter is always rendered on a near-black canvas, so legible cream text is required even when the rest of the site is in light theme.
+
+---
+
 ## `@sdarm/ui` shared components
 
 All public-facing apps (`web`, `songbook`, `treasures`, `events`) import from `@sdarm/ui`. **Check here before building something from scratch** — the hero, footer, nav, and quote band are already done.

@@ -1,14 +1,16 @@
 import { and, asc, count, eq } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import { treasures } from '@sdarm/db';
+import { bibleTranslations, treasures } from '@sdarm/db';
 
-function row(r: typeof treasures.$inferSelect) {
+type Row = typeof treasures.$inferSelect & { bibleCode?: string | null };
+
+function row(r: Row) {
   return {
     id: r.id,
     title: r.title,
     author: r.author ?? null,
     description: r.description ?? null,
-    type: r.type as 'book',
+    type: r.type,
     language: r.language,
     coverGradient: r.coverGradient ?? null,
     coverAccentColor: r.coverAccentColor ?? null,
@@ -17,10 +19,30 @@ function row(r: typeof treasures.$inferSelect) {
     price: r.price ?? null,
     sortOrder: r.sortOrder,
     epubUrl: r.epubUrl ?? null,
+    bibleCode: r.bibleCode ?? null,
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
   };
 }
+
+const listSelect = {
+  id: treasures.id,
+  title: treasures.title,
+  author: treasures.author,
+  description: treasures.description,
+  type: treasures.type,
+  language: treasures.language,
+  coverGradient: treasures.coverGradient,
+  coverAccentColor: treasures.coverAccentColor,
+  coverKey: treasures.coverKey,
+  isFree: treasures.isFree,
+  price: treasures.price,
+  sortOrder: treasures.sortOrder,
+  epubUrl: treasures.epubUrl,
+  createdAt: treasures.createdAt,
+  updatedAt: treasures.updatedAt,
+  bibleCode: bibleTranslations.code,
+};
 
 export async function listTreasures(
   db: DrizzleD1Database,
@@ -28,13 +50,14 @@ export async function listTreasures(
 ) {
   const { limit = 50, offset = 0, type, language } = opts;
   const where = and(
-    type ? eq(treasures.type, type as 'book') : undefined,
+    type ? eq(treasures.type, type as 'book' | 'bible') : undefined,
     language ? eq(treasures.language, language) : undefined,
   );
   const [{ total }] = await db.select({ total: count() }).from(treasures).where(where);
   const rows = await db
-    .select()
+    .select(listSelect)
     .from(treasures)
+    .leftJoin(bibleTranslations, eq(bibleTranslations.treasureId, treasures.id))
     .where(where)
     .orderBy(asc(treasures.sortOrder), asc(treasures.id))
     .limit(limit)
@@ -43,7 +66,11 @@ export async function listTreasures(
 }
 
 export async function getTreasureById(db: DrizzleD1Database, id: number) {
-  const [r] = await db.select().from(treasures).where(eq(treasures.id, id));
+  const [r] = await db
+    .select(listSelect)
+    .from(treasures)
+    .leftJoin(bibleTranslations, eq(bibleTranslations.treasureId, treasures.id))
+    .where(eq(treasures.id, id));
   return r ? row(r) : null;
 }
 
@@ -51,7 +78,7 @@ export interface CreateTreasureInput {
   title: string;
   author?: string | null;
   description?: string | null;
-  type?: 'book';
+  type?: 'book' | 'bible';
   language: string;
   coverGradient?: string | null;
   coverAccentColor?: string | null;

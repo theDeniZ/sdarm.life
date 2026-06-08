@@ -1,4 +1,4 @@
-import type { TreasureDto } from '@sdarm/types';
+import type { TreasureDto, TreasureType } from '@sdarm/types';
 
 export type TreasureListItem = Pick<
   TreasureDto,
@@ -19,7 +19,7 @@ export interface TreasureFormData {
   title: string;
   author: string;
   description: string;
-  type: 'book';
+  type: TreasureType;
   language: string;
   coverGradient: string;
   coverAccentColor: string;

@@ -42,6 +42,9 @@ These are the only external data recipients currently named in [DatenschutzerklÃ
 |---|---|---|
 | Cloudflare | Hosting, Web Analytics, CDN | section4 |
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
+| YouVersion (Life.Church) | Bible verse content provider | section8 |
+
+**YouVersion note:** all calls to `api.youversion.com` are made server-side from the Cloudflare Worker â€” the user's IP never leaves our infrastructure. The API key is a Worker secret (`YOUVERSION_API_KEY`) and is never sent to the client bundle. Verse content is cached in Workers KV for up to 30 days.
 
 **To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 

@@ -23,3 +23,19 @@ tests/screenshot/results/
 
 /.claude/worktrees
 .claude-backup.tgz
+/.claude/scheduled_tasks.lock
+
+# Bible source data — operator-downloaded, do not commit ~30MB of public-domain text
+scripts/bible-data/*
+!scripts/bible-data/README.md
+!scripts/bible-data/book-names.mjs
+
+# Reference sketches — cloned OSS repos for study, never commit
+_sketches
+
+# Test-page assets for (dev)/3d-book — local only
+apps/treasures/public/3d-book-test
+
+# Local-only Bible mock API (used when wrangler dev hangs in the dev container)
+scripts/dev-mock-api.mjs
+

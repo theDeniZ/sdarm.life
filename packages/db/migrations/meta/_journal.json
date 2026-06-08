@@ -78,6 +78,13 @@
       "when": 1777000000000,
       "tag": "0010_song_data_cleanup",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1777768727734,
+      "tag": "0011_naive_maestro",
+      "breakpoints": true
     }
   ]
 }

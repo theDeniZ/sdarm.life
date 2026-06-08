@@ -29,7 +29,7 @@ nav.scrolled {
   font-weight: 700;
   font-size: 1.35rem;
   letter-spacing: 0.04em;
-  color: rgba(240, 235, 225, 0.92);
+  color: var(--text-strong);
   text-decoration: none;
   transition: color 0.5s ease;
   flex-shrink: 0; /* never let logo squeeze under content pressure */
@@ -43,7 +43,7 @@ nav.scrolled {
   letter-spacing: 0;
 }
 .nav-logo:hover {
-  color: rgba(235, 226, 210, 1);
+  color: var(--gold);
 }
 
 /* ── Nav links ── */

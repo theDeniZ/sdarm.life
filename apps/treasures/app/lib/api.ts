@@ -22,7 +22,7 @@ export function r2url(key: string | null, opts?: ImageTransform): string | null 
   return `${R2}/cdn-cgi/image/${params}/${key}`;
 }
 
-export type TreasureType = 'book';
+export type TreasureType = 'book' | 'bible';
 
 export interface Treasure {
   id: number;
@@ -38,6 +38,7 @@ export interface Treasure {
   price: string | null;
   sortOrder: number;
   epubUrl: string | null;
+  bibleCode?: string | null;
 }
 
 export async function fetchTreasureById(id: number): Promise<Treasure | null> {
