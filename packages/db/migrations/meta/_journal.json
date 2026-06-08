@@ -78,6 +78,20 @@
       "when": 1777000000000,
       "tag": "0010_song_data_cleanup",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1780253636631,
+      "tag": "0011_past_black_cat",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "6",
+      "when": 1780254552000,
+      "tag": "0012_wet_loners",
+      "breakpoints": true
     }
   ]
 }

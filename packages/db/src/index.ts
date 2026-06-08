@@ -114,6 +114,35 @@ export const songSheets = sqliteTable('song_sheets', {
   index('song_sheets_song_id_idx').on(t.songId),
 ]);
 
+export const bookRequests = sqliteTable('book_requests', {
+  id:          integer('id').primaryKey({ autoIncrement: true }),
+  name:        text('name').notNull(),
+  email:       text('email').notNull(),
+  phone:       text('phone'),
+  land:        text('land').notNull(),
+  street:      text('street').notNull(),
+  plz:         text('plz').notNull(),
+  city:        text('city').notNull(),
+  books:       text('books').notNull(),
+  wish:        text('wish'),
+  language:    text('language').notNull().default('de'),
+  requestedAt: integer('requested_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+}, (t) => [
+  index('book_requests_requested_at_idx').on(t.requestedAt),
+  index('book_requests_email_idx').on(t.email),
+]);
+
+export const adminAudit = sqliteTable('admin_audit', {
+  id:         integer('id').primaryKey({ autoIncrement: true }),
+  action:     text('action').notNull(),
+  targetType: text('target_type').notNull(),
+  targetId:   integer('target_id').notNull(),
+  createdAt:  integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+}, (t) => [
+  index('admin_audit_target_idx').on(t.targetType, t.targetId),
+  index('admin_audit_created_at_idx').on(t.createdAt),
+]);
+
 export const treasures = sqliteTable('treasures', {
   id:               integer('id').primaryKey({ autoIncrement: true }),
   title:            text('title').notNull(),

@@ -46,6 +46,13 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 - `epub_url` — direct URL to an EPUB file (external, e.g. `media2.egwwritings.org`)
 - Bulk-import from `scripts/epub-meta.json` via `POST /admin/treasures/batch`
 
+**`book_requests`**
+`id`, `name`, `email`, `phone?`, `land`, `street`, `plz`, `city`, `books` (JSON array as text), `wish?`, `language` (default `'de'`), `requested_at`
+- Inserted on `POST /api/v1/book-request`; no update or list endpoints
+- `books` stored as a JSON array string; parsed back to `string[]` by the repository layer
+- Records are hard-deleted 90 days after `requested_at` via a Cloudflare Cron Trigger (daily at 02:00 UTC)
+- Admin access: `GET /api/v1/admin/book-requests/:id` — detail only, no bulk list (DSGVO minimal surface)
+
 ## Config keys
 
 `KNOWN_CONFIG_KEYS` is exported from `@sdarm/db` and is the single source of truth. Both `apps/api` and `apps/admin` import it — never hardcode config keys elsewhere.
