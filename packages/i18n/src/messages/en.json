@@ -8,7 +8,10 @@
       "contact": "Contact",
       "imprint": "Imprint",
       "privacy": "Privacy",
-      "themeToggleAria": "Toggle color theme"
+      "themeToggleAria": "Toggle color theme",
+      "skipToContent": "Skip to main content",
+      "prevPage": "Previous page",
+      "nextPage": "Next page"
     },
     "footer": {
       "stayInTouch": "Be <em>part</em> of it",
@@ -85,6 +88,7 @@
         "sub": "discover now"
       },
       "quote": {
+        "openShare": "Share Bible verse",
         "saveImage": "Save as image",
         "close": "Close"
       }

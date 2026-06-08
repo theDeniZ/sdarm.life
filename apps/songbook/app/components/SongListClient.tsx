@@ -15,6 +15,7 @@ interface Props {
 
 export default function SongListClient({ songbook, initial }: Props) {
   const t = useTranslations('songbook.reader');
+  const tNav = useTranslations('common.nav');
   const locale = useLocale();
   const router = useRouter();
   const [q, setQ] = useState('');
@@ -65,9 +66,9 @@ export default function SongListClient({ songbook, initial }: Props) {
       <table className="song-table">
         <thead>
           <tr>
-            <th>#</th>
-            <th>{t('title')}</th>
-            <th>{t('author')}</th>
+            <th scope="col">#</th>
+            <th scope="col">{t('title')}</th>
+            <th scope="col">{t('author')}</th>
           </tr>
         </thead>
         <tbody style={{ opacity: loading ? 0.5 : 1, transition: 'opacity 0.1s' }}>
@@ -75,7 +76,14 @@ export default function SongListClient({ songbook, initial }: Props) {
             <tr
               key={song.id}
               className="song-row"
+              tabIndex={0}
               onClick={() => router.push(`/${locale}/songbooks/${songbook.slug}/${song.id}`)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault();
+                  router.push(`/${locale}/songbooks/${songbook.slug}/${song.id}`);
+                }
+              }}
             >
               <td className="song-row__num">{song.number}</td>
               <td className="song-row__title">{song.title}</td>
@@ -87,13 +95,13 @@ export default function SongListClient({ songbook, initial }: Props) {
 
       {pages > 1 && (
         <div className="pagination">
-          <button onClick={() => setPage((p) => p - 1)} disabled={page === 1}>
+          <button onClick={() => setPage((p) => p - 1)} disabled={page === 1} aria-label={tNav('prevPage')}>
             ←
           </button>
           <span>
             {page} / {pages} ({total})
           </span>
-          <button onClick={() => setPage((p) => p + 1)} disabled={page >= pages}>
+          <button onClick={() => setPage((p) => p + 1)} disabled={page >= pages} aria-label={tNav('nextPage')}>
             →
           </button>
         </div>

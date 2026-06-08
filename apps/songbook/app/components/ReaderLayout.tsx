@@ -19,6 +19,7 @@ interface Props {
 
 export default function ReaderLayout({ songbook, song: initialSong, initialSongs, slug, apiUrl }: Props) {
   const t = useTranslations('songbook.reader');
+  const tNav = useTranslations('common.nav');
   const locale = useLocale();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [q, setQ] = useState('');
@@ -139,13 +140,13 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
 
             {pages > 1 && (
               <div className="reader-sidebar-pagination">
-                <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
+                <button disabled={page === 1} onClick={() => setPage((p) => p - 1)} aria-label={tNav('prevPage')}>
                   ←
                 </button>
                 <span>
                   {page} / {pages}
                 </span>
-                <button disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
+                <button disabled={page >= pages} onClick={() => setPage((p) => p + 1)} aria-label={tNav('nextPage')}>
                   →
                 </button>
               </div>

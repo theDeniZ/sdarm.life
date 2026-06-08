@@ -3,7 +3,13 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, develop]
+    branches:
+      - main
+      - develop
+      - bugfix/62-songbook-light-theme
+      - feat/5-accessibility
+      - feat/61-projector-line-by-line
+      - feature/bible
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'

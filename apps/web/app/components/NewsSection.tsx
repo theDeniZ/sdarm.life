@@ -150,6 +150,7 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
               style={{ cursor: 'pointer' }}
               role="button"
               tabIndex={0}
+              aria-label={t('quote.openShare')}
               onKeyDown={(e) => {
                 if (e.key === 'Enter' || e.key === ' ') {
                   e.preventDefault();

@@ -18,7 +18,7 @@ export default async function ConfirmPage({
   if (!token) {
     return (
       <>
-        <main className="page unsubscribe-page">
+        <main id="main-content" className="page unsubscribe-page">
           <p>{t('invalidLink')}</p>
         </main>
         <ConnectedFooter locale={locale} />

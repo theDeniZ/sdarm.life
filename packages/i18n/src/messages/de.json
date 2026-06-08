@@ -8,7 +8,10 @@
       "contact": "Kontakt",
       "imprint": "Impressum",
       "privacy": "Datenschutz",
-      "themeToggleAria": "Farbschema umschalten"
+      "themeToggleAria": "Farbschema umschalten",
+      "skipToContent": "Zum Hauptinhalt springen",
+      "prevPage": "Vorherige Seite",
+      "nextPage": "Nächste Seite"
     },
     "footer": {
       "stayInTouch": "Sei <em>dabei</em>",
@@ -85,6 +88,7 @@
         "sub": "jetzt entdecken"
       },
       "quote": {
+        "openShare": "Bibelvers teilen",
         "saveImage": "Als Bild speichern",
         "close": "Schließen"
       }

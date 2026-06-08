@@ -112,6 +112,9 @@ export default function Navbar({
 
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        {t('skipToContent')}
+      </a>
       <nav className={`${scrolled ? 'scrolled' : ''}${overDark ? ' over-dark' : ''}`.trim()}>
         <Link href={withTheme(webUrl, theme)} className="nav-logo">
           SDARM<span>.life</span>
