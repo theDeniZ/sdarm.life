@@ -252,6 +252,8 @@ export async function createSongPart(
     label: string;
     sortOrder: number;
     lyrics: string;
+    language?: string | null;
+    translationType?: 'original' | 'singable' | 'reference' | null;
   },
 ) {
   const [part] = await db.insert(songParts).values(data).returning();
@@ -262,7 +264,14 @@ export async function createSongPart(
 export async function updateSongPart(
   db: DrizzleD1Database,
   id: number,
-  data: Partial<{ type: 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda'; label: string; sortOrder: number; lyrics: string }>,
+  data: Partial<{
+    type: 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda';
+    label: string;
+    sortOrder: number;
+    lyrics: string;
+    language: string | null;
+    translationType: 'original' | 'singable' | 'reference' | null;
+  }>,
 ) {
   const [part] = await db.update(songParts).set(data).where(eq(songParts.id, id)).returning();
   if (!part) return null;

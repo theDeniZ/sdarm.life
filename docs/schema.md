@@ -30,8 +30,10 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 `id`, `songbook_id` (FK → `songbooks.id`), `number`, `title`, `author`, `copyright`, `created_at`, `updated_at`
 
 **`song_parts`**
-`id`, `song_id` (FK → `songs.id`), `type` (`verse` | `chorus` | `bridge` | `intro` | `outro` | `coda`), `label`, `sort_order`, `lyrics`
+`id`, `song_id` (FK → `songs.id`), `type` (`verse` | `chorus` | `bridge` | `intro` | `outro` | `coda`), `label`, `sort_order`, `lyrics`, `language`, `translation_type`
 - `lyrics` is plain text; chord annotations are embedded inline (e.g. `[G]Amazing [C]grace`)
+- `language` — ISO 639-1 language code (e.g. `'en'`, `'de'`, `'ru'`); used by projector to identify and match translations
+- `translation_type` — one of `'original'` (part is in the original language), `'singable'` (singable translation, displayed at full size alongside original), or `'reference'` (literal translation, displayed dimmed below original for comprehension only)
 
 **`song_sheets`**
 `id`, `song_id` (FK → `songs.id`), `key` (R2 object key under `sheets/{songId}/{uuid}.{ext}`), `type` (`pdf` | `image`), `sort_order`, `uploaded_at`

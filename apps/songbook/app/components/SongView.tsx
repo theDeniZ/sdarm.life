@@ -11,7 +11,15 @@ import PresenterDashboard from './PresenterDashboard';
 
 type Mode = 'reader' | 'fullscreen' | 'presenter' | 'sheets';
 
-export default function SongView({ song }: { song: SongDto }) {
+export default function SongView({
+  song,
+  forcePresenter,
+  projectorUrl,
+}: {
+  song: SongDto;
+  forcePresenter?: boolean;
+  projectorUrl?: string;
+}) {
   const t = useTranslations('songbook.view');
   const locale = useLocale();
   const [mode, setMode] = useState<Mode>('reader');
@@ -24,7 +32,7 @@ export default function SongView({ song }: { song: SongDto }) {
     setMultiScreen(!!(window.screen as Screen & { isExtended?: boolean }).isExtended);
   }, []);
 
-  async function openPresenter() {
+  async function openDisplayWindow(): Promise<Window | null> {
     let features = `width=${screen.availWidth},height=${screen.availHeight},left=${(screen as Screen & { availLeft?: number }).availLeft ?? 0},top=${(screen as Screen & { availTop?: number }).availTop ?? 0}`;
     try {
       type ScreenInfo = {
@@ -44,13 +52,21 @@ export default function SongView({ song }: { song: SongDto }) {
     } catch {
       // fall back to current screen dimensions
     }
-    const win = window.open(
-      `/${locale}/songbooks/${song.songbook.slug}/${song.id}?projector=1`,
-      'projector-display',
-      features
-    );
+    const url = projectorUrl ?? `/${locale}/songbooks/${song.songbook.slug}/${song.id}?projector=1`;
+    return window.open(url, 'projector-display', features);
+  }
+
+  async function openPresenter() {
+    const win = await openDisplayWindow();
     displayWinRef.current = win;
     setMode('presenter');
+  }
+
+  async function reopenDisplay() {
+    displayWinRef.current?.close();
+    displayWinRef.current = null;
+    const win = await openDisplayWindow();
+    displayWinRef.current = win;
   }
 
   function closePresenter() {
@@ -62,12 +78,13 @@ export default function SongView({ song }: { song: SongDto }) {
   return (
     <div className="song-view">
       <div className="song-header">
-        <h1 className="song-header__title">
-          <span className="song-header__num">{song.number}</span> {song.title}
-        </h1>
-        {(song.author || song.copyright) && (
-          <div className="song-header__meta">{[song.author, song.copyright].filter(Boolean).join(' · ')}</div>
-        )}
+        <div className="song-header__num">{song.number}</div>
+        <div className="song-header__body">
+          <h1 className="song-header__title">{song.title}</h1>
+          {(song.author || song.copyright) && (
+            <div className="song-header__meta">{[song.author, song.copyright].filter(Boolean).join(' · ')}</div>
+          )}
+        </div>
       </div>
 
       <div className="mode-bar">
@@ -82,7 +99,7 @@ export default function SongView({ song }: { song: SongDto }) {
         <button className={`mode-btn${mode === 'fullscreen' ? ' active' : ''}`} onClick={() => setMode('fullscreen')}>
           {t('fullscreen')}
         </button>
-        {multiScreen && (
+        {(multiScreen || forcePresenter) && (
           <button className={`mode-btn${mode === 'presenter' ? ' active' : ''}`} onClick={openPresenter}>
             {t('presenter')}
           </button>
@@ -96,7 +113,9 @@ export default function SongView({ song }: { song: SongDto }) {
 
       {mode === 'reader' && <SongReader parts={song.parts} showChords={showChords} songId={song.id} />}
       {mode === 'fullscreen' && <Projector song={song} onClose={() => setMode('reader')} />}
-      {mode === 'presenter' && <PresenterDashboard song={song} onClose={closePresenter} />}
+      {mode === 'presenter' && (
+        <PresenterDashboard song={song} onClose={closePresenter} onReopenDisplay={reopenDisplay} />
+      )}
       {mode === 'sheets' && <SheetViewer sheets={song.sheets} />}
     </div>
   );

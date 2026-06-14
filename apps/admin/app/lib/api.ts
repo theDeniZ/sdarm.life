@@ -1,7 +1,7 @@
-// API constant points to the admin app itself (same-origin). The `/api/v1/*`
-// Next.js route handler server-side-proxies to sdarm-api and injects the bearer
-// token there, so the secret never reaches the browser bundle.
-export const API = '';
+// Client: empty string = same-origin proxy at /api/v1/* (hides API_KEY from browser).
+// Server: must be absolute — Node.js fetch doesn't resolve relative URLs. Defaults to localhost for dev.
+export const API =
+  typeof window === 'undefined' ? process.env.API_URL || `http://localhost:${process.env.PORT ?? 3001}` : '';
 export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
 
 export function adminHeaders(): HeadersInit {

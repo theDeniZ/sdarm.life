@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import type { SongPartDto } from '@sdarm/types';
-import { partLabel, expandParts } from '@/app/lib/format';
+import { partLabel, expandParts, getOriginalParts } from '@/app/lib/format';
 import { transposeLine, detectKey, transposeChord } from '@/app/lib/chords';
 import ChordLine from './ChordLine';
 
@@ -49,7 +49,8 @@ export default function SongReader({ parts, showChords, songId }: Props) {
     }
   }
 
-  const displayParts = expandParts(parts);
+  // Translations are for the projector only — the reader shows the original parts.
+  const displayParts = expandParts(getOriginalParts(parts));
 
   // Build transposed parts when transpose !== 0
   const renderedParts =

@@ -12,6 +12,7 @@ import {
   SongSchema,
   SongSheetSchema,
   SongSheetTypeSchema,
+  TranslationTypeSchema,
 } from '../../schemas';
 import * as repo from '../../repositories/songs';
 import { purgeCache } from '../../middleware/cache';
@@ -214,6 +215,8 @@ const PartBody = z.object({
   label: z.string().min(1),
   sortOrder: z.number().int(),
   lyrics: z.string(),
+  language: z.string().nullable().optional(),
+  translationType: TranslationTypeSchema.nullable().optional(),
 });
 
 router.openapi(

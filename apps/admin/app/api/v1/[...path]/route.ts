@@ -6,7 +6,7 @@ const API_BASE = process.env.API_URL ?? 'https://api.sdarm.life';
 
 async function proxy(req: Request, ctx: { params: Promise<{ path: string[] }> }) {
   const { path } = await ctx.params;
-  const url = new URL(req.url);
+  const url = new URL(req.url, 'http://localhost');
   const target = `${API_BASE}/api/v1/${path.join('/')}${url.search}`;
 
   const apiKey = process.env.API_KEY;

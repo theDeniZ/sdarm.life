@@ -17,6 +17,8 @@ const MOCK_SONG: SongDto = {
       sortOrder: 0,
       lyrics:
         'Коли в [Em]мене запитають:\nЧи існує щастя десь?\nЯк дійти до того краю,\nДе потіха для сердець.\nДе не [Em]ллються тихо сльози\nВід гріха і марноти?\nЯ ска[C]жу, що щастя в Бозі\nЯ знай[Am]шла і зн[H7]айдеш [Em]ти.',
+      language: null,
+      translationType: 'original',
     },
     {
       id: 2,
@@ -25,6 +27,8 @@ const MOCK_SONG: SongDto = {
       sortOrder: 1,
       lyrics:
         'Щастя не [Em]ховається, щастя не тік[C]ає!\nЩастя укр[H7]ивається в Господа руц[Em]і.\nСерце що стиск[Am]ається, серце що шук[Em]ає,\nЩастям наповн[H7]яється тільки у Христ[Em]і.',
+      language: null,
+      translationType: 'original',
     },
     {
       id: 3,
@@ -33,6 +37,8 @@ const MOCK_SONG: SongDto = {
       sortOrder: 2,
       lyrics:
         'Коли в [Em]мене запитають,\nДе любові джерело?\nЗвідки сили я черпаю,\nЩоб робити всім добро?\nДе на[Em]дія не вмирає,\nІ де мрія ожива?\nВідпо[C]вім, що на Голгофі\nДже[Am]рело я [H7]це знайш[Em]ла!',
+      language: null,
+      translationType: 'original',
     },
   ],
   sheets: [],
