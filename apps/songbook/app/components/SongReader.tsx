@@ -1,11 +1,12 @@
 'use client';
 
 import type { SongPartDto } from '@sdarm/types';
-import { partLabel, expandParts } from '@/app/lib/format';
+import { partLabel, getOriginalParts } from '@/app/lib/format';
 import ChordLine from './ChordLine';
 
 export default function SongReader({ parts, showChords }: { parts: SongPartDto[]; showChords: boolean }) {
-  const displayParts = expandParts(parts);
+  // Show original order as authored; translations are for the projector only
+  const displayParts = getOriginalParts(parts);
 
   return (
     <div className="reader">

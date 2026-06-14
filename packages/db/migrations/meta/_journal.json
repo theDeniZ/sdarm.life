@@ -71,6 +71,23 @@
       "when": 1776636184109,
       "tag": "0009_abandoned_tattoo",
       "breakpoints": true
+<<<<<<< HEAD
+=======
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1777000000000,
+      "tag": "0010_song_data_cleanup",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "6",
+      "when": 1779230896764,
+      "tag": "0011_overrated_apocalypse",
+      "breakpoints": true
+>>>>>>> 1048a48 (feat(#61): line-by-line projector mode with parallel translations)
     }
   ]
 }

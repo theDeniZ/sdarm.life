@@ -1,6 +1,5 @@
-// API constant points to the admin app itself (same-origin). The `/api/v1/*`
-// Next.js route handler server-side-proxies to sdarm-api and injects the bearer
-// token there, so the secret never reaches the browser bundle.
+// Same-origin API proxy at /api/v1/* (hides API_KEY from browser).
+// All admin API calls go through app/api/v1/[...path]/route.ts which injects the Bearer token server-side.
 export const API = '';
 export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
 

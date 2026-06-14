@@ -13,7 +13,7 @@ export default async function NewSongPage({ params }: { params: Promise<{ id: st
       <div className="page-header">
         <h1>New Song — {book.title}</h1>
       </div>
-      <SongForm songbookId={id} />
+      <SongForm songbookId={id} initialNumber={book.songCount + 1} />
     </>
   );
 }

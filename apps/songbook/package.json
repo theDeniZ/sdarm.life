@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@fontsource/lexend": "^5.2.11",
+    "@fontsource/montserrat": "^5.2.8",
     "@sdarm/types": "workspace:*",
     "@sdarm/ui": "workspace:*",
     "next": "16.2.7",
@@ -21,8 +22,8 @@
     "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1",
     "@eslint/js": "^10.0.1",
+    "@opennextjs/cloudflare": "^1",
     "@sdarm/i18n": "workspace:*",
     "@types/node": "^25",
     "@types/react": "^19",

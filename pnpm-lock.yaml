@@ -217,6 +217,9 @@ importers:
       '@fontsource/lexend':
         specifier: ^5.2.11
         version: 5.2.11
+      '@fontsource/montserrat':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@sdarm/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -1330,6 +1333,9 @@ packages:
 
   '@fontsource/lora@5.2.8':
     resolution: {integrity: sha512-AQlfsHw4TP1x/eb2IZ6VjQ70ctKa39m9JN9A4zlvDOeKYLrCs+GaYIEQ86Y6YfSPGHn01bErXkRcyktOW0LOPQ==}
+
+  '@fontsource/montserrat@5.2.8':
+    resolution: {integrity: sha512-xTjLxSbSfCycDB0pwmNsfNvdfWPaDaRQ2LC6yt/ZI7SdvXG52zHnzNYC/09mzuAuWNJyShkteutfCoDgym56hQ==}
 
   '@fontsource/noto-sans@5.2.10':
     resolution: {integrity: sha512-J58RVfS/C0Z2VBF+PoU260Tx8cdRGYuS+e3yQe4hYaIYDl0sEVn5CzlLo5zVRvQD0HaIUTV8AZMfqR7rtdEpqQ==}
@@ -6584,6 +6590,8 @@ snapshots:
   '@fontsource/lexend@5.2.11': {}
 
   '@fontsource/lora@5.2.8': {}
+
+  '@fontsource/montserrat@5.2.8': {}
 
   '@fontsource/noto-sans@5.2.10': {}
 

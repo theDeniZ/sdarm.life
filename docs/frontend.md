@@ -189,6 +189,8 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 | `ConfigEditor` | Config fields grouped by section. Uses `ImagePicker` for image keys |
 | `SubscriberList` | Active subscribers table with Remove. Paginated (20/page) |
 | `Pagination` | Shared offset-based pagination. Props: `page`, `total`, `limit`, `onChange` |
+| `SongForm` | Minimal create-song form (number, title, author, copyright). On success redirects to `SongEditor`. |
+| `SongEditor` | Full-featured song editor with two-column layout: lyrics/translations editor (left) + live preview (right). |
 
 ### Pagination pattern
 
@@ -224,6 +226,27 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 
 Image fields render `<ImagePicker>`. Text-area fields render `<textarea>`. URL and other fields render `<input>`.
 
+### SongEditor
+
+Two-column layout (`song-editor-grid`): editor column (left) + live preview column (right, sticky). Collapses to single column at ≤1100 px.
+
+**Editor column:**
+- Compact meta bar with inline fields: `number`, `title`, `author`, `copyright`, `language` + sheet-upload icon button
+- Auto-saves meta fields via 600 ms debounce; shows `.field-status` dot (gold = saving, green = saved, red = error)
+- Toolbar with section buttons (Verse, Chorus, Bridge, Intro, Outro, Coda) that insert typed section labels
+- Chord palette with major/minor chords + modifiers (♭, ♯, 7) — insert at cursor
+- Single auto-grow `<textarea>` for all lyrics (section headings embedded as text labels, e.g. `Verse 1:`)
+- Translation sections: add/remove translations, each with language code + type selector (`singable` | `reference`) + auto-grow textarea
+- Manual "Save" button for lyrics + translations
+
+**Preview column (sticky):**
+- Renders chord rows above lyric lines (chords on gold row, word-aligned)
+- Parallel view: original + translations matched by global line index
+- Singable translations appear full-size; reference translations appear smaller (`.preview-parallel-tr--ref`)
+- Light document-like styling with serif fonts
+
+**Part parsing:** labels are detected by prefix keywords (English + Russian + numeric, e.g. `Verse 1:`, `Chorus:`, `Припев:`). Unknown prefixes default to `verse`.
+
 ---
 
 ## `apps/songbook` component map
@@ -232,11 +255,12 @@ Image fields render `<ImagePicker>`. Text-area fields render `<textarea>`. URL a
 |---|---|---|
 | `SongView` | **Client** | Mode switcher rendered on every song detail page. Owns mode state and the display window ref. |
 | `SongReader` | Client | Default reading view — parts list with optional chord display. |
-| `Projector` | **Client** | Full-screen lyric display used in two contexts: inline fullscreen (portal over current window) and display window (`?projector=1`). |
+| `Projector` | **Client** | Full-screen lyric display used in two contexts: inline fullscreen (portal over current window) and display window (`?projector=1`). Supports both part-slide and line-by-line modes. |
 | `ProjectorOnly` | Client | Thin wrapper rendered when `?projector=1` — passes `isDisplay` to `Projector` and closes the window on exit. |
-| `PresenterDashboard` | **Client** | PowerPoint-style presenter view (portal over current window). Shows current + next slide previews, font controls, and navigation. Controls the display window via `BroadcastChannel`. |
+| `PresenterDashboard` | **Client** | PowerPoint-style presenter view (portal over current window). Shows current + next slide previews, controls for line-by-line mode, transitions, translations, language swap, and navigation. Controls the display window via `BroadcastChannel`. |
 | `SheetViewer` | Client | Sheet music viewer — thumbnail tabs + full image or PDF display. |
 | `ChordLine` | Client | Renders a single lyric line with optional inline chord annotations (`[G]`, `[C]`, etc.). |
+| `ReaderLayout` | **Client** | Sidebar + main content layout for the song detail page. Sidebar (song list) is hidden on mobile, shown on desktop. Passes `forcePresenter` and `projectorUrl` props through to `SongView`. |
 
 ### SongView modes
 
@@ -271,16 +295,65 @@ Main screen (presenter)              External screen (display window)
 
 | `type` | Direction | Payload | Effect |
 |---|---|---|---|
-| `ready` | display → presenter | — | Display finished loading; presenter re-pushes current slide + fontScale to sync |
-| `slide` | bidirectional | `{ index: number }` | Navigate both sides to the same slide |
+| `ping` | presenter → display | — | Presenter announces its existence; display responds with `ready` |
+| `ready` | display → presenter | — | Display finished loading; presenter re-pushes all current state to sync |
+| `slide` | bidirectional | `{ index: number }` | Navigate both sides to the same part-slide |
 | `fontScale` | bidirectional | `{ value: number }` | Resize lyrics on the display; reflected in presenter header |
 | `requestFullscreen` | presenter → display | — | Display shows a "tap to enter fullscreen" overlay; click on display triggers `requestFullscreen()` |
+| `lineMode` | presenter → display | `{ active: boolean }` | Toggle line-by-line mode (vs. part-slide mode) |
+| `lineIndex` | bidirectional | `{ index: number }` | Current line index within line-by-line mode |
+| `linesPerSlide` | presenter → display | `{ value: 1 \| 2 }` | Solo mode (1 line) vs. flow mode (prev + current + next) |
+| `transition` | presenter → display | `{ value: TransitionType }` | Active transition animation (`none` \| `fade` \| `slide` \| `zoom` \| `rise` \| `blur`) |
+| `showTranslation` | presenter → display | `{ value: boolean }` | Show/hide translation lines below each lyric line |
+| `showPartLabel` | presenter → display | `{ value: boolean }` | Show verse/chorus label in line-by-line mode |
+| `blank` | presenter → display | `{ active: boolean }` | Black-out the display screen |
+| `primaryLang` | presenter → display | `{ value: string \| null }` | Override which language is displayed first (null = default order) |
+| `allCaps` | presenter → display | `{ value: boolean }` | Convert lyrics to `text-transform: uppercase` |
 
 **Connecting overlay:** `PresenterDashboard` shows a pulsing dots overlay until the first `ready` message arrives. The fullscreen button is disabled until connected. This covers the ~10 s cold-start time for the display window to load Next.js.
 
 **Fullscreen constraint:** `requestFullscreen()` requires a user gesture in that window. A BroadcastChannel message does not qualify. The display therefore renders a click-to-fullscreen overlay (`projector__fs-overlay`) when it receives `requestFullscreen`; clicking it provides the required gesture.
 
 **Font controls:** In display mode (`isDisplay=true`), the `Projector` A−/A+ buttons are hidden — the presenter dashboard owns font size. Both sides still sync fontScale bidirectionally via the channel.
+
+### Line-by-line mode
+
+Toggled by the presenter via `lineMode` message. In this mode the `Projector` operates on a flat array of `LineSlide` objects (one entry per non-empty lyric line, produced by `buildLineSlides()` in `apps/songbook/app/lib/format.ts`) instead of whole song parts.
+
+**Display variants:**
+
+| `linesPerSlide` | Layout | CSS class |
+|---|---|---|
+| `2` (flow) | Previous line (dim) + current line (large) + next line (dim) | `.projector__line-stage--flow` |
+| `1` (solo) | Current line only, centred | `.projector__line-stage--solo` |
+
+**Transitions:** A dual-layer animation system handles simultaneous exit (old line animates out) and enter (new line animates in):
+- `exitingLineIdx` drives the outgoing `.projector__line-layer--trans` layer
+- `enteringLineIdx` drives the incoming layer
+- After 1 s both layers resolve to `displayLineIdx`
+- Available `TransitionType` values: `none`, `fade`, `slide`, `zoom`, `rise`, `blur`
+
+**Keyboard shortcuts (PresenterDashboard in line mode):**
+
+| Key | Action |
+|---|---|
+| `→` / `↓` / `Space` | Next line |
+| `←` / `↑` | Previous line |
+| `1` | Switch to solo (1 line) |
+| `2` | Switch to flow (2 lines) |
+| `Escape` | Exit line-by-line mode |
+
+**`format.ts` helpers** (`apps/songbook/app/lib/format.ts`):
+
+| Export | Type | Purpose |
+|---|---|---|
+| `LineSlide` | interface | One lyric line + its translations, with part metadata |
+| `buildLineSlides(parts)` | function | Converts `SongPartDto[]` into a flat `LineSlide[]` array; skips blank lines; matches translations by `sortOrder` |
+| `getOriginalParts(parts)` | function | Filters out singable/reference translation parts |
+| `getTranslationParts(parts)` | function | Filters for singable/reference translation parts only |
+| `swapPrimaryLang(slide, lang)` | function | Returns a new `LineSlide` with the specified language moved to `translations[0]` |
+| `getAvailableLanguages(slides)` | function | Returns deduplicated list of languages present in any slide's translations |
+| `expandParts(parts)` | function | Expands a chorus-after-verse pattern (inserts chorus after each verse) |
 
 ---
 

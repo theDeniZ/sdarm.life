@@ -92,6 +92,7 @@ export const SongSearchResultSchema = z
 
 export const SongPartTypeSchema = z.enum(['verse', 'chorus', 'bridge', 'intro', 'outro', 'coda']);
 export const SongSheetTypeSchema = z.enum(['pdf', 'image']);
+export const TranslationTypeSchema = z.enum(['original', 'singable', 'reference']);
 
 export const SongPartSchema = z
   .object({
@@ -100,6 +101,8 @@ export const SongPartSchema = z
     label: z.string(),
     sortOrder: z.number(),
     lyrics: z.string(),
+    language: z.string().nullable(),
+    translationType: TranslationTypeSchema.nullable(),
   })
   .openapi('SongPart');
 
