@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import Link from 'next/link';
 import SongbookList from '../domains/songbooks/SongbookList';
 

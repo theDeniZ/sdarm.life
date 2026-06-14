@@ -1,7 +1,5 @@
 import type { MetadataRoute } from 'next';
 
-export const runtime = 'edge';
-
 const BASE = 'https://sdarm.life';
 const LOCALES = ['de', 'en'] as const;
 
@@ -32,6 +30,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: now,
       changeFrequency: 'monthly' as const,
       priority: 0.8,
+    })),
+    ...LOCALES.map((l) => ({
+      url: `${BASE}/${l}/kontakt`,
+      lastModified: now,
+      changeFrequency: 'monthly' as const,
+      priority: 0.7,
     })),
     ...LOCALES.map((l) => ({ url: `${BASE}/${l}/impressum`, changeFrequency: 'yearly' as const, priority: 0.2 })),
     ...LOCALES.map((l) => ({ url: `${BASE}/${l}/datenschutz`, changeFrequency: 'yearly' as const, priority: 0.2 })),

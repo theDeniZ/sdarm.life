@@ -4,32 +4,38 @@
   "private": true,
   "scripts": {
     "dev": "next dev --port 3001",
-    "build": "next build",
-    "pages:build": "npx @cloudflare/next-on-pages",
-    "preview": "npx wrangler pages dev .vercel/output/static",
-    "deploy": "pnpm pages:build && wrangler pages deploy .vercel/output/static",
+    "build": "next build --webpack",
+    "pages:build": "NODE_OPTIONS='--require ../../tools/patch-cp.cjs' npx opennextjs-cloudflare build",
+    "preview": "npx opennextjs-cloudflare preview",
+    "deploy": "npx opennextjs-cloudflare build && npx opennextjs-cloudflare deploy",
     "start": "next start",
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/cormorant-garamond": "^5.2.11",
+    "@fontsource/dm-serif-display": "^5.2.8",
+    "@fontsource/lexend": "^5.2.11",
+    "@fontsource/oswald": "^5.2.8",
+    "@fontsource/playfair-display": "^5.2.8",
+    "@fontsource/raleway": "^5.2.8",
     "@sdarm/db": "workspace:*",
     "@sdarm/types": "workspace:*",
     "@sdarm/ui": "workspace:*",
-    "next": "15.2.2",
-    "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "next": "16.2.7",
+    "react": "19.2.7",
+    "react-dom": "19.2.7"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
-    "@eslint/js": "^9.0.0",
+    "@opennextjs/cloudflare": "^1",
+    "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
+    "@types/node": "^25",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^9.0.0",
+    "eslint": "^10.4.1",
     "tailwindcss": "^4",
-    "typescript": "^5",
-    "typescript-eslint": "^8.0.0",
-    "vercel": "47.0.4"
+    "typescript": "^6",
+    "typescript-eslint": "^8.60.1",
+    "wrangler": "^4"
   }
 }

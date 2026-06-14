@@ -1,21 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
-import HeroSection from '../components/HeroSection';
+import HeroWelcome from '../components/HeroWelcome';
 import NewsSection from '../components/NewsSection';
 import ScriptureVerseSection from '../components/ScriptureVerseSection';
-import {
-  fetchPosts,
-  fetchConfig,
-  toHeroPost,
-  r2url,
-  WEB_URL,
-  TREASURES_URL,
-  SONGBOOK_URL,
-  EVENTS_URL,
-} from '../lib/api';
+import { fetchTreasures, fetchSongbooks, WEB_URL, TREASURES_URL, SONGBOOK_URL, EVENTS_URL } from '../lib/api';
+import type { NewsData } from '../lib/api';
 
-export const runtime = 'edge';
 export const dynamic = 'force-dynamic';
 
 const BASE = WEB_URL;
@@ -39,15 +30,25 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [featuredRaw, config] = await Promise.all([fetchPosts('featured=1'), fetchConfig()]);
-  const heroPosts = featuredRaw?.map(toHeroPost) ?? [];
-  const heroBgUrl = r2url(config?.hero_bg_key ?? null, { w: 1920, q: 85 });
+  const [bookRaw, songbooksRaw] = await Promise.all([fetchTreasures('type=book&limit=1'), fetchSongbooks()]);
+
+  const newsData: NewsData = {
+    book: bookRaw?.[0]
+      ? { title: bookRaw[0].title, author: bookRaw[0].author, href: `${TREASURES_URL}/${locale}` }
+      : null,
+    song: songbooksRaw?.[0]
+      ? { title: songbooksRaw[0].title, songCount: songbooksRaw[0].songCount, href: `${SONGBOOK_URL}/${locale}` }
+      : null,
+    eventsUrl: `${EVENTS_URL}/${locale}`,
+    aboutUrl: `/${locale}/about`,
+    youVersionUrl: 'https://www.bible.com/reading-plans',
+  };
 
   return (
     <>
       <ConnectedNavbar locale={locale} />
-      <HeroSection posts={heroPosts} bgUrl={heroBgUrl} />
-      <NewsSection treasuresUrl={TREASURES_URL} songbookUrl={SONGBOOK_URL} eventsUrl={EVENTS_URL} />
+      <HeroWelcome locale={locale} />
+      <NewsSection newsData={newsData} />
       <ScriptureVerseSection href={`${TREASURES_URL}/${locale}`} locale={locale} />
       <ConnectedFooter locale={locale} />
     </>

@@ -1,8 +1,6 @@
 import { notFound, redirect } from 'next/navigation';
 import { fetchSongbook, fetchSongs } from '@/app/lib/api';
 
-export const runtime = 'edge';
-
 export default async function SongbookPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
   const { slug, locale } = await params;
   const [songbook, songs] = await Promise.all([fetchSongbook(slug), fetchSongs(slug, { limit: 1, offset: 0 })]);

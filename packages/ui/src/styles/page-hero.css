@@ -230,3 +230,48 @@
 @media (max-width: 600px) {
   .page-hero__content { padding: 0 1.4rem 3.5rem; }
 }
+
+/* ── Light theme — clean white hero ── */
+[data-theme='light'] .page-hero {
+  background: #ffffff;
+}
+[data-theme='light'] .page-hero__grain {
+  opacity: 0.12;
+  mix-blend-mode: multiply;
+}
+[data-theme='light'] .page-hero__glow {
+  display: none;
+}
+[data-theme='light'] .page-hero__fog::before,
+[data-theme='light'] .page-hero__fog::after {
+  display: none;
+}
+[data-theme='light'] .page-hero__deco-circle {
+  border-color: rgba(0, 0, 0, 0.07);
+}
+[data-theme='light'] .page-hero__deco-circle::after {
+  border-color: rgba(0, 0, 0, 0.04);
+}
+[data-theme='light'] .page-hero__decoration {
+  opacity: 0.12;
+}
+[data-theme='light'] .page-hero__eyebrow {
+  color: rgba(0, 0, 0, 0.4);
+}
+[data-theme='light'] .page-hero__eyebrow::before {
+  background: rgba(0, 0, 0, 0.2);
+}
+[data-theme='light'] .page-hero__title {
+  color: #111111;
+}
+[data-theme='light'] .page-hero__title em {
+  color: var(--gold);
+}
+[data-theme='light'] .page-hero__subtitle {
+  color: rgba(0, 0, 0, 0.45);
+}
+[data-theme='light'] .page-hero__scroll-hint span,
+[data-theme='light'] .page-hero__scroll-hint svg {
+  color: var(--gold);
+  stroke: var(--gold);
+}

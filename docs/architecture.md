@@ -158,11 +158,12 @@ packages/ui/src/
   components/
     ConnectedNavbar.tsx  — wraps Navbar; accepts locale prop, reads translations server-side
     ConnectedFooter.tsx  — wraps Footer; accepts locale prop, reads translations + apiUrl server-side
-    Navbar.tsx           — fixed nav; transparent → frosted glass on scroll; language switcher
+    Navbar.tsx           — fixed nav; transparent → frosted glass on scroll; language switcher; sun/moon theme toggle (dispatches sdarm:toggle-theme)
     Footer.tsx           — 3-col: contact+subscribe, nav links, sunset clock
     PageHero.tsx         — full-bleed landing hero: grain, glow, fog, deco-circle, decoration slot, scroll hint
     ScriptureVerseSection.tsx — centered quote band: large italic text + reference tag
-    ThemeProvider.tsx    — client component; reads/writes localStorage, sets data-theme on <html>
+    ThemeScript.tsx      — server component; renders inline <script> in <head> that applies the theme (URL ?theme= → localStorage → SSR default) before first paint (prevents FOUC)
+    ThemeProvider.tsx    — client component; listens for sdarm:toggle-theme, toggles data-theme on <html>, persists to localStorage
     ComingSoon.tsx       — placeholder section for unreleased pages
     Pagination.tsx       — generic offset pagination (styling left to consumer)
   styles/
@@ -450,21 +451,30 @@ export function r2url(key: string | null, opts?: ImageTransform): string | null 
 
 ```ts
 // apps/admin/app/lib/api.ts
-export const API = process.env.NEXT_PUBLIC_API_URL ?? 'https://api.sdarm.life';
-export const R2  = process.env.NEXT_PUBLIC_R2_URL  ?? 'https://images.sdarm.life';
+export const API = '';  // same-origin; proxied server-side via app/api/v1/[...path]/route.ts
+export const R2  = process.env.NEXT_PUBLIC_R2_URL ?? 'https://images.sdarm.life';
 ```
 
 ### Auth headers
 
 ```ts
 // apps/admin/app/lib/api.ts
+export const API = '';                 // same-origin — calls go through the proxy
 export function adminHeaders(): HeadersInit {
-  return {
-    'CF-Access-Client-Id':     process.env.NEXT_PUBLIC_CF_CLIENT_ID     ?? '',
-    'CF-Access-Client-Secret': process.env.NEXT_PUBLIC_CF_CLIENT_SECRET ?? '',
-  };
+  return {};                           // Bearer is injected server-side by the proxy
 }
 ```
+
+All admin API calls go to `/api/v1/*` (same-origin), handled by the catch-all
+proxy at `apps/admin/app/api/v1/[...path]/route.ts`. The proxy attaches
+`Authorization: Bearer ${API_KEY}` server-side (Next.js Edge runtime) and
+forwards to `sdarm-api`. Cloudflare Access still gates `admin.sdarm.life` so
+only authorised operators can hit the proxy.
+
+**Env vars (admin):**
+- `API_URL` — server-only, where the proxy forwards (e.g. `http://localhost:8787` in dev, `https://api.sdarm.life` in prod)
+- `API_KEY` — server-only, bearer token; **never prefix with `NEXT_PUBLIC_`**
+- `NEXT_PUBLIC_R2_URL` — browser-exposed, fine (R2 images are public)
 
 Every admin component imports `adminHeaders()` — no component defines its own.
 

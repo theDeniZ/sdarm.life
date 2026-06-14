@@ -57,9 +57,11 @@ export const subscribers = sqliteTable('subscribers', {
   token:          text('token').notNull().unique(),
   language:       text('language').notNull().default('de'),
   unsubscribedAt: integer('unsubscribed_at', { mode: 'timestamp' }),
+  confirmedAt:    integer('confirmed_at', { mode: 'timestamp' }),
   createdAt:      integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 }, (t) => [
   index('subscribers_created_at_idx').on(t.createdAt),
+  index('subscribers_confirmed_at_idx').on(t.confirmedAt),
 ]);
 
 export const songbooks = sqliteTable('songbooks', {

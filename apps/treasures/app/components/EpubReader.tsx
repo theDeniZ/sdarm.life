@@ -252,16 +252,27 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [errorMsg, setErrorMsg] = useState('');
-  const [theme, setThemeState] = useState<ReaderTheme>('dark');
+  const [theme, setThemeState] = useState<ReaderTheme>(() => {
+    const saved = localStorage.getItem('sdarm_theme') as ReaderTheme | null;
+    return saved && (saved === 'dark' || saved === 'sepia' || saved === 'light') ? saved : 'dark';
+  });
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [fontSize, setFontSizeState] = useState(26);
-  const [fontKey, setFontKeyState] = useState<ReaderFont>('cormorant');
-  const [lineHeight, setLineHeightState] = useState(1.9);
+  const [fontSize, setFontSizeState] = useState(() => {
+    const saved = localStorage.getItem('sdarm_fs');
+    return saved ? Math.max(13, Math.min(32, Number(saved))) : 26;
+  });
+  const [fontKey, setFontKeyState] = useState<ReaderFont>(() => {
+    const saved = localStorage.getItem('sdarm_font') as ReaderFont | null;
+    return saved && FONT_MAP[saved] ? saved : 'cormorant';
+  });
+  const [lineHeight, setLineHeightState] = useState(() => {
+    const saved = localStorage.getItem('sdarm_lh');
+    return saved ? Number(saved) : 1.9;
+  });
 
   // Search
   const [searchInput, setSearchInput] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<{ chapterIndex: number; snippet: string }[]>([]);
   const [activeSearchIdx, setActiveSearchIdx] = useState(0);
   const searchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -269,6 +280,27 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     () => chapters.map((ch) => ch.html.replace(/<[^>]+>/g, '').replace(/&[a-zA-Z0-9#]+;/g, ' ')),
     [chapters]
   );
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery || chapterTexts.length === 0) return [];
+    const MAX_RESULTS = 200;
+    const q = searchQuery.toLowerCase();
+    const results: { chapterIndex: number; snippet: string }[] = [];
+    outer: for (let ci = 0; ci < chapterTexts.length; ci++) {
+      const text = chapterTexts[ci];
+      const lower = text.toLowerCase();
+      let pos = 0;
+      while ((pos = lower.indexOf(q, pos)) !== -1) {
+        const start = Math.max(0, pos - 30);
+        const end = Math.min(text.length, pos + q.length + 30);
+        const snippet = (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
+        results.push({ chapterIndex: ci, snippet });
+        if (results.length >= MAX_RESULTS) break outer;
+        pos += q.length;
+      }
+    }
+    return results;
+  }, [searchQuery, chapterTexts]);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const settingsWrapRef = useRef<HTMLDivElement>(null);
@@ -278,20 +310,6 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const [hlShake, setHlShake] = useState(false);
   // retrySignal increments on manual retry to re-trigger the effect
   const [retrySignal, setRetrySignal] = useState(0);
-
-  // Restore all reader prefs from localStorage on mount
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('sdarm_theme') as ReaderTheme | null;
-    if (savedTheme && (savedTheme === 'dark' || savedTheme === 'sepia' || savedTheme === 'light')) {
-      setThemeState(savedTheme);
-    }
-    const savedFs = localStorage.getItem('sdarm_fs');
-    if (savedFs) setFontSizeState(Math.max(13, Math.min(32, Number(savedFs))));
-    const savedFont = localStorage.getItem('sdarm_font') as ReaderFont | null;
-    if (savedFont && FONT_MAP[savedFont]) setFontKeyState(savedFont);
-    const savedLh = localStorage.getItem('sdarm_lh');
-    if (savedLh) setLineHeightState(Number(savedLh));
-  }, []);
 
   // Mirror theme to <html data-theme> so body bg and scrollbar also respond
   useEffect(() => {
@@ -451,9 +469,9 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   useEffect(() => {
     savedRangeRef.current = null;
     clickedHLRef.current = null;
-    setHlToolbarPos(null);
 
     async function loadEpub() {
+      setHlToolbarPos(null);
       try {
         setPhase('downloading');
         setProgress(0);
@@ -535,9 +553,13 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     void loadEpub();
   }, [epubUrl, retrySignal]);
 
-  // Scroll to top when chapter changes
+  // Scroll to top and clear highlight toolbar when chapter changes
   useEffect(() => {
     contentRef.current?.scrollTo({ top: 0, behavior: 'smooth' });
+    clickedHLRef.current = null;
+    savedRangeRef.current = null;
+    const t = setTimeout(() => setHlToolbarPos(null), 0);
+    return () => clearTimeout(t);
   }, [currentIdx]);
 
   // Keyboard arrow navigation (only when reader is ready)
@@ -556,44 +578,17 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   useEffect(() => {
     if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     const trimmed = searchInput.trim();
-    if (trimmed.length < 2) {
-      setSearchQuery('');
-      setSearchResults([]);
-      setActiveSearchIdx(0);
-      return;
-    }
-    searchDebounceRef.current = setTimeout(() => setSearchQuery(trimmed), 300);
+    searchDebounceRef.current = setTimeout(
+      () => {
+        setSearchQuery(trimmed.length >= 2 ? trimmed : '');
+        setActiveSearchIdx(0);
+      },
+      trimmed.length < 2 ? 0 : 300
+    );
     return () => {
       if (searchDebounceRef.current) clearTimeout(searchDebounceRef.current);
     };
   }, [searchInput]);
-
-  // Search across pre-computed plain text (capped at 200 results)
-  useEffect(() => {
-    if (!searchQuery || chapterTexts.length === 0) {
-      setSearchResults([]);
-      setActiveSearchIdx(0);
-      return;
-    }
-    const MAX_RESULTS = 200;
-    const q = searchQuery.toLowerCase();
-    const results: { chapterIndex: number; snippet: string }[] = [];
-    outer: for (let ci = 0; ci < chapterTexts.length; ci++) {
-      const text = chapterTexts[ci];
-      const lower = text.toLowerCase();
-      let pos = 0;
-      while ((pos = lower.indexOf(q, pos)) !== -1) {
-        const start = Math.max(0, pos - 30);
-        const end = Math.min(text.length, pos + q.length + 30);
-        const snippet = (start > 0 ? '…' : '') + text.slice(start, end).trim() + (end < text.length ? '…' : '');
-        results.push({ chapterIndex: ci, snippet });
-        if (results.length >= MAX_RESULTS) break outer;
-        pos += q.length;
-      }
-    }
-    setSearchResults(results);
-    setActiveSearchIdx(0);
-  }, [searchQuery, chapterTexts]);
 
   // Text selection → toolbar (works on desktop mouse and mobile touch).
   //
@@ -689,14 +684,6 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     document.addEventListener('mousedown', onMouseDown);
     return () => document.removeEventListener('mousedown', onMouseDown);
   }, []);
-
-  // Clear toolbar state when navigating to a different chapter
-  // (dangerouslySetInnerHTML has already replaced the DOM, so preview spans are gone)
-  useEffect(() => {
-    setHlToolbarPos(null);
-    clickedHLRef.current = null;
-    savedRangeRef.current = null;
-  }, [currentIdx]);
 
   // Restore highlights when chapter changes
   useEffect(() => {
@@ -846,7 +833,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
           <button
             className="epub-icon-btn"
             onClick={() => setSidebarOpen((v) => !v)}
-            aria-label="Inhaltsverzeichnis umschalten"
+            aria-label={locale === 'de' ? 'Inhaltsverzeichnis umschalten' : 'Toggle table of contents'}
           >
             <svg viewBox="0 0 18 18" fill="none">
               <line x1="2" y1="4" x2="16" y2="4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -856,7 +843,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
           </button>
           <div className="epub-breadcrumb">
             <Link href={`/${locale}`} className="epub-breadcrumb__link">
-              Schätze
+              {locale === 'de' ? 'Schätze' : 'Treasures'}
             </Link>
             <span className="epub-breadcrumb__sep" aria-hidden="true">
               ›
@@ -873,7 +860,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             <button
               className={`epub-icon-btn${settingsOpen ? ' epub-icon-btn--active' : ''}`}
               onClick={() => setSettingsOpen((v) => !v)}
-              aria-label="Leseeinstellungen"
+              aria-label={locale === 'de' ? 'Leseeinstellungen' : 'Reading settings'}
             >
               <svg viewBox="0 0 18 18" fill="none">
                 <circle cx="9" cy="9" r="2.5" stroke="currentColor" strokeWidth="1.5" />
@@ -996,7 +983,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                     className="epub-sidebar__search-arrow"
                     disabled={activeSearchIdx === 0}
                     onClick={() => goToSearchResult(activeSearchIdx - 1)}
-                    aria-label="Previous result"
+                    aria-label={locale === 'de' ? 'Vorheriges Ergebnis' : 'Previous result'}
                   >
                     ↑
                   </button>
@@ -1004,7 +991,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                     className="epub-sidebar__search-arrow"
                     disabled={activeSearchIdx >= searchResults.length - 1}
                     onClick={() => goToSearchResult(activeSearchIdx + 1)}
-                    aria-label="Next result"
+                    aria-label={locale === 'de' ? 'Nächstes Ergebnis' : 'Next result'}
                   >
                     ↓
                   </button>
@@ -1017,7 +1004,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                 {locale === 'de' ? 'Ergebnisse' : 'Results'} ({searchResults.length})
               </div>
             ) : (
-              <div className="epub-sidebar__toc-label">Kapitel</div>
+              <div className="epub-sidebar__toc-label">{locale === 'de' ? 'Kapitel' : 'Chapters'}</div>
             )}
 
             {searchResults.length > 0 ? (
@@ -1061,7 +1048,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             className="epub-float-btn epub-float-btn--prev"
             onClick={() => setCurrentIdx((i) => i - 1)}
             disabled={currentIdx === 0}
-            aria-label="Voriges Kapitel"
+            aria-label={locale === 'de' ? 'Voriges Kapitel' : 'Previous chapter'}
           >
             <svg viewBox="0 0 10 16" fill="none">
               <line x1="8" y1="1" x2="2" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
@@ -1084,7 +1071,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
             className="epub-float-btn epub-float-btn--next"
             onClick={() => setCurrentIdx((i) => i + 1)}
             disabled={currentIdx === chapters.length - 1}
-            aria-label="Nächstes Kapitel"
+            aria-label={locale === 'de' ? 'Nächstes Kapitel' : 'Next chapter'}
           >
             <svg viewBox="0 0 10 16" fill="none">
               <line x1="2" y1="1" x2="8" y2="8" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />

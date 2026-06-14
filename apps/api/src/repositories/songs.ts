@@ -77,25 +77,59 @@ export async function listSongs(
   opts: { q?: string; limit?: number; offset?: number },
 ) {
   const { q, limit = 50, offset = 0 } = opts;
-  const filter = q
-    ? and(
-        eq(songs.songbookId, songbookId),
-        or(like(songs.title, `%${q}%`), like(sql`cast(${songs.number} as text)`, `%${q}%`)),
-      )
-    : eq(songs.songbookId, songbookId);
 
-  const [rows, [{ count }]] = await Promise.all([
+  if (!q) {
+    const filter = eq(songs.songbookId, songbookId);
+    const [rows, [{ count }]] = await Promise.all([
+      db
+        .select({ id: songs.id, number: songs.number, title: songs.title, author: songs.author, copyright: songs.copyright })
+        .from(songs)
+        .where(filter)
+        .orderBy(asc(songs.number))
+        .limit(limit)
+        .offset(offset),
+      db.select({ count: sql<number>`count(*)` }).from(songs).where(filter),
+    ]);
+    return { items: rows.map((r) => ({ ...r, matchType: null as 'title' | 'number' | 'lyrics' | null })), total: count };
+  }
+
+  const pattern = `%${q}%`;
+  const condition = and(
+    eq(songs.songbookId, songbookId),
+    or(
+      like(songs.title, pattern),
+      like(sql`cast(${songs.number} as text)`, pattern),
+      like(songParts.lyrics, pattern),
+    ),
+  );
+
+  // SELECT DISTINCT eliminates duplicate song rows produced by the LEFT JOIN on songParts.
+  // All selected columns come from songs, so rows per matching song are identical.
+  const [rows, [{ total }]] = await Promise.all([
     db
-      .select({ id: songs.id, number: songs.number, title: songs.title, author: songs.author, copyright: songs.copyright })
+      .selectDistinct({ id: songs.id, number: songs.number, title: songs.title, author: songs.author, copyright: songs.copyright })
       .from(songs)
-      .where(filter)
+      .leftJoin(songParts, eq(songParts.songId, songs.id))
+      .where(condition)
       .orderBy(asc(songs.number))
       .limit(limit)
       .offset(offset),
-    db.select({ count: sql<number>`count(*)` }).from(songs).where(filter),
+    db
+      .select({ total: sql<number>`count(distinct ${songs.id})` })
+      .from(songs)
+      .leftJoin(songParts, eq(songParts.songId, songs.id))
+      .where(condition),
   ]);
 
-  return { items: rows, total: count };
+  const qLower = q.toLowerCase();
+  const items = rows.map((r) => {
+    let matchType: 'title' | 'number' | 'lyrics' = 'lyrics';
+    if (r.title.toLowerCase().includes(qLower)) matchType = 'title';
+    else if (String(r.number).includes(qLower)) matchType = 'number';
+    return { ...r, matchType };
+  });
+
+  return { items, total: total ?? 0 };
 }
 
 export async function getSongById(db: DrizzleD1Database, id: number) {

@@ -1,0 +1,47 @@
+name: Update Playwright Snapshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  update-snapshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref }}
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm test:screenshots:update
+        env:
+          CI: true
+      - name: Commit updated snapshots and open PR
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add tests/screenshot/snapshots/
+          git diff --cached --quiet && echo "No snapshot changes" && exit 0
+          BRANCH="test/update-snapshots-$(date +%Y%m%d-%H%M%S)"
+          git checkout -b "$BRANCH"
+          git commit -m "test: update playwright snapshots"
+          git push origin "$BRANCH"
+          gh pr create \
+            --title "test: update playwright snapshots" \
+            --body "Automated snapshot update triggered by the \`update-snapshots\` workflow." \
+            --base "${{ github.ref_name }}" \
+            --head "$BRANCH"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

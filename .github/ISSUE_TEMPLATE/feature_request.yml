@@ -1,0 +1,45 @@
+name: "✨ Feature Request"
+description: "Suggest an idea to make sdarm.life better"
+labels: ["enhancement"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the idea! Use a user story format to help us understand what you need.
+
+  - type: input
+    id: story
+    attributes:
+      label: "User story"
+      placeholder: "As a [user], I want [feature], in order to [benefit], unlike today when [current state]"
+      description: "Frame your request as a user story to clarify the need"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Description"
+      placeholder: |
+        Add any additional context:
+        - How it should work
+        - Expected flow or outcome
+        - Acceptance criteria (optional, as checklist)
+        - Screenshots, design ideas, or links to similar features
+      description: "Details about the feature, however you want to explain it"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: app
+    attributes:
+      label: "Which app? (optional)"
+      options:
+        - "All apps"
+        - "Web (sdarm.life)"
+        - "Admin (admin.sdarm.life)"
+        - "Songbook (songs.sdarm.life)"
+        - "Treasures (treasures.sdarm.life)"
+        - "Events (events.sdarm.life)"
+        - "API (api.sdarm.life)"

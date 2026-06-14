@@ -21,6 +21,7 @@ import adminApiKeysRouter from './routes/admin/api-keys';
 import adminEmailRouter from './routes/admin/email';
 import treasuresRouter from './routes/treasures';
 import bookRequestRouter from './routes/book-request';
+import geocodeRouter from './routes/geocode';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -33,6 +34,11 @@ app.use(
 			'https://songs.sdarm.life',
 			'https://events.sdarm.life',
 			'https://treasures.sdarm.life',
+			'https://sdarm-web-staging.mine-a8f.workers.dev',
+			'https://sdarm-admin-staging.mine-a8f.workers.dev',
+			'https://sdarm-songbook-staging.mine-a8f.workers.dev',
+			'https://sdarm-events-staging.mine-a8f.workers.dev',
+			'https://sdarm-treasures-staging.mine-a8f.workers.dev',
 			'http://localhost:3000',
 			'http://localhost:3001',
 			'http://localhost:3002',
@@ -65,11 +71,16 @@ v1.route('/songs/search', songSearchRouter); // literal path — must be mounted
 v1.use('/songs/*', cached(3600));    // 1 hour — individual songs
 v1.route('/songs', songsRouter);
 
-v1.use('/treasures', cached(3600)); // 1 hour — treasure list
+// List endpoint is not cached: every query string (?limit, ?offset, ?type, ?language)
+// produces a separate cache entry, and purgeCache() on admin writes only invalidates
+// the bare path — stale variants survived for up to an hour and rendered with stale
+// coverKey. Detail endpoint stays cached (purge is point-and-shoot by id).
 v1.use('/treasures/*', cached(3600)); // 1 hour — treasure detail
 v1.route('/treasures', treasuresRouter);
 
 v1.route('', bookRequestRouter); // /book-request
+
+v1.route('/geocode', geocodeRouter); // KV-cached Nominatim proxy (DSGVO: hides user IP)
 
 // ── Admin routes (auth-gated) ─────────────────────────────────────────────────
 admin.use('*', auth);

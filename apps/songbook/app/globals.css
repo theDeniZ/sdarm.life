@@ -160,7 +160,8 @@ a {
 }
 
 .songbook-landing-card__lang {
-  font-family: 'Bebas Neue', sans-serif;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 300;
   font-size: 3.5rem;
   line-height: 1;
   color: rgba(201, 169, 110, 0.1);
@@ -206,10 +207,10 @@ a {
 }
 
 .songbook-landing-card__count {
-  font-family: 'Oswald', sans-serif;
+  font-family: 'Lexend', sans-serif;
   font-size: 0.72rem;
-  font-weight: 200;
-  letter-spacing: 0.2em;
+  font-weight: 300;
+  letter-spacing: 0.16em;
   text-transform: uppercase;
   color: rgba(201, 169, 110, 0.68);
 }
@@ -312,7 +313,7 @@ a {
   border-bottom: 1px solid var(--border);
 }
 .song-row {
-  border-bottom: 1px solid rgba(201, 169, 110, 0.06);
+  border-bottom: 1px solid rgba(201, 169, 110, 0.2);
   transition: background 0.15s;
   cursor: pointer;
 }
@@ -681,17 +682,21 @@ a {
   display: block;
 }
 
-/* Bottom bar */
+/* Bottom bar — 3-column grid: spacer | centered nav | controls.
+   Was a flex with absolute-positioned controls, which overlapped the
+   centered nav on narrow viewports (≲440px) in fullscreen mode. */
 .projector__bottombar {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: center;
   padding: 14px 20px;
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+  gap: 12px;
 }
 .projector__nav {
+  grid-column: 2;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -731,10 +736,8 @@ a {
   text-align: center;
 }
 .projector__controls {
-  position: absolute;
-  right: 20px;
-  top: 50%;
-  transform: translateY(-50%);
+  grid-column: 3;
+  justify-self: end;
   display: flex;
   gap: 8px;
 }
@@ -1676,7 +1679,7 @@ a {
 /* Song list */
 [data-theme='light'] .song-list-wrap { background: var(--dark); }
 [data-theme='light'] .song-list-header h1 { color: var(--text-strong); }
-[data-theme='light'] .song-row { border-bottom-color: var(--border); }
+[data-theme='light'] .song-row { border-bottom-color: rgba(146, 114, 35, 0.32); }
 [data-theme='light'] .song-row:hover { background: var(--bg-card); }
 [data-theme='light'] .song-row__number { color: var(--gold); }
 [data-theme='light'] .song-row__title { color: var(--text-strong); }
@@ -1693,8 +1696,59 @@ a {
 [data-theme='light'] .part-label { color: var(--muted); }
 [data-theme='light'] .lyrics-line { color: var(--text); }
 
+/* Reader toolbar and sidebar */
+[data-theme='light'] .reader-toolbar-bar {
+  background: var(--bg-card);
+  border-bottom-color: var(--border);
+}
+[data-theme='light'] .reader-sidebar {
+  background: var(--bg-card);
+  border-right-color: var(--border);
+}
+[data-theme='light'] .reader-sidebar-search-input {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: var(--text);
+}
+[data-theme='light'] .reader-sidebar-search-input:focus {
+  border-color: rgba(0, 0, 0, 0.3);
+}
+
 /* Projector — keep dark always */
 [data-theme='light'] .projector { background: #0c0b09; color: #d6d0c8; }
 
 /* Sheet display */
 [data-theme='light'] .sheet-display { background: var(--bg-section); }
+
+/* ── Search match highlight (within-songbook) ── */
+.reader-toc-name mark {
+  background: rgba(201, 169, 110, 0.28);
+  color: var(--gold);
+  padding: 0 0.12em;
+  border-radius: 2px;
+}
+.song-row__match-pill {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.1);
+  border: 1px solid rgba(201, 169, 110, 0.28);
+  border-radius: 999px;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+[data-theme='light'] .reader-toc-name mark {
+  background: rgba(255, 226, 125, 0.55);
+  color: #5a3d00;
+}
+[data-theme='light'] .song-row__match-pill {
+  color: #5a3d00;
+  background: rgba(255, 226, 125, 0.35);
+  border-color: rgba(146, 114, 35, 0.4);
+}

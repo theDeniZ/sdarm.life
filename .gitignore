@@ -4,6 +4,7 @@ node_modules
 .dev.vars
 .next
 dist
+**/tsconfig.tsbuildinfo
 **/.turbo
 .pnpm-store
 .vscode/mcp.json
@@ -11,3 +12,14 @@ dist
 .DS_Store
 **/.obsidian
 _tests
+test-results/
+playwright-report/
+tests/screenshot/results/
+
+# Local-only dev sketches, tuners, multi-device previews, design variants.
+# Routes like /de/newsletter-variants, /de/planet-tuner, /de/footer-preview
+# are work-in-progress and must never ship to production.
+**/(dev)/
+
+/.claude/worktrees
+.claude-backup.tgz

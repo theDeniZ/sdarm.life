@@ -74,11 +74,11 @@ The post-create hook scaffolds these files (you can customize after creation):
 - **`apps/web/.env.local`** - Web app environment variables
 - **`apps/admin/.env.local`** - Admin app environment variables
 
-For local Cloudflare integration, add your credentials to `apps/api/.dev.vars`:
+For local Cloudflare integration, add Worker secrets to `apps/api/.dev.vars`:
 
 ```
-CF_CLIENT_ID=your_id
-CF_CLIENT_SECRET=your_secret
+API_KEY=dev
+RESEND_API_KEY=re_xxx   # only needed if testing email flows locally
 ```
 
 ## VS Code Extensions

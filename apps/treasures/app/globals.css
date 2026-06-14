@@ -1,4 +1,9 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Serif+Display:ital@0;1&family=Bebas+Neue&family=Oswald:wght@200;300&family=Lora:ital,wght@0,400;0,500;1,400&family=Inter:wght@300;400&display=swap');
+/* Shared fonts inherited from @sdarm/ui tokens.css. Only treasures-specific fonts declared here: */
+@import '@fontsource/lora/400.css';
+@import '@fontsource/lora/400-italic.css';
+@import '@fontsource/lora/500.css';
+@import '@fontsource/inter/300.css';
+@import '@fontsource/inter/400.css';
 
 *,
 *::before,
@@ -34,7 +39,58 @@ a {
   color: inherit;
 }
 
+/* ── HERO TEXT ALWAYS WHITE IN TREASURES (photo bg) ── */
+[data-theme='light'] .catalog-hero .page-hero__title {
+  color: #fff;
+}
+[data-theme='light'] .catalog-hero .page-hero__eyebrow {
+  color: rgba(201, 169, 110, 0.85);
+}
+[data-theme='light'] .catalog-hero .page-hero__eyebrow::before {
+  background: rgba(201, 169, 110, 0.4);
+}
+
 /* ── FILTER BAR ── */
+/* ── NAV ALWAYS VISIBLE IN TREASURES ── */
+nav {
+  background: var(--nav-bg-scrolled) !important;
+  backdrop-filter: blur(20px) !important;
+}
+
+/* ── CATALOG HERO (photo background behind PageHero) ── */
+.catalog-hero {
+  position: relative;
+  background-color: #0c0b09;
+  background-size: cover;
+  background-position: center 40%;
+  background-repeat: no-repeat;
+}
+
+.catalog-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 11, 9, 0.72) 0%,
+    rgba(12, 11, 9, 0.15) 25%,
+    rgba(12, 11, 9, 0.15) 70%,
+    rgba(12, 11, 9, 0.95) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.catalog-hero .page-hero {
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+[data-theme='light'] .catalog-hero .page-hero {
+  background: transparent;
+}
+
+
 .filter-section {
   background: #0a0908;
   position: sticky;
@@ -74,18 +130,18 @@ a {
   padding: 0.42rem 1.1rem;
   border: none;
   background: transparent;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.78rem;
-  font-weight: 300;
-  letter-spacing: 0.14em;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(160, 148, 128, 0.75);
+  color: rgba(200, 190, 175, 0.8);
   cursor: pointer;
   transition: color 0.2s;
   line-height: 1;
 }
 .filter-pill:hover {
-  color: rgba(210, 200, 185, 0.75);
+  color: rgba(220, 212, 200, 1);
 }
 .filter-pill.active {
   color: rgba(201, 169, 110, 1);
@@ -99,17 +155,134 @@ a {
 
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1.2rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.9rem 0.8rem;
   max-width: 1340px;
   margin: 0 auto;
+  align-items: stretch;
 }
 
-/* ── INFINITE SCROLL LOADER ── */
+/* ── BIBLES SHELF (top strip above the main catalog) ── */
+.bibles-shelf {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 1rem 3vw 0.5rem;
+}
+
+/* Bible cards skip the stagger animation and stay vertical (bibles shelf is a horizontal strip) */
+.bibles-shelf-grid .item-card {
+  opacity: 1;
+  transform: none;
+  flex-direction: column;
+  align-items: center;
+}
+.bibles-shelf-grid .item-visual {
+  width: 100%;
+  height: 180px;
+  align-items: flex-end;
+  padding: 1rem 0.75rem 0.4rem;
+}
+.bibles-shelf-grid .book-visual {
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.06) 100%);
+}
+.bibles-shelf-grid .item-body {
+  justify-content: flex-start;
+  padding: 0.7rem 0.9rem 0.9rem;
+}
+.bibles-shelf-title {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: 1.4rem;
+  color: var(--gold);
+  letter-spacing: 0.02em;
+  margin-bottom: 0.9rem;
+}
+.bibles-shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.8rem;
+}
+
+/* ── PAGINATION ── */
+.shop-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 2.5rem 0 1rem;
+}
+
+.shop-pg-btn,
+.shop-pg-num {
+  min-width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 3px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.92rem;
+  color: var(--muted);
+  cursor: pointer;
+  padding: 0 0.5rem;
+  transition:
+    border-color 0.2s,
+    color 0.2s,
+    background 0.2s;
+}
+
+.shop-pg-btn:hover:not(:disabled),
+.shop-pg-num:hover {
+  border-color: rgba(201, 169, 110, 0.5);
+  color: var(--text);
+}
+
+.shop-pg-num.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.07);
+}
+
+.shop-pg-btn:disabled {
+  opacity: 0.25;
+  cursor: default;
+}
+
+.shop-pg-ellipsis {
+  min-width: 30px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  font-size: 0.88rem;
+  opacity: 0.5;
+}
+
+[data-theme='light'] .shop-pg-btn,
+[data-theme='light'] .shop-pg-num {
+  border-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.45);
+}
+[data-theme='light'] .shop-pg-btn:hover:not(:disabled),
+[data-theme='light'] .shop-pg-num:hover {
+  border-color: rgba(0, 0, 0, 0.28);
+  color: rgba(0, 0, 0, 0.8);
+}
+[data-theme='light'] .shop-pg-num.active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.06);
+}
+
+/* ── PAGE LOAD SPINNER ── */
 .shop-loading {
   display: flex;
   justify-content: center;
-  padding: 2.5rem 0 1.5rem;
+  padding: 4rem 0 3rem;
 }
 
 .shop-spinner {
@@ -129,21 +302,26 @@ a {
 
 /* ── ITEM CARD ── */
 .item-card {
-  background: rgba(255, 255, 255, 0.042);
-  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
+  border-radius: 10px;
   position: relative;
-  overflow: hidden;
-  transition:
-    background 0.35s ease,
-    box-shadow 0.4s ease,
-    opacity 0.55s var(--ease),
-    transform 0.55s var(--ease);
+  overflow: visible;
+  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease);
   cursor: pointer;
   opacity: 0;
   transform: translateY(22px);
-  display: block;
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
   text-decoration: none;
   color: inherit;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+[data-theme='light'] .item-card {
+  background: #ffffff;
+  border-color: rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 .item-card--no-link {
   cursor: default;
@@ -152,31 +330,27 @@ a {
   opacity: 1;
   transform: translateY(0);
 }
-.item-card:hover {
-  background: rgba(255, 255, 255, 0.065);
-  box-shadow:
-    0 12px 44px rgba(0, 0, 0, 0.38),
-    0 0 0 1px rgba(201, 169, 110, 0.06);
-}
 
 /* ── ITEM VISUAL ── */
 .item-visual {
-  height: 210px;
+  width: 180px;
+  flex-shrink: 0;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
+  padding: 1.4rem 1rem;
+  overflow: visible;
 }
 
 .book-visual {
-  background: linear-gradient(145deg, #1a1108 0%, #0e0a06 100%);
+  border-radius: 10px 0 0 10px;
 }
 .book-visual::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(ellipse 75% 65% at 50% 30%, rgba(140, 90, 20, 0.16) 0%, transparent 65%);
+  display: none;
+}
+[data-theme='light'] .book-visual::before {
+  display: none;
 }
 
 /* ── ITEM BADGE ── */
@@ -204,127 +378,196 @@ a {
   background: rgba(180, 220, 180, 0.06);
 }
 
-/* ── 3D BOOK ── */
-.book-3d {
+/* ── TOME (3D book cover for treasures) ──
+   Layered stack: the printed face, the closed paper edge to the right,
+   the rear binding behind. Image keeps its natural aspect ratio so the
+   book reads as a real object rather than a stretched rectangle.
+   --tome-depth is per-instance (set inline by Book3DCover, range 11–22px). */
+.tome {
+  --tome-depth: 28px;
+  --tome-spine: #1a1108;
+  --tome-skin: linear-gradient(140deg, #1a1108, #0e0a06);
   position: relative;
   z-index: 2;
-  filter: drop-shadow(4px 6px 24px rgba(0, 0, 0, 0.65));
-  transform: perspective(400px) rotateY(-10deg);
-  transition: transform 0.5s ease;
-}
-.item-card:hover .book-3d {
-  transform: perspective(400px) rotateY(-5deg) translateY(-3px);
+  width: 100%;
+  max-width: 158px;
+  perspective: 1000px;
+  margin: 0 auto;
 }
 
-.book-3d-cover {
-  width: 95px;
-  height: 138px;
-  border-radius: 2px 4px 4px 2px;
-  border: 1px solid rgba(201, 169, 110, 0.22);
+.tome-stack {
   position: relative;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
+  transform-style: preserve-3d;
+  transform: rotateY(-8deg);
+  transition: transform 0.6s ease;
 }
 
-.book-3d-spine {
+.tome:hover .tome-stack {
+  transform: translateY(-14px) rotateY(-28deg);
+}
+
+.tome:hover .tome-face {
+  box-shadow: -15px 8px 20px 0px rgba(0, 0, 0, 0.16);
+}
+
+.tome-edge {
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 7px;
+  left: 100%;
+  top: 1%;
+  width: calc(var(--tome-depth) * 2);
+  height: 98%;
+  transform: translate(-55%, 0) rotateY(90deg);
+  background: linear-gradient(
+    90deg,
+    #fff 0%,
+    hsl(0, 0%, 94%) 5%,
+    #fff 10%,
+    hsl(0, 0%, 94%) 15%,
+    #fff 20%,
+    hsl(0, 0%, 94%) 25%,
+    #fff 30%,
+    hsl(0, 0%, 94%) 35%,
+    #fff 40%,
+    hsl(0, 0%, 94%) 45%,
+    #fff 50%,
+    hsl(0, 0%, 94%) 55%,
+    #fff 60%,
+    hsl(0, 0%, 94%) 65%,
+    #fff 70%,
+    hsl(0, 0%, 94%) 75%,
+    #fff 80%,
+    hsl(0, 0%, 94%) 85%,
+    #fff 90%,
+    hsl(0, 0%, 94%) 95%,
+    #fff 100%
+  );
 }
 
-.book-3d-content {
-  padding: 0.8rem 0.5rem 0.8rem 1rem;
-  flex: 1;
+.tome-bind {
+  position: absolute;
+  top: 0;
+  left: 1%;
+  width: 100%;
+  height: 100%;
+  transform: translateZ(calc(var(--tome-depth) * -1));
+  background-color: var(--tome-spine);
+  border-radius: 0 2px 2px 0;
+  box-shadow: none;
+  opacity: 0;
+  transition: box-shadow 0.6s ease, opacity 0.6s ease;
+}
+
+.tome:hover .tome-bind {
+  opacity: 1;
+}
+
+.tome-face {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 0 3px 3px 0;
+  transform: translateZ(var(--tome-depth));
+  box-shadow: 13px 8px 12px 0px rgba(0, 0, 0, 0.14);
+  transition: box-shadow 0.6s ease;
+  background: var(--tome-spine);
+}
+
+.tome-face--blank {
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
+  padding: 14% 10%;
   text-align: center;
+  background: var(--tome-skin);
+  border: 1px solid rgba(201, 169, 110, 0.2);
+  gap: 0.4rem;
 }
 
-.book-3d-cross {
-  color: rgba(201, 169, 110, 0.3);
-  font-size: 0.75rem;
-  margin-bottom: 0.35rem;
-  font-family: 'Cormorant Garamond', serif;
+.tome-mark {
+  color: rgba(201, 169, 110, 0.55);
+  font-size: 0.95rem;
   letter-spacing: 0.1em;
 }
 
-.book-3d-title {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.72rem;
-  font-weight: 400;
-  color: rgba(201, 169, 110, 0.9);
-  line-height: 1.45;
-  letter-spacing: 0.04em;
-  margin-bottom: 0.3rem;
-}
-
-.book-3d-line {
-  width: 22px;
-  height: 1px;
-  background: rgba(201, 169, 110, 0.28);
-  margin: 0.3rem auto;
-}
-
-.book-3d-author {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.6rem;
-  font-weight: 300;
-  color: rgba(201, 169, 110, 0.45);
-  letter-spacing: 0.08em;
+.tome-name {
+  font-family: 'DM Serif Display', serif;
   font-style: italic;
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: rgba(225, 198, 148, 0.95);
+  overflow-wrap: break-word;
+  hyphens: auto;
+  margin-top: 0.45rem;
 }
+
 
 /* ── ITEM BODY ── */
 .item-body {
-  padding: 1.4rem 1.6rem 1.6rem;
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  justify-content: center;
 }
 
 .item-title-row {
   display: flex;
-  align-items: flex-start;
+  align-items: baseline;
   gap: 0.5rem;
-  margin-bottom: 0.25rem;
+  margin-bottom: 0.2rem;
 }
 
 .item-title {
   font-family: 'Inter', sans-serif;
-  font-size: 1.05rem;
-  font-weight: 500;
-  color: rgba(225, 215, 200, 0.92);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-strong, var(--text));
   letter-spacing: 0;
-  line-height: 1.35;
+  line-height: 1.3;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 .item-lang {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 0.72rem;
-  color: rgba(201, 169, 110, 0.55);
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.65rem;
+  color: var(--gold);
+  opacity: 0.7;
   letter-spacing: 0.1em;
   flex-shrink: 0;
-  padding-top: 0.15rem;
 }
 
 .item-author {
   font-family: 'Cormorant Garamond', serif;
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-style: italic;
-  color: rgba(201, 169, 110, 0.55);
-  margin-bottom: 0.5rem;
+  color: var(--gold);
+  opacity: 0.95;
+  margin-bottom: 0.45rem;
 }
 
 .item-desc {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.82rem;
-  font-weight: 300;
-  color: rgba(160, 150, 132, 0.82);
-  line-height: 1.65;
-  margin-bottom: 1.1rem;
+  font-family: 'Lora', serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 0.4rem;
 }
 
 .item-footer {
@@ -429,7 +672,7 @@ a {
 /* ── RESPONSIVE ── */
 @media (max-width: 1200px) {
   .shop-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
   }
   .hero-deco-icons {
     display: none;
@@ -453,6 +696,19 @@ a {
 @media (max-width: 600px) {
   .shop-grid {
     grid-template-columns: 1fr;
+  }
+  .item-card {
+    flex-direction: column;
+    align-items: center;
+  }
+  .item-visual {
+    width: 100%;
+    height: 160px;
+    align-items: flex-end;
+    padding: 1rem 0.75rem 0.4rem;
+  }
+  .book-visual {
+    border-radius: 10px 10px 0 0;
   }
   .shop-section {
     padding: 1.5rem 1rem 3rem;
@@ -586,7 +842,7 @@ a {
   background: #faf6ef;
 }
 [data-theme='light'] body {
-  background: #f5f4f2;
+  background: #f7f7f7;
 }
 
 [data-theme='sepia'] .epub-reader {
@@ -649,13 +905,13 @@ a {
   border-color: rgba(100, 70, 30, 0.2);
 }
 
-/* Search icon */
-[data-theme='sepia'] .nav-search,
-[data-theme='light'] .nav-search {
-  color: rgba(44, 28, 8, 0.5);
+/* Theme toggle icon */
+[data-theme='sepia'] .nav-theme,
+[data-theme='light'] .nav-theme {
+  color: rgba(44, 28, 8, 0.6);
 }
-[data-theme='sepia'] .nav-search:hover,
-[data-theme='light'] .nav-search:hover {
+[data-theme='sepia'] .nav-theme:hover,
+[data-theme='light'] .nav-theme:hover {
   color: var(--gold);
 }
 
@@ -719,6 +975,7 @@ a {
   left: 0;
   right: 0;
   bottom: 0;
+  z-index: 20;
   overflow: hidden;
   background: var(--reader-bg);
   transition: background 0.25s, color 0.25s;
@@ -1548,7 +1805,7 @@ a {
 }
 
 .epub-theme-dot--active {
-  /* border-color comes via inline style */
+  border-width: 2px;
 }
 
 /* Font size */
@@ -1699,57 +1956,153 @@ nav {
   padding-inline: 1.8rem;
 }
 
+/* ── BOOK DETAIL (renders when treasure has no epubUrl) ─────────────────── */
+
+.book-detail {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6rem 2rem 5rem;
+  position: relative;
+}
+
+.book-detail__back {
+  position: absolute;
+  top: 5rem;
+  left: 2rem;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  transition: background 0.2s, color 0.2s;
+}
+.book-detail__back:hover {
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.08);
+}
+[data-theme='light'] .book-detail__back {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.book-detail__layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.book-detail__cover {
+  position: sticky;
+  top: 6rem;
+}
+
+.book-detail__title {
+  font-family: 'DM Serif Display', 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  margin: 0 0 0.5rem;
+  color: var(--text-strong, var(--text));
+}
+
+.book-detail__author {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin: 0 0 1.6rem;
+}
+
+.book-detail__desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0 0 2.4rem;
+}
+
+@media (max-width: 720px) {
+  .book-detail__layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .book-detail__cover {
+    position: static;
+    max-width: 220px;
+    margin: 0 auto;
+  }
+  .book-detail__back {
+    top: 4.2rem;
+  }
+}
+
 /* ── BOOK REQUEST HERO BUTTON ─────────────────────────────────────────────── */
 
 .br-hero-cta {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: var(--gold);
-  color: #0c0b09;
+  background: linear-gradient(135deg, #7a5a28 0%, #5a3e18 100%);
+  color: #f0e8d8;
   border: none;
-  border-radius: 3px;
-  padding: 14px 36px;
+  border-radius: 999px;
+  padding: 12px 26px;
   font-family: 'Inter', sans-serif;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 500;
-  letter-spacing: 0.01em;
-  text-transform: none;
+  letter-spacing: 0.02em;
   cursor: pointer;
-  position: relative;
-  overflow: hidden;
-  transition: box-shadow 0.3s;
-}
-
-.br-hero-cta::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 60%;
-  height: 100%;
-  background: linear-gradient(
-    120deg,
-    transparent 0%,
-    rgba(255, 255, 255, 0.38) 50%,
-    transparent 100%
-  );
-  transition: left 0.5s ease;
-}
-
-.br-hero-cta svg {
-  width: 9px;
-  height: 9px;
-  position: relative;
-  z-index: 1;
-}
-
-.br-hero-cta:hover::after {
-  left: 160%;
+  box-shadow:
+    0 4px 20px rgba(90, 60, 20, 0.45),
+    inset 0 1px 0 rgba(255, 220, 160, 0.15);
+  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1), box-shadow 0.35s ease;
 }
 
 .br-hero-cta:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 8px 28px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(201, 169, 110, 0.18);
 }
+
+.br-hero-cta svg {
+  width: 14px;
+  height: 14px;
+  color: var(--gold);
+  stroke: var(--gold);
+  flex-shrink: 0;
+  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.br-hero-cta:hover svg {
+  transform: translate(2px, -2px);
+}
+
+/* Light-theme variant: cleaner pill with high contrast against both
+   the dark catalog-hero overlay and the white BookDetail page. */
+[data-theme='light'] .br-hero-cta {
+  background: #ffffff;
+  color: #3d2a10;
+  box-shadow:
+    0 4px 18px rgba(0, 0, 0, 0.18),
+    inset 0 0 0 1px rgba(146, 114, 35, 0.18);
+}
+[data-theme='light'] .br-hero-cta:hover {
+  box-shadow:
+    0 6px 24px rgba(0, 0, 0, 0.22),
+    inset 0 0 0 1px rgba(146, 114, 35, 0.35);
+}
+[data-theme='light'] .br-hero-cta svg {
+  color: var(--gold);
+  stroke: var(--gold);
+}
+
 
 /* ── BOOK REQUEST MODAL ────────────────────────────────────────────────────── */
 
@@ -2187,22 +2540,38 @@ nav {
 /* ═══ LIGHT THEME ═══ */
 
 /* Catalog / filter section */
-[data-theme='light'] .filter-section { background: var(--bg-section); }
-[data-theme='light'] .treasures-page { background: var(--dark); }
-[data-theme='light'] .treasure-card { background: var(--bg-card); }
-[data-theme='light'] .treasure-title { color: var(--text-strong); }
-[data-theme='light'] .treasure-author { color: var(--muted); }
-[data-theme='light'] .book-visual { background: #c0b090; }
+[data-theme='light'] .filter-section {
+  background: #ffffff;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+[data-theme='light'] .filter-pill {
+  color: rgba(0, 0, 0, 0.45);
+}
+[data-theme='light'] .filter-pill:hover {
+  color: rgba(0, 0, 0, 0.75);
+}
+[data-theme='light'] .filter-pill.active {
+  color: var(--gold);
+}
+[data-theme='light'] .filter-sep {
+  background: rgba(0, 0, 0, 0.08);
+}
 
-/* Detail page */
-[data-theme='light'] .treasure-detail { background: var(--dark); }
-[data-theme='light'] .treasure-detail-title { color: var(--text-strong); }
-[data-theme='light'] .treasure-detail-desc { color: var(--text); }
-
-/* Reader — keep dark always (reading comfort) */
-[data-theme='light'] .epub-reader { background: #1a1814; color: #d6d0c8; }
-[data-theme='light'] .reader-toolbar { background: #0e0d0b; }
-[data-theme='light'] .reader-sidebar { background: #12100c; }
+/* Item cards */
+[data-theme='light'] .item-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+[data-theme='light'] .item-card:hover {
+  background: #ffffff;
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.10),
+    0 0 0 1px rgba(146, 114, 35, 0.10);
+}
+[data-theme='light'] .book-visual {
+  background: transparent;
+}
 
 /* Book request modal */
 [data-theme='light'] .br-modal {

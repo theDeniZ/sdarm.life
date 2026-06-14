@@ -8,7 +8,11 @@ nav {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 2rem; /* guaranteed min space between logo/links/right groups */
   padding: 1.4rem 3rem;
+  /* respect iPhone notch / Android cutouts */
+  padding-left: max(3rem, env(safe-area-inset-left));
+  padding-right: max(3rem, env(safe-area-inset-right));
   background: transparent;
   transition:
     background 0.8s ease,
@@ -21,13 +25,15 @@ nav.scrolled {
 
 /* ── Logo ── */
 .nav-logo {
-  font-family: 'Lexend', sans-serif;
-  font-weight: 350;
-  font-size: 1.1rem;
-  letter-spacing: 0.06em;
-  color: rgba(240, 235, 225, 0.90);
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 700;
+  font-size: 1.35rem;
+  letter-spacing: 0.04em;
+  color: rgba(240, 235, 225, 0.92);
   text-decoration: none;
   transition: color 0.5s ease;
+  flex-shrink: 0; /* never let logo squeeze under content pressure */
+  white-space: nowrap;
 }
 .nav-logo span {
   font-family: 'Cormorant Garamond', serif;
@@ -47,9 +53,9 @@ nav.scrolled {
   gap: 2.8rem;
 }
 .nav-links a {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 300;
-  font-size: 1.05rem;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 500;
+  font-size: 0.86rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: rgba(255, 255, 255, 0.88);
@@ -69,39 +75,62 @@ nav.scrolled {
   display: flex;
   align-items: center;
   gap: 1.2rem;
+  flex-shrink: 0; /* never collapse — the burger button must always be reachable */
 }
 
-/* Language — just text, no box */
+/* Language — same type style as nav links, just lower contrast */
 .nav-lang {
-  font-family: 'Oswald', sans-serif;
-  font-size: 0.62rem;
-  font-weight: 300;
-  letter-spacing: 0.2em;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 500;
+  font-size: 0.86rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
   color: rgba(210, 200, 185, 0.28);
   text-decoration: none;
   transition: color 0.5s ease;
+  /* enlarge touch target without changing visual size */
+  padding: 12px 4px;
+  margin: -12px -4px;
+  flex-shrink: 0;
 }
 .nav-lang:hover {
   color: rgba(201, 169, 110, 0.65);
 }
 
-/* Search */
-.nav-search {
+/* Theme toggle (sun in dark, moon in light) */
+.nav-theme {
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px 2px;
-  color: rgba(210, 200, 185, 0.32);
+  /* 44×44 minimum touch target */
+  width: 44px;
+  height: 44px;
+  margin: -10px -2px; /* keep visual size unchanged */
+  padding: 0;
+  color: rgba(210, 200, 185, 0.55);
   transition: color 0.5s ease;
   display: flex;
   align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  position: relative;
 }
-.nav-search:hover {
-  color: rgba(228, 218, 200, 0.8);
+.nav-theme:hover {
+  color: rgba(228, 218, 200, 0.95);
 }
-.nav-search svg {
-  width: 15px;
-  height: 15px;
+.nav-theme__icon {
+  width: 16px;
+  height: 16px;
+}
+/* Icon swap: show the icon for the theme you'll switch TO */
+.nav-theme__icon--moon {
+  display: none;
+}
+[data-theme='light'] .nav-theme__icon--sun {
+  display: none;
+}
+[data-theme='light'] .nav-theme__icon--moon {
+  display: block;
 }
 
 /* ── Burger button (mobile only) ── */
@@ -111,12 +140,14 @@ nav.scrolled {
   justify-content: center;
   align-items: center;
   gap: 5px;
-  width: 32px;
-  height: 32px;
+  /* 44×44 minimum touch target (WCAG / Apple HIG / Material) */
+  width: 44px;
+  height: 44px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 4px;
+  padding: 10px;
+  margin: -6px; /* compensate for the larger box visually */
   flex-shrink: 0;
 }
 .nav-burger__line {
@@ -153,6 +184,11 @@ nav.scrolled {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  /* respect iPhone notch / status bar / home indicator */
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
   opacity: 0;
   pointer-events: none;
   transform: translateY(-8px);
@@ -172,15 +208,15 @@ nav.scrolled {
   gap: 0.1rem;
 }
 .nav-mobile__links a {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: clamp(1.7rem, 7vw, 2.2rem);
-  font-weight: 300;
+  font-family: 'Lexend', sans-serif;
+  font-size: clamp(1.2rem, 5vw, 1.6rem);
+  font-weight: 400;
   font-style: normal;
   text-transform: uppercase;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.14em;
   color: rgba(255, 255, 255, 0.88);
   text-decoration: none;
-  line-height: 1.4;
+  line-height: 1.6;
   white-space: nowrap;
   transition: color 0.4s ease;
 }
@@ -192,29 +228,78 @@ nav.scrolled {
   margin-top: 2.8rem;
 }
 
-/* ── Responsive ── */
-@media (max-width: 900px) {
+/* ═══ RESPONSIVE BREAKPOINTS ═══
+ *  ≥1200px  — full desktop nav (current default)
+ *  1024-1199px — slightly tighter spacing, smaller links
+ *  768-1023px — inline nav still visible but very tight; reduces letter-spacing
+ *  ≤767px   — burger menu only (links + search hidden, language stays visible)
+ */
+
+/* Small desktop / large tablet landscape */
+@media (max-width: 1199px) {
   nav {
-    padding: 1.1rem 1.8rem;
+    padding: 1.2rem 2rem;
+    padding-left: max(2rem, env(safe-area-inset-left));
+    padding-right: max(2rem, env(safe-area-inset-right));
   }
   .nav-links {
     gap: 1.8rem;
   }
   .nav-links a {
-    font-size: 0.95rem;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
   }
 }
 
-@media (max-width: 600px) {
+/* Tablet portrait — last viable point for inline nav */
+@media (max-width: 1023px) {
   nav {
-    padding: 0.9rem 1.2rem;
+    padding: 1.05rem 1.6rem;
+    gap: 1.4rem;
   }
-  .nav-links,
-  .nav-search {
+  .nav-links {
+    gap: 1.2rem;
+  }
+  .nav-links a {
+    font-size: 0.74rem;
+    letter-spacing: 0.06em;
+  }
+  .nav-logo {
+    font-size: 1.2rem;
+  }
+}
+
+/* Mobile / small tablet — switch to burger */
+@media (max-width: 767px) {
+  nav {
+    padding: 0.85rem 1.1rem;
+    padding-left: max(1.1rem, env(safe-area-inset-left));
+    padding-right: max(1.1rem, env(safe-area-inset-right));
+    gap: 1rem;
+  }
+  .nav-links {
     display: none;
   }
   .nav-burger {
     display: flex;
+  }
+  .nav-logo {
+    font-size: 1.15rem;
+  }
+}
+
+/* Very small phones — tightest layout */
+@media (max-width: 380px) {
+  nav {
+    padding: 0.75rem 0.85rem;
+    padding-left: max(0.85rem, env(safe-area-inset-left));
+    padding-right: max(0.85rem, env(safe-area-inset-right));
+  }
+  .nav-logo {
+    font-size: 1.05rem;
+  }
+  .nav-right {
+    gap: 0.9rem;
   }
 }
 
@@ -234,15 +319,52 @@ nav.scrolled {
 [data-theme='light'] .nav-lang {
   color: rgba(80, 78, 96, 0.44);
 }
-[data-theme='light'] .nav-search {
-  color: rgba(80, 78, 96, 0.44);
+[data-theme='light'] .nav-theme {
+  color: rgba(80, 78, 96, 0.65);
 }
-[data-theme='light'] .nav-search:hover {
-  color: rgba(28, 28, 38, 0.88);
+[data-theme='light'] .nav-theme:hover {
+  color: rgba(28, 28, 38, 0.95);
 }
 [data-theme='light'] .nav-burger__line {
   background: rgba(28, 28, 38, 0.62);
 }
 [data-theme='light'] .nav-mobile__links a {
   color: rgba(14, 14, 20, 0.85);
+}
+
+/* ── Adaptive contrast: navbar over a [data-nav-overlay="dark"] section ──
+   Forces the dark-style (white) palette regardless of the active theme so
+   the nav stays legible while it floats over the cosmic hero. */
+[data-theme='light'] nav.over-dark .nav-logo {
+  color: rgba(240, 235, 225, 0.92);
+}
+[data-theme='light'] nav.over-dark .nav-logo:hover {
+  color: rgba(235, 226, 210, 1);
+}
+[data-theme='light'] nav.over-dark .nav-links a {
+  color: rgba(255, 255, 255, 0.88);
+}
+[data-theme='light'] nav.over-dark .nav-links a:hover {
+  color: #fff;
+}
+[data-theme='light'] nav.over-dark .nav-links a.active {
+  color: var(--gold);
+}
+[data-theme='light'] nav.over-dark .nav-lang {
+  color: rgba(210, 200, 185, 0.28);
+}
+[data-theme='light'] nav.over-dark .nav-lang:hover {
+  color: rgba(201, 169, 110, 0.65);
+}
+[data-theme='light'] nav.over-dark .nav-theme {
+  color: rgba(210, 200, 185, 0.55);
+}
+[data-theme='light'] nav.over-dark .nav-theme:hover {
+  color: rgba(228, 218, 200, 0.95);
+}
+[data-theme='light'] nav.over-dark .nav-burger__line {
+  background: rgba(210, 200, 185, 0.65);
+}
+[data-theme='light'] nav.over-dark.scrolled {
+  background: rgba(9, 8, 6, 0.62);
 }

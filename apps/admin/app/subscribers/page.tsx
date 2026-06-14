@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import SubscriberList from '../domains/subscribers/SubscriberList';
 import NotifySubscribers from '../domains/subscribers/NotifySubscribers';
 

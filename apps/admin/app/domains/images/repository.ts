@@ -4,7 +4,8 @@ import type { ImageDto, ListResponse } from '@sdarm/types';
 const LIMIT = 24;
 
 export async function fetchImages(page: number, unusedOnly?: boolean): Promise<ListResponse<ImageDto>> {
-  const url = new URL(`${API}/api/v1/admin/images`);
+  const base = API || window.location.origin;
+  const url = new URL(`${base}/api/v1/admin/images`);
   url.searchParams.set('limit', String(LIMIT));
   url.searchParams.set('offset', String((page - 1) * LIMIT));
   if (unusedOnly) url.searchParams.set('unused', '1');
@@ -14,9 +15,10 @@ export async function fetchImages(page: number, unusedOnly?: boolean): Promise<L
 }
 
 export async function uploadImage(file: File): Promise<{ key: string }> {
+  const base = API || window.location.origin;
   const form = new FormData();
   form.append('file', file);
-  const res = await fetch(`${API}/api/v1/admin/images/upload`, {
+  const res = await fetch(`${base}/api/v1/admin/images/upload`, {
     method: 'POST',
     headers: adminHeaders(),
     body: form,
@@ -26,7 +28,8 @@ export async function uploadImage(file: File): Promise<{ key: string }> {
 }
 
 export async function deleteImage(key: string): Promise<void> {
-  const res = await fetch(`${API}/api/v1/admin/images?key=${encodeURIComponent(key)}`, {
+  const base = API || window.location.origin;
+  const res = await fetch(`${base}/api/v1/admin/images?key=${encodeURIComponent(key)}`, {
     method: 'DELETE',
     headers: adminHeaders(),
   });

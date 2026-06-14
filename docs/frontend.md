@@ -8,13 +8,13 @@
 | `[locale]/layout.tsx` | Server (async) | Locale layout — validates locale, wraps in `<NextIntlClientProvider>`, renders `<html lang={locale}><body>` |
 | `[locale]/page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
 | `[locale]/posts/[slug]/page.tsx` | Server (async) | Post detail page |
-| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and secret 5-click logo theme toggle. |
-| `HeroSection` | **Client** | Featured-posts strip carousel with per-slide color tints, fog animation, deco-circle, side label counter. Includes "Receive a gift" button that opens `BookRequestModal`. |
+| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and a sun/moon theme toggle that dispatches `sdarm:toggle-theme`. |
+| `HeroWelcome` | **Server** (async) | 3D Earth landing hero — renders `<PlanetEarth />` with grain overlay, badge, title, subtitle, and CTA link to `/{locale}/about`. Uses `web.heroWelcome` i18n namespace. |
+| `PlanetEarth` | **Client** | Three.js WebGL globe with day/night textures, atmosphere shader, cloud layer. Self-hosted textures in `/public/textures/` (MIT, no CDN, DSGVO clean). |
 | `NewsSection` | **Client** | Static illustrated masonry grid — live news posts + static faith/event cards. Wired to API for news and latest video post. |
 | `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
 | `ScriptureVerseSection` | **Client** | Daily rotating Scripture verse with `QuoteShareModal`. Verse rotated hourly from `lib/verses.ts` (DE + EN). |
 | `GlaubensLongRead` | **Client** | 25 SDA Reform faith articles with accordion and hanging number layout. Detail content from sta-ref.de. |
-| `GlaubensReader` | **Client** | EpubReader-style layout (toolbar + sidebar + content) for the GlaubensGrid — used on the About page. |
 | `QuoteShareModal` | **Client** | Canvas-rendered verse share images. Themes: dark/light/paper. Formats: landscape (16:9), square (1:1), portrait (4:5). |
 | `Footer` | **Client** (`@sdarm/ui`) | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, location-aware sunset clock. Uses `useTranslations('common.footer')`. |
 
@@ -22,7 +22,7 @@
 
 `page.tsx` fetches in parallel: featured posts, news posts, latest video post, config — `cache: 'no-store'`. All return `null` on error → components fall back to static data silently.
 
-Data mappers: `toHeroPost`, `toNewsPost`, `toFooterConfig`.
+Data mappers: `toNewsPost`, `toFooterConfig`.
 
 ### Post detail page (`[locale]/posts/[slug]/page.tsx`)
 
@@ -32,28 +32,21 @@ Server component with edge runtime. Fetches single post + up to 5 other posts + 
 
 CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overlay`, `.post-back`, `.post-meta`, `.post-section`, `.post-section-label`, `.post-body`, `.post-video`, `.post-video-card`, `.post-video-play`, `.post-more-title`, `.post-grid`, `.post-card`, `.post-card-img`, `.post-card-title`, `.post-card-meta`.
 
-### HeroSection carousel
+### HeroWelcome
 
-`'use client'` strip carousel. Receives only **featured** posts (`isFeatured = true`) via `posts?: HeroPost[]`. Falls back to a static placeholder if array is empty.
+Server component (async). Renders the home page landing hero — no client bundle, no interactivity of its own.
 
-**`HeroPost` interface:**
+**What it renders:**
+- `<PlanetEarth />` — the Three.js WebGL globe (Client component, lazy-loaded)
+- Grain overlay div
+- Badge line (decorative dot + translated eyebrow text)
+- `<h1>` with gold italic accent via `t.rich()` and `<em>`
+- Subtitle paragraph
+- `<Link>` CTA button pointing to `/{locale}/about`
 
-| Field | Source | Used in |
-|---|---|---|
-| `title` | `posts.title` | Hero content h1 |
-| `meta` | formatted date + author | Side label eyebrow |
-| `body` | `posts.body` | Hero content paragraph |
-| `excerpt` | `posts.excerpt` | Strip card preview text (falls back to `title`) |
-| `imageUrl` | R2 cover key → URL | Kept in type but not rendered (no photo hero bg) |
-| `thumbUrl` | R2 thumb key → URL | Strip card thumbnail via `<Image>` |
-| `imageAlt` | `posts.cover_alt` | Alt text |
-| `slug` | `posts.slug` | React key |
+**i18n namespace:** `web.heroWelcome` (keys: `badge`, `title`, `subtitle`, `cta`).
 
-**Visual layers (bottom to top):** `.hero-base` (dark gradient) → `.hero-tint` (per-slide radial color tints, cross-fade on slide change) → `.fog` (animated pseudo-element blobs) → `.sculpture` (decorative radial glow) → `.deco-circle` (pulsing ring) → `.side-label` (eyebrow + counter) → `.hero-content` (title + subtitle) → `.strip-wrap` (card strip).
-
-**Behaviour:** 5 s auto-cycle, progress bar restarted via React `key`, hero text cross-fade (420 ms), tints cross-fade (1.1 s). Strip cards use flex-grow animation with `.active` / `.leaving` classes. Card numbers use Bebas Neue font.
-
-**Admin note:** `excerpt` is labelled **"Preview Text"** in PostForm — it drives the strip card text, not a traditional excerpt.
+**CSS class prefix:** `hero-welcome-*` — all classes are defined in `apps/web/app/globals.css`: `hero-welcome`, `hero-welcome-bg`, `hero-welcome-planet`, `hero-welcome-grain`, `hero-welcome-content`, `hero-welcome-badge`, `hero-welcome-badge-dot`, `hero-welcome-title`, `hero-welcome-sub`, `hero-welcome-cta`, `hero-welcome-cta-label`.
 
 ### NewsSection masonry gallery
 
@@ -87,12 +80,19 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 3. **Sunset clock** — SVG arc ring + countdown label
 
 **Sunset clock logic:**
-- On mount, fetches today + tomorrow sunrise/sunset from `https://api.sunrisesunset.io/json?lat=…&lng=…&timezone=…`
-- Location resolved via Nominatim (`nominatim.openstreetmap.org`) from a user-entered postal code (worldwide, not DE-only). Last chosen location persisted to `localStorage`.
-- Timezone determined dynamically via `Intl.DateTimeFormat().resolvedOptions().timeZone` (browser timezone, not hardcoded `Europe/Berlin`).
-- Parses `"HH:MM AM/PM"` strings → milliseconds since midnight
-- Updates every 15 s via `setInterval`; SVG ring transition is `1s linear`
+- Sunrise/sunset times computed locally via `suncalc` (no third-party API call → DSGVO clean)
+- Default location: Pforzheim, Baden-Württemberg. Persisted user picks override the default via `localStorage.sdarm_sunset_location`
+- Updates every 1 s via `setInterval`; SVG ring transition is `0.9s` cubic-bezier
 - SVG ring: `r=76`, `CIRC ≈ 477.52px`, `strokeDashoffset = CIRC * (1 - progress)`
+
+**Location state ownership:**
+Footer is the single owner of `current: StoredLocation = { lat, lng, name, slug? }`. The `<CommunityMap />` and the location autocomplete input are presentational consumers — they call `onPick(loc)` to change the current location. Storage helpers live in [packages/ui/src/lib/sunset-location.ts](../packages/ui/src/lib/sunset-location.ts) (`readStoredLocation`, `writeStoredLocation`, `findLocationSlug`). No CustomEvents, no global event-bus.
+
+**CommunityMap user-marker:**
+A single golden ring + dot is rendered at `current.lat/lng` whenever the picked location falls inside the map BBOX (Europe view). For locations outside the BBOX (e.g. Tokyo via Nominatim search), no marker is rendered but the sunset widget still works. The marker is the only visual indicator of "this is the picked location" — there is no separate active-pin highlight on LOCATION pins.
+
+**Location autocomplete input:**
+The input under the clock searches via `GET /api/v1/geocode?q=…&limit=N` — a KV-cached proxy to Nominatim that hides the user's IP from OpenStreetMap (DSGVO). Picking any suggestion calls `handlePickLocation`, which runs `findLocationSlug(name)` against `LOCATIONS` so a typed match (e.g. "Frankfurt") highlights the corresponding congregation pin via the user-marker landing on it.
 
 **4 Sabbath-aware states** (determined by `new Date().getDay()` + time of day):
 
@@ -107,23 +107,58 @@ CSS classes (in `globals.css`): `.post-hero`, `.post-hero-bg`, `.post-hero-overl
 
 **Fallback:** API fetch failure is silently swallowed; clock stays at `'–:––'` / `'…'` placeholder.
 
-### ThemeProvider
+### ThemeScript + ThemeProvider
 
-`ThemeProvider` (from `@sdarm/ui`) is a `'use client'` component that manages the light/dark theme toggle. Place it once in `[locale]/layout.tsx`, rendered before `{children}`.
+Theme handling is split across two components. Both must be present in every `[locale]/layout.tsx`.
 
-- On mount: reads `localStorage` key `sdarm-theme` and applies `data-theme` attribute to `<html>`.
-- Listens for custom event `sdarm:toggle-theme` (dispatched by Navbar's secret 5-click logo) and toggles between `dark` and `light`.
-- Light theme overrides are defined in `packages/ui/src/styles/tokens.css` via `[data-theme="light"]` selector.
+**`ThemeScript`** — server component that renders a tiny synchronous inline `<script>` into `<head>`. Runs **before first paint** and applies `data-theme` to `<html>`. Reads (in order):
+1. `?theme=dark|light` query param — set by cross-app links (see [Cross-subdomain theme persistence](#cross-subdomain-theme-persistence) below). Wins over storage.
+2. `localStorage.sdarm-theme` — set when the user toggled in the current app.
+
+If the URL carried `?theme=`, the script also writes it to `localStorage` and strips the param via `history.replaceState` so it doesn't litter the address bar.
+
+**`ThemeProvider`** — `'use client'` component placed inside `<body>`. Listens for the `sdarm:toggle-theme` custom event (dispatched by the Navbar sun/moon button) and toggles `data-theme` on `<html>` + persists the new value to `localStorage`.
+
+Together: `ThemeScript` handles the initial render (no flash), `ThemeProvider` handles runtime toggling. The toggle UI is the sun/moon icon in the Navbar — sun shows in dark theme, moon shows in light theme (icon swap is pure CSS, no React state, no hydration concern).
+
+- Storage key: `sdarm-theme`, values `'dark'` | `'light'`.
+- SSR default is `'dark'` — the common case for first-time visitors paints correctly with zero flash. `ThemeScript` only overrides when a visitor has explicitly stored `'light'`.
+- `<html>` is rendered with `suppressHydrationWarning` because `ThemeScript` mutates `data-theme` before React hydrates, which would otherwise emit a hydration mismatch warning (same approach used by `next-themes`).
+- Light theme overrides are defined in `packages/ui/src/styles/tokens.css` via the `[data-theme="light"]` selector.
 
 ```tsx
+// app/layout.tsx (root)
+import { ThemeScript } from '@sdarm/ui';
+// ...
+<html lang={locale} data-theme="dark" suppressHydrationWarning>
+  <head>
+    <ThemeScript />
+  </head>
+  <body>{children}</body>
+</html>
+
 // [locale]/layout.tsx
 import { ThemeProvider } from '@sdarm/ui';
 // ...
-<body>
-  <ThemeProvider />
-  {children}
-</body>
+return (
+  <>
+    <ThemeProvider />
+    {children}
+  </>
+);
 ```
+
+The `data-theme="dark"` on `<html>` is the SSR default; `ThemeScript` overrides it inline before the browser paints anything if the user has stored `'light'` or arrived via a `?theme=` link.
+
+#### Cross-subdomain theme persistence
+
+`localStorage` is per-origin, so a value written on `sdarm.life` is invisible to `songs.sdarm.life`, `events.sdarm.life`, and `treasures.sdarm.life`. Cookies would solve this but are off-limits in this project (see [docs/dsgvo.md](dsgvo.md)). Instead, the theme rides along on the URL:
+
+- `Navbar`, `Footer`, `NewsSection`, and `ScriptureVerseSection` all import `useCurrentTheme()` + `withTheme()` from `@sdarm/ui` and append `?theme=dark|light` to every cross-app `href`.
+- The destination app's `ThemeScript` reads the param, persists it to `localStorage`, applies it to `<html>` before first paint, and strips it from the URL via `history.replaceState`.
+- Result: the user toggles on `sdarm.life`, clicks "Songs", lands on `songs.sdarm.life` with the same theme — no flash, no extra round trips, no cookies.
+
+When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `withTheme(url, theme)` if the destination is a different subdomain.
 
 ### SEO and structured data (`apps/web`)
 
@@ -134,9 +169,9 @@ import { ThemeProvider } from '@sdarm/ui';
 
 ### Layout notes
 
-- Never add `export const runtime = 'edge'` to `layout.tsx` — set it only on individual page files.
-- Root `layout.tsx` is minimal: imports CSS, returns `{children}`. No `<html>` or `<body>` tags — those are in the `[locale]/layout.tsx`.
-- `[locale]/layout.tsx` validates the locale, calls `setRequestLocale()`, wraps children in `<NextIntlClientProvider messages={messages}>`, renders `<ThemeProvider />`, then `<html lang={locale}><body>`.
+- Never add `export const runtime = 'edge'` to any file — `@opennextjs/cloudflare` builds the entire app as a single Worker already on the edge runtime; per-file declarations cause the build to fail (see [gotchas.md](gotchas.md)).
+- Root `layout.tsx` is an async server component. It imports CSS, calls `await getLocale()` from `next-intl/server`, and renders `<html lang={locale} data-theme="dark" suppressHydrationWarning>` with `<ThemeScript />` inside `<head>` and `<body>{children}</body>`. Next 16 requires `<html>` and `<body>` to live in the root layout — they cannot be deferred to a child layout (see [gotchas.md](gotchas.md)).
+- `[locale]/layout.tsx` validates the locale, calls `setRequestLocale()`, and returns a fragment (no `<html>`/`<body>`) containing `<ThemeProvider />` and a `<NextIntlClientProvider>`. In `apps/web`, the provider wraps only `{children}` (JSON-LD `<script>` tags sit outside the provider); in `apps/events`, `apps/songbook`, and `apps/treasures`, the provider wraps `<ConnectedNavbar />`, `{children}`, and `<ConnectedFooter />`.
 - All page files under `[locale]/` receive `params: Promise<{ locale: string }>` and call `setRequestLocale(locale)` at the top. Server components use `getTranslations()`, client components use `useTranslations()`.
 
 ---
@@ -249,6 +284,49 @@ Main screen (presenter)              External screen (display window)
 
 ---
 
+## `apps/treasures` component map
+
+| Component | Type | Notes |
+|---|---|---|
+| `TreasureCatalog` | **Client** | Catalog page — `PageHero` + scripture quote + filter bar + paginated grid of `TreasureCard`s. Owns category/language filter state and pagination. Page size is 8 (2 rows × 4 cols on desktop). |
+| `TreasureCard` | **Client** | One book entry: `Book3DCover` on the visual side, title row + author + description + price/free badge on the body side. Always links to `/{locale}/books/{id}` — epub books open the reader, non-epub books open `BookDetail`. |
+| `Book3DCover` | **Client** | Perspective-tilted 3D book rendering with drop shadow. Renders a face image when one is available, otherwise a museum-tone gradient fallback with a glyph + title. |
+| `TreasuresFilterBar` | Client | Category + language filter chips. Emits `onChange`. |
+| `BookRequestModal` | Client | Free-book delivery request form. Posts to `POST /api/v1/book-request`. |
+
+### Book3DCover
+
+Renders a book as a perspective-rotated figure with three stacked elements — a side `tome-edge` (page block), a top `tome-bind` (binding strip), and the front `tome-face` (cover image or gradient placeholder). The depth of the page block scales with the book's known page count so a thick book reads visibly thicker than a slim one.
+
+**Props:**
+
+| Prop | Type | Notes |
+|---|---|---|
+| `src` | `string \| null` | Cover image URL. If `null`, the `tome-face--blank` variant renders with a glyph and the title text. |
+| `alt` | `string` | Alt text for the `<img>` when `src` is set. |
+| `title` | `string?` | Used for (a) the deterministic fallback hue picker, (b) the page-count → depth lookup, (c) the visible label on blank covers. |
+| `accentColor` | `string?` | Overrides the spine colour (`--tome-spine`) for books with a brand colour configured in the DB. |
+| `gradient` | `string?` | Overrides the front-face gradient (`--tome-skin`) when no cover image is uploaded. |
+
+**Depth model:** `BOOK_PAGES` maps known EGW titles (DE / EN / RU editions) to page counts. Page count is mapped to pixel depth via a linear scale (96 → 12 px, 835 → 24 px, clamped). Unknown titles fall back to a hash-derived value in the 14–20 px range so depth is stable across renders without being uniform.
+
+**Fallback hues:** Six museum-tone palettes are picked deterministically by hashing the title — same book → same hue every render and on every breakpoint.
+
+### Cover source
+
+`TreasureCard` resolves the cover image solely from `treasure.coverKey`:
+
+- `coverKey` set → `r2url(coverKey, { w: 200, q: 85 })` (Cloudflare Image Transformations in production, raw R2 in local dev).
+- `coverKey` null → `Book3DCover` renders the blank `tome-face--blank` variant (gradient + glyph + title).
+
+No external image hosts are contacted from the catalog. Covers are uploaded through Admin → Treasures → Edit → Cover image (the same `<ImagePicker>` used by posts), which stores the file under `uploads/<uuid>.<ext>` in R2 and tracks it in the `images` D1 table.
+
+### TreasureCatalog layout
+
+`PageHero` (book SVG decoration) → `ScriptureQuote` → `TreasuresFilterBar` → 4-column grid of `TreasureCard`s (2 cols on tablet, 1 col on mobile) → pagination (`pageRange()` with ellipses when more than 7 pages). Cards stagger in via the `.visible` class on `.item-card` (55 ms × index, capped at the first 20 cards).
+
+---
+
 ## `@sdarm/ui` shared components
 
 All public-facing apps (`web`, `songbook`, `treasures`, `events`) import from `@sdarm/ui`. **Check here before building something from scratch** — the hero, footer, nav, and quote band are already done.
@@ -263,7 +341,8 @@ import '@sdarm/ui/src/styles/index.css';
 
 | Component | Import | Notes |
 |---|---|---|
-| `ThemeProvider` | `@sdarm/ui` | Client component. Place once in `[locale]/layout.tsx`. Reads/writes `localStorage` and sets `data-theme` on `<html>`. No visible output. |
+| `ThemeScript` | `@sdarm/ui` | Server component. Renders a synchronous inline `<script>` inside `<head>` that reads `localStorage.sdarm-theme` and applies `data-theme` to `<html>` before first paint. Prevents FOUC. |
+| `ThemeProvider` | `@sdarm/ui` | Client component. Place inside `<body>` once per `[locale]/layout.tsx`. Listens for `sdarm:toggle-theme` and toggles `data-theme` on `<html>`. Persists to `localStorage`. No visible output. |
 | `ConnectedNavbar` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads nav translations internally. Use in every locale layout. |
 | `ConnectedFooter` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads footer translations + `apiUrl` from env internally. Use in every locale layout. |
 | `PageHero` | `@sdarm/ui` | Full-bleed dark landing hero. Pass `title` (ReactNode), `eyebrow?`, `subtitle?`, `decoration?` (SVG), `scrollHint?`. Already has grain, fog, deco-circle, entrance animations — **do not re-implement these**. |
@@ -304,7 +383,7 @@ The `<em>` inside `title` renders in `--gold` italic. Use `t.rich()` with `{ em:
 
 **Fetch at the page level, map to component types, pass down as props.** Sections do not fetch independently.
 
-**Mapper functions** (`toHeroPost`, `toNewsPost`, etc.) convert `PostDto` shapes into component-specific types. If used by one page only, they live in that page file. If used by two or more pages, move to `lib/api.ts`. Keep them pure.
+**Mapper functions** (`toNewsPost`, `toFooterConfig`, etc.) convert `PostDto` shapes into component-specific types. If used by one page only, they live in that page file. If used by two or more pages, move to `lib/api.ts`. Keep them pure.
 
 **Fetch errors are silent.** Fetchers return `null` on any error; components render a static fallback. Do not propagate fetch errors to the UI.
 
@@ -328,10 +407,9 @@ R2 images are served through Cloudflare Image Transformations in production. `r2
 
 | Context | Transform |
 |---|---|
-| Hero cover / post detail cover | `w: 1200, q: 85` |
+| Post detail cover | `w: 1200, q: 85` |
 | News cards | `w: 600, h: 400` |
 | Related post cards | `w: 400, h: 300` |
-| Hero strip thumbnails | `w: 300, h: 200` |
 | About page image | `w: 800` |
 | Songbook sheet images | `w: 1200, q: 90` |
 | Songbook sheet PDFs | no transform |

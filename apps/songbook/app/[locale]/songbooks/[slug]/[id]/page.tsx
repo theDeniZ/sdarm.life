@@ -3,8 +3,6 @@ import { fetchSong, fetchSongbook, fetchSongs } from '@/app/lib/api';
 import ReaderLayout from '@/app/components/ReaderLayout';
 import ProjectorOnly from '@/app/components/ProjectorOnly';
 
-export const runtime = 'edge';
-
 export default async function SongPage({
   params,
   searchParams,

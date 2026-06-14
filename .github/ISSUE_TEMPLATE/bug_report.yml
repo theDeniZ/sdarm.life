@@ -1,0 +1,95 @@
+name: "🐛 Bug Report"
+description: "Report something that's not working as expected"
+labels: ["bug"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! Help us squash this bug by providing clear details.
+
+  - type: input
+    id: title
+    attributes:
+      label: "What's the bug?"
+      placeholder: "e.g., Song search crashes when query contains special characters"
+      description: "A short, clear summary of the issue"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: "Describe the bug"
+      placeholder: |
+        Example:
+        When I try to search for songs with brackets like "[song]", the page throws an error instead of showing results.
+      description: "A clear description of what's broken"
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: "How to reproduce?"
+      placeholder: |
+        1. Go to the songbook search page
+        2. Type "[test]" in the search box
+        3. Press Enter
+        4. Observe the error
+      description: "Step-by-step instructions to reproduce the issue"
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: "What should happen?"
+      placeholder: |
+        Example:
+        The search should find songs matching the query and display them in a list, regardless of special characters.
+      description: "What did you expect to see instead?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: "Environment"
+      placeholder: |
+        - Browser: Chrome 125 / Firefox 126 / Safari 17
+        - OS: macOS / Windows / Linux / iOS / Android
+        - Device: Desktop / Mobile / Tablet
+        - URL: https://songs.sdarm.life/de/...
+      description: "Browser, OS, device, and any relevant URLs"
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: "Screenshots or screen recording (optional)"
+      placeholder: "Paste images/videos directly or describe what the error looks like"
+      description: "Visual evidence helps us fix it faster"
+
+  - type: dropdown
+    id: app
+    attributes:
+      label: "Which app? (optional)"
+      options:
+        - "Web (sdarm.life)"
+        - "Admin (admin.sdarm.life)"
+        - "Songbook (songs.sdarm.life)"
+        - "Treasures (treasures.sdarm.life)"
+        - "Events (events.sdarm.life)"
+        - "API (api.sdarm.life)"
+        - "Other / Not sure"
+
+  - type: checkboxes
+    id: severity
+    attributes:
+      label: "Severity (optional)"
+      description: "How much does this impact usage?"
+      options:
+        - label: "🔴 Critical — breaks core functionality / causes data loss"
+        - label: "🟠 High — major feature doesn't work"
+        - label: "🟡 Medium — feature partially broken or workaround exists"
+        - label: "🟢 Low — cosmetic issue or minor inconvenience"

@@ -34,15 +34,13 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body>
-        <ThemeProvider />
-        <NextIntlClientProvider messages={messages}>
-          <ConnectedNavbar locale={locale} />
-          {children}
-          <ConnectedFooter locale={locale} />
-        </NextIntlClientProvider>
-      </body>
-    </html>
+    <>
+      <ThemeProvider />
+      <NextIntlClientProvider messages={messages}>
+        <ConnectedNavbar locale={locale} />
+        {children}
+        <ConnectedFooter locale={locale} />
+      </NextIntlClientProvider>
+    </>
   );
 }

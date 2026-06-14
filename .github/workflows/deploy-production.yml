@@ -1,0 +1,110 @@
+name: Deploy Production
+
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+' # semver only — does not match v1.2.3-rc.1
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  build-api:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - run: pnpm turbo build --filter=@sdarm/api
+
+  build-pages:
+    strategy:
+      matrix:
+        include:
+          - filter: '@sdarm/web'
+            artifact: web-dist
+            path: apps/web/.vercel/output/static
+          - filter: '@sdarm/songbook'
+            artifact: songbook-dist
+            path: apps/songbook/.vercel/output/static
+          - filter: '@sdarm/events'
+            artifact: events-dist
+            path: apps/events/.vercel/output/static
+          - filter: '@sdarm/treasures'
+            artifact: treasures-dist
+            path: apps/treasures/.vercel/output/static
+    uses: ./.github/workflows/_build-pages.yml
+    with:
+      filter: ${{ matrix.filter }}
+      artifact-name: ${{ matrix.artifact }}
+      dist-path: ${{ matrix.path }}
+
+  build-admin:
+    uses: ./.github/workflows/_build-pages.yml
+    with:
+      filter: '@sdarm/admin'
+      artifact-name: admin-dist
+      dist-path: apps/admin/.vercel/output/static
+    secrets:
+      NEXT_PUBLIC_API_KEY: ${{ secrets.API_KEY }}
+
+  migrate:
+    needs: [build-api, build-pages, build-admin]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: d1 migrations apply sdarm-db --remote
+
+  sync-secrets:
+    needs: [build-api, build-pages, build-admin]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          secrets: |
+            API_KEY
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+
+  deploy-api:
+    needs: [migrate, sync-secrets]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+
+  deploy-pages:
+    needs: deploy-api
+    strategy:
+      matrix:
+        include:
+          - artifact: web-dist
+            project: web-sdarm-life
+          - artifact: admin-dist
+            project: admin-sdarm-life
+          - artifact: songbook-dist
+            project: songs-sdarm-life
+          - artifact: events-dist
+            project: events-sdarm-life
+          - artifact: treasures-dist
+            project: treasures-sdarm-life
+    uses: ./.github/workflows/_deploy-pages.yml
+    with:
+      artifact-name: ${{ matrix.artifact }}
+      project-name: ${{ matrix.project }}
+    secrets: inherit

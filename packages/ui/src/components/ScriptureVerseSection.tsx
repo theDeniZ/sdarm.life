@@ -1,4 +1,7 @@
+'use client';
+
 import type { ReactNode } from 'react';
+import { useCurrentTheme, withTheme } from '../lib/theme-link';
 
 export interface ScriptureVerseSectionProps {
   eyebrow?: string;
@@ -8,6 +11,8 @@ export interface ScriptureVerseSectionProps {
 }
 
 export default function ScriptureVerseSection({ eyebrow, text, reference, href }: ScriptureVerseSectionProps) {
+  const theme = useCurrentTheme();
+
   const inner = (
     <section className="scripture-verse">
       <div className="scripture-verse-inner">
@@ -26,7 +31,7 @@ export default function ScriptureVerseSection({ eyebrow, text, reference, href }
 
   if (href) {
     return (
-      <a href={href} className="scripture-verse-link">
+      <a href={withTheme(href, theme)} className="scripture-verse-link">
         {inner}
       </a>
     );

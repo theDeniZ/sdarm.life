@@ -1,0 +1,57 @@
+name: Build Pages App
+
+on:
+  workflow_call:
+    inputs:
+      filter:
+        description: pnpm workspace filter (e.g. '@sdarm/web')
+        required: true
+        type: string
+      artifact-name:
+        required: true
+        type: string
+      dist-path:
+        required: true
+        type: string
+      next-public-r2-url:
+        description: Override NEXT_PUBLIC_R2_URL (staging admin build only).
+        required: false
+        type: string
+        default: ''
+      upload-artifact:
+        description: Whether to upload the build artifact. Set to false on PR builds (build still runs for verification).
+        required: false
+        type: boolean
+        default: true
+    secrets:
+      NEXT_PUBLIC_API_KEY:
+        description: Value for NEXT_PUBLIC_API_KEY (admin builds only).
+        required: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Set staging R2 URL
+        if: inputs.next-public-r2-url != ''
+        run: echo "NEXT_PUBLIC_R2_URL=${{ inputs.next-public-r2-url }}" >> $GITHUB_ENV
+      - run: pnpm --filter ${{ inputs.filter }} pages:build
+        env:
+          NEXT_PUBLIC_API_KEY: ${{ secrets.NEXT_PUBLIC_API_KEY }}
+      - uses: actions/upload-artifact@v7
+        if: inputs.upload-artifact
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.dist-path }}
+          include-hidden-files: true
+          retention-days: 1

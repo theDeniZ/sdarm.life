@@ -3,6 +3,27 @@ set -e
 
 echo "🚀 Setting up sdarm.life dev environment..."
 
+# Restore Claude Code data into the persisted named volume on first boot.
+# The tarball is created manually before a rebuild and survives because the
+# workspace is host-bind-mounted. Once restored, the tarball is deleted so
+# we don't keep clobbering the volume on every subsequent rebuild.
+CLAUDE_BACKUP="/workspaces/sdarm.life/.claude-backup.tgz"
+if [ -f "$CLAUDE_BACKUP" ]; then
+	if [ -z "$(ls -A "$HOME/.claude" 2>/dev/null)" ]; then
+		echo "📦 Restoring Claude Code data from $CLAUDE_BACKUP into volume..."
+		tar -xzf "$CLAUDE_BACKUP" -C "$HOME/.claude"
+		rm -f "$CLAUDE_BACKUP"
+		echo "✅ Claude Code data restored; backup tarball removed"
+	else
+		echo "ℹ️  Claude volume already populated; leaving $CLAUDE_BACKUP in place (delete manually if no longer needed)"
+	fi
+fi
+
+# Initialize Git LFS
+echo "🗄️  Initializing Git LFS..."
+git lfs install
+echo "✅ Git LFS initialized"
+
 # Install project dependencies
 echo "📚 Installing project dependencies..."
 pnpm install
@@ -10,6 +31,11 @@ pnpm install
 # Generate Wrangler types for the API
 echo "🔧 Generating Wrangler types for API..."
 pnpm --filter @sdarm/api cf-typegen
+
+# Install Playwright browsers
+echo "🎭 Installing Playwright browsers..."
+pnpm exec playwright install chromium
+echo "✅ Playwright browsers installed"
 
 # Build packages
 echo "🏗️ Building packages (db, types)..."
@@ -20,9 +46,8 @@ echo "⚙️ Creating env files..."
 
 if [ ! -f apps/api/.dev.vars ]; then
 	cat > apps/api/.dev.vars << 'EOF'
-# Cloudflare Secrets - fill in for local testing
-# CF_CLIENT_ID=your_id
-# CF_CLIENT_SECRET=your_secret
+# Worker secrets for local development
+API_KEY=dev
 EOF
 	echo "✅ Created apps/api/.dev.vars"
 fi
@@ -37,10 +62,12 @@ fi
 
 if [ ! -f apps/admin/.env.local ]; then
 	cat > apps/admin/.env.local << 'EOF'
-# Add any local env vars for admin app here
-NEXT_PUBLIC_API_URL=http://localhost:8787
-NEXT_PUBLIC_CF_CLIENT_ID=dev
-NEXT_PUBLIC_CF_CLIENT_SECRET=dev
+# Server-side only — the admin Next.js app proxies requests through
+# /app/api/v1/[...path]/route.ts, which attaches Authorization server-side.
+# Never use NEXT_PUBLIC_* for API_KEY: it would leak into the browser bundle.
+API_URL=http://localhost:8787
+API_KEY=dev
+NEXT_PUBLIC_R2_URL=http://localhost:8787/api/v1/images
 EOF
 	echo "✅ Created apps/admin/.env.local"
 fi

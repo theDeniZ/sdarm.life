@@ -1,16 +1,27 @@
 # sdarm.life — Claude Context
 
+Following 4 rules are imperative to follow at all times:
+1. Don’t assume. Don’t hide confusion. Surface tradeoffs.
+2. Minimum code that solves the problem. Nothing speculative.
+3. Touch only what you must. Clean up only your own mess.
+4. Define success criteria. Loop until verified.
+
+⚠️ **CRITICAL RULE:** All Claude documentation files, comments, and content must be written in **English only**. No exceptions. German, French, or any other language is forbidden in these files. (The user-facing web content in `apps/` uses `de` and `en` — this rule applies to dev context only.)
+
+---
+
 Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Cloudflare.
 
 ## Apps
 
 | Package | URL | Stack |
 |---|---|---|
-| `@sdarm/web` | `sdarm.life` | Next.js 15 public site |
-| `@sdarm/admin` | `admin.sdarm.life` | Next.js 15 admin UI |
+| `@sdarm/web` | `sdarm.life` | Next.js 16 public site |
+| `@sdarm/admin` | `admin.sdarm.life` | Next.js 16 admin UI |
 | `@sdarm/api` | `api.sdarm.life` | Hono Cloudflare Worker |
-| `@sdarm/events` | `events.sdarm.life` | Next.js 15 events landing page |
-| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 15 analog treasures site |
+| `@sdarm/events` | `events.sdarm.life` | Next.js 16 events landing page |
+| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 16 analog treasures site |
+| `@sdarm/songbook` | `songs.sdarm.life` | Next.js 16 songbook site |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
 | `@sdarm/types` | — | Shared API response DTO interfaces |
 | `@sdarm/ui` | — | Shared React components + dark museum CSS design system |
@@ -26,12 +37,13 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | R2 bucket | `sdarm-images` |
 | KV namespace | `sdarm-kv` — stores site config as single JSON key |
 | Worker | `sdarm-api` |
-| Pages (web) | `sdarm-web` |
-| Pages (admin) | `sdarm-admin` |
-| Pages (events) | `sdarm-events` |
-| Pages (treasures) | `sdarm-treasures` |
+| Worker | `sdarm-web` |
+| Worker | `sdarm-admin` |
+| Worker | `sdarm-events` |
+| Worker | `sdarm-treasures` |
+| Worker | `sdarm-songbook` |
 
-Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV namespace), `CF_CLIENT_ID` (secret), `CF_CLIENT_SECRET` (secret).
+Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV namespace). Secrets: `API_KEY`, `RESEND_API_KEY`, `CF_ZONE_ID?`, `CF_PURGE_TOKEN?`.
 
 ## Domain routing
 
@@ -43,6 +55,9 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 | `images.sdarm.life` | R2 public bucket | Public |
 | `events.sdarm.life` | `apps/events` | Public |
 | `treasures.sdarm.life` | `apps/treasures` | Public |
+| `songs.sdarm.life` | `apps/songbook` | Public |
+
+⚠️ **Reference for manual git work:** @docs/gitflow.md — guidelines for how you work with git. Claude does not automatically commit or push.
 
 @docs/schema.md
 @docs/api.md
@@ -50,6 +65,8 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 @docs/architecture.md
 @docs/conventions.md
 @docs/gotchas.md
+@docs/dsgvo.md
+@docs/testing.md
 
 ## Agent patterns
 

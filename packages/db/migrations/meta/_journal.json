@@ -64,6 +64,13 @@
       "when": 1774245173344,
       "tag": "0008_tan_karma",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "6",
+      "when": 1776636184109,
+      "tag": "0009_abandoned_tattoo",
+      "breakpoints": true
     }
   ]
 }

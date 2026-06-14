@@ -27,6 +27,7 @@ export interface SubscriberDto {
   id: number;
   email: string;
   language: string;
+  confirmedAt: string | null;
   createdAt: string;
 }
 
@@ -54,6 +55,7 @@ export interface SongListItemDto {
   title: string;
   author: string | null;
   copyright: string | null;
+  matchType?: 'title' | 'number' | 'lyrics' | null;
 }
 
 export type SongPartType = 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda';

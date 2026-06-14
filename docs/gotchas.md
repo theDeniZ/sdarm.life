@@ -3,16 +3,22 @@
 ## Next.js / React
 
 - **`fetch().json<T>()`** — generic `.json<T>()` is Cloudflare Workers-only. In Next.js always use `(await res.json()) as T`.
-- **`export const runtime = 'edge'` in layout breaks the build** — set it only on individual page files, never on `layout.tsx`.
+- **`export const runtime = 'edge'` must NOT appear in any file** — `@opennextjs/cloudflare` builds the entire app into a single Cloudflare Worker that already runs on the edge runtime. Per-page edge declarations cause the build to fail. Remove them from all page files.
+- **Next 16 root layout must render `<html>` and `<body>`** — deferring them to `[locale]/layout.tsx` (the Next 15 pattern) now throws `Missing <html> and <body> tags in the root layout` and renders the default 404. Each public app's `app/layout.tsx` reads the locale with `await getLocale()` from `next-intl/server` and renders the outer shell; `[locale]/layout.tsx` returns a fragment with `<ThemeProvider />` + providers + Navbar/Footer.
 - **Internal navigation must use `<Link>`** — plain `<a href>` causes a full page reload. Use `next/link` for SPA navigation.
 - **Passing server env vars to client components** — `apps/web` uses server-only env vars (`API_URL`, `R2_URL`). Pass them as props from the server component. Do not add `NEXT_PUBLIC_` prefixes. Example: `Footer` receives `apiUrl={process.env.API_URL}`.
 - **`BgCanvas` is no longer used on the home page** — removed during the dark theme redesign. The file still exists for potential future use. Do not re-add it to `layout.tsx`.
 
 ## Build / dependencies
 
-- **Next.js version** — both apps use **15.2.2** (not 16). Next.js 16 Turbopack fails inside `vercel build` in a monorepo.
-- **`@cloudflare/next-on-pages`** — requires `vercel@47.0.4` pinned as devDep. Later versions break the build. Requires `nodejs_compat` flag set in the Pages project settings.
-- **`setupDevPlatform` in `next.config.ts`** — use `.then()`, not top-level `await`. Next.js 15 compiles config to CJS.
+- **Next.js version** — all apps use **16.x**. Use `"build": "next build --webpack"` in every app's `package.json` — Turbopack is the Next.js 16 default but fails inside `vercel build` in a pnpm monorepo. The `--webpack` flag bypasses Turbopack for CI/Cloudflare builds while keeping Turbopack for `next dev`.
+- **`turbopack.root` in `next.config.ts`** — required for `next dev` (local development) in a pnpm monorepo. Set to `path.resolve(process.cwd(), '../..')` (the monorepo root). Not needed for production builds since `--webpack` skips Turbopack entirely.
+- **`@opennextjs/cloudflare`** — replaces the archived `@cloudflare/next-on-pages`. Deploys to **Cloudflare Workers** (not Pages). Output is `.open-next/worker.js` + `.open-next/assets/`. Each app needs a `wrangler.jsonc` (pointing at `.open-next/worker.js`) and an `open-next.config.ts`. Build with `pnpm pages:build` (`opennextjs-cloudflare build`).
+- **`open-next.config.ts` is required** — the build fails without it. Use `staticAssetsIncrementalCache` (not `r2IncrementalCache`) for apps that don't use ISR — it requires no extra R2 binding.
+- **`initOpenNextCloudflareForDev()` in `next.config.ts`** — replaces `setupDevPlatform()`. Call it unconditionally at the top level (no `if (process.env.NODE_ENV === 'development')` guard, no `.then()`).
+- **`global_fetch_strictly_public` compatibility flag** — required in `wrangler.jsonc` for `@opennextjs/cloudflare`.
+- **Node 24 `cpSync` on Docker overlay/bind-mount** — `fs.cpSync` with `recursive:true` on a directory fails with EACCES on overlay filesystems in Node 24. `tools/patch-cp.cjs` patches it to use `cp -r`. All `pages:build` scripts load it via `NODE_OPTIONS='--require ../../tools/patch-cp.cjs'`.
+- **Server env vars for Workers** — runtime vars (`API_URL`, `WEB_URL`, etc.) are set in `wrangler.jsonc` under `vars` (and `env.staging.vars` for staging). `NEXT_PUBLIC_*` vars are still build-time only.
 - **`drizzle-orm` in `@sdarm/api`** — must be a direct dependency (not just in `@sdarm/db`). Wrangler bundles per-package and won't hoist workspace deps.
 
 ## Database / Drizzle

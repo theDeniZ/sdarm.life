@@ -52,23 +52,27 @@ No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
 | `R2_URL`        | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`      |
 | `WEB_URL`       | `http://localhost:3000`               | `https://sdarm.life`             |
 | `TREASURES_URL` | `http://localhost:3002`               | `https://treasures.sdarm.life`   |
+| `SONGBOOK_URL`  | `http://localhost:3003`               | `https://songs.sdarm.life`       |
+| `EVENTS_URL`    | `http://localhost:3004`               | `https://events.sdarm.life`      |
 | `R2_TRANSFORMS` | _(not set)_                           | _(not set — enabled by default)_ |
 
 Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — pass as props from the server component.
 
-`WEB_URL` and `TREASURES_URL` are used to build cross-app links (e.g. book request links back to the web app). Never hardcode these URLs — always read from `lib/api.ts`.
+`WEB_URL`, `TREASURES_URL`, `SONGBOOK_URL`, and `EVENTS_URL` are used to build cross-app links (e.g. NewsSection cards linking to other apps). Never hardcode these URLs — always read from `lib/api.ts`.
 
 `R2_TRANSFORMS` is an emergency kill switch. Set to `false` to disable Cloudflare Image Transformations and serve raw R2 URLs. Leave unset for normal operation.
 
 ### `apps/admin`
 
-| Variable              | Dev (`.env.local`)                    | Production                  |
-| --------------------- | ------------------------------------- | --------------------------- |
-| `NEXT_PUBLIC_API_URL` | `http://localhost:8787`               | `https://api.sdarm.life`    |
-| `NEXT_PUBLIC_R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` |
-| `NEXT_PUBLIC_API_KEY` | `dev`                                 | managed API key             |
+| Variable              | Dev (`.env.local`)                    | Production                  | Scope       |
+| --------------------- | ------------------------------------- | --------------------------- | ----------- |
+| `API_URL`             | `http://localhost:8787`               | `https://api.sdarm.life`    | server-only |
+| `API_KEY`             | `dev`                                 | managed API key             | **server-only** |
+| `NEXT_PUBLIC_R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` | browser OK  |
 
-`NEXT_PUBLIC_API_URL` has **no `/api/v1` suffix** — components append the full path themselves.
+**Never prefix `API_KEY` with `NEXT_PUBLIC_`** — it would embed the bearer token in the JS bundle. Admin API calls go same-origin (`/api/v1/*`) and are proxied server-side by `apps/admin/app/api/v1/[...path]/route.ts`, which injects the bearer from the server-only `API_KEY` env var.
+
+`API_URL` has **no `/api/v1` suffix** — the proxy appends the path itself.
 
 ### `apps/songbook`
 
@@ -78,6 +82,17 @@ Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — 
 | `R2_TRANSFORMS` | _(not set)_             | _(not set — enabled by default)_ |
 
 Server-only (no `NEXT_PUBLIC_` prefix). `R2_TRANSFORMS` — same kill switch as `apps/web`.
+
+### `apps/treasures`
+
+| Variable              | Dev (`.env.local`)                    | Production fallback              | Scope      |
+| --------------------- | ------------------------------------- | -------------------------------- | ---------- |
+| `API_URL`             | `http://localhost:8787/api/v1`        | `https://api.sdarm.life/api/v1`  | server-only |
+| `R2_URL`              | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`      | server-only |
+| `NEXT_PUBLIC_R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`      | browser OK  |
+| `R2_TRANSFORMS`       | _(not set)_                           | _(not set — enabled by default)_ | server-only |
+
+`NEXT_PUBLIC_R2_URL` is required because `TreasureCard` and other client components resolve R2 image URLs at runtime. `process.env.R2_URL` is server-only in Next.js and would always fall back to the production URL in the browser bundle, causing 404s in local dev. Set it to the same value as `R2_URL` in `.env.local`. `R2_TRANSFORMS` — same kill switch as `apps/web`.
 
 ### `apps/api` (local dev only)
 
@@ -136,35 +151,32 @@ When in doubt about which file to update, update the one closest to what changed
 
 ## Git strategy
 
-**`main` is never touched directly.** No direct commits, no pushes. `main` is the production branch — it only receives changes via merged PRs.
+⚠️ **Reference for manual use.** See [gitflow.md](gitflow.md) for complete guidelines on how you should work with git. Claude does not automatically commit, push, or perform git operations — use this when you want to work with git or need help.
 
-### Preferred workflow: feature branch + PR
+**TL;DR:**
+- **Every change starts with a GitHub Issue.** Assign yourself before starting work.
+- **Branch names:** `feat/<description>` for features, `bugfix/<description>` for bug fixes.
+- **NEVER commit to `main` or `develop` directly.** Always use feature or bugfix branches.
+- **ONE commit per PR, always.** Rebase interactively if needed: `git rebase -i develop`.
+- **Rebase before opening PR.** Ensure linear history: `git rebase develop`.
+- **Fast-forward merge only.** Use "Rebase and merge" on GitHub, never "Create a merge commit."
+- **No force-pushes after PR is open.** Use `--force-with-lease` only on your own branch before PR.
+- **No `--no-verify`.** Fix the hook failure, do not skip it.
+- **All CI checks + at least one approved review** required before merge. Fill out the PR template fully.
 
-1. Cut a branch from `develop`: `git checkout -b feat/my-feature develop`
-2. Commit work on the feature branch.
-3. Open a PR from the feature branch into `develop`.
-4. Walk through the PR review before merging.
+**Workflow:**
 
-When completing a task that warrants a PR, always suggest opening one and walk through the process.
+1. Find or open a GitHub Issue. Assign it to yourself.
+2. Create branch from `develop`: `git checkout -b feat/my-feature develop` (or `bugfix/my-fix`)
+3. Commit as needed locally.
+4. Before opening PR: `git rebase -i develop` to squash into one commit.
+5. Push: `git push origin feat/my-feature`
+6. Open PR → `develop`. Fill out the PR template. Add `Closes #N`.
+7. Ensure CI passes. Request review.
+8. Reviewer approves. Merge via GitHub UI (Rebase and merge).
+9. Delete branch: `git branch -d feat/my-feature && git push origin --delete feat/my-feature`
 
-### Fallback: commit directly on `develop`
-
-Acceptable for small fixes when a full PR is overkill. Never commit directly to `main`.
-
-### Commit discipline
-
-**Keep commits lean and scoped.** The goal is a clean, readable history — not one commit per file change and not one giant commit per session.
-
-**Amend vs. new commit:**
-
-- Compare the files about to be staged against the most recent commit message on the branch.
-- If the scope is the same or a subset (e.g., fixing a detail of what was just built), **amend the previous commit** rather than adding a new one.
-- If the scope is clearly new (a second distinct feature after the first is already committed), **create a new commit**.
-- **Never amend a commit that has already been pushed to remote.** Check with `git status` / `git log --oneline origin/develop..HEAD` first. If the commit is on remote, create a new commit instead.
-
-**No force-pushes.** Ever. Not to `develop`, not to feature branches, not to `main`.
-
-**No `--no-verify`.** Fix the underlying hook failure — do not skip it.
+**Read [gitflow.md](gitflow.md) for full details, common scenarios, and troubleshooting.**
 
 ---
 
@@ -176,3 +188,23 @@ Acceptable for small fixes when a full PR is overkill. Never commit directly to 
 - Do not create new files when editing an existing one solves the problem.
 - Do not push config keys that are not in `KNOWN_CONFIG_KEYS`.
 - Do not over-engineer: three similar lines of code is better than a premature abstraction.
+
+---
+
+## Responsive — check every frontend change
+
+Every UI change must be verified on multiple viewport widths before being marked done. Layout breaks at unexpected sizes are a recurring source of bugs in this project.
+
+**Minimum sizes to verify:**
+
+| Width | Device class | What to check |
+|---|---|---|
+| **≥1280px** | Desktop | Default layout — nothing crowded, gaps respected |
+| **1024px** | Small desktop / tablet landscape | Nav links don't touch the logo or right-side utilities |
+| **768px** | Tablet portrait | Last viable point for inline nav — usually the breakpoint to a burger menu |
+| **375px** | Mobile (iPhone) | Burger visible, touch targets ≥44×44, no horizontal scroll, safe-area for notch |
+
+- Use Chrome DevTools device toolbar (`Cmd+Shift+M`) — switch through the standard presets after editing any layout-affecting CSS or component.
+- Check **both** `data-theme="light"` (default) and `data-theme="dark"` (5 clicks on the logo toggles).
+- Watch for: text touching, content bleeding under fixed headers, horizontal scrollbars, touch targets smaller than 44×44, fixed elements ignoring iPhone notch (`env(safe-area-inset-*)`).
+- Type-check passing ≠ layout works. Do not say "responsive done" until breakpoints have been clicked through visually.

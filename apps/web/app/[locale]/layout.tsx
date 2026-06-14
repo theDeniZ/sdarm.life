@@ -97,13 +97,11 @@ export default async function LocaleLayout({
   };
 
   return (
-    <html lang={locale}>
-      <body>
-        <ThemeProvider />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
-        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
-        <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
-      </body>
-    </html>
+    <>
+      <ThemeProvider />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }} />
+      <NextIntlClientProvider messages={messages}>{children}</NextIntlClientProvider>
+    </>
   );
 }

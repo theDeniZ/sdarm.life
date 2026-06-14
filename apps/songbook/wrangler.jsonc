@@ -1,6 +1,32 @@
 {
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "main": ".open-next/worker.js",
   "name": "sdarm-songbook",
-  "pages_build_output_dir": ".vercel/output/static",
   "compatibility_date": "2024-09-23",
-  "compatibility_flags": ["nodejs_compat"]
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "vars": {
+    "API_URL": "https://api.sdarm.life/api/v1",
+    "R2_URL": "https://images.sdarm.life",
+    "WEB_URL": "https://sdarm.life",
+    "SONGBOOK_URL": "https://songs.sdarm.life",
+    "EVENTS_URL": "https://events.sdarm.life",
+    "TREASURES_URL": "https://treasures.sdarm.life"
+  },
+  "env": {
+    "staging": {
+      "name": "sdarm-songbook-staging",
+      "vars": {
+        "API_URL": "https://sdarm-api-staging.mine-a8f.workers.dev/api/v1",
+        "R2_URL": "https://images.sdarm.life",
+        "WEB_URL": "https://sdarm-web-staging.mine-a8f.workers.dev",
+        "SONGBOOK_URL": "https://sdarm-songbook-staging.mine-a8f.workers.dev",
+        "EVENTS_URL": "https://sdarm-events-staging.mine-a8f.workers.dev",
+        "TREASURES_URL": "https://sdarm-treasures-staging.mine-a8f.workers.dev"
+      }
+    }
+  }
 }

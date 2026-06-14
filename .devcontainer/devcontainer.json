@@ -1,67 +1,72 @@
 {
-	"name": "sdarm.life",
-	"build": {
-		"dockerfile": "Dockerfile",
-		"context": "."
-	},
-	"features": {
-		"ghcr.io/devcontainers/features/git:1": {},
-		"ghcr.io/devcontainers/features/github-cli:1": {}
-	},
-	"customizations": {
-		"vscode": {
-			"settings": {
-				"editor.defaultFormatter": "esbenp.prettier-vscode",
-				"editor.formatOnSave": true,
-				"editor.rulers": [80, 120],
-				"files.watcherExclude": {
-					"**/node_modules": true,
-					"**/.turbo": true,
-					"**/.next": true,
-					"**/.vercel": true
-				},
-				"search.exclude": {
-					"**/node_modules": true,
-					"**/.turbo": true,
-					"**/pnpm-lock.yaml": true
-				}
-			},
-			"extensions": [
-				"dbaeumer.vscode-eslint",
-				"esbenp.prettier-vscode",
-				"bradlc.vscode-tailwindcss",
-				"vitest.explorer",
-				"github.copilot"
-			]
-		}
-	},
-	"remoteUser": "node",
-	"postCreateCommand": "bash .devcontainer/post-create.sh",
-	"forwardPorts": [3000, 3001, 3002, 3003, 3004, 8787],
-	"portAttributes": {
-		"3000": {
-			"label": "Web",
-			"onAutoForward": "notify"
-		},
-		"3001": {
-			"label": "Admin",
-			"onAutoForward": "notify"
-		},
-		"3002": {
-			"label": "Songbook",
-			"onAutoForward": "notify"
-		},
-		"3003": {
-			"label": "Events",
-			"onAutoForward": "notify"
-		},
-		"3004": {
-			"label": "Treasures",
-			"onAutoForward": "notify"
-		},
-		"8787": {
-			"label": "API (Wrangler)",
-			"onAutoForward": "notify"
-		}
-	}
+  "name": "sdarm.life",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "context": "."
+  },
+  "mounts": ["source=sdarm-claude-data,target=/home/node/.claude,type=volume"],
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers/features/git-lfs:1": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.defaultFormatter": "esbenp.prettier-vscode",
+        "editor.formatOnSave": true,
+        "editor.rulers": [80, 120],
+        "files.watcherExclude": {
+          "**/node_modules": true,
+          "**/.turbo": true,
+          "**/.next": true,
+          "**/.vercel": true
+        },
+        "search.exclude": {
+          "**/node_modules": true,
+          "**/.turbo": true,
+          "**/pnpm-lock.yaml": true
+        }
+      },
+      "extensions": [
+        "anthropic.claude-code",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "vitest.explorer",
+        "github.copilot",
+        "ms-playwright.playwright",
+        "unthrottled.doki-theme"
+      ]
+    }
+  },
+  "remoteUser": "node",
+  "postCreateCommand": "bash .devcontainer/post-create.sh",
+  "forwardPorts": [3000, 3001, 3002, 3003, 3004, 8787],
+  "portAttributes": {
+    "3000": {
+      "label": "Web",
+      "onAutoForward": "notify"
+    },
+    "3001": {
+      "label": "Admin",
+      "onAutoForward": "notify"
+    },
+    "3002": {
+      "label": "Songbook",
+      "onAutoForward": "notify"
+    },
+    "3003": {
+      "label": "Events",
+      "onAutoForward": "notify"
+    },
+    "3004": {
+      "label": "Treasures",
+      "onAutoForward": "notify"
+    },
+    "8787": {
+      "label": "API (Wrangler)",
+      "onAutoForward": "notify"
+    }
+  }
 }

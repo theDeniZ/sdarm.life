@@ -1,6 +1,3 @@
-const FONT_IMPORT =
-	"@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap');";
-
 const i18n = {
 	de: {
 		unsubscribeIntro: 'Sie erhalten diese E-Mail, weil Sie sich auf sdarm.life angemeldet haben.',
@@ -24,7 +21,6 @@ export function baseLayout(content: string, opts: { unsubscribeUrl: string; loca
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="color-scheme" content="dark">
   <style>
-    ${FONT_IMPORT}
     body { margin:0; padding:0; background:#0c0b09; -webkit-font-smoothing:antialiased; }
     @media only screen and (max-width:640px) {
       .ew { width:100% !important; }

@@ -1,0 +1,38 @@
+name: Release RC
+
+on:
+  schedule:
+    - cron: '0 5 * * 0' # Every Sunday at 05:00 UTC
+  workflow_dispatch: # Allow manual trigger for testing
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  release-rc:
+    runs-on: ubuntu-latest
+    # Only run on develop branch (schedule always targets default branch, so we guard explicitly)
+    if: github.ref == 'refs/heads/develop' || github.event_name == 'workflow_dispatch'
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          # Use PAT so the bot commit can push to the protected develop branch
+          token: ${{ secrets.GH_TOKEN }}
+          ref: develop
+
+      - uses: ./.github/actions/setup
+
+      - name: Release RC
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          RELEASE_CHANNEL: rc
+          GIT_AUTHOR_NAME: github-actions[bot]
+          GIT_AUTHOR_EMAIL: github-actions[bot]@users.noreply.github.com
+          GIT_COMMITTER_NAME: github-actions[bot]
+          GIT_COMMITTER_EMAIL: github-actions[bot]@users.noreply.github.com
+        run: pnpm exec semantic-release

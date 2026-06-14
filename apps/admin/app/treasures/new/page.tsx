@@ -1,5 +1,3 @@
-export const runtime = 'edge';
-
 import TreasureForm from '../../domains/treasures/TreasureForm';
 
 export default function NewTreasurePage() {

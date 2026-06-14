@@ -1,0 +1,53 @@
+name: Deploy Worker App
+
+on:
+  workflow_call:
+    inputs:
+      artifact-name:
+        required: true
+        type: string
+      app-path:
+        description: Workspace-relative path to the app (e.g. apps/web)
+        required: true
+        type: string
+      env:
+        description: Wrangler environment to deploy to (e.g. staging). Leave empty for production.
+        required: false
+        type: string
+        default: ''
+    secrets:
+      CLOUDFLARE_API_TOKEN:
+        required: true
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - uses: actions/download-artifact@v8
+        with:
+          name: ${{ inputs.artifact-name }}
+          path: ${{ inputs.app-path }}/.open-next
+      - name: Deploy Worker
+        working-directory: ${{ inputs.app-path }}
+        run: |
+          if [ -n "$DEPLOY_ENV" ]; then
+            npx wrangler deploy --env "$DEPLOY_ENV"
+          else
+            npx wrangler deploy
+          fi
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          DEPLOY_ENV: ${{ inputs.env }}

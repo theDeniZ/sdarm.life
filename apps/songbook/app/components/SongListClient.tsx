@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useTranslations, useLocale } from 'next-intl';
 import type { SongbookDto, SongListItemDto, ListResponse } from '@sdarm/types';
 import { fetchSongs } from '@/app/lib/api';
+import { highlightMatch } from '@/app/lib/highlight';
 
 const LIMIT = 50;
 
@@ -15,6 +16,7 @@ interface Props {
 
 export default function SongListClient({ songbook, initial }: Props) {
   const t = useTranslations('songbook.reader');
+  const tSearch = useTranslations('songbook.search');
   const locale = useLocale();
   const router = useRouter();
   const [q, setQ] = useState('');
@@ -71,17 +73,24 @@ export default function SongListClient({ songbook, initial }: Props) {
           </tr>
         </thead>
         <tbody style={{ opacity: loading ? 0.5 : 1, transition: 'opacity 0.1s' }}>
-          {items.map((song) => (
-            <tr
-              key={song.id}
-              className="song-row"
-              onClick={() => router.push(`/${locale}/songbooks/${songbook.slug}/${song.id}`)}
-            >
-              <td className="song-row__num">{song.number}</td>
-              <td className="song-row__title">{song.title}</td>
-              <td className="song-row__author">{song.author ?? ''}</td>
-            </tr>
-          ))}
+          {items.map((song) => {
+            const showHighlight = q.length > 0 && song.matchType === 'title';
+            const showLyricsPill = q.length > 0 && song.matchType === 'lyrics';
+            return (
+              <tr
+                key={song.id}
+                className="song-row"
+                onClick={() => router.push(`/${locale}/songbooks/${songbook.slug}/${song.id}`)}
+              >
+                <td className="song-row__num">{song.number}</td>
+                <td className="song-row__title">
+                  {showHighlight ? highlightMatch(song.title, q) : song.title}
+                  {showLyricsPill && <span className="song-row__match-pill">{tSearch('lyricsMatch')}</span>}
+                </td>
+                <td className="song-row__author">{song.author ?? ''}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

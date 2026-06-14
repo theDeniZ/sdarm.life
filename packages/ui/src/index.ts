@@ -1,4 +1,5 @@
 export { default as ThemeProvider } from './components/ThemeProvider';
+export { default as ThemeScript } from './components/ThemeScript';
 export { default as Navbar } from './components/Navbar';
 export { default as Footer } from './components/Footer';
 export type { FooterConfig } from './components/Footer';
@@ -10,3 +11,8 @@ export { default as PageHero } from './components/PageHero';
 export type { PageHeroProps } from './components/PageHero';
 export { default as ScriptureVerseSection } from './components/ScriptureVerseSection';
 export type { ScriptureVerseSectionProps } from './components/ScriptureVerseSection';
+export { default as CommunityMap } from './components/CommunityMap';
+export type { Location, CountryCode } from './data/locations';
+export { LOCATIONS, COUNTRY_NAMES, locationsByCountry, googleMapsUrl } from './data/locations';
+export { useCurrentTheme, withTheme } from './lib/theme-link';
+export type { Theme } from './lib/theme-link';
