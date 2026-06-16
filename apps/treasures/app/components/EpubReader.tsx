@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
-import { useLocale } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import JSZip from 'jszip';
 
 // ── Types ──────────────────────────────────────────────────────────────────
@@ -242,6 +242,7 @@ type HLColor = (typeof HL_COLORS)[number];
 
 export default function EpubReader({ epubUrl, title, author }: Props) {
   const locale = useLocale();
+  const tReader = useTranslations('treasures.reader');
 
   const [phase, setPhase] = useState<Phase>('downloading');
   const [progress, setProgress] = useState(0);
@@ -795,6 +796,9 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                 : fmtBytes(loadedBytes)}
             </div>
           )}
+          <p className="epub-loading__egw-notice">
+            {tReader('egwNotice')} <a href={`/${locale}/datenschutz`}>{tReader('egwNoticeLink')}</a>.
+          </p>
         </div>
       </div>
     );

@@ -35,6 +35,26 @@ function ScriptureQuote() {
   );
 }
 
+function EgwDisclaimer() {
+  const t = useTranslations('treasures.catalog');
+  return (
+    <p className="egw-disclaimer">
+      {t.rich('egwDisclaimer', {
+        estate: (chunks) => (
+          <a href="https://whiteestate.org" target="_blank" rel="noopener noreferrer">
+            {chunks}
+          </a>
+        ),
+        site: (chunks) => (
+          <a href="https://egwwritings.org" target="_blank" rel="noopener noreferrer">
+            {chunks}
+          </a>
+        ),
+      })}
+    </p>
+  );
+}
+
 const BANNER_KEY = 'uploads/998516df-c8b7-4492-a11f-7785412673d6.png';
 
 export default function TreasureCatalog({
@@ -175,6 +195,8 @@ export default function TreasureCatalog({
         onCategoryChange={handleCategoryChange}
         onLangChange={handleLangChange}
       />
+
+      <EgwDisclaimer />
 
       <section className="shop-section" ref={sectionRef}>
         {loading ? (

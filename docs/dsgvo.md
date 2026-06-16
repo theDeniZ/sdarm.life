@@ -41,7 +41,7 @@ These are the only external data recipients currently named in [Datenschutzerkl√
 | Processor | Purpose | Disclosed in |
 |---|---|---|
 | Cloudflare | Hosting, Web Analytics, CDN | section4 |
-| egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
+| egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 + inline notice in EpubReader |
 
 **To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 
