@@ -13,7 +13,7 @@ jobs:
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: Check commit count
@@ -48,14 +48,14 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - run: pnpm turbo lint
 
   playwright:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - uses: actions/cache@v5
         id: playwright-cache
@@ -82,7 +82,7 @@ jobs:
     needs: lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - run: pnpm turbo build --filter=@sdarm/api
 
@@ -141,7 +141,7 @@ jobs:
     needs: [build-api, build-pages, build-admin, build-admin-staging, playwright]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - uses: cloudflare/wrangler-action@v4
         with:
@@ -155,7 +155,7 @@ jobs:
     needs: [build-api, build-pages, build-admin, build-admin-staging, playwright]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - name: Sync secrets to staging Worker
         working-directory: apps/api
@@ -169,7 +169,7 @@ jobs:
     needs: [migrate-staging, sync-secrets-staging]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - uses: cloudflare/wrangler-action@v4
         with:
@@ -206,7 +206,7 @@ jobs:
     needs: deploy-pages-staging
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/setup
       - name: Sync API key to admin staging Worker
         working-directory: apps/admin
