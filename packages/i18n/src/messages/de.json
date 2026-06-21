@@ -697,7 +697,9 @@
       "previousPart": "Vorheriger Teil",
       "nextPart": "Nächster Teil",
       "decreaseFont": "Schriftgröße verkleinern",
-      "increaseFont": "Schriftgröße vergrößern"
+      "increaseFont": "Schriftgröße vergrößern",
+      "lightMode": "Heller Modus",
+      "darkMode": "Dunkler Modus"
     },
     "presenter": {
       "close": "Präsentation schließen",
@@ -709,7 +711,9 @@
       "decreaseFont": "Schriftgröße verkleinern",
       "increaseFont": "Schriftgröße vergrößern",
       "titleSlide": "Titel",
-      "endOfSong": "Lied beendet"
+      "endOfSong": "Lied beendet",
+      "lightMode": "Heller Modus",
+      "darkMode": "Dunkler Modus"
     },
     "partTypes": {
       "verse": "Strophe",
