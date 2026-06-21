@@ -697,7 +697,9 @@
       "previousPart": "Previous part",
       "nextPart": "Next part",
       "decreaseFont": "Decrease font size",
-      "increaseFont": "Increase font size"
+      "increaseFont": "Increase font size",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode"
     },
     "presenter": {
       "close": "Close presenter",
@@ -709,7 +711,9 @@
       "decreaseFont": "Decrease font size",
       "increaseFont": "Increase font size",
       "titleSlide": "Title",
-      "endOfSong": "End of song"
+      "endOfSong": "End of song",
+      "lightMode": "Light mode",
+      "darkMode": "Dark mode"
     },
     "partTypes": {
       "verse": "Verse",

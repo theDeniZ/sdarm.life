@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
-import { expandParts } from '@/app/lib/format';
+import { expandParts, getSiteTheme } from '@/app/lib/format';
 import ChordLine from './ChordLine';
 
 interface Props {
@@ -21,6 +21,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   const total = parts.length + 2;
   const [index, setIndex] = useState(0);
   const [fontScale, setFontScale] = useState(1);
+  const [slideTheme, setSlideTheme] = useState<'dark' | 'light'>(getSiteTheme);
   const [mounted, setMounted] = useState(false);
   const [display, setDisplay] = useState(isDisplay);
   const [pendingFullscreen, setPendingFullscreen] = useState(false);
@@ -51,6 +52,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   const channelRef = useRef<BroadcastChannel | null>(null);
   const isSlideRemote = useRef(false);
   const isFontRemote = useRef(false);
+  const isSlideThemeRemote = useRef(false);
   useEffect(() => {
     const BC = (globalThis as { BroadcastChannel?: typeof BroadcastChannel }).BroadcastChannel;
     if (!BC) return;
@@ -64,6 +66,9 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
         setFontScale(e.data.value);
       } else if (e.data.type === 'requestFullscreen') {
         setPendingFullscreen(true);
+      } else if (e.data.type === 'slideTheme') {
+        isSlideThemeRemote.current = true;
+        setSlideTheme(e.data.value);
       }
     };
     channelRef.current = ch;
@@ -85,6 +90,20 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     }
     channelRef.current?.postMessage({ type: 'fontScale', value: fontScale });
   }, [fontScale]);
+  const slideThemeMounted = useRef(false);
+  useEffect(() => {
+    // Skip the mount broadcast — otherwise a freshly opened display window
+    // announces its default 'dark' and clobbers the presenter's choice.
+    if (!slideThemeMounted.current) {
+      slideThemeMounted.current = true;
+      return;
+    }
+    if (isSlideThemeRemote.current) {
+      isSlideThemeRemote.current = false;
+      return;
+    }
+    channelRef.current?.postMessage({ type: 'slideTheme', value: slideTheme });
+  }, [slideTheme]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -151,7 +170,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   }
 
   return createPortal(
-    <div className="projector">
+    <div className="projector" data-slide-theme={slideTheme}>
       {/* Fullscreen request overlay — requires a user gesture on this window */}
       {pendingFullscreen && (
         <button className="projector__fs-overlay" onClick={enterFullscreen} aria-label={t('enterFullscreen')}>
@@ -232,6 +251,13 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
         </div>
         {!display && (
           <div className="projector__controls">
+            <button
+              className="projector__ctrl-btn"
+              onClick={() => setSlideTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+              title={slideTheme === 'dark' ? t('lightMode') : t('darkMode')}
+            >
+              {slideTheme === 'dark' ? '☀' : '☾'}
+            </button>
             <button
               className="projector__ctrl-btn"
               onClick={() => setFontScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}

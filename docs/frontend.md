@@ -288,10 +288,11 @@ Main screen (presenter)              External screen (display window)
 
 | `type` | Direction | Payload | Effect |
 |---|---|---|---|
-| `ready` | display → presenter | — | Display finished loading; presenter re-pushes current slide + fontScale to sync |
+| `ready` | display → presenter | — | Display finished loading; presenter re-pushes current slide + fontScale + slideTheme to sync |
 | `slide` | bidirectional | `{ index: number }` | Navigate both sides to the same slide |
 | `fontScale` | bidirectional | `{ value: number }` | Resize lyrics on the display; reflected in presenter header |
 | `requestFullscreen` | presenter → display | — | Display shows a "tap to enter fullscreen" overlay; click on display triggers `requestFullscreen()` |
+| `slideTheme` | bidirectional | `{ value: 'dark' \| 'light' }` | Sync the slide color theme (☀/☾ toggle, `data-slide-theme` + `--proj-*` CSS tokens). The mount render never broadcasts — a fresh display window must not clobber the presenter's choice with its default. Initial state defaults to the current site theme (`getSiteTheme()` in `lib/format.ts`, reads `data-theme` off `<html>`), not always `'dark'` |
 
 **Connecting overlay:** `PresenterDashboard` shows a pulsing dots overlay until the first `ready` message arrives. The fullscreen button is disabled until connected. This covers the ~10 s cold-start time for the display window to load Next.js.
 
