@@ -16,7 +16,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
           # PAT so the PR triggers CI (GITHUB_TOKEN-created PRs do not) and can auto-merge.
