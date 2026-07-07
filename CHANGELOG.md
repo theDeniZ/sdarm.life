@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/theDeniZ/sdarm.life/compare/v1.0.0...v1.0.1) (2026-07-07)
+
+
+### Bug Fixes
+
+* add backmerge & fix ci ([302f8cd](https://github.com/theDeniZ/sdarm.life/commit/302f8cd9df30c36da792bda469caf2cf8446cb62))
+
 # 1.0.0 (2026-06-14)
 
 
