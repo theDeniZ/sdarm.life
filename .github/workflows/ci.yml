@@ -3,7 +3,7 @@ name: CI
 on:
   pull_request:
   push:
-    branches: [main, develop]
+    branches: [develop]
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
@@ -46,6 +46,7 @@ jobs:
           echo "✅ Commit format is valid"
 
   lint:
+    if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
@@ -53,6 +54,7 @@ jobs:
       - run: pnpm turbo lint
 
   playwright:
+    if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6

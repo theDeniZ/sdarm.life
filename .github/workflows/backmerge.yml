@@ -1,0 +1,45 @@
+name: Backmerge main to develop
+
+on:
+  push:
+    branches: [main]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  backmerge:
+    # Only after a release commit (the version bump + changelog produced by semantic-release).
+    if: startsWith(github.event.head_commit.message, 'chore(release):')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          # PAT so the PR triggers CI (GITHUB_TOKEN-created PRs do not) and can auto-merge.
+          token: ${{ secrets.GH_TOKEN }}
+
+      - name: Open and auto-merge backmerge PR
+        env:
+          GH_TOKEN: ${{ secrets.GH_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Reuse an existing open PR if one is already pending, otherwise create it.
+          PR_URL=$(gh pr list --base develop --head main --state open --json url --jq '.[0].url // empty')
+          if [ -z "$PR_URL" ]; then
+            PR_URL=$(gh pr create \
+              --base develop \
+              --head main \
+              --title "chore: backmerge ${{ github.ref_name }} into develop" \
+              --body "Automated backmerge of the latest release from \`main\` into \`develop\`. Resolves version bump + changelog drift. Uses a merge commit.")
+          fi
+
+          echo "Backmerge PR: $PR_URL"
+
+          # Enable GitHub auto-merge (merge commit). Falls back to an immediate
+          # merge if the repo has auto-merge disabled and the PR is already mergeable.
+          gh pr merge "$PR_URL" --auto --merge || gh pr merge "$PR_URL" --merge

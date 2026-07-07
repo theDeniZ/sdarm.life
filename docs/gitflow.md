@@ -17,6 +17,22 @@ These rules are non-negotiable for maintaining a clean, linear history.
 
 ---
 
+## Automated release & backmerge (CI)
+
+Merging to `main` triggers a fully automated chain — you only ever merge a PR into `main`, CI does the rest:
+
+1. **`release-main.yml`** runs `semantic-release` on the push to `main` → bumps version, updates `CHANGELOG.md`, pushes a `chore(release): X.Y.Z` commit **and** the `vX.Y.Z` tag back to `main`.
+2. **`deploy-production.yml`** fires on the `vX.Y.Z` tag push → builds and deploys all Workers to production.
+3. **`backmerge.yml`** fires on the release commit landing on `main` → opens a PR from `main` → `develop` and enables GitHub auto-merge so the version bump + changelog flow back to `develop`.
+
+**Loop prevention:** the release commit message starts with `chore(release):`. `release-main.yml` skips itself on that message, and `ci.yml`'s push jobs skip it too — so the bot commit does not re-trigger a release or a build.
+
+**CI never runs on `main`.** `ci.yml` only triggers on `pull_request` and pushes to `develop`. Production builds are produced fresh inside `deploy-production.yml`.
+
+**The backmerge is the one place merge commits are used.** Rule 5 below ("fast-forward merge only") applies to feature/bugfix PRs into `develop`. The automated `main` → `develop` backmerge intentionally uses a **merge commit** (`gh pr merge --merge`) so the release tag's ancestry is preserved on both branches. Do not rebase or squash the backmerge PR. If it has conflicts, auto-merge pauses and the PR stays open for manual resolution.
+
+---
+
 ## GitHub Issues → Branch workflow
 
 Every non-trivial change starts with a GitHub Issue. The issue drives the branch name and the PR description.
