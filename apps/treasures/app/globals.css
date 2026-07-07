@@ -52,7 +52,7 @@ a {
 
 /* ── FILTER BAR ── */
 /* ── NAV ALWAYS VISIBLE IN TREASURES ── */
-nav {
+nav.site-nav {
   background: var(--nav-bg-scrolled) !important;
   backdrop-filter: blur(20px) !important;
 }
@@ -1190,7 +1190,6 @@ nav {
   font-size: 0.82rem;
   font-weight: 300;
   color: var(--text);
-  outline: none;
   transition: border-color 0.25s;
 }
 
@@ -1857,7 +1856,6 @@ nav {
   -webkit-appearance: none;
   appearance: none;
   background: var(--border);
-  outline: none;
   border-radius: 2px;
   cursor: pointer;
 }
@@ -1952,7 +1950,7 @@ nav {
   }
 }
 
-nav {
+nav.site-nav {
   padding-inline: 1.8rem;
 }
 
@@ -2258,7 +2256,6 @@ nav {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   padding: 12px 14px;
-  outline: none;
   transition: border-color 0.2s, background 0.2s;
   appearance: none;
   -webkit-appearance: none;
@@ -2589,3 +2586,23 @@ nav {
 }
 [data-theme='light'] .br-banner { background: var(--bg-section); }
 [data-theme='light'] .sheet-display { background: var(--bg-section); }
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .tome-stack {
+    transition: none;
+  }
+  .tome:hover .tome-stack {
+    transform: rotateY(-8deg);
+  }
+  .item-card {
+    transition: none;
+  }
+}

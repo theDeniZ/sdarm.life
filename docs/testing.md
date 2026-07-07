@@ -180,3 +180,43 @@ if (url === '/api/v1/my-endpoint') {
 ## CI
 
 Playwright is not wired into CI yet — tests run manually. Snapshots are committed so the baselines are always available. When CI is added, use `pnpm test:screenshots` without `--update-snapshots` (failures will surface visual regressions).
+
+---
+
+# Accessibility (axe-core) Tests
+
+Automated WCAG 2.1 AA checks using `@axe-core/playwright`. Tests run against the same mock API as the screenshot tests — no real Cloudflare infrastructure needed.
+
+## Running
+
+```bash
+# Run all accessibility tests
+pnpm test:a11y
+```
+
+Config: `playwright.a11y.config.ts`. Results (failures) go to `tests/a11y/results/` (gitignored).
+
+## Test inventory
+
+| Pages tested | App | Port |
+|---|---|---|
+| `/de`, `/en` | `@sdarm/web` | 3000 |
+| `/de/about` | `@sdarm/web` | 3000 |
+| `/de` | `@sdarm/songbook` | 3002 |
+| `/de` | `@sdarm/events` | 3003 |
+| `/de` | `@sdarm/treasures` | 3004 |
+
+All tests load the page, wait for `networkidle`, then run `axe-core` across the full DOM.
+
+## Excluded rules
+
+| Rule | Reason |
+|---|---|
+| `color-contrast` | Checked manually (dark theme `--muted` raised to 4.6:1). axe mis-fires on text over gradients/images — false positives. |
+| `aria-allowed-attr` | Three.js `<canvas>` has no ARIA support; excluded globally. |
+
+`<canvas>` elements are also excluded from the axe scan via `.exclude('canvas')`.
+
+## Adding a test
+
+Add pages to the `PAGES` array in `tests/a11y/a11y.spec.ts`. If the page requires a new mock API route, add it to `tests/screenshot/mock-server/index.ts` (the a11y tests reuse the same mock server).

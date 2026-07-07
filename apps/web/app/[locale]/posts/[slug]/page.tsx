@@ -69,90 +69,92 @@ export default async function PostDetailPage({ params }: { params: Promise<{ loc
     <>
       <ConnectedNavbar locale={locale} />
 
-      {/* Hero */}
-      <div className="post-hero">
-        <Link href={`/${locale}`} className="post-back">
-          {ct('back')}
-        </Link>
-        <div className="post-hero-bg">
-          <Image
-            src={coverUrl}
-            alt={post.coverAlt ?? post.title}
-            fill
-            style={{ objectFit: 'cover' }}
-            sizes="100vw"
-            priority
-            unoptimized={isUnoptimized(coverUrl)}
-          />
-        </div>
-        <div className="post-hero-overlay" />
-        {meta && <div className="post-meta">{meta}</div>}
-        <h1>{post.title}</h1>
-      </div>
-
-      {/* Body */}
-      {post.body && (
-        <div className="post-section">
-          <div className="post-section-label">{t('content')}</div>
-          <div className="post-body">{post.body}</div>
-        </div>
-      )}
-
-      {/* Video */}
-      {post.videoUrl && (
-        <div className="post-section">
-          <div className="post-section-label">{t('video')}</div>
-          <div className="post-video">
-            <a className="post-video-card" href={post.videoUrl} target="_blank" rel="noopener noreferrer">
-              <Image
-                src={coverUrl}
-                alt={post.coverAlt ?? post.title}
-                fill
-                style={{ objectFit: 'cover' }}
-                sizes="(max-width: 768px) 100vw, 50vw"
-                unoptimized={isUnoptimized(coverUrl)}
-              />
-              <div className="post-video-play">
-                <svg viewBox="0 0 48 48" fill="none">
-                  <circle cx="24" cy="24" r="23" stroke="rgba(201,169,110,.6)" strokeWidth="1" />
-                  <polygon points="20,16 34,24 20,32" fill="rgba(201,169,110,.8)" />
-                </svg>
-              </div>
-            </a>
+      <main id="main-content">
+        {/* Hero */}
+        <div className="post-hero">
+          <Link href={`/${locale}`} className="post-back">
+            {ct('back')}
+          </Link>
+          <div className="post-hero-bg">
+            <Image
+              src={coverUrl}
+              alt={post.coverAlt ?? post.title}
+              fill
+              style={{ objectFit: 'cover' }}
+              sizes="100vw"
+              priority
+              unoptimized={isUnoptimized(coverUrl)}
+            />
           </div>
+          <div className="post-hero-overlay" />
+          {meta && <div className="post-meta">{meta}</div>}
+          <h1>{post.title}</h1>
         </div>
-      )}
 
-      {/* Other posts */}
-      {others.length > 0 && (
-        <div className="post-section">
-          <div className="post-more-title">{t('morePosts')}</div>
-          <div className="post-grid">
-            {others.map((p) => {
-              const imgUrl = r2url(p.coverKey, { w: 400, h: 300 }) ?? FALLBACK_IMG;
-              const pMeta = [formatDate(p.publishedAt), p.author].filter(Boolean).join(' · ');
-              return (
-                <Link key={p.id} href={`/${locale}/posts/${p.slug}`} className="post-card">
-                  <div className="post-card-img">
-                    <Image
-                      src={imgUrl}
-                      alt={p.coverAlt ?? p.title}
-                      fill
-                      style={{ objectFit: 'cover' }}
-                      sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 25vw"
-                      unoptimized={isUnoptimized(imgUrl)}
-                    />
-                  </div>
-                  <div className="post-card-body">
-                    <h3 className="post-card-title">{p.title}</h3>
-                    <div className="post-card-meta">{pMeta}</div>
-                  </div>
-                </Link>
-              );
-            })}
+        {/* Body */}
+        {post.body && (
+          <div className="post-section">
+            <div className="post-section-label">{t('content')}</div>
+            <div className="post-body">{post.body}</div>
           </div>
-        </div>
-      )}
+        )}
+
+        {/* Video */}
+        {post.videoUrl && (
+          <div className="post-section">
+            <div className="post-section-label">{t('video')}</div>
+            <div className="post-video">
+              <a className="post-video-card" href={post.videoUrl} target="_blank" rel="noopener noreferrer">
+                <Image
+                  src={coverUrl}
+                  alt={post.coverAlt ?? post.title}
+                  fill
+                  style={{ objectFit: 'cover' }}
+                  sizes="(max-width: 768px) 100vw, 50vw"
+                  unoptimized={isUnoptimized(coverUrl)}
+                />
+                <div className="post-video-play">
+                  <svg viewBox="0 0 48 48" fill="none">
+                    <circle cx="24" cy="24" r="23" stroke="rgba(201,169,110,.6)" strokeWidth="1" />
+                    <polygon points="20,16 34,24 20,32" fill="rgba(201,169,110,.8)" />
+                  </svg>
+                </div>
+              </a>
+            </div>
+          </div>
+        )}
+
+        {/* Other posts */}
+        {others.length > 0 && (
+          <div className="post-section">
+            <div className="post-more-title">{t('morePosts')}</div>
+            <div className="post-grid">
+              {others.map((p) => {
+                const imgUrl = r2url(p.coverKey, { w: 400, h: 300 }) ?? FALLBACK_IMG;
+                const pMeta = [formatDate(p.publishedAt), p.author].filter(Boolean).join(' · ');
+                return (
+                  <Link key={p.id} href={`/${locale}/posts/${p.slug}`} className="post-card">
+                    <div className="post-card-img">
+                      <Image
+                        src={imgUrl}
+                        alt={p.coverAlt ?? p.title}
+                        fill
+                        style={{ objectFit: 'cover' }}
+                        sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 25vw"
+                        unoptimized={isUnoptimized(imgUrl)}
+                      />
+                    </div>
+                    <div className="post-card-body">
+                      <h3 className="post-card-title">{p.title}</h3>
+                      <div className="post-card-meta">{pMeta}</div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        )}
+      </main>
 
       <ConnectedFooter locale={locale} />
     </>

@@ -190,7 +190,6 @@
   font-size: 0.78rem;
   font-weight: 300;
   color: rgba(214, 208, 200, 0.92);
-  outline: none;
 }
 .footer-input::placeholder {
   color: rgba(110, 100, 88, 0.55);
@@ -444,7 +443,6 @@
   font-weight: 300;
   letter-spacing: 0.08em;
   color: rgba(210, 200, 185, 0.8);
-  outline: none;
 }
 .sunset-location-input::placeholder {
   color: rgba(130, 120, 105, 0.38);
