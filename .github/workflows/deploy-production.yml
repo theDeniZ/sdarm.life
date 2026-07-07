@@ -4,6 +4,7 @@ on:
   push:
     tags:
       - 'v[0-9]+.[0-9]+.[0-9]+' # semver only — does not match v1.2.3-rc.1
+  workflow_dispatch: # manual re-deploy (e.g. an already-pushed tag)
 
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
@@ -22,16 +23,16 @@ jobs:
         include:
           - filter: '@sdarm/web'
             artifact: web-dist
-            path: apps/web/.vercel/output/static
+            path: apps/web/.open-next
           - filter: '@sdarm/songbook'
             artifact: songbook-dist
-            path: apps/songbook/.vercel/output/static
+            path: apps/songbook/.open-next
           - filter: '@sdarm/events'
             artifact: events-dist
-            path: apps/events/.vercel/output/static
+            path: apps/events/.open-next
           - filter: '@sdarm/treasures'
             artifact: treasures-dist
-            path: apps/treasures/.vercel/output/static
+            path: apps/treasures/.open-next
     uses: ./.github/workflows/_build-pages.yml
     with:
       filter: ${{ matrix.filter }}
@@ -43,7 +44,7 @@ jobs:
     with:
       filter: '@sdarm/admin'
       artifact-name: admin-dist
-      dist-path: apps/admin/.vercel/output/static
+      dist-path: apps/admin/.open-next
     secrets:
       NEXT_PUBLIC_API_KEY: ${{ secrets.API_KEY }}
 
@@ -94,17 +95,30 @@ jobs:
       matrix:
         include:
           - artifact: web-dist
-            project: web-sdarm-life
+            app-path: apps/web
           - artifact: admin-dist
-            project: admin-sdarm-life
+            app-path: apps/admin
           - artifact: songbook-dist
-            project: songs-sdarm-life
+            app-path: apps/songbook
           - artifact: events-dist
-            project: events-sdarm-life
+            app-path: apps/events
           - artifact: treasures-dist
-            project: treasures-sdarm-life
+            app-path: apps/treasures
     uses: ./.github/workflows/_deploy-pages.yml
     with:
       artifact-name: ${{ matrix.artifact }}
-      project-name: ${{ matrix.project }}
+      app-path: ${{ matrix.app-path }}
     secrets: inherit
+
+  sync-secrets-admin:
+    needs: deploy-pages
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: ./.github/actions/setup
+      - name: Sync API key to admin Worker
+        working-directory: apps/admin
+        run: echo "${{ secrets.API_KEY }}" | npx wrangler secret put API_KEY
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
