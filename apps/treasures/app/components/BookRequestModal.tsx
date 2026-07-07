@@ -30,12 +30,49 @@ export default function BookRequestModal({ open, onClose, apiUrl }: Props) {
   const [bookError, setBookError] = useState(false);
 
   const modalRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
 
-  // ESC to close
+  const FOCUSABLE =
+    'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+  // Focus management: capture trigger on open, focus first element, restore on close
+  useEffect(() => {
+    if (open) {
+      previousFocusRef.current = document.activeElement as HTMLElement;
+      const first = modalRef.current?.querySelector<HTMLElement>(FOCUSABLE);
+      first?.focus();
+    } else if (previousFocusRef.current) {
+      previousFocusRef.current.focus();
+      previousFocusRef.current = null;
+    }
+  }, [open]);
+
+  // ESC to close + Tab focus trap
   useEffect(() => {
     if (!open) return;
     function onKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const modal = modalRef.current;
+      if (!modal) return;
+      const focusable = Array.from(modal.querySelectorAll<HTMLElement>(FOCUSABLE));
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else {
+        if (document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     }
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
@@ -120,8 +157,8 @@ export default function BookRequestModal({ open, onClose, apiUrl }: Props) {
   }
 
   return (
-    <div className="br-overlay" onClick={handleOverlayClick}>
-      <div className="br-modal" ref={modalRef}>
+    <div className="br-overlay" onClick={handleOverlayClick} role="presentation">
+      <div className="br-modal" ref={modalRef} role="dialog" aria-modal="true" aria-labelledby="br-modal-title">
         <button className="br-close" onClick={handleClose} aria-label={t('closeAria')}>
           ✕
         </button>
@@ -138,7 +175,9 @@ export default function BookRequestModal({ open, onClose, apiUrl }: Props) {
         ) : (
           <div className="br-form-wrap">
             <div className="br-modal-header">
-              <h2 className="br-modal-title">{t('modalTitle')}</h2>
+              <h2 className="br-modal-title" id="br-modal-title">
+                {t('modalTitle')}
+              </h2>
               <p className="br-modal-subtitle">{t('modalSubtitle')}</p>
             </div>
 

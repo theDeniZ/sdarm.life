@@ -12,7 +12,7 @@ export default async function ImpressumPage({ params }: { params: Promise<{ loca
   const t = await getTranslations('web.legal.impressum');
 
   return (
-    <main className="page legal-page">
+    <main id="main-content" className="page legal-page">
       <h1>{t('title')}</h1>
 
       <h2>{t('section1Title')}</h2>

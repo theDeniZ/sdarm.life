@@ -23,3 +23,5 @@ tests/screenshot/results/
 
 /.claude/worktrees
 .claude-backup.tgz
+tests/a11y/results/
+

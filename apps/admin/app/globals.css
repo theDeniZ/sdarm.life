@@ -38,13 +38,22 @@
   --surface:   #13120f;
   --surface-2: #1a1916;
   --text:      #d6d0c8;
-  --muted:     #7a7470;
+  --muted:     #9e9891;
   --border:    rgba(201, 169, 110, 0.12);
   --border-2:  rgba(201, 169, 110, 0.22);
   --r:         4px;
 }
 
 html, body { height: 100%; }
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
 
 body {
   font-family: 'Raleway', sans-serif;
@@ -324,7 +333,6 @@ tbody tr:hover td { background: rgba(201, 169, 110, 0.03); }
   color: var(--text);
   font-size: 11px;
   text-align: center;
-  outline: none;
   transition: border-color 0.15s;
 }
 .swap-input:focus { border-color: rgba(201,169,110,0.4); }
@@ -377,7 +385,6 @@ tbody tr:hover td { background: rgba(201, 169, 110, 0.03); }
   color: var(--text);
   background: var(--surface-2);
   transition: border-color 0.18s;
-  outline: none;
   resize: vertical;
 }
 
@@ -643,7 +650,6 @@ input[type="file"]::file-selector-button:hover {
   font-family: 'Raleway', sans-serif;
   color: var(--text);
   background: var(--surface-2);
-  outline: none;
   resize: vertical;
   transition: border-color 0.18s;
 }
@@ -820,7 +826,6 @@ input[type="file"]::file-selector-button:hover {
   font-family: 'Raleway', sans-serif;
   color: var(--text);
   background: var(--surface);
-  outline: none;
   transition: border-color 0.18s;
 }
 
@@ -876,7 +881,6 @@ input[type="file"]::file-selector-button:hover {
   font-family: 'Raleway', sans-serif;
   color: var(--text);
   background: var(--surface-2);
-  outline: none;
 }
 
 .part-controls input[type="number"] {
@@ -887,7 +891,6 @@ input[type="file"]::file-selector-button:hover {
   font-family: 'Raleway', sans-serif;
   color: var(--text);
   background: var(--surface-2);
-  outline: none;
 }
 
 .part-lyrics {
@@ -900,7 +903,6 @@ input[type="file"]::file-selector-button:hover {
   color: var(--text);
   background: var(--surface-2);
   resize: vertical;
-  outline: none;
   transition: border-color 0.18s;
 }
 
@@ -1095,7 +1097,6 @@ input[type="file"]::file-selector-button:hover {
   font-family: 'Lexend', sans-serif;
   font-size: 13px;
   font-weight: 400;
-  outline: none;
   transition: border-color 0.18s;
 }
 
@@ -1170,7 +1171,6 @@ input[type="file"]::file-selector-button:hover {
   line-height: 1.75;
   resize: none;
   overflow: hidden;
-  outline: none;
 }
 
 .song-text-input:focus {
@@ -1311,7 +1311,6 @@ input[type="file"]::file-selector-button:hover {
   font-size: 13px;
   line-height: 1.7;
   resize: vertical;
-  outline: none;
 }
 
 .add-part-row {
