@@ -8,7 +8,10 @@
       "contact": "Kontakt",
       "imprint": "Impressum",
       "privacy": "Datenschutz",
-      "themeToggleAria": "Farbschema umschalten"
+      "themeToggleAria": "Farbschema umschalten",
+      "skipToContent": "Zum Hauptinhalt springen",
+      "prevPage": "Vorherige Seite",
+      "nextPage": "Nächste Seite"
     },
     "footer": {
       "stayInTouch": "Sei <em>dabei</em>",
@@ -22,6 +25,9 @@
       "subscribeError": "Fehler. Bitte versuchen Sie es später.",
       "locationPlaceholder": "Stadt oder PLZ",
       "locationUpdateAria": "Standort aktualisieren",
+      "emailInputAria": "E-Mail-Adresse eingeben",
+      "locationInputAria": "Ort oder PLZ eingeben",
+      "footerNavAria": "Seitennavigation",
       "copyright": "© {year} SDARM.life",
       "allRightsReserved": "Alle Rechte vorbehalten"
     },
@@ -85,8 +91,10 @@
         "sub": "jetzt entdecken"
       },
       "quote": {
+        "openShare": "Bibelvers teilen",
         "saveImage": "Als Bild speichern",
-        "close": "Schließen"
+        "close": "Schließen",
+        "dialogLabel": "Bibelvers als Bild teilen"
       }
     },
     "post": {

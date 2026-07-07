@@ -304,6 +304,8 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
 
   const contentRef = useRef<HTMLDivElement>(null);
   const settingsWrapRef = useRef<HTMLDivElement>(null);
+  const settingsBtnRef = useRef<HTMLButtonElement>(null);
+  const settingsEverOpenedRef = useRef(false);
   const savedRangeRef = useRef<Range | null>(null);
   const clickedHLRef = useRef<HTMLElement | null>(null);
   const [hlToolbarPos, setHlToolbarPos] = useState<{ x: number; y: number } | null>(null);
@@ -327,6 +329,20 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
     }
     document.addEventListener('mousedown', onOutside);
     return () => document.removeEventListener('mousedown', onOutside);
+  }, [settingsOpen]);
+
+  // Move focus into settings panel on open; restore to toggle button on close
+  useEffect(() => {
+    if (settingsOpen) {
+      settingsEverOpenedRef.current = true;
+      const panel = document.getElementById('epub-settings-panel');
+      const first = panel?.querySelector<HTMLElement>(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      first?.focus();
+    } else if (settingsEverOpenedRef.current) {
+      settingsBtnRef.current?.focus();
+    }
   }, [settingsOpen]);
 
   function setTheme(t: ReaderTheme) {
@@ -858,8 +874,11 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
           <span className="epub-chapter-pos">{readingProgress}%</span>
           <div className="epub-settings-wrap" ref={settingsWrapRef}>
             <button
+              ref={settingsBtnRef}
               className={`epub-icon-btn${settingsOpen ? ' epub-icon-btn--active' : ''}`}
               onClick={() => setSettingsOpen((v) => !v)}
+              aria-expanded={settingsOpen}
+              aria-controls="epub-settings-panel"
               aria-label={locale === 'de' ? 'Leseeinstellungen' : 'Reading settings'}
             >
               <svg viewBox="0 0 18 18" fill="none">
@@ -873,7 +892,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
               </svg>
             </button>
             {settingsOpen && (
-              <div className="epub-settings">
+              <div className="epub-settings" id="epub-settings-panel">
                 <span className="epub-settings__label">
                   {THEME_LABEL[locale] ?? 'Thema'} — {(THEME_NAMES[locale] ?? THEME_NAMES.de)[theme]}
                 </span>

@@ -111,11 +111,11 @@ export default function GlaubensLongRead({ articles, ariaNav, ariaOpen, ariaClos
               >
                 <div className="glr-item__header">
                   <div className="glr-item__num">{a.num}</div>
-                  <h3 className="glr-item__title">
+                  <h2 className="glr-item__title">
                     {a.titlePrefix}
                     <em>{a.accent}</em>
                     {a.titleSuffix}
-                  </h3>
+                  </h2>
                 </div>
                 <p className="glr-item__body">{a.body}</p>
                 <p className="glr-item__refs">{a.refs}</p>

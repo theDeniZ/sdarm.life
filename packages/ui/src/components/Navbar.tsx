@@ -112,6 +112,9 @@ export default function Navbar({
 
   return (
     <>
+      <a href="#main-content" className="skip-link">
+        {t('skipToContent')}
+      </a>
       <nav className={`${scrolled ? 'scrolled' : ''}${overDark ? ' over-dark' : ''}`.trim()}>
         <Link href={withTheme(webUrl, theme)} className="nav-logo">
           SDARM<span>.life</span>
@@ -163,8 +166,8 @@ export default function Navbar({
         </div>
       </nav>
 
-      {/* Mobile overlay */}
-      <div className={`nav-mobile${menuOpen ? ' nav-mobile--open' : ''}`} aria-hidden={!menuOpen}>
+      {/* Mobile overlay — inert when closed so hidden links are not tabbable (WCAG 4.1.2) */}
+      <div className={`nav-mobile${menuOpen ? ' nav-mobile--open' : ''}`} aria-hidden={!menuOpen} inert={!menuOpen || undefined}>
         <div className="nav-mobile__links">
           {navLinks.map(({ label, href }) => (
             <Link

@@ -382,7 +382,7 @@ export default function Footer({
       <div className="footer-inner-wrap">
         {/* Column 1: contact + subscribe */}
         <div className="footer-contact">
-          <h3 className="footer-heading">{t.rich('stayInTouch', { em: (chunks) => <em>{chunks}</em> })}</h3>
+          <h2 className="footer-heading">{t.rich('stayInTouch', { em: (chunks) => <em>{chunks}</em> })}</h2>
 
           <div className="footer-social">
             <a href={instagramUrl} title="Instagram" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
@@ -424,6 +424,7 @@ export default function Footer({
               className="footer-input"
               type="email"
               placeholder={t('newsletter')}
+              aria-label={t('emailInputAria')}
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={subStatus === 'loading'}
@@ -459,7 +460,7 @@ export default function Footer({
         </div>
 
         {/* Column 2: nav links */}
-        <div className="footer-nav">
+        <nav className="footer-nav" aria-label={t('footerNavAria')}>
           <div className="footer-nav-links">
             <Link href={withTheme(songbookUrl, theme)}>{navT('songs')}</Link>
             <Link href={withTheme(eventsUrl, theme)}>{navT('events')}</Link>
@@ -467,7 +468,7 @@ export default function Footer({
             <Link href={withTheme(`${webUrl}/about`, theme)}>{navT('about')}</Link>
             <Link href={withTheme(`${webUrl}/kontakt`, theme)}>{navT('contact')}</Link>
           </div>
-        </div>
+        </nav>
 
         {/* Column 3: sunset clock */}
         <div className="footer-sunset">
@@ -512,6 +513,7 @@ export default function Footer({
                   type="text"
                   className="sunset-location-input"
                   placeholder={t('locationPlaceholder')}
+                  aria-label={t('locationInputAria')}
                   autoComplete="off"
                   spellCheck={false}
                   value={locationInput}

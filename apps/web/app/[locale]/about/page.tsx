@@ -76,31 +76,33 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
     <>
       <ConnectedNavbar locale={locale} />
 
-      {/* Full-bleed image hero */}
-      <section className="about-cover">
-        <Image
-          src={imageUrl}
-          alt={imageAlt}
-          fill
-          style={{ objectFit: 'cover', objectPosition: 'center' }}
-          sizes="100vw"
-          priority
-          unoptimized={isUnoptimized(imageUrl)}
+      <main id="main-content">
+        {/* Full-bleed image hero */}
+        <section className="about-cover">
+          <Image
+            src={imageUrl}
+            alt={imageAlt}
+            fill
+            style={{ objectFit: 'cover', objectPosition: 'center' }}
+            sizes="100vw"
+            priority
+            unoptimized={isUnoptimized(imageUrl)}
+          />
+          <div className="about-cover__overlay" />
+          <div className="about-cover__content">
+            <h1 className="about-cover__title">{t.rich('heroTitle', { em: (chunks) => <em>{chunks}</em> })}</h1>
+          </div>
+        </section>
+
+        <GlaubensLongRead
+          articles={articles}
+          ariaNav={tGlaubens('navAria')}
+          ariaOpen={tGlaubens('openAria')}
+          ariaClose={tGlaubens('closeAria')}
         />
-        <div className="about-cover__overlay" />
-        <div className="about-cover__content">
-          <h1 className="about-cover__title">{t.rich('heroTitle', { em: (chunks) => <em>{chunks}</em> })}</h1>
-        </div>
-      </section>
 
-      <GlaubensLongRead
-        articles={articles}
-        ariaNav={tGlaubens('navAria')}
-        ariaOpen={tGlaubens('openAria')}
-        ariaClose={tGlaubens('closeAria')}
-      />
-
-      <ScriptureVerseSection locale={locale} />
+        <ScriptureVerseSection locale={locale} />
+      </main>
 
       <ConnectedFooter locale={locale} />
     </>
