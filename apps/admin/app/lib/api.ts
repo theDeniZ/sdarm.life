@@ -12,3 +12,23 @@ export function adminHeaders(): HeadersInit {
 export function r2url(key: string | null): string | null {
   return key ? `${R2}/${key}` : null;
 }
+
+// Aggregate views (dashboard, statistics) need the full dataset, not one
+// paginated page. Pages through a list endpoint until `total` is reached so
+// counts stay accurate regardless of how many rows exist.
+export async function fetchAll<T>(path: string): Promise<{ items: T[]; total: number }> {
+  const pageSize = 500;
+  const items: T[] = [];
+  const sep = path.includes('?') ? '&' : '?';
+  let offset = 0;
+  while (true) {
+    const res = await fetch(`${API}${path}${sep}limit=${pageSize}&offset=${offset}&_t=${Date.now()}`, {
+      headers: adminHeaders(),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const page = (await res.json()) as { items: T[]; total: number };
+    items.push(...page.items);
+    offset += pageSize;
+    if (page.items.length === 0 || offset >= page.total) return { items, total: page.total };
+  }
+}

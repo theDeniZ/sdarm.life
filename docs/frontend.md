@@ -185,6 +185,9 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 | `ConfirmDialog` | Reusable confirm modal (title, message, confirm/cancel, `danger` variant). Escape-to-cancel, autofocuses Cancel. Reuses the existing `.modal-backdrop`/`.modal`/`.modal-title` classes. Wired into Songbooks/Songs delete; other domains still use the browser `confirm()`. |
 | `Dashboard` | Renders at `/` (replaces the old redirect to `/config`). Hero stat card (posts published this month + `Sparkline`), a compact stats column (subscribers/songs/treasures/images), and "Latest posts"/"Latest subscribers" tables. All data composed client-side from existing endpoints via `domains/dashboard/repository.ts` — no new backend route. |
 | `Sparkline` | Tiny presentational bar chart (`values: number[]`) rendered as inline SVG `<rect>`s — no charting dependency. Used by `Dashboard` for the monthly posts trend. |
+| `BarChart` | Vertical monthly bar chart (inline SVG, value + month labels). Used by `Statistics`. |
+| `HBarChart` | Horizontal bar rows (`{ label, value, detail? }[]`, plain divs). Used by `Statistics` for songs-per-book. |
+| `Statistics` | Renders at `/statistics`. Four charts built client-side from existing endpoints via `domains/statistics/repository.ts` (signups/posts/uploads per month via the shared `lastMonthKeys`/`bucketByMonth` helpers in `lib/format.ts`, songs per book from `songCount`), plus two roadmap placeholder cards ("Top 10 songs", "Usage by language") with an info badge — those need the usage-tracking half of issue #109. Shares the `fetchAll` pagination helper in `lib/api.ts` with `Dashboard`. |
 | `PostList` | Posts table, featured toggle, soft-delete. Paginated (20/page) |
 | `PostForm` | Create/edit form with auto-slug. Uses `ImagePicker` for cover + thumb |
 | `ImagePicker` | Unified upload + library picker |
