@@ -1,15 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import SongbookCard from './SongbookCard';
 import { fetchSongbooks, deleteSongbook } from './repository';
-import { r2url } from '../../lib/api';
 import type { SongbookDto } from '@sdarm/types';
 
 export default function SongbookList() {
   const [items, setItems] = useState<SongbookDto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [q, setQ] = useState('');
+  const [language, setLanguage] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<SongbookDto | null>(null);
 
   function load() {
     setLoading(true);
@@ -20,68 +23,75 @@ export default function SongbookList() {
 
   useEffect(load, []);
 
-  async function handleDelete(book: SongbookDto) {
-    if (!confirm(`Delete "${book.title}"? This will also delete all its songs.`)) return;
-    await deleteSongbook(book.id);
+  const languages = useMemo(() => Array.from(new Set(items.map((b) => b.language))).sort(), [items]);
+
+  const filtered = useMemo(() => {
+    const needle = q.trim().toLowerCase();
+    return items.filter((b) => {
+      if (language && b.language !== language) return false;
+      if (needle && !b.title.toLowerCase().includes(needle) && !b.slug.toLowerCase().includes(needle)) return false;
+      return true;
+    });
+  }, [items, q, language]);
+
+  async function handleDelete() {
+    if (!pendingDelete) return;
+    await deleteSongbook(pendingDelete.id);
+    setPendingDelete(null);
     load();
   }
 
   if (loading) return <div className="state-loading">Loading…</div>;
-  if (items.length === 0) return <div className="state-empty">No songbooks yet.</div>;
 
   return (
-    <div className="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>Cover</th>
-            <th>Title</th>
-            <th>Language</th>
-            <th>Songs</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {items.map((book) => (
-            <tr key={book.id}>
-              <td>
-                {book.coverKey ? (
-                  <Image
-                    className="td-thumb"
-                    src={r2url(book.coverKey)!}
-                    alt={book.title}
-                    width={40}
-                    height={40}
-                    unoptimized
-                  />
-                ) : (
-                  <div className="td-thumb" />
-                )}
-              </td>
-              <td>
-                <div className="td-title">{book.title}</div>
-                <div className="td-slug">{book.slug}</div>
-              </td>
-              <td>{book.language}</td>
-              <td>
-                <Link href={`/songbooks/${book.id}/songs`} className="btn-ghost">
-                  Songs ({book.songCount})
-                </Link>
-              </td>
-              <td>
-                <div className="td-actions">
-                  <Link href={`/songbooks/${book.id}`} className="btn-ghost">
-                    Edit
-                  </Link>
-                  <button className="btn-danger" onClick={() => handleDelete(book)}>
-                    Delete
-                  </button>
-                </div>
-              </td>
-            </tr>
+    <>
+      <div className="toolbar">
+        <input
+          type="search"
+          className="filter-input"
+          placeholder="Search by title or slug…"
+          aria-label="Search songbooks by title or slug"
+          value={q}
+          onChange={(e) => setQ(e.target.value)}
+        />
+        <button className="chip-filter" aria-pressed={language === null} onClick={() => setLanguage(null)}>
+          All
+        </button>
+        {languages.map((lang) => (
+          <button key={lang} className="chip-filter" aria-pressed={language === lang} onClick={() => setLanguage(lang)}>
+            {lang.toUpperCase()}
+          </button>
+        ))}
+        <Link href="/songbooks/new" className="btn-primary" style={{ marginLeft: 'auto' }}>
+          + New songbook
+        </Link>
+      </div>
+
+      {filtered.length === 0 ? (
+        <div className="state-empty">
+          {items.length === 0 ? 'No songbooks yet.' : 'No songbooks match your search.'}
+        </div>
+      ) : (
+        <div className="book-grid">
+          {filtered.map((book) => (
+            <SongbookCard key={book.id} book={book} onDelete={setPendingDelete} />
           ))}
-        </tbody>
-      </table>
-    </div>
+        </div>
+      )}
+
+      {pendingDelete && (
+        <ConfirmDialog
+          title="Delete songbook?"
+          message={
+            <>
+              <b>{pendingDelete.title}</b> and all of its songs, parts, and sheet music will be permanently deleted.
+              This cannot be undone.
+            </>
+          }
+          onConfirm={handleDelete}
+          onCancel={() => setPendingDelete(null)}
+        />
+      )}
+    </>
   );
 }

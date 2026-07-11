@@ -1,24 +1,41 @@
-import { fetchSongbooks } from '../../domains/songbooks/repository';
-import SongbookForm from '../../domains/songbooks/SongbookForm';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import SongbookForm from '../../domains/songbooks/SongbookForm';
+import { fetchSongbooks } from '../../domains/songbooks/repository';
+import type { SongbookDto } from '@sdarm/types';
 
-export default async function EditSongbookPage({ params }: { params: Promise<{ id: string }> }) {
-  const id = Number((await params).id);
-  const books = await fetchSongbooks();
-  const book = books.find((b) => b.id === id);
+export default function EditSongbookPage() {
+  const { id } = useParams<{ id: string }>();
+  const songbookId = parseInt(id, 10);
+  const [book, setBook] = useState<SongbookDto | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!book) return <div className="state-error">Songbook not found.</div>;
+  useEffect(() => {
+    fetchSongbooks()
+      .then((books) => {
+        const found = books.find((b) => b.id === songbookId);
+        if (found) setBook(found);
+        else setError('Songbook not found.');
+      })
+      .catch((e) => setError(String(e)));
+  }, [songbookId]);
+
+  if (error) return <div className="state-error">{error}</div>;
+  if (!book) return <div className="state-loading">Loading…</div>;
 
   return (
     <>
       <div className="page-header">
         <h1>Edit: {book.title}</h1>
-        <Link href={`/songbooks/${id}/songs`} className="btn-ghost">
+        <Link href={`/songbooks/${songbookId}/songs`} className="btn-ghost">
           Songs ({book.songCount})
         </Link>
       </div>
       <SongbookForm
-        id={id}
+        id={songbookId}
         initial={{
           title: book.title,
           slug: book.slug,
