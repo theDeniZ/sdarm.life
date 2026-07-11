@@ -117,7 +117,27 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     return () => window.removeEventListener('keydown', onKey);
   }, [next, prev, onClose]);
 
-  // Touch swipe
+  // Auto-hide chrome after 3s of inactivity. Only mouse movement and taps
+  // reveal the bars — arrow keys and swipes are navigation gestures, not UI
+  // intent, so they leave the chrome hidden. Display windows are unaffected.
+  const [idle, setIdle] = useState(false);
+  const idleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resetIdle = useCallback(() => {
+    setIdle(false);
+    if (idleTimer.current) clearTimeout(idleTimer.current);
+    idleTimer.current = setTimeout(() => setIdle(true), 3000);
+  }, []);
+  useEffect(() => {
+    if (display) return;
+    resetIdle();
+    window.addEventListener('mousemove', resetIdle);
+    return () => {
+      window.removeEventListener('mousemove', resetIdle);
+      if (idleTimer.current) clearTimeout(idleTimer.current);
+    };
+  }, [display, resetIdle]);
+
+  // Touch swipe (≥50px navigates); a short tap (<10px) reveals the chrome
   useEffect(() => {
     let startX = 0;
     const onTouchStart = (e: TouchEvent) => {
@@ -128,6 +148,8 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
       if (Math.abs(dx) > 50) {
         if (dx < 0) next();
         else prev();
+      } else if (Math.abs(dx) < 10) {
+        resetIdle();
       }
     };
     window.addEventListener('touchstart', onTouchStart);
@@ -136,7 +158,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
       window.removeEventListener('touchstart', onTouchStart);
       window.removeEventListener('touchend', onTouchEnd);
     };
-  }, [next, prev]);
+  }, [next, prev, resetIdle]);
 
   const isTitleSlide = index === 0;
   const isAmenSlide = index === total - 1;
@@ -170,7 +192,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   }
 
   return createPortal(
-    <div className="projector" data-slide-theme={slideTheme}>
+    <div className={`projector${idle && !display ? ' projector--idle' : ''}`} data-slide-theme={slideTheme}>
       {/* Fullscreen request overlay — requires a user gesture on this window */}
       {pendingFullscreen && (
         <button className="projector__fs-overlay" onClick={enterFullscreen} aria-label={t('enterFullscreen')}>

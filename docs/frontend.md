@@ -249,7 +249,7 @@ Image fields render `<ImagePicker>`. Text-area fields render `<textarea>`. URL a
 |---|---|---|
 | `SongView` | **Client** | Mode switcher rendered on every song detail page. Owns mode state and the display window ref. |
 | `SongReader` | Client | Default reading view — parts list with optional chord display. |
-| `Projector` | **Client** | Full-screen lyric display used in two contexts: inline fullscreen (portal over current window) and display window (`?projector=1`). |
+| `Projector` | **Client** | Full-screen lyric display used in two contexts: inline fullscreen (portal over current window) and display window (`?projector=1`). Chrome (topbar/bottombar) auto-hides after 3 s of inactivity — mouse move or a tap reveals it; arrow keys and swipes are navigation gestures and leave it hidden. Display windows never hide chrome. |
 | `ProjectorOnly` | Client | Thin wrapper rendered when `?projector=1` — passes `isDisplay` to `Projector` and closes the window on exit. |
 | `PresenterDashboard` | **Client** | PowerPoint-style presenter view (portal over current window). Shows current + next slide previews, font controls, and navigation. Controls the display window via `BroadcastChannel`. |
 | `SheetViewer` | Client | Sheet music viewer — thumbnail tabs + full image or PDF display. |

@@ -559,6 +559,15 @@ a {
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Auto-hide chrome after inactivity (mouse move / tap reveals it again).
+   Opacity only — no layout shift; hidden bars must not catch clicks. */
+.projector--idle .projector__topbar,
+.projector--idle .projector__bottombar {
+  opacity: 0;
+  pointer-events: none;
 }
 .projector__logo {
   font-family: 'Cormorant Garamond', serif;
@@ -700,6 +709,7 @@ a {
   z-index: 1;
   gap: 12px;
   background-color: var(--proj-bar-bg);
+  transition: opacity 0.3s ease;
 }
 .projector__nav {
   grid-column: 2;
