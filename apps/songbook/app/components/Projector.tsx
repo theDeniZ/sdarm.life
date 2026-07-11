@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
 import { expandParts, getSiteTheme } from '@/app/lib/format';
 import ChordLine from './ChordLine';
+import { amenLabel, chorusLabel } from './slide-labels';
 
 interface Props {
   song: SongDto;
@@ -15,7 +16,6 @@ interface Props {
 
 export default function Projector({ song, onClose, isDisplay }: Props) {
   const t = useTranslations('songbook.projector');
-  const partT = useTranslations('songbook.partTypes');
   const parts = expandParts(song.parts);
   // index 0 = title slide; 1..parts.length = song parts; parts.length+1 = amen slide
   const total = parts.length + 2;
@@ -153,9 +153,9 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
 
   const bgSymbol = (() => {
     if (isTitleSlide) return String(song.number);
-    if (isAmenSlide) return 'Amen';
+    if (isAmenSlide) return amenLabel(song.songbook.language);
     const partIndex = index - 1;
-    if (part?.type === 'chorus') return partT('chorus').slice(0, 3);
+    if (part?.type === 'chorus') return chorusLabel(song.songbook.language);
     const vn = verseNumbers[partIndex];
     return vn !== null ? String(vn) : null;
   })();

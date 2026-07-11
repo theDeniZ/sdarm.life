@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { SongDto, SongPartDto } from '@sdarm/types';
 import { expandParts, getSiteTheme } from '@/app/lib/format';
 import ChordLine from './ChordLine';
+import { amenLabel, chorusLabel } from './slide-labels';
 
 interface Props {
   song: SongDto;
@@ -17,12 +18,11 @@ interface SlideViewProps {
   index: number;
   parts: SongPartDto[];
   verseNumbers: (number | null)[];
-  partT: (key: string) => string;
   variant: 'current' | 'next';
   slideTheme: 'dark' | 'light';
 }
 
-function SlideView({ song, index, parts, verseNumbers, partT, variant, slideTheme }: SlideViewProps) {
+function SlideView({ song, index, parts, verseNumbers, variant, slideTheme }: SlideViewProps) {
   const total = parts.length + 2;
   const isTitleSlide = index === 0;
   const isAmenSlide = index === total - 1;
@@ -32,9 +32,9 @@ function SlideView({ song, index, parts, verseNumbers, partT, variant, slideThem
 
   const bgSymbol = (() => {
     if (isTitleSlide) return String(song.number);
-    if (isAmenSlide) return 'Amen';
+    if (isAmenSlide) return amenLabel(song.songbook.language);
     const partIndex = index - 1;
-    if (part?.type === 'chorus') return partT('chorus').slice(0, 3);
+    if (part?.type === 'chorus') return chorusLabel(song.songbook.language);
     const vn = verseNumbers[partIndex];
     return vn !== null ? String(vn) : null;
   })();
@@ -264,7 +264,6 @@ export default function PresenterDashboard({ song, onClose }: Props) {
             index={index}
             parts={parts}
             verseNumbers={verseNumbers}
-            partT={partT}
             variant="current"
             slideTheme={slideTheme}
           />
@@ -280,7 +279,6 @@ export default function PresenterDashboard({ song, onClose }: Props) {
               index={nextIndex}
               parts={parts}
               verseNumbers={verseNumbers}
-              partT={partT}
               variant="next"
               slideTheme={slideTheme}
             />

@@ -115,7 +115,7 @@ export interface SongDto {
   title: string;
   author: string | null;
   copyright: string | null;
-  songbook: { id: number; title: string; slug: string };
+  songbook: { id: number; title: string; slug: string; language: string };
   parts: SongPartDto[];
   sheets: SongSheetDto[];
   createdAt: string;

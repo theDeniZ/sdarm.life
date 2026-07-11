@@ -5,9 +5,10 @@ const MOCK_SONG: SongDto = {
   id: 6547,
   number: 1,
   title: 'Щастя не ховається',
+
   author: 'Екатерина Лихачёва',
   copyright: null,
-  songbook: { id: 42, title: 'Breezify', slug: 'breezify' },
+  songbook: { id: 42, title: 'Breezify', slug: 'breezify', language: 'ru' },
   parts: [
     {
       id: 1,
