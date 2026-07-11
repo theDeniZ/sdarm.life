@@ -119,7 +119,7 @@ export const SongSchema = z
     title: z.string(),
     author: z.string().nullable(),
     copyright: z.string().nullable(),
-    songbook: z.object({ id: z.number(), title: z.string(), slug: z.string() }),
+    songbook: z.object({ id: z.number(), title: z.string(), slug: z.string(), language: z.string() }),
     parts: z.array(SongPartSchema),
     sheets: z.array(SongSheetSchema),
     createdAt: z.string(),

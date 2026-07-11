@@ -21,7 +21,7 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/songbooks/:slug` | Songbook metadata + `songCount`. 404 if not found. |
 | `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number, title, and `song_parts.lyrics`. `?limit=N&offset=N`. Returns `{ items, total }`. When `?q=` is set, each item includes `matchType: 'title' \| 'number' \| 'lyrics'` indicating which field caused the match (used by the songbook UI to highlight title hits with `<mark>` and label lyrics-only hits with a small pill). |
 | `GET` | `/api/v1/songs/search` | Global search across all songbooks. `?q=` (required, max 100 chars), `?limit=N&offset=N`. Returns `{ items, total }` of `SongSearchResultDto` (id, number, title, author, songbook). |
-| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays. 404 if not found. |
+| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays; `songbook` includes `language` (drives the projector's chorus/Amen slide labels). 404 if not found. |
 | `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |
 | `POST` | `/api/v1/book-request` | Submit a free-book delivery request. Body: `{ name, email, phone?, land (DE/AT/CH), street, plz, city, books[] (min 1), wish?, language? }`. Sends a formatted email to `info@sdarm.life` via Resend (background, non-blocking). Rate-limited: 2 requests per IP per minute. Returns `{ ok: true }` (201). |

@@ -145,6 +145,7 @@ export async function getSongById(db: DrizzleD1Database, id: number) {
       songbookId: songbooks.id,
       songbookTitle: songbooks.title,
       songbookSlug: songbooks.slug,
+      songbookLanguage: songbooks.language,
     })
     .from(songs)
     .innerJoin(songbooks, eq(songs.songbookId, songbooks.id))
@@ -158,10 +159,10 @@ export async function getSongById(db: DrizzleD1Database, id: number) {
     db.select().from(songSheets).where(eq(songSheets.songId, id)).orderBy(asc(songSheets.sortOrder)),
   ]);
 
-  const { songbookId, songbookTitle, songbookSlug, ...songData } = row;
+  const { songbookId, songbookTitle, songbookSlug, songbookLanguage, ...songData } = row;
   return {
     ...songData,
-    songbook: { id: songbookId, title: songbookTitle, slug: songbookSlug },
+    songbook: { id: songbookId, title: songbookTitle, slug: songbookSlug, language: songbookLanguage },
     parts: parts.map(({ songId: _s, ...p }) => p),
     sheets: sheets.map(({ songId: _s, uploadedAt: _u, ...sh }) => sh),
   };
