@@ -180,8 +180,9 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 
 | Component | Notes |
 |---|---|
-| `AdminShell` | Sidebar + main layout wrapper |
-| `Sidebar` | Nav links, active route via `usePathname()`. Links: Posts, Images, Config, Subscribers |
+| `AdminShell` | Owns mobile sidebar open/close state. Renders the `.sidebar-toggle` hamburger (mobile only, <768px), `<Sidebar>`, and the `.admin-main` content area. |
+| `Sidebar` | Left nav (replaces the old top `AdminNav` bar). Links: Dashboard, Statistics, Posts, Songbooks, Treasures, Images, Subscribers, Email, Config, API Keys — active state via `usePathname()`. Footer profile menu holds the dark/light theme toggle (`localStorage: sdarm-admin-theme`). Collapses to an off-canvas panel with an overlay below 768px. |
+| `ConfirmDialog` | Reusable confirm modal (title, message, confirm/cancel, `danger` variant). Escape-to-cancel, autofocuses Cancel. Reuses the existing `.modal-backdrop`/`.modal`/`.modal-title` classes. Wired into Songbooks/Songs delete; other domains still use the browser `confirm()`. |
 | `PostList` | Posts table, featured toggle, soft-delete. Paginated (20/page) |
 | `PostForm` | Create/edit form with auto-slug. Uses `ImagePicker` for cover + thumb |
 | `ImagePicker` | Unified upload + library picker |
@@ -189,6 +190,16 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 | `ConfigEditor` | Config fields grouped by section. Uses `ImagePicker` for image keys |
 | `SubscriberList` | Active subscribers table with Remove. Paginated (20/page) |
 | `Pagination` | Shared offset-based pagination. Props: `page`, `total`, `limit`, `onChange` |
+
+### Theme system (admin)
+
+Unlike the public apps, the admin app has no `ThemeScript`/FOUC-prevention pass yet — `Sidebar` reads `localStorage.sdarm-admin-theme` in a `useEffect` and sets `data-theme` on `<html>` after mount (default `'dark'`).
+
+The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html` and unlike the public site's warm black museum theme): dark = `#020617` page / `#0b1120` cards, light = `#f8fafc` page / white cards, hairline borders (`rgba(255,255,255,0.07)` dark / `rgba(2,6,23,0.08)` light), UI font Lexend, base radius `--r: 10px` (cards 12px). Accent tokens: `--accent` (`#c9a96e` dark / `#927223` light — deeper gold for contrast on white), `--accent-hover`, `--accent-soft`, `--on-accent`; `--gold` is kept as an alias of `--accent` so pre-existing rules follow it. `--brand-gold` (`#c9a96e`, theme-independent) exists only for the logo. Semantic tokens: `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--red`/`--red-text`/`--danger-soft`, plus `--heading`, `--muted`, `--row-hover`, `--overlay`. Never hardcode colors in admin CSS — every rule goes through these tokens so both themes stay in sync.
+
+### Songbooks card grid
+
+`SongbookList` renders a responsive card grid (3/2/1 columns) instead of a table — `SongbookCard` shows the cover image (or a book-icon placeholder via `.book-cover-icon` when `coverKey` is null), language chip, song count, and always-visible Edit/Songs/Delete actions. A toolbar above the grid combines a title/slug search input with language filter chips (`.chip-filter`) and the "+ New songbook" action. Delete goes through `ConfirmDialog` instead of the browser `confirm()`.
 
 ### Pagination pattern
 
