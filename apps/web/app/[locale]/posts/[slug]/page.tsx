@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchPost, fetchPosts, r2url, FALLBACK_IMG, WEB_URL } from '../../../lib/api';
+import { fetchPost, fetchPosts, r2url, FALLBACK_IMG, WEB_URL, API } from '../../../lib/api';
 import { formatDate } from '../../../lib/format';
 
 export const dynamic = 'force-dynamic';
@@ -21,7 +21,8 @@ export async function generateMetadata({
   if (!post) return {};
 
   const canonical = `${BASE}/${locale}/posts/${slug}`;
-  const ogImage = r2url(post.coverKey, { w: 1200, q: 85 }) ?? FALLBACK_IMG;
+  // Generated branded social card; cache-busts on content edits via ?v=updatedAt
+  const ogImage = `${API}/og?type=post&slug=${encodeURIComponent(slug)}&locale=${locale}&v=${encodeURIComponent(post.updatedAt)}`;
   const description = post.excerpt ?? post.body?.slice(0, 160) ?? undefined;
 
   return {

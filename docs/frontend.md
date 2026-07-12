@@ -166,6 +166,7 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 - **`app/robots.ts`** — `robots.txt` that allows all crawlers and points to the sitemap.
 - **`[locale]/layout.tsx`** — injects `Organization` and `WebSite` JSON-LD structured data via `<script type="application/ld+json">`.
 - **Page-level metadata** — home, about, and post pages export `generateMetadata()` with `openGraph` image/title/description and `alternates.canonical` + `alternates.languages` (hreflang).
+- **OpenGraph card images** — post (`apps/web`), book (`apps/treasures`), and song (`apps/songbook`) detail pages set `openGraph.images` to the generated card route `${API}/og?type=…&…&v={updatedAt}` (see [api.md](api.md)). The `v` param (content `updatedAt`) self-busts the KV cache on edits; the treasures DTO has no `updatedAt`, so its card relies on the 24 h KV TTL. Add `?v=` whenever a DTO exposes an update timestamp.
 
 ### Layout notes
 
