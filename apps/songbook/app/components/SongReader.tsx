@@ -108,7 +108,7 @@ export default function SongReader({ parts, showChords, songId }: Props) {
         </div>
       )}
       {renderedParts.map((part, i) => (
-        <div key={i} className="song-part">
+        <div key={i} className={`song-part${part.type === 'verse' ? ' song-part--verse' : ''}`}>
           <div className="song-part__label">{partLabel(part.type, part.label)}</div>
           <div className="song-part__lyrics">
             {part.lyrics.split('\n').map((line, j) => (
