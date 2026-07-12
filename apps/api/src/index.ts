@@ -22,6 +22,7 @@ import adminEmailRouter from './routes/admin/email';
 import treasuresRouter from './routes/treasures';
 import bookRequestRouter from './routes/book-request';
 import geocodeRouter from './routes/geocode';
+import ogRouter from './routes/og';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -81,6 +82,9 @@ v1.route('/treasures', treasuresRouter);
 v1.route('', bookRequestRouter); // /book-request
 
 v1.route('/geocode', geocodeRouter); // KV-cached Nominatim proxy (DSGVO: hides user IP)
+
+// OG social-card images — binary responder, KV-cached, excluded from OpenAPI (like the R2 proxy)
+v1.route('/og', ogRouter);
 
 // ── Admin routes (auth-gated) ─────────────────────────────────────────────────
 admin.use('*', auth);

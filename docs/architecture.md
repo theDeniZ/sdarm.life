@@ -255,10 +255,15 @@ apps/api/src/
     treasures.ts       — all DB queries for the treasures table
   middleware/
     auth.ts            — CF Access header verification middleware
+  og/
+    card.ts            — OG social-card HTML for Satori (workers-og)
+    fonts/*.ttf        — self-hosted Lexend (Latin) + Noto Sans (Cyrillic subset), bundled via the wrangler `Data` rule
   schemas.ts           — shared Zod schemas (PostSchema, ImageSchema, etc.) — source of truth for OpenAPI spec
   types.ts             — Bindings type, shared request body shapes
   index.ts             — CORS, route mounting, OpenAPI spec + Swagger UI, export default app
 ```
+
+**Binary/OG responders bypass zod-openapi.** `routes/og.ts` (and the local-dev R2 proxy) return image bytes, not a JSON contract, so they mount as plain Hono routes excluded from the OpenAPI spec. `.ttf` fonts are imported as `ArrayBuffer`s — enabled by the `rules: [{ type: "Data", globs: ["**/*.ttf"] }]` entry in `wrangler.jsonc`.
 
 **Repository pattern for Workers.** Repositories are plain modules exporting functions that take a `db` (Drizzle instance) as their first argument. No classes, no constructors — Workers have no persistent state between requests.
 
