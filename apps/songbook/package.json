@@ -13,27 +13,27 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@fontsource/lexend": "^5.2.11",
+    "@fontsource/lexend": "^5.3.0",
     "@sdarm/types": "workspace:*",
     "@sdarm/ui": "workspace:*",
-    "next": "16.2.7",
-    "next-intl": "^4.13.0",
-    "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "next": "16.2.11",
+    "next-intl": "^4.13.4",
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
     "@opennextjs/cloudflare": "^1",
     "@eslint/js": "^10.0.1",
     "@sdarm/i18n": "workspace:*",
-    "@types/node": "^25",
+    "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "eslint": "^10.4.1",
+    "eslint": "^10.7.0",
     "eslint-plugin-prettier": "^5.5.6",
-    "prettier": "^3.0.0",
-    "typescript": "^6",
-    "typescript-eslint": "^8.60.1",
-    "vitest": "~4.1.8",
+    "prettier": "^3.9.6",
+    "typescript": "^7",
+    "typescript-eslint": "^8.65.0",
+    "vitest": "~4.1.10",
     "wrangler": "^4"
   }
 }
