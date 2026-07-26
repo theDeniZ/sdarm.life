@@ -96,11 +96,16 @@ Server-only (no `NEXT_PUBLIC_` prefix). `R2_TRANSFORMS` — same kill switch as 
 
 ### `apps/api` (local dev only)
 
-`apps/api/.dev.vars` (gitignored, auto-loaded by `wrangler dev`):
+`apps/api/.dev.vars` (gitignored, auto-loaded by `wrangler dev`) — see `.dev.vars.example`:
 
 ```
 API_KEY=dev
+RESEND_API_KEY=
+YOUVERSION_API_KEY=
+YOUVERSION_DEVELOPER_ID=
 ```
+
+`YOUVERSION_API_KEY` is the app key for the YouVersion Platform API used by the Bible feature. It is **server-only** and must be set as a Wrangler secret in production (`wrangler secret put YOUVERSION_API_KEY`). Without it, `/bible/*` returns empty/404 and the reader shows its unavailable state — it never fails the build.
 
 Never put secrets in `wrangler.jsonc`.
 

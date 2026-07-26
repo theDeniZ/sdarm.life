@@ -193,7 +193,8 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 | `PostForm` | Create/edit form with auto-slug. Uses `ImagePicker` for cover + thumb |
 | `ImagePicker` | Unified upload + library picker |
 | `ImageLibrary` | R2 image grid with usage info. Paginated (24/page), "Show unused only" filter |
-| `ConfigEditor` | Config fields grouped by section. Uses `ImagePicker` for image keys |
+| `ConfigEditor` | Config fields grouped by section. Uses `ImagePicker` for image keys. `bible_translations` is deliberately not rendered here — it is managed by `BibleSettings`. |
+| `BibleSettings` | Renders at `/bible`. Curates which YouVersion translations are public: an ordered "enabled" list (reorder / remove), a copyright-jurisdiction selector, a read-only reference list of the licenses available to the app key, a paginated language-filtered browse of the YouVersion catalog, and a curated public-domain reference panel. Saves the chosen IDs as a JSON array through `PUT /admin/config/bible_translations`. Public-domain verdicts come from `domains/bible/publicDomain.ts`; the "Not licensed" badge comes from the catalog's `licensed` flag — there is deliberately **no** license-acceptance badge (see [api.md](api.md#bible-content)). |
 | `SubscriberList` | Active subscribers table with Remove. Paginated (20/page) |
 | `Pagination` | Shared offset-based pagination. Props: `page`, `total`, `limit`, `onChange` |
 
@@ -306,11 +307,20 @@ Main screen (presenter)              External screen (display window)
 
 | Component | Type | Notes |
 |---|---|---|
-| `TreasureCatalog` | **Client** | Catalog page — `PageHero` + scripture quote + filter bar + paginated grid of `TreasureCard`s. Owns category/language filter state and pagination. Page size is 8 (2 rows × 4 cols on desktop). |
-| `TreasureCard` | **Client** | One book entry: `Book3DCover` on the visual side, title row + author + description + price/free badge on the body side. Always links to `/{locale}/books/{id}` — epub books open the reader, non-epub books open `BookDetail`. |
+| `TreasureCatalog` | **Client** | Catalog page — `PageHero` + scripture quote + filter bar + paginated grid of `TreasureCard`s. Owns category/language filter state and pagination. Page size is 8 (2 rows × 4 cols on desktop). Hero renders two CTAs (`.br-hero-ctas`): the primary book-request button and a ghost "Open Bible" link to `/{locale}/bible` — the only entry point to the Bible reader. |
+| `TreasureCard` | **Client** | One book entry: `Book3DCover` on the visual side, title row + author + description + price/free badge on the body side. Always links to `/{locale}/books/{id}` — Bibles are not treasures and never appear in this grid. |
 | `Book3DCover` | **Client** | Perspective-tilted 3D book rendering with drop shadow. Renders a face image when one is available, otherwise a museum-tone gradient fallback with a glyph + title. |
 | `TreasuresFilterBar` | Client | Category + language filter chips. Emits `onChange`. |
 | `BookRequestModal` | Client | Free-book delivery request form. Posts to `POST /api/v1/book-request`. |
+| `bible/BibleBookIndex` | Client | Book list of a translation: passage picker + OT/NT tab filter + book link grid. |
+| `bible/BiblePassagePicker` | **Client** | Reactive passage search (combobox). Understands `Book`, `Book N`, `Book N:V`, and bare numbers (`60` → only books with ≥60 chapters). Fuzzy book matching over localized name/abbreviation/USFM code. |
+| `bible/BibleChapterReader` | **Client** | Default chapter view. Verse click-selection (click / Shift-range / Cmd-toggle), copy-to-clipboard with a persisted options panel (`lib/copyVerses.ts`), share link, font scale (localStorage), keyboard nav (←/→ chapters, j/k verses, g picker), presenter launch, and the publisher copyright notice (`.bible-copyright`). |
+| `bible/BibleParallelReader` | **Client** | Two-column side-by-side view (`?compare=` URL param). Verses aligned by number; Psalm chapters remapped LXX↔Hebrew via `@sdarm/types` using each translation's `lxxPsalms` flag. A/B translation selects, swap, presenter launch. |
+| `bible/BiblePresenterDashboard` | **Client** | Operator view (portal): verse strip + scaled 1280×720 mirror of the display, passage picker, primary/compare translation selects, font controls, blank-screen toggle (`b`), keyboard verse navigation with Shift-range extension. Controls the display window via `BroadcastChannel('bible-projector')`. |
+| `bible/BibleProjector` | **Client** | Full-screen verse display. Inline fullscreen or display window (`?projector=1`, `isDisplay`). Receives `selection`/`fontScale`/`blank`/`passage`/`requestFullscreen` channel messages; sends `ready` on load. Renders single or parallel layout. |
+| `bible/BibleProjectorOnly` | Client | Thin wrapper for `?projector=1` — mounts `BibleProjector` with `isDisplay` and closes the window on exit. |
+| `bible/ContinueReadingBar` | Client | "Continue reading" banner on the Bible landing page, driven by `localStorage` last-read (read after mount to avoid hydration mismatch). |
+| `bible/BibleUnavailable` | Client | Friendly error state when a chapter fetch fails (retry / back links). |
 
 ### Book3DCover
 
@@ -342,6 +352,29 @@ No external image hosts are contacted from the catalog. Covers are uploaded thro
 ### TreasureCatalog layout
 
 `PageHero` (book SVG decoration) → `ScriptureQuote` → `TreasuresFilterBar` → 4-column grid of `TreasureCard`s (2 cols on tablet, 1 col on mobile) → pagination (`pageRange()` with ellipses when more than 7 pages). Cards stagger in via the `.visible` class on `.item-card` (55 ms × index, capped at the first 20 cards).
+
+### Bible reader (`/[locale]/bible/...`)
+
+Route structure (all server components fetching via `lib/bible.ts`, silent-error style). `bible/layout.tsx` adds `<ConnectedFooter>` — the section sits outside the `(main)` route group, which is where the footer otherwise lives, and would render without one:
+
+| Route | Renders |
+|---|---|
+| `/bible` | `PageHero` + `ContinueReadingBar` + a card per enabled translation (language chip, name, abbreviation, year, copyright). Shows an empty-state message when the operator has enabled none. |
+| `/bible/[code]` | `PageHero` + `BibleBookIndex` |
+| `/bible/[code]/[book]` | Chapter number grid |
+| `/bible/[code]/[book]/[chapter]` | `BibleChapterReader`; `?compare=X` → `BibleParallelReader`; `?projector=1` → `BibleProjectorOnly` (display window). JSON-LD `Article` + `generateMetadata` with canonical/hreflang. |
+
+**Multi-window presenter** mirrors the songbook architecture (`BroadcastChannel`, `ready` handshake, click-to-fullscreen overlay on the display) — channel name `bible-projector`, selection is a verse **set** (single / contiguous range / Cmd-toggled) instead of a slide index. The presenter can also switch the display into parallel mode at runtime; the display window then reloads with `?compare=`.
+
+**Data source:** everything comes from our own `/api/v1/bible/*`, which proxies YouVersion server-side (see [api.md](api.md#bible-content)). The browser never talks to YouVersion, and translation availability is controlled by the operator in Admin → Bible.
+
+**URL codes** are YouVersion abbreviation slugs (`/bible/delut/JHN/3`), and book codes are USFM (`JHN`, not `JOH`). The API also accepts the raw numeric YouVersion ID in place of the slug.
+
+**Data flow note:** `lib/bible.ts` fetchers run on the server (`API` env). `fetchParallelChapter` is additionally called from `BibleChapterReader` (client) when the operator picks a compare translation in the presenter — the chapter page threads `apiUrl={API}` down as a prop for that.
+
+**Copyright:** `chapter.translation.copyright` is rendered under the text and under both parallel columns. Several YouVersion per-Bible licenses require the notice — do not remove it.
+
+**Client-side persistence** (functional localStorage, no identifiers — DSGVO-fine): `bible_last_read`, `bible_font_scale`, `bible_copy_options`.
 
 ---
 

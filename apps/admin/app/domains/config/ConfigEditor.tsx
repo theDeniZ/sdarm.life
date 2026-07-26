@@ -18,6 +18,9 @@ const LABELS: Record<ConfigKey, string> = {
   whatsapp_url: 'WhatsApp',
   instagram_url: 'Instagram',
   youtube_url: 'YouTube',
+  // Managed by Admin → Bible, not rendered as a raw field here (it is not
+  // listed in SECTIONS). The entry exists so the Record<ConfigKey, …> stays total.
+  bible_translations: 'Enabled Bible translations',
 };
 
 const SECTIONS: { label: string; keys: ConfigKey[] }[] = [

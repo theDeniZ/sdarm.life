@@ -55,7 +55,10 @@ donation_url
 hero_bg_key, hero_bg_alt
 about_text_1, about_text_2, about_image_key, about_image_alt, about_link_url
 facebook_url, whatsapp_url, instagram_url, youtube_url
+bible_translations
 ```
+
+`bible_translations` is a JSON array of enabled YouVersion Bible IDs (e.g. `"[51,143]"`), written by Admin → Bible and read by the public `/bible/*` routes. **Bible text itself is never stored** — see [api.md](api.md#bible-content).
 
 ## Drizzle notes
 

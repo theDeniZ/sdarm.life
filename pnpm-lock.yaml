@@ -128,6 +128,9 @@ importers:
       '@hono/zod-openapi':
         specifier: ^1.4.0
         version: 1.4.0(hono@4.12.25)(zod@4.4.3)
+      '@sdarm/types':
+        specifier: workspace:*
+        version: link:../../packages/types
       drizzle-orm:
         specifier: ^0.45.1
         version: 0.45.2(@cloudflare/workers-types@4.20260605.1)
@@ -449,7 +452,11 @@ importers:
 
   packages/i18n: {}
 
-  packages/types: {}
+  packages/types:
+    devDependencies:
+      vitest:
+        specifier: ~4.1.8
+        version: 4.1.8(@edge-runtime/vm@3.2.0)(@types/node@25.9.1)(vite@7.3.2(@types/node@25.9.1)(jiti@2.7.0)(lightningcss@1.32.0)(terser@5.16.9)(tsx@4.22.4)(yaml@2.9.0))
 
   packages/ui:
     dependencies:

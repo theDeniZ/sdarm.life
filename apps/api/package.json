@@ -21,6 +21,7 @@
 	"dependencies": {
 		"@hono/swagger-ui": "^0.6.1",
 		"@hono/zod-openapi": "^1.4.0",
+		"@sdarm/types": "workspace:*",
 		"drizzle-orm": "^0.45.1",
 		"hono": "^4.12.25",
 		"workers-og": "^0.0.27",

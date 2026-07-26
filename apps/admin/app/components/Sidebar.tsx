@@ -111,6 +111,19 @@ const ICONS: Record<string, React.ReactNode> = {
       <path d="M22 6l-10 7L2 6" />
     </svg>
   ),
+  bible: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5z" />
+      <path d="M12 6v8M9.5 8.5h5" />
+    </svg>
+  ),
   config: (
     <svg
       viewBox="0 0 24 24"
@@ -149,6 +162,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '/images', label: 'Images', icon: 'images' },
   { href: '/subscribers', label: 'Subscribers', icon: 'subscribers' },
   { href: '/email', label: 'Email', icon: 'email' },
+  { href: '/bible', label: 'Bible', icon: 'bible' },
   { href: '/config', label: 'Config', icon: 'config' },
   { href: '/api-keys', label: 'API Keys', icon: 'apiKeys' },
 ];

@@ -19,7 +19,9 @@ import adminSongbooksRouter from './routes/admin/songbooks';
 import adminTreasuresRouter from './routes/admin/treasures';
 import adminApiKeysRouter from './routes/admin/api-keys';
 import adminEmailRouter from './routes/admin/email';
+import adminBibleRouter from './routes/admin/bible';
 import treasuresRouter from './routes/treasures';
+import bibleRouter from './routes/bible';
 import bookRequestRouter from './routes/book-request';
 import geocodeRouter from './routes/geocode';
 import ogRouter from './routes/og';
@@ -79,6 +81,12 @@ v1.route('/songs', songsRouter);
 v1.use('/treasures/*', cached(3600)); // 1 hour — treasure detail
 v1.route('/treasures', treasuresRouter);
 
+// Bible: proxied from YouVersion, KV-cached inside the service layer.
+// Edge caching is applied per-route inside the router, not by a blanket mount:
+// the translation endpoints reflect the admin allowlist and must react to it
+// immediately, while book/chapter/parallel text is immutable and cached a day.
+v1.route('/bible', bibleRouter);
+
 v1.route('', bookRequestRouter); // /book-request
 
 v1.route('/geocode', geocodeRouter); // KV-cached Nominatim proxy (DSGVO: hides user IP)
@@ -95,6 +103,7 @@ admin.route('/subscribers', adminSubscribersRouter);
 admin.route('', adminSongbooksRouter);
 admin.route('', adminTreasuresRouter);
 admin.route('', adminEmailRouter);
+admin.route('/bible', adminBibleRouter);
 
 v1.route('/admin', admin);
 app.route('/api/v1', v1);

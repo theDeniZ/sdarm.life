@@ -96,6 +96,33 @@ export const mockTreasure = {
   updatedAt: '2025-01-01T00:00:00Z',
 };
 
+export const mockBibleTranslation = {
+  id: 51,
+  code: 'delut',
+  name: 'Lutherbibel 1912',
+  abbreviation: 'DELUT',
+  language: 'de',
+  copyright: null,
+  year: 1912,
+  lxxPsalms: false,
+};
+
+export const mockBibleBooks = [
+  { id: 1, code: 'GEN', number: 1, name: '1. Mose', abbreviation: '1. Mose', testament: 'OT', chapterCount: 50 },
+  { id: 19, code: 'PSA', number: 19, name: 'Psalmen', abbreviation: 'Psalmen', testament: 'OT', chapterCount: 150 },
+  { id: 43, code: 'JHN', number: 43, name: 'Johannes', abbreviation: 'Johannes', testament: 'NT', chapterCount: 21 },
+];
+
+export const mockBibleChapter = {
+  translation: { code: 'delut', name: 'Lutherbibel 1912', copyright: null },
+  book: mockBibleBooks[2],
+  chapter: 3,
+  verses: [
+    { verse: 16, text: 'Also hat Gott die Welt geliebt, daß er seinen eingeborenen Sohn gab.' },
+    { verse: 17, text: 'Denn Gott hat seinen Sohn nicht gesandt in die Welt, daß er die Welt richte.' },
+  ],
+};
+
 export const mockPost = {
   id: 1,
   title: 'Testbeitrag',

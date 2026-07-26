@@ -13,6 +13,9 @@ export const KNOWN_CONFIG_KEYS = [
   'whatsapp_url',
   'instagram_url',
   'youtube_url',
+  // JSON array of enabled YouVersion Bible IDs, e.g. "[51,12]".
+  // Written by Admin → Bible; read by the public /bible/* routes.
+  'bible_translations',
 ] as const;
 
 export type ConfigKey = typeof KNOWN_CONFIG_KEYS[number];
