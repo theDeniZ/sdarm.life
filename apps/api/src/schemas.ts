@@ -151,6 +151,89 @@ export const TreasureSchema = z
   })
   .openapi('Treasure');
 
+// ── Bible (YouVersion-backed, see services/bible/) ────────────────────────────
+
+export const BibleTestamentSchema = z.enum(['OT', 'NT']);
+
+export const BibleTranslationSchema = z
+  .object({
+    id: z.number().openapi({ description: 'YouVersion Bible ID', example: 51 }),
+    code: z.string().openapi({ description: 'URL slug', example: 'delut' }),
+    name: z.string(),
+    abbreviation: z.string(),
+    language: z.string(),
+    copyright: z.string().nullable(),
+    year: z.number(),
+    lxxPsalms: z.boolean().openapi({ description: 'Uses Septuagint Psalm numbering' }),
+  })
+  .openapi('BibleTranslation');
+
+export const BibleCatalogEntrySchema = z
+  .object({
+    id: z.number(),
+    code: z.string(),
+    name: z.string(),
+    abbreviation: z.string(),
+    language: z.string(),
+    copyright: z.string().nullable(),
+    licensed: z.boolean().openapi({
+      description: 'Whether our app key has agreed to a license covering this Bible. Unlicensed Bibles appear only on an all_available listing and cannot be read.',
+    }),
+  })
+  .openapi('BibleCatalogEntry');
+
+export const BibleLicenseSchema = z
+  .object({
+    id: z.string(),
+    name: z.string(),
+    organization: z.string().nullable(),
+    bibleIds: z.array(z.number()).openapi({ description: 'Every Bible ID this license governs' }),
+  })
+  .openapi('BibleLicense');
+
+export const BibleBookSchema = z
+  .object({
+    id: z.number(),
+    code: z.string().openapi({ description: 'USFM code', example: 'JHN' }),
+    number: z.number(),
+    name: z.string(),
+    abbreviation: z.string(),
+    testament: BibleTestamentSchema,
+    chapterCount: z.number(),
+  })
+  .openapi('BibleBook');
+
+export const BibleVerseSchema = z.object({ verse: z.number(), text: z.string() }).openapi('BibleVerse');
+
+export const BibleChapterSchema = z
+  .object({
+    translation: z.object({ code: z.string(), name: z.string(), copyright: z.string().nullable() }),
+    book: BibleBookSchema,
+    chapter: z.number(),
+    verses: z.array(BibleVerseSchema),
+  })
+  .openapi('BibleChapter');
+
+export const ParallelVerseSchema = z
+  .object({ verse: z.number(), a: z.string().nullable(), b: z.string().nullable() })
+  .openapi('ParallelVerse');
+
+const ParallelSideSchema = z.object({
+  code: z.string(),
+  name: z.string(),
+  chapter: z.number(),
+  copyright: z.string().nullable(),
+});
+
+export const ParallelChapterSchema = z
+  .object({
+    bookCode: z.string(),
+    a: ParallelSideSchema,
+    b: ParallelSideSchema,
+    verses: z.array(ParallelVerseSchema),
+  })
+  .openapi('ParallelChapter');
+
 export const PaginationQuery = z.object({
   limit: z.coerce.number().optional().openapi({ example: 20 }),
   offset: z.coerce.number().optional().openapi({ example: 0 }),

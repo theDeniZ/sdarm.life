@@ -2043,3 +2043,344 @@ input[type="file"]::file-selector-button:hover {
 
 .card--roadmap { opacity: 0.75; }
 .card--roadmap .state-empty { padding: 24px 12px; }
+
+/* ── BIBLE SETTINGS (Admin → Bible) ──────────────────────────────────────────
+   Curates which YouVersion translations are public. No DB involved — the
+   selection is one KV config key (`bible_translations`). */
+
+.bible-settings {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.muted-note {
+  color: var(--muted);
+  font-size: 12.5px;
+  line-height: 1.55;
+  margin: 8px 0 0;
+}
+
+.flash-ok,
+.flash-err {
+  font-size: 12.5px;
+  margin: 12px 0 0;
+  padding: 8px 12px;
+  border-radius: var(--r);
+}
+.flash-ok {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+.flash-err {
+  color: var(--red-text);
+  background: var(--danger-soft);
+}
+
+/* ── Enabled list (ordered, reorderable) ── */
+.bible-enabled-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bible-enabled-row {
+  display: grid;
+  grid-template-columns: 26px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--row-hover);
+}
+
+.bible-enabled-rank {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-align: center;
+}
+
+.bible-enabled-name {
+  font-size: 13.5px;
+  color: var(--heading);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.bible-enabled-meta {
+  color: var(--muted);
+  font-size: 11.5px;
+  white-space: nowrap;
+}
+
+.bible-enabled-actions {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.bible-enabled-actions .btn-ghost {
+  padding: 4px 9px;
+  line-height: 1;
+}
+
+/* ── Catalog browser ── */
+.bible-catalog-toolbar {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 14px 0 16px;
+}
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bible-catalog-toolbar input[type='search'] {
+  max-width: 340px;
+}
+
+.bible-catalog-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  max-height: 460px;
+  overflow-y: auto;
+}
+
+.bible-catalog-row {
+  border-radius: var(--r);
+  padding: 7px 10px;
+  transition: background 0.15s;
+}
+.bible-catalog-row:hover {
+  background: var(--row-hover);
+}
+.bible-catalog-row.is-enabled {
+  background: var(--accent-soft);
+}
+
+.bible-catalog-row label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  margin: 0;
+}
+
+.bible-catalog-row input[type='checkbox'] {
+  flex-shrink: 0;
+  accent-color: var(--accent);
+}
+
+.bible-catalog-name {
+  font-size: 13.5px;
+  color: var(--heading);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.bible-catalog-meta {
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-left: auto;
+  white-space: nowrap;
+  padding-left: 10px;
+}
+
+.bible-catalog-copyright {
+  display: block;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 2px 0 0 34px;
+}
+
+.bible-catalog-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.bible-catalog-pager .muted-note {
+  margin: 0;
+}
+
+/* ── Status badges (public domain / licensing) ──
+   Verdicts are advisory, so the palette stays quiet: green states a known-free
+   text, amber flags something the operator must act on or verify, and grey is
+   an honest "we do not know". */
+.pd-badge {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  cursor: help;
+}
+
+.pd-public {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+.pd-copyrighted {
+  color: var(--red-text);
+  background: var(--danger-soft);
+}
+.pd-unknown {
+  color: var(--muted);
+  background: var(--row-hover);
+}
+.pd-warn {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+.pd-info {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.bible-badge-row {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  align-items: center;
+  margin-left: 8px;
+}
+
+.bible-catalog-row .bible-badge-row {
+  margin-left: 34px;
+  padding-top: 3px;
+}
+
+/* Unlicensed rows are browsable but not selectable — mute them so the
+   difference is visible at a glance rather than only on the disabled input. */
+.bible-catalog-row.is-unlicensed .bible-catalog-name,
+.bible-catalog-row.is-unlicensed .bible-catalog-meta {
+  opacity: 0.55;
+}
+
+/* ── Jurisdiction picker ── */
+.bible-jurisdiction-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 12px 0 0;
+}
+
+.bible-jurisdiction-row select {
+  min-width: 260px;
+}
+
+.bible-jurisdiction-row .muted-note {
+  margin: 0;
+  flex: 1 1 260px;
+}
+
+.chip-code {
+  opacity: 0.55;
+  font-variant-numeric: tabular-nums;
+}
+
+.bible-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.bible-toggle input[type='checkbox'] {
+  accent-color: var(--accent);
+}
+
+/* ── License agreements ── */
+.bible-license-list,
+.bible-reference-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.bible-license-row,
+.bible-reference-row {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: baseline;
+  gap: 4px 10px;
+  padding: 7px 10px;
+  border-radius: var(--r);
+  background: var(--row-hover);
+}
+
+.bible-license-name,
+.bible-reference-title {
+  font-size: 13px;
+  color: var(--heading);
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+/* Licenses are reference rows with no badge column: name left, Bible count right. */
+.bible-license-row {
+  grid-template-columns: 1fr auto;
+}
+
+.bible-license-row .muted-note {
+  margin: 0;
+  white-space: nowrap;
+}
+
+.bible-reference-row .muted-note {
+  grid-column: 2;
+  margin: 0;
+}
+
+.bible-reference-list {
+  max-height: 420px;
+  overflow-y: auto;
+}
+
+@media (max-width: 640px) {
+  .bible-enabled-row {
+    grid-template-columns: 22px 1fr;
+  }
+  .bible-enabled-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+  }
+  .bible-catalog-meta {
+    margin-left: 0;
+    padding-left: 0;
+  }
+  .bible-catalog-row label {
+    flex-wrap: wrap;
+  }
+  .bible-catalog-row .bible-badge-row {
+    margin-left: 0;
+  }
+  .bible-jurisdiction-row select {
+    min-width: 0;
+    width: 100%;
+  }
+}

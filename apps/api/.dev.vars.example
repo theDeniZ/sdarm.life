@@ -1,0 +1,6 @@
+API_KEY=dev
+RESEND_API_KEY=
+# YouVersion Platform (https://platform.youversion.com) — server-side only.
+# Without these the Bible feature renders an empty state instead of failing.
+YOUVERSION_API_KEY=
+YOUVERSION_DEVELOPER_ID=

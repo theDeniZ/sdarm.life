@@ -7,6 +7,9 @@ import {
   mockTreasure,
   mockPostList,
   mockPost,
+  mockBibleTranslation,
+  mockBibleBooks,
+  mockBibleChapter,
 } from './data';
 
 const PORT = 8788;
@@ -76,6 +79,28 @@ function handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
   // /api/v1/treasures
   if (url === '/api/v1/treasures') {
     sendJSON(res, 200, { items: [mockTreasure], total: 1 });
+    return;
+  }
+
+  // /api/v1/bible/*
+  if (url === '/api/v1/bible/translations') {
+    sendJSON(res, 200, { items: [mockBibleTranslation], total: 1 });
+    return;
+  }
+  if (url === '/api/v1/bible/translations/delut') {
+    sendJSON(res, 200, mockBibleTranslation);
+    return;
+  }
+  if (url === '/api/v1/bible/translations/delut/books') {
+    sendJSON(res, 200, { items: mockBibleBooks, total: mockBibleBooks.length });
+    return;
+  }
+  if (url === '/api/v1/bible/translations/delut/books/JHN') {
+    sendJSON(res, 200, mockBibleBooks[2]);
+    return;
+  }
+  if (url === '/api/v1/bible/translations/delut/books/JHN/chapters/3') {
+    sendJSON(res, 200, mockBibleChapter);
     return;
   }
 

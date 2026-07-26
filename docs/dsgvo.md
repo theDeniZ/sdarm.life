@@ -42,8 +42,26 @@ These are the only external data recipients currently named in [Datenschutzerkl�
 |---|---|---|
 | Cloudflare | Hosting, Web Analytics, CDN | section4 |
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
+| YouVersion / Life.Church (US) | Bible text for treasures.sdarm.life/bible | section8 |
 
 **To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
+
+### Bible feature (treasures.sdarm.life/bible) — YouVersion
+
+Bible text is fetched from the **YouVersion Platform API** (Life.Church, Oklahoma, USA). Nothing is stored in our database; the only persisted state is the operator's list of enabled Bible IDs in KV.
+
+What keeps this defensible:
+
+- **Every call is server-side.** `apps/api/src/services/bible/youversion.ts` runs inside the Worker. The visitor's IP, user-agent and reading behaviour never reach YouVersion — they only see "our Worker asked for JHN.3". Never call YouVersion from a client component.
+- **The app key never leaves the Worker.** `YOUVERSION_API_KEY` is a Worker secret, not a `NEXT_PUBLIC_` var.
+- **Responses are KV-cached** (chapters 30 days, books 7 days), which keeps request volume — and therefore the metadata YouVersion sees — low.
+- **Transfer basis:** Art. 6(1)(f) for the processing, Art. 49(1)(b) for the US transfer (necessary to perform the retrieval the user asked for). YouVersion does not publish SCCs for platform developers. This is disclosed in `section8` and accepted deliberately; revisit if YouVersion ever offers a DPA.
+- **No YouVersion branding** in the UI — the Platform Terms forbid using their marks without explicit authorisation. Do not add a "Powered by YouVersion" logo.
+- **Publisher copyright notices are rendered** with the text (`.bible-copyright`) — several per-Bible licenses require this. Do not remove it.
+- **Do not add "Sign in with YouVersion".** That would send the user's browser to YouVersion directly and trigger consent-banner requirements.
+- Reader localStorage keys (`bible_last_read`, `bible_font_scale`, `bible_copy_options`) are functional preferences with no identifiers — same category as `sdarm-theme`.
+
+**Which translations are exposed is an operator decision** (Admin → Bible). Each YouVersion Bible carries its own publisher license; enabling a restrictively-licensed translation is a licensing decision, not a technical one.
 
 ## ⚠️ Known gaps to close
 
