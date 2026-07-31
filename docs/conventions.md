@@ -14,7 +14,25 @@
 
 ## Styling
 
-No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
+No Tailwind, no CSS-in-JS. Pure class-based CSS, loaded through the app's `globals.css`.
+
+**One CSS file per section or page.** A section's file owns *everything* for that section — its base rules, its `@media` breakpoints, and its `[data-theme='light']` overrides. There are no global "responsive" or "light theme" blocks: if you are changing a section, everything you need is in one file.
+
+`globals.css` is an `@import` index only — no rules of its own. Import order mirrors the intended cascade order.
+
+```
+apps/web/app/
+  globals.css              ← @import index, no rules
+  styles/
+    fonts.css
+    hero-welcome.css       ← base + @media + [data-theme='light']
+    news.css
+    …
+```
+
+The same pattern is used by `packages/ui/src/styles/index.css`. It exists so that (a) a section can be changed in one place instead of four, and (b) parallel feature branches edit different files instead of colliding in one trailing block.
+
+Styles for a component that exists but is not rendered anywhere stay in `styles/` **without** an `@import` line, with a comment saying why. Do not delete them; do not load them.
 
 **Design tokens (CSS custom properties):**
 
@@ -26,7 +44,7 @@ No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
   --sidebar-w: 220px --admin-bg: #f4f2ef;
 ```
 
-**Typography stack (web):** Cormorant Garamond (body), DM Serif Display (headings, italic), Playfair Display (logo, footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Loaded via `@import` in `globals.css`.
+**Typography stack (web):** Cormorant Garamond (body), DM Serif Display (headings, italic), Playfair Display (logo, footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Self-hosted via `@fontsource/*` in `packages/ui/src/styles/tokens.css`.
 
 **Full-width layout.** All sections are full-width (no `.page` wrapper, no grid margins). Section backgrounds span the viewport.
 

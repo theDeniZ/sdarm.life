@@ -1,0 +1,263 @@
+/* This file owns every rule for this section, including its @media
+   breakpoints and its [data-theme="light"] overrides. Imported from
+   app/layout.tsx. */
+
+/* ═══ 16:9 IMAGE CONTAINER (post detail) ═══ */
+.img16 {
+  width: 100%;
+  aspect-ratio: 16/9;
+  overflow: hidden;
+  position: relative;
+  display: block;
+  background: #c8c0b4;
+  cursor: pointer;
+}
+.img16 img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.4s;
+}
+.img16:hover img {
+  transform: scale(1.04);
+}
+
+/* ═══ POST DETAIL ═══ */
+.post-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: 420px;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 80px 3rem 2.5rem;
+}
+.post-hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+.post-hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(to right, rgba(0, 0, 0, 0.82) 0%, rgba(0, 0, 0, 0.48) 48%, rgba(0, 0, 0, 0.16) 100%),
+    linear-gradient(to top, rgba(0, 0, 0, 0.56) 0%, transparent 44%);
+}
+.post-back {
+  position: absolute;
+  top: 80px;
+  left: 3rem;
+  z-index: 3;
+  color: rgba(220, 210, 195, 0.78);
+  font-size: 13px;
+  font-weight: 300;
+  font-family: 'Cormorant Garamond', serif;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: color 0.18s;
+}
+.post-back:hover {
+  color: #fff;
+}
+.post-meta {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 13px;
+  font-weight: 300;
+  color: rgba(220, 210, 195, 0.6);
+  margin-bottom: 8px;
+  position: relative;
+  z-index: 2;
+  letter-spacing: 0.04em;
+}
+.post-hero h1 {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: clamp(1.8rem, 4vw, 2.4rem);
+  font-weight: 400;
+  line-height: 1.2;
+  color: #fff;
+  max-width: 620px;
+  position: relative;
+  z-index: 2;
+}
+
+.post-section {
+  padding: 2.5rem 3rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+.post-section-label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 1.2rem;
+}
+.post-body {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  line-height: 1.82;
+  color: var(--text);
+  max-width: 720px;
+  white-space: pre-wrap;
+}
+
+.post-video {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  aspect-ratio: 16/9;
+}
+.post-video-card {
+  position: absolute;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  cursor: pointer;
+}
+.post-video-card img {
+  transition: transform 0.5s ease;
+}
+.post-video-card:hover img {
+  transform: scale(1.04);
+}
+.post-video-play {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.25);
+  transition: background 0.3s;
+}
+.post-video-card:hover .post-video-play {
+  background: rgba(0, 0, 0, 0.1);
+}
+.post-video-play svg {
+  width: 56px;
+  height: 56px;
+}
+
+.post-more-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 300;
+  color: var(--gold);
+  letter-spacing: 0.03em;
+  margin-bottom: 1.5rem;
+}
+
+.post-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 1.5rem;
+}
+.post-card {
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  overflow: hidden;
+  transition: transform 0.3s ease;
+}
+.post-card:hover {
+  transform: translateY(-3px);
+}
+.post-card-img {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16/10;
+  overflow: hidden;
+}
+.post-card-img img {
+  transition: transform 0.5s ease;
+}
+.post-card:hover .post-card-img img {
+  transform: scale(1.04);
+}
+.post-card-body {
+  padding: 0.9rem 0;
+}
+.post-card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: #fff;
+  line-height: 1.35;
+  margin-bottom: 0.4rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.post-card-meta {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  /* Post detail */
+  .post-hero {
+    padding: 70px 2rem 2rem;
+    min-height: 360px;
+  }
+  .post-back {
+    left: 2rem;
+    top: 70px;
+  }
+  .post-section {
+    padding: 2rem;
+  }
+  .post-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  /* Post detail */
+  .post-hero {
+    padding: 60px 1.2rem 1.5rem;
+    min-height: 300px;
+  }
+  .post-back {
+    left: 1.2rem;
+    top: 60px;
+  }
+  .post-hero h1 {
+    font-size: 1.5rem;
+  }
+  .post-section {
+    padding: 1.5rem 1.2rem;
+  }
+  .post-grid {
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+  .post-video {
+    max-width: 100%;
+  }
+}
+
+/* ── Light theme ── */
+/* Post pages */
+[data-theme='light'] .post-hero { background: #1a1612; }
+[data-theme='light'] .post-section { background: var(--dark); }
+[data-theme='light'] .post-section-label { color: var(--muted); }
+[data-theme='light'] .post-body { color: var(--text); }
+[data-theme='light'] .post-card { background: var(--bg-card); }
+[data-theme='light'] .post-card-title { color: var(--text-strong); }
+[data-theme='light'] .post-card-meta { color: var(--muted); }

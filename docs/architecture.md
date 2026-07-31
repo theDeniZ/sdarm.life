@@ -438,6 +438,27 @@ apps/admin/app/lib/
   hooks.ts     — usePaginatedList()
 ```
 
+### `styles/` folder per app
+
+`apps/web/app/globals.css` is an `@import` index with no rules of its own. Each section or page owns one file under `apps/web/app/styles/`, containing its base rules, its `@media` breakpoints and its `[data-theme='light']` overrides together.
+
+```
+apps/web/app/styles/
+  fonts.css          — @font-face declarations
+  hero-welcome.css   — home hero (cosmic intro)
+  news.css           — NewsSection masonry + card internals
+  quote-share.css    — QuoteShareModal + save button
+  glaubens.css       — faith long-read + grid (about page)
+  post.css           — post detail + .img16
+  legal.css          — Impressum / Datenschutz
+  about.css          — about page
+  kontakt.css        — kontakt page
+  not-found.css      — 404
+  uber-uns.css       — NOT imported; UberUnsSection.tsx is not rendered
+```
+
+Mirrors `packages/ui/src/styles/index.css`. See [conventions.md](conventions.md) for the rule.
+
 Do not create `utils/` at the monorepo root for app-specific code — it breaks isolation. Only framework-free, truly cross-app logic belongs in a shared package.
 
 ### Constants

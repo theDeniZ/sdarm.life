@@ -1,0 +1,275 @@
+/* This file owns every rule for this section, including its @media
+   breakpoints and its [data-theme="light"] overrides. Imported from
+   app/layout.tsx. */
+
+/* ═══ QUOTE SAVE BUTTON ═══ */
+.quote-save-btn {
+  position: absolute;
+  top: 0.7rem;
+  right: 0.7rem;
+  z-index: 5;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: rgba(10, 9, 7, 0.65);
+  border: 1px solid rgba(201, 169, 110, 0.22);
+  cursor: pointer;
+  color: rgba(201, 169, 110, 0.6);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  opacity: 0;
+  transform: translateY(-3px);
+}
+.nc--quote:hover .quote-save-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+.quote-save-btn:hover {
+  background: rgba(201, 169, 110, 0.14);
+  border-color: rgba(201, 169, 110, 0.5);
+  color: var(--gold);
+}
+.quote-save-btn svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+@media (max-width: 768px) {
+  .quote-save-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ═══ QUOTE SHARE MODAL ═══ */
+.qsm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  background: rgba(4, 3, 2, 0.88);
+  backdrop-filter: blur(22px) saturate(1.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.qsm-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+/* Panel fills the entire overlay */
+.qsm-panel {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+}
+
+/* Close button — floating circle, top-right */
+.qsm-close {
+  position: fixed;
+  top: 1.1rem;
+  right: 1.4rem;
+  z-index: 1;
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(14, 12, 9, 0.7);
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 50%;
+  backdrop-filter: blur(10px);
+  cursor: pointer;
+  color: rgba(180, 170, 155, 0.55);
+  font-size: 1.3rem;
+  line-height: 1;
+  transition: all 0.25s;
+  padding: 0;
+}
+.qsm-close::before {
+  content: '×';
+}
+.qsm-close:hover {
+  color: rgba(201, 169, 110, 0.9);
+  border-color: rgba(201, 169, 110, 0.45);
+}
+
+/* Preview area — takes all available height, canvas scales inside */
+.qsm-preview-wrap {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3.5rem 2rem 1rem;
+  transition: background 0.5s ease;
+  background: #0a0907;
+}
+.qsm-preview-wrap[data-preview-theme='dark'] {
+  background: #0d0a07;
+}
+.qsm-preview-wrap[data-preview-theme='vanilla'] {
+  background: #f1eada;
+}
+.qsm-preview-wrap[data-preview-theme='sand'] {
+  background: #cec1a8;
+}
+.qsm-preview-wrap[data-preview-theme='mahog'] {
+  background: #584738;
+}
+/* Transparent: atmospheric scene — shows exactly how the PNG looks on a photo */
+.qsm-preview-wrap[data-preview-theme='transparent'] {
+  background:
+    radial-gradient(ellipse 90% 55% at 20% 28%, rgba(201, 169, 110, 0.09) 0%, transparent 58%),
+    radial-gradient(ellipse 60% 40% at 80% 75%, rgba(60, 100, 55, 0.12) 0%, transparent 50%),
+    linear-gradient(158deg, #1c1a12 0%, #0f1a0d 38%, #0b130a 65%, #121009 100%);
+}
+
+/* Canvas — slightly inset so it breathes inside the preview area */
+.qsm-canvas {
+  max-width: 88%;
+  max-height: 88%;
+  display: block;
+  box-shadow: 0 16px 80px rgba(0, 0, 0, 0.8);
+}
+[data-preview-theme='transparent'] .qsm-canvas {
+  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.75), 0 2px 16px rgba(201, 169, 110, 0.07);
+}
+
+/* Controls strip — single row at the bottom */
+.qsm-controls {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1.6rem;
+  padding: 0.9rem 2rem 1.1rem;
+  border-top: 1px solid rgba(201, 169, 110, 0.07);
+}
+.qsm-formats {
+  display: flex;
+  gap: 0.4rem;
+}
+.qsm-fmt {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid rgba(201, 169, 110, 0.14);
+  background: none;
+  cursor: pointer;
+  color: rgba(180, 170, 155, 0.45);
+  border-radius: 2px;
+  transition: all 0.2s;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.qsm-fmt.active {
+  background: rgba(201, 169, 110, 0.09);
+  border-color: rgba(201, 169, 110, 0.42);
+  color: rgba(201, 169, 110, 0.82);
+}
+.qsm-fmt:hover:not(.active) {
+  border-color: rgba(201, 169, 110, 0.26);
+  color: rgba(201, 169, 110, 0.55);
+}
+.qsm-fmt-icon {
+  display: block;
+  border: 1.5px solid currentColor;
+  border-radius: 1px;
+}
+.qsm-fmt-icon--story {
+  width: 11px;
+  height: 18px;
+}
+.qsm-fmt-icon--post {
+  width: 15px;
+  height: 15px;
+}
+.qsm-fmt-icon--portrait {
+  width: 13px;
+  height: 16px;
+}
+.qsm-fmt-icon--wide {
+  width: 20px;
+  height: 12px;
+}
+.qsm-themes {
+  display: flex;
+  gap: 0.45rem;
+}
+.qsm-theme {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.qsm-theme[data-theme='duomo'] {
+  background: #b8c8b8;
+}
+.qsm-theme[data-theme='wald'] {
+  background: #283a2a;
+}
+.qsm-theme[data-theme='nacht'] {
+  background: #1e2430;
+}
+.qsm-theme[data-theme='vanilla'] {
+  background: #f4ece0;
+}
+.qsm-theme[data-theme='sand'] {
+  background: #d5c9b2;
+}
+.qsm-theme.active {
+  border-color: rgba(201, 169, 110, 0.85);
+}
+.qsm-download {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  padding: 0;
+  background: rgba(201, 169, 110, 0.1);
+  border: 1px solid rgba(201, 169, 110, 0.32);
+  border-radius: 50%;
+  cursor: pointer;
+  color: rgba(201, 169, 110, 0.82);
+  transition: all 0.25s;
+  flex-shrink: 0;
+}
+.qsm-download:hover {
+  background: linear-gradient(135deg, rgba(201, 169, 110, 0.22) 0%, rgba(201, 169, 110, 0.13) 100%);
+  color: var(--gold);
+  border-color: rgba(201, 169, 110, 0.55);
+}
+.qsm-download svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  fill: none;
+}
+@media (max-width: 600px) {
+  .qsm-controls {
+    gap: 1rem;
+    padding: 0.7rem 1rem 0.9rem;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}
+
+/* ── Light theme ── */
+/* Quote share modal */
+[data-theme='light'] .qsm-overlay { background: rgba(252, 251, 248, 0.92); }
+[data-theme='light'] .qsm-preview-wrap { background: var(--bg-card); }

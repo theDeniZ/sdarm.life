@@ -1,0 +1,246 @@
+/* This file owns every rule for this section, including its @media
+   breakpoints and its [data-theme="light"] overrides. Imported from
+   app/layout.tsx. */
+
+/* ═══ KONTAKT PAGE ═══ */
+.kontakt-section {
+  background: var(--dark);
+  padding: clamp(3rem, 6vw, 6rem) clamp(1.6rem, 5vw, 6rem);
+  position: relative;
+}
+.kontakt-section + .kontakt-section {
+  padding-top: 0;
+}
+.kontakt-section-head {
+  max-width: 720px;
+  margin: 0 auto clamp(2rem, 4vw, 4rem);
+  text-align: center;
+}
+.kontakt-section-eyebrow {
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 400;
+  letter-spacing: 0.32em;
+  text-transform: uppercase;
+  color: var(--gold);
+  opacity: 0.85;
+  margin: 0 0 1.1rem;
+}
+.kontakt-section-title {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin: 0 0 1rem;
+}
+.kontakt-section-title em {
+  font-style: italic;
+  color: var(--gold);
+}
+.kontakt-section-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.7;
+  max-width: 580px;
+  margin: 0 auto;
+}
+
+/* ── Online card ── */
+.kontakt-online-card {
+  max-width: 540px;
+  margin: 0 auto;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+.kontakt-email {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 600;
+  color: var(--text-strong);
+  text-decoration: none;
+  border-bottom: 1px solid var(--gold);
+  padding-bottom: 4px;
+  transition: color 0.45s ease;
+}
+.kontakt-email:hover {
+  color: var(--gold);
+}
+.kontakt-social {
+  display: flex;
+  gap: 1.4rem;
+}
+.kontakt-social a {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.45s ease, transform 0.45s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.kontakt-social a:hover {
+  color: var(--gold);
+  transform: translateY(-2px);
+}
+.kontakt-social a svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* ── Vor Ort: country group ── */
+.kontakt-country {
+  max-width: 1100px;
+  margin: 0 auto clamp(2.5rem, 5vw, 4.5rem);
+}
+.kontakt-country:last-child {
+  margin-bottom: 0;
+}
+.kontakt-country-head {
+  display: flex;
+  align-items: baseline;
+  gap: 1.2rem;
+  padding: 0.8rem 0;
+  margin-bottom: 1.6rem;
+  border-bottom: 1px solid var(--border);
+}
+.kontakt-country-code {
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.1rem;
+  letter-spacing: 0.18em;
+  color: var(--gold);
+}
+.kontakt-country-name {
+  font-family: 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  font-weight: 400;
+  color: var(--text-strong);
+  letter-spacing: -0.005em;
+}
+.kontakt-country-count {
+  margin-left: auto;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* ── Locations grid ── */
+.kontakt-locations-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border);
+}
+.kontakt-loc-card {
+  background: var(--dark);
+  padding: 1.8rem 1.6rem 1.6rem;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 220px;
+  scroll-margin-top: 100px;
+  transition: background 0.45s ease, box-shadow 0.6s ease;
+}
+.kontakt-loc-card:hover {
+  background: var(--bg-section);
+}
+.kontakt-loc-card:target {
+  background: var(--bg-section);
+  box-shadow: inset 3px 0 0 var(--gold);
+  animation: kontakt-loc-flash 1.2s ease-out;
+}
+@keyframes kontakt-loc-flash {
+  0% { box-shadow: inset 3px 0 0 var(--gold), 0 0 0 1px var(--gold); }
+  100% { box-shadow: inset 3px 0 0 var(--gold), 0 0 0 0 transparent; }
+}
+.kontakt-loc-num {
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  opacity: 0.6;
+  margin-bottom: 0.4rem;
+}
+.kontakt-loc-city {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(1.6rem, 2.4vw, 2rem);
+  font-weight: 400;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  margin: 0 0 0.2rem;
+  line-height: 1.05;
+}
+.kontakt-loc-region {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: var(--muted);
+  margin: 0 0 1rem;
+  letter-spacing: 0.02em;
+}
+.kontakt-loc-address {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.6;
+  margin: 0 0 1rem;
+}
+.kontakt-loc-desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  font-weight: 300;
+  color: var(--muted);
+  line-height: 1.65;
+  margin: 0 0 1rem;
+}
+.kontakt-loc-link {
+  margin-top: auto;
+  padding-top: 1rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.66rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold);
+  text-decoration: none;
+  transition: color 0.4s ease, letter-spacing 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.kontakt-loc-link:hover {
+  letter-spacing: 0.24em;
+}
+
+@media (max-width: 900px) {
+  .kontakt-locations-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .kontakt-locations-grid {
+    grid-template-columns: 1fr;
+  }
+  .kontakt-loc-card {
+    min-height: unset;
+  }
+  .kontakt-country-head {
+    flex-wrap: wrap;
+  }
+}
