@@ -1,0 +1,251 @@
+/* This file owns every rule for this section, including its @media
+   breakpoints and its [data-theme="light"] overrides. Imported from
+   app/layout.tsx. */
+
+/* ═══ HERO WELCOME (cosmic atmosphere intro) ═══
+   Full-bleed first section. A huge dark planet sits in the lower half,
+   silhouetted against deep space; its top edge catches a gold atmospheric
+   glow (sun-side limb). Inner surface texture rotates slowly (90s) so the
+   planet feels alive. Mixed typography: italic in Instrument Serif + gold,
+   regular in Fraunces. Both themes share the same scene; light theme
+   inverts the void to cream. */
+.hero-welcome {
+  position: relative;
+  min-height: 62vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  overflow: hidden;
+  text-align: center;
+  background: radial-gradient(ellipse 100% 80% at 50% -10%, #0e0c08 0%, #050403 60%, #020100 100%);
+  isolation: isolate;
+}
+.hero-welcome-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ── Planet container — Three.js Canvas paints the Earth at scene origin
+   (centre of the canvas). Container is centred horizontally and pulled
+   below the hero bottom so only the UPPER HEMISPHERE is visible — like
+   a planet rising over the horizon. */
+.hero-welcome-planet {
+  position: absolute;
+  left: 50%;
+  top: 105%;
+  width: clamp(640px, 100vw, 1400px);
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.hero-welcome-planet-body {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    circle at 50% 18%,
+    #221c14 0%,
+    #14100c 28%,
+    #0a0805 60%,
+    #050403 100%
+  );
+}
+/* Slow-rotating surface — continent-like patches that drift around the
+   planet, giving the impression it's spinning. Brighter than the body
+   so they read against the dark sphere. */
+.hero-welcome-planet-surface {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(ellipse 18% 10% at 30% 22%, rgba(120, 95, 55, 0.55) 0%, transparent 65%),
+    radial-gradient(ellipse 14% 8% at 62% 18%, rgba(105, 80, 50, 0.5) 0%, transparent 65%),
+    radial-gradient(ellipse 16% 9% at 45% 30%, rgba(115, 90, 55, 0.5) 0%, transparent 65%),
+    radial-gradient(ellipse 12% 7% at 78% 26%, rgba(95, 75, 45, 0.45) 0%, transparent 65%),
+    radial-gradient(ellipse 20% 11% at 22% 36%, rgba(110, 85, 52, 0.48) 0%, transparent 65%),
+    radial-gradient(ellipse 13% 8% at 58% 38%, rgba(100, 78, 48, 0.42) 0%, transparent 65%);
+  animation: hero-planet-spin 90s linear infinite;
+  /* Mask shows surface only on the lit (upper) crescent */
+  -webkit-mask-image: radial-gradient(circle at 50% 18%, black 0%, black 28%, transparent 45%);
+  mask-image: radial-gradient(circle at 50% 18%, black 0%, black 28%, transparent 45%);
+}
+@keyframes hero-planet-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-welcome-planet-surface { animation: none; }
+}
+/* Atmospheric limb glow — the gold halo at the top of the planet where
+   sun-light catches the atmosphere. Stronger than before so it reads
+   clearly against deep-space black. */
+.hero-welcome-planet-glow {
+  position: absolute;
+  inset: -4% 0 auto 0;
+  height: 45%;
+  border-radius: 50% 50% 0 0;
+  background: radial-gradient(
+    ellipse 60% 100% at 50% 100%,
+    rgba(245, 215, 160, 0.75) 0%,
+    rgba(228, 198, 140, 0.5) 12%,
+    rgba(210, 178, 115, 0.28) 28%,
+    rgba(201, 169, 110, 0.1) 48%,
+    transparent 72%
+  );
+  filter: blur(4px);
+}
+
+/* Scatter star grain — tiny twinkles in the cosmic void */
+.hero-welcome-grain {
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 18% 22%, rgba(255, 250, 235, 0.5) 50%, transparent 100%),
+    radial-gradient(1px 1px at 78% 14%, rgba(255, 250, 235, 0.4) 50%, transparent 100%),
+    radial-gradient(1px 1px at 42% 18%, rgba(255, 250, 235, 0.35) 50%, transparent 100%),
+    radial-gradient(1px 1px at 88% 26%, rgba(255, 250, 235, 0.45) 50%, transparent 100%),
+    radial-gradient(1px 1px at 12% 36%, rgba(255, 250, 235, 0.3) 50%, transparent 100%),
+    radial-gradient(1px 1px at 64% 8%, rgba(255, 250, 235, 0.4) 50%, transparent 100%),
+    radial-gradient(1px 1px at 32% 42%, rgba(255, 250, 235, 0.5) 50%, transparent 100%),
+    radial-gradient(1px 1px at 6% 12%, rgba(255, 250, 235, 0.4) 50%, transparent 100%),
+    radial-gradient(1px 1px at 95% 4%, rgba(255, 250, 235, 0.3) 50%, transparent 100%);
+  opacity: 0.7;
+}
+
+.hero-welcome-content {
+  position: relative;
+  z-index: 2;
+  max-width: 920px;
+  /* Top padding pushes content below the navbar; bottom padding leaves
+     room for the planet's upper arc rising from below. */
+  padding: 6rem 2rem 2.5rem;
+  animation: hero-welcome-rise 1.1s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+@keyframes hero-welcome-rise {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-welcome-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 2.2rem;
+}
+.hero-welcome-badge-dot {
+  font-size: 0.6em;
+  opacity: 0.8;
+}
+
+.hero-welcome-title,
+.hero-welcome-title em,
+.hero-welcome-title * {
+  font-weight: 300 !important;
+}
+.hero-welcome-title {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(2.4rem, 7vw, 5.6rem);
+  line-height: 1.05;
+  letter-spacing: -0.018em;
+  color: rgba(255, 255, 255, 0.92);
+  margin: 0 0 1.6rem;
+}
+.hero-welcome-title em {
+  font-family: 'Instrument Serif', serif;
+  font-style: italic;
+  color: var(--gold);
+  margin-right: 0.06em;
+}
+
+.hero-welcome-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(1rem, 1.5vw, 1.2rem);
+  color: rgba(214, 208, 200, 0.72);
+  max-width: 52ch;
+  margin: 0 auto 2.4rem;
+  line-height: 1.55;
+}
+
+/* Primary CTA — minimal version of the footer newsletter pill: transparent
+   capsule with gold rim, solid gold round button on the right. Hero scene
+   is always dark space, so the same dark-theme styling applies regardless
+   of global data-theme. */
+.hero-welcome-cta {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.7rem 1.6rem;
+  border-radius: 999px;
+  text-decoration: none;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  color: rgba(214, 208, 200, 0.92);
+  /* Subtle white-tint gradient like .footer-form so the pill reads on
+     deep space without a heavy filled bg. */
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(255, 255, 255, 0.015));
+  border: 1px solid rgba(201, 169, 110, 0.42);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  transition:
+    border-color 0.45s ease,
+    background 0.45s ease,
+    transform 0.45s cubic-bezier(0.76, 0, 0.24, 1);
+  margin-top: 0.4rem;
+}
+.hero-welcome-cta:hover {
+  border-color: rgba(201, 169, 110, 0.7);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.03));
+  transform: translateY(-1px);
+}
+.hero-welcome-cta-label {
+  display: inline-block;
+}
+
+/* Hero is "always dark" (deep space) regardless of site theme — same
+   pattern as .site-footer in tokens.css. We pin the dark-theme gold/text
+   tokens locally so light-theme global overrides don't bleed in and
+   wash everything out. */
+[data-theme='light'] .hero-welcome {
+  --gold: #c9a96e;
+  --text: #d6d0c8;
+  --muted: #7a7470;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .hero-welcome-content {
+    animation: none;
+  }
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .hero-welcome {
+    min-height: 65vh;
+  }
+  .hero-welcome-content {
+    padding: 4.5rem 1.4rem 2rem;
+  }
+  .hero-welcome-title {
+    font-size: clamp(2rem, 9vw, 3.2rem);
+  }
+  .hero-welcome-cta {
+    width: auto;
+    justify-content: center;
+  }
+}

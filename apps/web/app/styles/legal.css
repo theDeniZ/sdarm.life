@@ -1,0 +1,57 @@
+/* This file owns every rule for this section, including its @media
+   breakpoints and its [data-theme="light"] overrides. Imported from
+   app/layout.tsx. */
+
+/* ═══ LEGAL PAGES ═══ */
+.legal-page {
+  padding: 80px 2rem 100px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+.legal-page h1,
+.legal-page h2,
+.legal-page p {
+  max-width: 720px;
+}
+.legal-page h1 {
+  font-size: 32px;
+  font-weight: 400;
+  margin-bottom: 40px;
+  color: #fff;
+  font-family: 'DM Serif Display', serif;
+}
+.legal-page h2 {
+  font-size: 14px;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--gold);
+  margin-top: 36px;
+  margin-bottom: 8px;
+}
+.legal-page p {
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--text);
+}
+.legal-page a {
+  color: var(--gold);
+  text-decoration: underline;
+}
+.legal-page a:hover {
+  opacity: 0.7;
+}
+.legal-page code {
+  font-family: monospace;
+  font-size: 13px;
+  background: rgba(201, 169, 110, 0.1);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* ── Light theme ── */
+/* Legal pages */
+[data-theme='light'] .legal-page { background: var(--dark); color: var(--text); }
+[data-theme='light'] .legal-page h1,
+[data-theme='light'] .legal-page h2,
+[data-theme='light'] .legal-page h3 { color: var(--text-strong); }

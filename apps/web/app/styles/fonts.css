@@ -1,0 +1,54 @@
+/* This file owns every rule for this section, including its @media
+   breakpoints and its [data-theme="light"] overrides. Imported from
+   app/layout.tsx. */
+
+/* ═══ SLTF SILVER EDITORIAL — available for future use ═══ */
+@font-face {
+  font-family: 'SLTF Silver Editorial';
+  src: url('/fonts/SLTFTheSilverEditorial-ExtraLight.woff2') format('woff2');
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SLTF Silver Editorial';
+  src: url('/fonts/SLTFTheSilverEditorial-Light.woff2') format('woff2');
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SLTF Silver Editorial';
+  src: url('/fonts/SLTFTheSilverEditorial-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SLTF Silver Editorial';
+  src: url('/fonts/SLTFTheSilverEditorial-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SLTF Silver Editorial';
+  src: url('/fonts/SLTFTheSilverEditorial-SemiBold.woff2') format('woff2');
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SLTF Silver Editorial';
+  src: url('/fonts/SLTFTheSilverEditorial-Bold.woff2') format('woff2');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'SLTF Silver Editorial';
+  src: url('/fonts/SLTFTheSilverEditorial-ExtraBold.woff2') format('woff2');
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
