@@ -98,6 +98,27 @@
         "dialogLabel": "Share Bible verse as image"
       }
     },
+    "stats": {
+      "eyebrow": "Our community",
+      "title": "A work that crosses <em>borders</em>",
+      "plan": {
+        "label": "Reading plan on YouVersion",
+        "title": "Before<br></br><em>everything starts</em>",
+        "cta": "Open the reading plan",
+        "phoneAlt": "Reading plan in the YouVersion app"
+      },
+      "invite": {
+        "title": "Come as you are",
+        "cta": "Where we meet",
+        "photoAlt": "Congregation at Sabbath worship"
+      },
+      "verse": {
+        "label": "Together in faith"
+      },
+      "faith": {
+        "title": "Foundations<br></br>of our faith"
+      }
+    },
     "post": {
       "content": "Content",
       "video": "Video",
