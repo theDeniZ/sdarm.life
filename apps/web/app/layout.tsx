@@ -13,7 +13,10 @@ import '@sdarm/ui/src/styles/index.css';
    is not rendered anywhere. Add the import to re-enable it. */
 import './styles/fonts.css';
 import './styles/hero-welcome.css';
-import './styles/news.css';
+/* styles/news.css is intentionally absent — NewsSection.tsx still exists but
+   the homepage renders StatsGrid in its place, so none of it is loaded.
+   Its warm gold section background lived there. */
+import './styles/stats-grid.css';
 import './styles/quote-share.css';
 import './styles/glaubens.css';
 import './styles/post.css';

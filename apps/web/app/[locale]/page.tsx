@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import HeroWelcome from '../components/HeroWelcome';
-import NewsSection from '../components/NewsSection';
+import StatsGrid from '../components/StatsGrid';
 import ScriptureVerseSection from '../components/ScriptureVerseSection';
 import { fetchTreasures, fetchSongbooks, WEB_URL, TREASURES_URL, SONGBOOK_URL, EVENTS_URL } from '../lib/api';
 import type { NewsData } from '../lib/api';
@@ -49,7 +49,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <ConnectedNavbar locale={locale} />
       <main id="main-content">
         <HeroWelcome locale={locale} />
-        <NewsSection newsData={newsData} />
+        <StatsGrid newsData={newsData} />
         <ScriptureVerseSection href={`${TREASURES_URL}/${locale}/bible`} locale={locale} />
       </main>
       <ConnectedFooter locale={locale} />
