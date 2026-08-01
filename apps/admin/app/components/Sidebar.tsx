@@ -5,6 +5,20 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
 const ICONS: Record<string, React.ReactNode> = {
+  homeGrid: (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <rect x="3" y="3" width="7" height="18" rx="1.5" />
+      <rect x="13" y="3" width="8" height="9" rx="1.5" />
+      <rect x="13" y="15" width="8" height="6" rx="1.5" />
+    </svg>
+  ),
   dashboard: (
     <svg
       viewBox="0 0 24 24"
@@ -149,6 +163,7 @@ const NAV_LINKS: NavLink[] = [
   { href: '/images', label: 'Images', icon: 'images' },
   { href: '/subscribers', label: 'Subscribers', icon: 'subscribers' },
   { href: '/email', label: 'Email', icon: 'email' },
+  { href: '/home-grid', label: 'Homepage grid', icon: 'homeGrid' },
   { href: '/config', label: 'Config', icon: 'config' },
   { href: '/api-keys', label: 'API Keys', icon: 'apiKeys' },
 ];

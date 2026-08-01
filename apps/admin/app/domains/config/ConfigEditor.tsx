@@ -5,7 +5,11 @@ import { type ConfigKey } from '@sdarm/db';
 import ImagePicker from '../images/ImagePicker';
 import { fetchConfig, saveConfigKey } from './repository';
 
-const LABELS: Record<ConfigKey, string> = {
+// home_grid is deliberately absent: it holds the homepage grid document and is
+// edited on its own page, not as a text field here.
+type ScalarConfigKey = Exclude<ConfigKey, 'home_grid'>;
+
+const LABELS: Record<ScalarConfigKey, string> = {
   donation_url: 'Donation link',
   hero_bg_key: 'Hero background image',
   hero_bg_alt: 'Hero background image alt text',
@@ -20,15 +24,15 @@ const LABELS: Record<ConfigKey, string> = {
   youtube_url: 'YouTube',
 };
 
-const SECTIONS: { label: string; keys: ConfigKey[] }[] = [
+const SECTIONS: { label: string; keys: ScalarConfigKey[] }[] = [
   { label: 'General', keys: ['hero_bg_key', 'hero_bg_alt', 'donation_url'] },
   { label: 'About', keys: ['about_text_1', 'about_text_2', 'about_image_key', 'about_image_alt', 'about_link_url'] },
   { label: 'Footer', keys: ['facebook_url', 'whatsapp_url', 'instagram_url', 'youtube_url'] },
 ];
 
-const TEXTAREA_KEYS: ConfigKey[] = ['about_text_1', 'about_text_2'];
-const IMAGE_KEYS: ConfigKey[] = ['about_image_key', 'hero_bg_key'];
-const URL_KEYS: ConfigKey[] = [
+const TEXTAREA_KEYS: ScalarConfigKey[] = ['about_text_1', 'about_text_2'];
+const IMAGE_KEYS: ScalarConfigKey[] = ['about_image_key', 'hero_bg_key'];
+const URL_KEYS: ScalarConfigKey[] = [
   'donation_url',
   'about_link_url',
   'facebook_url',
@@ -39,7 +43,7 @@ const URL_KEYS: ConfigKey[] = [
 
 type Flash = 'ok' | 'err' | null;
 
-function ConfigField({ configKey, initialValue }: { configKey: ConfigKey; initialValue: string }) {
+function ConfigField({ configKey, initialValue }: { configKey: ScalarConfigKey; initialValue: string }) {
   const [value, setValue] = useState(initialValue);
   const [flash, setFlash] = useState<Flash>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);

@@ -13,6 +13,13 @@ export const KNOWN_CONFIG_KEYS = [
   'whatsapp_url',
   'instagram_url',
   'youtube_url',
+  /**
+   * Homepage bento grid. Unlike every other key this holds a JSON document
+   * (HomeGridConfig from @sdarm/types) rather than a scalar: the grid has five
+   * blocks with roughly a dozen settings each in two languages, which is about
+   * a hundred values — far past what flat keys can carry sanely.
+   */
+  'home_grid',
 ] as const;
 
 export type ConfigKey = typeof KNOWN_CONFIG_KEYS[number];

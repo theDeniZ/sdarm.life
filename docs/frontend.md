@@ -11,7 +11,8 @@
 | `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and a sun/moon theme toggle that dispatches `sdarm:toggle-theme`. |
 | `HeroWelcome` | **Server** (async) | 3D Earth landing hero — renders `<PlanetEarth />` with grain overlay, badge, title, subtitle, and CTA link to `/{locale}/about`. Uses `web.heroWelcome` i18n namespace. |
 | `PlanetEarth` | **Client** | Three.js WebGL globe with day/night textures, atmosphere shader, cloud layer. Self-hosted textures in `/public/textures/` (MIT, no CDN, DSGVO clean). |
-| `NewsSection` | **Client** | Static illustrated masonry grid — live news posts + static faith/event cards. Wired to API for news and latest video post. |
+| `StatsGrid` | **Client** | Bento grid of five blocks — the homepage's main section. Reads `HomeGridConfig` from the `home_grid` KV key, falls back to the built-in defaults. Fits every headline to its card. |
+| `NewsSection` | **Client** | Former masonry section, replaced on the homepage by `StatsGrid`. File and `styles/news.css` are kept but neither is rendered nor imported. |
 | `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
 | `ScriptureVerseSection` | **Client** | Daily rotating Scripture verse with `QuoteShareModal`. Verse rotated hourly from `lib/verses.ts` (DE + EN). |
 | `GlaubensLongRead` | **Client** | 25 SDA Reform faith articles with accordion and hanging number layout. Detail content from sta-ref.de. |
@@ -48,7 +49,29 @@ Server component (async). Renders the home page landing hero — no client bundl
 
 **CSS class prefix:** `hero-welcome-*` — all classes are defined in `apps/web/app/globals.css`: `hero-welcome`, `hero-welcome-bg`, `hero-welcome-planet`, `hero-welcome-grain`, `hero-welcome-content`, `hero-welcome-badge`, `hero-welcome-badge-dot`, `hero-welcome-title`, `hero-welcome-sub`, `hero-welcome-cta`, `hero-welcome-cta-label`.
 
-### NewsSection masonry gallery
+### StatsGrid bento grid
+
+`'use client'`. The homepage's main section, in place of the old Releases masonry.
+
+**Layout.** Outer `display: grid` of three equal columns; each column is a flex stack sharing one gap, so the column bottoms line up. The heights do the arithmetic and are the reason no sixth block can be added:
+
+```
+col 1  724
+col 2  420 + 24 + 280 = 724
+col 3  350 + 24 + 350 = 724
+```
+
+**The five blocks.** `plan` (reading plan, photo, external link) · `verse` (verse of the hour, opens `QuoteShareModal`) · `invite` (invitation, links to Kontakt) · `book` (latest treasure, from the API) · `faith` (25 points, ghost numeral).
+
+**Headline fitting.** Card text varies far too much for one type size — the verse alone runs 21 to 112 characters. An effect steps `[data-fit]` elements down a fixed size ladder until the card fits. It measures against the card's `min-height`, **not** its current height: a card that has already overflowed reports the grown height and every size then looks like it fits, which silently knocks the columns out of alignment. It also checks `scrollWidth` so a single long word wraps instead of running past the card edge.
+
+**Verse emphasis.** `splitVerse()` in [lib/verses.ts](../apps/web/app/lib/verses.ts) picks one word to mark: a concept (`Liebe`, `Gnade`, `Hirte`, `erquicken`, …) first, the divine name only if the verse carries no concept, and the longest word as a last resort. Concepts come first because `Gott` appears in most verses — marking it every hour marks nothing. Across the 32 German verses this picks 25 distinct words. The mark is a hand-drawn SVG stroke, not a rectangle.
+
+**Config.** `HomeGridConfig` decides visibility, clickability, link, label/button visibility, per-locale text overrides and the image (key, crop, scrim, text colour). Empty text means "use the translation", so copy stays in the message files unless an editor overrides it.
+
+**Preview.** With `?gridPreview=1` the section listens for a `sdarm:grid-preview` `postMessage` and renders that draft instead, and scrolls itself into view. The admin's preview is this page in an iframe, so it cannot drift from what visitors see.
+
+### NewsSection masonry gallery (no longer rendered)
 
 `'use client'` masonry grid. Receives news posts via `posts?: NewsPost[]`. Falls back to static data. Returns `null` if array is empty.
 
@@ -193,7 +216,8 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 | `PostForm` | Create/edit form with auto-slug. Uses `ImagePicker` for cover + thumb |
 | `ImagePicker` | Unified upload + library picker |
 | `ImageLibrary` | R2 image grid with usage info. Paginated (24/page), "Show unused only" filter |
-| `ConfigEditor` | Config fields grouped by section. Uses `ImagePicker` for image keys |
+| `ConfigEditor` | Config fields grouped by section. Uses `ImagePicker` for image keys. Excludes `home_grid`, which has its own page |
+| `HomeGridEditor` | Homepage grid settings — five blocks, per-locale text, images, and a live preview of the real site in an iframe |
 | `SubscriberList` | Active subscribers table with Remove. Paginated (20/page) |
 | `Pagination` | Shared offset-based pagination. Props: `page`, `total`, `limit`, `onChange` |
 
@@ -439,3 +463,16 @@ R2 images are served through Cloudflare Image Transformations in production. `r2
 After upload, use `URL.createObjectURL(file)` for preview. Do not switch to the R2 URL — wrangler local state is not served at `images.sdarm.life`. The R2 key is stored correctly regardless.
 
 Direct R2 operations (wrangler, CF dashboard) bypass the `images` table. Any upload/delete outside the admin API requires a manual backfill (`POST /admin/images/backfill`).
+
+
+### HomeGridEditor (`apps/admin`)
+
+Settings panel on the left, preview on the right. Route `/home-grid`, domain folder `app/domains/home-grid/`.
+
+**Per block:** show/hide · clickable · link (empty = built-in destination) · open in new tab · show label · show button · label / headline / button text per locale · image with crop, scrim strength and text colour.
+
+**Preview is the real site.** Each pane is an `<iframe>` of `${NEXT_PUBLIC_WEB_URL}/{locale}?gridPreview=1&theme=…`, and the draft config goes in over `postMessage` on every keystroke. Rebuilding the card inside the admin would mean two implementations and a preview that lies the first time either changes. Theme (dark / light / both side by side), locale and width (desktop / tablet / mobile) are switchable; the iframe renders at its true width and is scaled with a transform, because resizing it would trip a different media query and preview the wrong layout.
+
+**Auto text colour.** `measureLuminance()` reads the mean Rec. 709 luma of the lower third of the file **in the admin, before upload** — that region is what sits behind the card's text. The number is stored with the config, so the site paints the right colour on first render. Sampling on the public site would need cross-origin pixel access and would repaint the text after the photo loads, a visible flash on every visit. Images picked from the library instead of uploaded have no measurement; `auto` then falls back to light text and the editor can set it by hand.
+
+**Env:** `NEXT_PUBLIC_WEB_URL` — the site the preview iframe points at. Browser-exposed by necessity; it is a public URL.

@@ -2043,3 +2043,230 @@ input[type="file"]::file-selector-button:hover {
 
 .card--roadmap { opacity: 0.75; }
 .card--roadmap .state-empty { padding: 24px 12px; }
+
+/* ═══ HOMEPAGE GRID EDITOR ═══
+   Settings on the left, live preview on the right. The preview is the real
+   site in an iframe rather than a rebuilt card, so it cannot drift from what
+   visitors see. */
+.grid-editor {
+  display: grid;
+  grid-template-columns: minmax(340px, 460px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.grid-editor__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-height: calc(100vh - 200px);
+  overflow-y: auto;
+  padding-right: 0.4rem;
+}
+
+.grid-editor__hint {
+  font-size: 0.82rem;
+  line-height: 1.55;
+  margin: 0 0 0.75rem;
+}
+
+.grid-editor__block.is-hidden {
+  opacity: 0.55;
+}
+
+.grid-editor__block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: 0.75rem;
+  padding: 0;
+  background: none;
+  border: none;
+  color: var(--text);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.grid-editor__slot {
+  display: block;
+  font-size: 0.76rem;
+  margin-top: 0.15rem;
+}
+
+.grid-editor__block-body {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.grid-editor__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.grid-editor__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.grid-editor__field-label {
+  font-size: 0.76rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.grid-editor__field input,
+.grid-editor__field textarea,
+.grid-editor__field select {
+  width: 100%;
+  padding: 0.55rem 0.7rem;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  color: var(--text);
+  font: inherit;
+  font-size: 0.88rem;
+}
+.grid-editor__field input:focus-visible,
+.grid-editor__field textarea:focus-visible,
+.grid-editor__field select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.grid-editor__sub {
+  margin: 0.5rem 0 0;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.grid-editor__image {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
+.grid-editor__upload {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 0.8rem;
+  border: 1px dashed var(--border-2);
+  border-radius: var(--r);
+  cursor: pointer;
+  font-size: 0.86rem;
+}
+.grid-editor__upload input {
+  max-width: 200px;
+  font-size: 0.78rem;
+}
+
+.grid-editor__error {
+  margin: 0;
+  color: var(--red-text);
+  font-size: 0.82rem;
+}
+
+/* 3×3 crop picker — which part of the photo must survive the crop */
+.grid-editor__positions {
+  display: grid;
+  grid-template-columns: repeat(3, 34px);
+  gap: 4px;
+}
+.grid-editor__pos {
+  width: 34px;
+  height: 34px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+}
+.grid-editor__pos.is-active {
+  background: var(--accent-soft);
+  border-color: var(--accent);
+}
+
+/* ── Preview side ── */
+.grid-editor__preview {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.grid-editor__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.grid-editor__spacer {
+  flex: 1;
+}
+
+.grid-editor__segment {
+  display: inline-flex;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.grid-editor__segment button {
+  padding: 0.4rem 0.8rem;
+  background: none;
+  border: none;
+  color: var(--muted);
+  font: inherit;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+.grid-editor__segment button.is-active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.grid-editor__frames {
+  display: grid;
+  gap: 0.9rem;
+}
+.grid-editor__frames--split {
+  grid-template-columns: 1fr 1fr;
+}
+
+.grid-editor__frame-label {
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.35rem;
+}
+
+/* The iframe renders at its real width and is scaled down to fit. Resizing it
+   instead would trip a different media query and preview the wrong layout. */
+.grid-editor__frame-view {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  background: var(--surface-2);
+}
+
+@media (max-width: 1200px) {
+  .grid-editor {
+    grid-template-columns: 1fr;
+  }
+  .grid-editor__panel {
+    max-height: none;
+  }
+  .grid-editor__preview {
+    position: static;
+  }
+}

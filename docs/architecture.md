@@ -22,7 +22,7 @@ API response shapes (`PostDto`, `ImageDto`, etc.) are currently redefined in bot
 
 **Separation of concerns:**
 - `@sdarm/db` — Drizzle schema definitions (DB layer). Types have `Date` objects and internal fields.
-- `@sdarm/types` — HTTP response types (API contract layer). Types have ISO strings and only publicly surfaced fields.
+- `@sdarm/types` — HTTP response types (API contract layer). Types have ISO strings and only publicly surfaced fields. Also holds the homepage grid config (`HomeGridConfig`) together with the pure functions that read it — `defaultGridConfig`, `parseGridConfig`, `pick`, `resolveTextColor`. Both `apps/web` (renders the grid) and `apps/admin` (edits it) need that logic, neither may import from the other, and a duplicated merge routine is exactly how the two would drift apart.
 - `@sdarm/ui` — Shared React components and the dark museum CSS design system used by all public-facing apps.
 - `@sdarm/i18n` — Shared i18n config (`locales`, `defaultLocale`) and message JSON files (`de.json`, `en.json`).
 

@@ -3,7 +3,16 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import HeroWelcome from '../components/HeroWelcome';
 import StatsGrid from '../components/StatsGrid';
-import { fetchTreasures, fetchSongbooks, WEB_URL, TREASURES_URL, SONGBOOK_URL, EVENTS_URL } from '../lib/api';
+import {
+  fetchTreasures,
+  fetchSongbooks,
+  fetchConfig,
+  WEB_URL,
+  TREASURES_URL,
+  SONGBOOK_URL,
+  EVENTS_URL,
+} from '../lib/api';
+import { parseGridConfig } from '@sdarm/types';
 import type { NewsData } from '../lib/api';
 
 export const dynamic = 'force-dynamic';
@@ -29,7 +38,15 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   setRequestLocale(locale);
 
-  const [bookRaw, songbooksRaw] = await Promise.all([fetchTreasures('type=book&limit=1'), fetchSongbooks()]);
+  const [bookRaw, songbooksRaw, config] = await Promise.all([
+    fetchTreasures('type=book&limit=1'),
+    fetchSongbooks(),
+    fetchConfig(),
+  ]);
+
+  // A missing or malformed config falls back to the built-in defaults rather
+  // than blanking the homepage.
+  const grid = parseGridConfig(config?.home_grid);
 
   const newsData: NewsData = {
     book: bookRaw?.[0]
@@ -48,7 +65,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <ConnectedNavbar locale={locale} />
       <main id="main-content">
         <HeroWelcome locale={locale} />
-        <StatsGrid newsData={newsData} />
+        <StatsGrid newsData={newsData} grid={grid} />
       </main>
       <ConnectedFooter locale={locale} />
     </>

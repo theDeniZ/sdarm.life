@@ -55,7 +55,16 @@ donation_url
 hero_bg_key, hero_bg_alt
 about_text_1, about_text_2, about_image_key, about_image_alt, about_link_url
 facebook_url, whatsapp_url, instagram_url, youtube_url
+home_grid
 ```
+
+**`home_grid` is the one key that holds a document, not a scalar.** Its value is
+`JSON.stringify(HomeGridConfig)` — the five homepage bento blocks with roughly a
+dozen settings each in two languages, about a hundred values. Flat keys cannot
+carry that. Read it with `parseGridConfig()` from `@sdarm/types`, which merges
+whatever is stored onto the defaults and tolerates missing or malformed fields
+rather than throwing: a bad value in KV must not be able to blank the homepage.
+The generic admin Config page excludes this key; it is edited at `/home-grid`.
 
 ## Drizzle notes
 
