@@ -662,7 +662,9 @@
       "subtitle": "Sacred songs from the tradition of the Reform Movement — to the praise of God, the comfort of the soul, the strengthening of the community.",
       "discover": "Discover",
       "songCount": "{count} songs",
-      "openSongbook": "Open songbook"
+      "openSongbook": "Open songbook",
+      "verseText": "Sing to the LORD a new song; sing to the LORD, all the earth!",
+      "verseRef": "Psalm 96:1"
     },
     "reader": {
       "songs": "Songs",
