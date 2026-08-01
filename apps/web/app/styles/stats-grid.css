@@ -424,11 +424,16 @@
   .stats__card--tall {
     min-height: 280px;
   }
+  /* 240 + 12 + 192 = 444 = 216 + 12 + 216. The short card is 192 rather than
+     the 180 it started at: at 180 column 2 came to 432 against column 3's 444,
+     the grid stretched it to match, and its last card ended 12px above the
+     neighbouring one. The same arithmetic that aligns the desktop columns has
+     to hold at every breakpoint. */
   .stats__card--media {
     min-height: 240px;
   }
   .stats__card--short {
-    min-height: 180px;
+    min-height: 192px;
   }
   .stats__card--mid {
     min-height: 216px;
