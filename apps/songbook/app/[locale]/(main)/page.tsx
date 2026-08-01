@@ -46,16 +46,12 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
               <div className="songbook-landing-card__count">
                 {sb.songCount > 0 ? t('songCount', { count: sb.songCount }) : t('openSongbook')}
               </div>
-              <span className="songbook-landing-card__arrow">→</span>
             </Link>
           ))}
         </div>
       </section>
 
-      <ScriptureVerseSection
-        text="Singet dem HERRN ein neues Lied; singet dem HERRN, alle Welt!"
-        reference="Psalm 96,1"
-      />
+      <ScriptureVerseSection text={t('verseText')} reference={t('verseRef')} />
     </>
   );
 }

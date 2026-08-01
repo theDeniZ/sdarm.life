@@ -684,7 +684,9 @@
       "subtitle": "Heilige Gesänge aus der Tradition der Reformationsbewegung — zum Lob Gottes, zum Trost der Seele, zur Stärkung der Gemeinschaft.",
       "discover": "Entdecken",
       "songCount": "{count} Lieder",
-      "openSongbook": "Gesangbuch öffnen"
+      "openSongbook": "Gesangbuch öffnen",
+      "verseText": "Singet dem HERRN ein neues Lied; singet dem HERRN, alle Welt!",
+      "verseRef": "Psalm 96,1"
     },
     "reader": {
       "songs": "Lieder",
