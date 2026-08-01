@@ -182,19 +182,35 @@
   color: var(--stats-muted);
 }
 
-/* ── YouVersion card ──
-   Photo card: like the news cards, it is photo + dark scrim + light text in
-   both themes, so it pins its own colours instead of following --stats-text. */
-.stats__card--plan {
+/* ── Photo cards ──
+   Any block can be given a photo from the admin, so the treatment is generic
+   rather than pinned to one card. The card stops following the section palette
+   and switches to a light-on-dark or dark-on-light pair, and the scrim tints
+   toward whichever side the text needs. */
+.stats__card--photo {
   overflow: hidden;
+}
+
+.stats__card--on-light {
+  --stats-scrim: 10, 9, 8;
   --stats-text: #f6f2ec;
-  --stats-muted: rgba(246, 242, 236, 0.72);
+  --stats-muted: rgba(246, 242, 236, 0.74);
   --stats-accent: #e8c9a0;
+  --stats-line: rgba(255, 250, 244, 0.32);
+  --stats-line-hover: rgba(255, 250, 244, 0.6);
+}
+
+.stats__card--on-dark {
+  --stats-scrim: 252, 250, 246;
+  --stats-text: #14110d;
+  --stats-muted: rgba(20, 17, 13, 0.72);
+  --stats-accent: #6b4f2a;
+  --stats-line: rgba(20, 17, 13, 0.24);
+  --stats-line-hover: rgba(20, 17, 13, 0.5);
 }
 
 .stats__card-photo {
   object-fit: cover;
-  object-position: 58% 38%;
   z-index: 0;
 }
 
@@ -202,10 +218,21 @@
   position: absolute;
   inset: 0;
   z-index: 1;
-  background: linear-gradient(to top, rgba(10, 9, 8, 0.92) 0%, rgba(10, 9, 8, 0.55) 45%, rgba(10, 9, 8, 0.25) 100%);
+}
+.stats__card--scrim-none .stats__card-scrim {
+  display: none;
+}
+.stats__card--scrim-light .stats__card-scrim {
+  background: linear-gradient(to top, rgba(var(--stats-scrim), 0.6) 0%, rgba(var(--stats-scrim), 0.16) 55%, transparent 100%);
+}
+.stats__card--scrim-medium .stats__card-scrim {
+  background: linear-gradient(to top, rgba(var(--stats-scrim), 0.8) 0%, rgba(var(--stats-scrim), 0.36) 50%, rgba(var(--stats-scrim), 0.1) 100%);
+}
+.stats__card--scrim-strong .stats__card-scrim {
+  background: linear-gradient(to top, rgba(var(--stats-scrim), 0.92) 0%, rgba(var(--stats-scrim), 0.55) 45%, rgba(var(--stats-scrim), 0.25) 100%);
 }
 
-.stats__card--plan .stats__card-body {
+.stats__card--photo .stats__card-body {
   position: relative;
   z-index: 2;
 }
@@ -243,9 +270,13 @@
   transform: translateX(4px);
 }
 
-/* The photo card's own background is not behind the button */
-.stats__card--plan:hover .stats__btn {
+/* On a photo there is no card background behind the button, so the filled
+   hover takes the opposite of the text colour rather than the card colour. */
+.stats__card--on-light:hover .stats__btn {
   color: #14110d;
+}
+.stats__card--on-dark:hover .stats__btn {
+  color: #f6f2ec;
 }
 
 /* ── Invitation card ──
@@ -440,10 +471,13 @@
   --stats-card-bg: #ffffff;
   --stats-text: #111111;
   --stats-muted: #666666;
-  /* Pine, not the sketch's brick red — red reads as a warning, which is the
-     wrong signal on a church page. The photo card keeps the dark-theme gold,
-     because it is a dark surface in both themes. */
-  --stats-accent: #3f5140;
+  /* Umbra: the dark theme's gold, deepened for paper. Not the sketch's brick
+     red — red reads as a warning, the wrong signal on a church page — and not
+     a green either, because the highlighter is green and two greens in one
+     card compete. One accent hue across both themes, one green for marking.
+     7.56:1 on white. The photo card keeps the gold: it is a dark surface in
+     both themes. */
+  --stats-accent: #6b4f2a;
   --stats-mark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44' preserveAspectRatio='none'><path fill='rgb(118,170,108)' fill-opacity='0.42' d='M3,16 C30,10 70,12.4 110,9.2 C140,6.8 172,8.6 196,10.5 C198.5,14.4 199,22.6 197,27.8 C170,32.4 130,29.4 92,31.2 C64,32.4 28,31 5,28.4 C1.6,25 1,20.2 3,16 Z'/></svg>");
   --stats-line: #e8e4dc;
   --stats-line-hover: #cdc7bb;

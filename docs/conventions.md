@@ -90,10 +90,13 @@ Server-only (no `NEXT_PUBLIC_` prefix) apart from `NEXT_PUBLIC_R2_URL`. Client c
 | `API_URL`             | `http://localhost:8787`               | `https://api.sdarm.life`    | server-only |
 | `API_KEY`             | `dev`                                 | managed API key             | **server-only** |
 | `NEXT_PUBLIC_R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` | browser OK  |
+| `NEXT_PUBLIC_WEB_URL` | `http://localhost:3000`               | `https://sdarm.life`        | browser OK  |
 
 **Never prefix `API_KEY` with `NEXT_PUBLIC_`** — it would embed the bearer token in the JS bundle. Admin API calls go same-origin (`/api/v1/*`) and are proxied server-side by `apps/admin/app/api/v1/[...path]/route.ts`, which injects the bearer from the server-only `API_KEY` env var.
 
 `API_URL` has **no `/api/v1` suffix** — the proxy appends the path itself.
+
+`NEXT_PUBLIC_WEB_URL` is the site the homepage-grid preview iframe points at. Browser-exposed by necessity, and harmless — it is a public URL.
 
 ### `apps/songbook`
 
