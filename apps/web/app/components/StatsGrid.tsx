@@ -65,9 +65,31 @@ export default function StatsGrid({ newsData, grid }: { newsData?: NewsData; gri
     // The admin's iframe is cross-origin, so it cannot scroll this document.
     // Bring the section into view from in here instead, otherwise the preview
     // shows the hero and the editor never sees what it is editing.
-    const toGrid = setTimeout(() => sectionRef.current?.scrollIntoView({ block: 'start' }), 120);
+    //
+    // This used to be a single setTimeout(120), which raced the page it was
+    // measuring: at 120ms the globe, the fonts and the card photos are still
+    // landing, so whatever offset it computed was stale a moment later and the
+    // frame settled back on the hero. It also never ran again, so switching the
+    // editor between desktop, tablet and mobile reflowed the document to a
+    // different height while the scroll position stayed where the old layout
+    // had put it. Keep the section pinned until things stop moving instead.
+    let frame = 0;
+    const pin = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => sectionRef.current?.scrollIntoView({ block: 'start', behavior: 'instant' }));
+    };
+    pin();
+    window.addEventListener('load', pin);
+    window.addEventListener('resize', pin);
+    const obs = typeof ResizeObserver === 'undefined' ? null : new ResizeObserver(pin);
+    obs?.observe(document.documentElement);
+    if (sectionRef.current) obs?.observe(sectionRef.current);
+
     return () => {
-      clearTimeout(toGrid);
+      cancelAnimationFrame(frame);
+      obs?.disconnect();
+      window.removeEventListener('load', pin);
+      window.removeEventListener('resize', pin);
       window.removeEventListener('message', onMessage);
     };
   }, []);
