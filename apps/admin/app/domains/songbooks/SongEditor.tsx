@@ -28,14 +28,27 @@ type MetaState = {
 
 // ── Label ↔ type dictionary ──────────────────────────────────────────────────
 
+/**
+ * The keyword has to be followed by something that is not a letter or digit —
+ * `\b` cannot do this job. `\b` is defined against ASCII `\w`, so after a
+ * Cyrillic character at end-of-string there is no boundary and `/^(припев)\b/`
+ * never matched "Припев" at all. Every Russian alternative in this dictionary
+ * was dead code.
+ */
+const TYPE_PATTERNS: [SongPartType, RegExp][] = [
+  ['verse', /^(verse|куплет)(?![\p{L}\p{N}])/iu],
+  ['chorus', /^(chorus|refrain|refren|припев|хор)(?![\p{L}\p{N}])/iu],
+  ['bridge', /^(bridge|мост)(?![\p{L}\p{N}])/iu],
+  ['intro', /^intro(?![\p{L}\p{N}])/iu],
+  ['outro', /^outro(?![\p{L}\p{N}])/iu],
+  ['coda', /^(coda|кода)(?![\p{L}\p{N}])/iu],
+];
+
 function labelToType(label: string): SongPartType | null {
-  const l = label.trim().toLowerCase();
-  if (/^(verse|куплет)\b/i.test(l)) return 'verse';
-  if (/^(chorus|припев|хор)\b/i.test(l)) return 'chorus';
-  if (/^(bridge|мост)\b/i.test(l)) return 'bridge';
-  if (/^intro\b/i.test(l)) return 'intro';
-  if (/^outro\b/i.test(l)) return 'outro';
-  if (/^(coda|кода)\b/i.test(l)) return 'coda';
+  const l = label.trim();
+  for (const [type, re] of TYPE_PATTERNS) if (re.test(l)) return type;
+  // Almost every verse in this database is labelled with a bare number.
+  if (/^\d+[.):]?$/.test(l)) return 'verse';
   return null;
 }
 
@@ -57,21 +70,30 @@ function initText(parts: SongPartDto[]): string {
     .join('\n\n');
 }
 
+/**
+ * One blank-line-separated block is one part, always. The first line is the
+ * label because `initText` put it there — the dictionary decides the part's
+ * TYPE, never whether the block is a part at all.
+ *
+ * It used to decide both: an unrecognised first line meant the whole block was
+ * folded into the previous part's lyrics, and `handleSave` then deleted every
+ * stored part past the shortened list. Since the dictionary recognised none of
+ * the labels this database actually uses — bare numbers, `Refren`, `Refrain` —
+ * opening any multi-part song and pressing Save merged it into one part and
+ * deleted the rest. No edit required, and no error shown.
+ */
 function parseText(text: string): ParsedPart[] {
-  const blocks = text.split(/\n\s*\n/).map((b) => b.replace(/^\n+|\n+$/g, ''));
   const parts: ParsedPart[] = [];
-  for (const block of blocks) {
-    if (!block.trim()) continue;
-    const lines = block.split('\n');
-    const firstLine = lines[0].trim();
-    const type = labelToType(firstLine);
-    if (type) {
-      parts.push({ label: firstLine, type, lyrics: lines.slice(1).join('\n').trim() });
-    } else if (parts.length > 0) {
-      parts[parts.length - 1].lyrics += '\n\n' + block;
-    } else {
-      parts.push({ label: 'Verse 1', type: 'verse', lyrics: block });
-    }
+  for (const block of text.split(/\n\s*\n/)) {
+    const trimmed = block.replace(/^\n+|\n+$/g, '');
+    if (!trimmed.trim()) continue;
+    const lines = trimmed.split('\n');
+    const label = lines[0].trim();
+    parts.push({
+      label,
+      type: labelToType(label) ?? 'verse',
+      lyrics: lines.slice(1).join('\n').trim(),
+    });
   }
   return parts;
 }
@@ -239,6 +261,15 @@ export default function SongEditor({ song }: Props) {
     setSaveDone(false);
     try {
       const existing = [...savedParts].sort((a, b) => a.sortOrder - b.sortOrder);
+
+      // A save that would wipe a song is never what an editor meant. Emptying
+      // the textarea is how you would clear one part, not how you would ask for
+      // every part of a stored song to be deleted — and there is no undo here.
+      if (parsed.length === 0 && existing.length > 0) {
+        setSaveError('Refusing to delete every section. Clear them one at a time if that is really the intent.');
+        return;
+      }
+
       for (let i = 0; i < parsed.length; i++) {
         const p = parsed[i];
         if (i < existing.length) {
