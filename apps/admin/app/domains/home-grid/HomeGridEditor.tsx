@@ -131,25 +131,10 @@ export default function HomeGridEditor() {
   return (
     <div className="grid-editor">
       <div className="grid-editor__panel">
-        <section className="card">
-          <h2 className="card-h">Section heading</h2>
-          <p className="muted grid-editor__hint">
-            Leave a field empty to use the translation from the message files. Anything you type here overrides it for
-            that language only.
-          </p>
-          <Field
-            label={`Eyebrow (${lang.toUpperCase()})`}
-            value={config.eyebrow[lang]}
-            placeholder="Unsere Gemeinschaft"
-            onChange={(v) => setConfig({ ...config, eyebrow: { ...config.eyebrow, [lang]: v } })}
-          />
-          <Field
-            label={`Title (${lang.toUpperCase()})`}
-            value={config.title[lang]}
-            placeholder="Ein Werk, das Grenzen überschreitet"
-            onChange={(v) => setConfig({ ...config, title: { ...config.title, [lang]: v } })}
-          />
-        </section>
+        <p className="muted grid-editor__hint">
+          Leave a text field empty to use the translation from the message files. Anything you type here overrides it
+          for that language only.
+        </p>
 
         {BLOCKS.map((meta) => {
           const b = config.blocks[meta.id];
@@ -346,8 +331,11 @@ function PreviewFrame({
   }, [config, ready]);
 
   const frameWidth = width === 'desktop' ? 1280 : width === 'tablet' ? 900 : 390;
-  // Tall enough for the whole section once the page has scrolled to it.
-  const frameHeight = width === 'mobile' ? 1900 : 1300;
+  // Real device heights. The mobile frame used to be 1900px tall, which is no
+  // phone that exists — and every `vh` rule on the page then resolved against
+  // it, so the preview showed a hero and a spacing nobody would ever get. A
+  // preview whose viewport is invented previews an invented layout.
+  const frameHeight = width === 'mobile' ? 844 : width === 'tablet' ? 1180 : 900;
   // Scaled down so a 1280px page fits the panel while keeping the real
   // breakpoints — resizing the iframe instead would change which media query
   // applies and preview the wrong layout.
