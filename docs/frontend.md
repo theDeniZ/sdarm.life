@@ -40,12 +40,19 @@ Server component (async). Renders the home page landing hero — no client bundl
 **What it renders:**
 - `<PlanetEarth />` — the Three.js WebGL globe (Client component, lazy-loaded)
 - Grain overlay div
-- Badge line (decorative dot + translated eyebrow text)
 - `<h1>` with gold italic accent via `t.rich()` and `<em>`
 - Subtitle paragraph
 - `<Link>` CTA button pointing to `/{locale}/about`
 
-**i18n namespace:** `web.heroWelcome` (keys: `badge`, `title`, `subtitle`, `cta`).
+**i18n namespace:** `web.heroWelcome` (keys: `title`, `subtitle`, `ctaPrimary`, `ctaSecondary`).
+
+**Height is bounded, not a bare `vh`.** `min-height: clamp(430px, 62vh, 660px)` (`clamp(420px, 65vh, 560px)` below 700px). The content inside is a fixed ~430px tall whatever the screen, so a bare `62vh` kept growing away from it — a 1366px-tall iPad portrait produced an 847px hero holding 411px of nothing, and the planet, anchored at `top: 105%` of the hero, detached from the text and left a black band. The upper bound stops the hero outgrowing what it holds; `62vh` still governs every landscape desktop, where the viewport is wide and short, so desktop is unchanged at 558px.
+
+**Tablet and phone use `min-height: 56.25vw`** — 9/16 of the width, so the hero is a 16:9 band at every tablet size (744 → 419px, 820 → 461px, 1024 → 576px, all exactly 1.78:1). Phones cannot reach it: a two-line title, a two-line subtitle and the button come to ~310px against the 219px that 16:9 allows at 390px, so the band settles at ~1.26:1 and the content sets the height. Closing that gap means cutting copy, not CSS.
+
+**The planet floor is 480px, not 640px.** `width: clamp(480px, 100vw, 1400px)`. At 640px the sphere came out 1.71× the viewport on a 375px phone and its arc flattened into a horizon line, while a tablet under the same rule got a real curve — the same element read differently per breakpoint.
+
+**The CTA is filled flat `--gold`** with a soft ambient shadow and one hairline along the top edge: a gradient ramp plus inner gloss reads as a 2005 candy button. Hover runs a low-contrast gleam across the surface and swaps the arrow — the resident one exits right, its replacement arrives from the left out of a clipped slot. Both are disabled under `prefers-reduced-motion`.
 
 **CSS class prefix:** `hero-welcome-*` — all classes are defined in `apps/web/app/globals.css`: `hero-welcome`, `hero-welcome-bg`, `hero-welcome-planet`, `hero-welcome-grain`, `hero-welcome-content`, `hero-welcome-badge`, `hero-welcome-badge-dot`, `hero-welcome-title`, `hero-welcome-sub`, `hero-welcome-cta`, `hero-welcome-cta-label`.
 

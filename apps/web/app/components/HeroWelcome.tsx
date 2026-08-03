@@ -17,13 +17,6 @@ export default async function HeroWelcome({ locale }: { locale: string }) {
       </div>
 
       <div className="hero-welcome-content">
-        <span className="hero-welcome-badge">
-          <span className="hero-welcome-badge-dot" aria-hidden="true">
-            ✦
-          </span>
-          {t('badge')}
-        </span>
-
         <h1 className="hero-welcome-title">
           {t.rich('title', {
             em: (chunks) => <em>{chunks}</em>,
@@ -35,6 +28,17 @@ export default async function HeroWelcome({ locale }: { locale: string }) {
 
         <Link href={`/${locale}/about`} className="hero-welcome-cta">
           <span className="hero-welcome-cta-label">{t('ctaPrimary')}</span>
+          {/* Two arrows in a clipped slot: on hover the first leaves to the
+              right and the second arrives from the left, so the mark moves
+              rather than just nudging. */}
+          <span className="hero-welcome-cta-go" aria-hidden="true">
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.7">
+              <path d="M3 8h9M8.5 4.5 12 8l-3.5 3.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          </span>
         </Link>
       </div>
     </section>
