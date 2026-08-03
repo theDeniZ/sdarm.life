@@ -10,9 +10,17 @@ forEachTheme('web / home', async (page, theme) => {
   // captures a half-hydrated page (globe missing, cards empty, clock blank).
   // PlanetEarth WebGL canvas (Suspense fallback is null, so canvas == mounted).
   await page.waitForSelector('.hero-welcome canvas', { timeout: 30_000 });
-  // NewsSection cards fade in via IntersectionObserver — at least one must land
-  // before we screenshot, otherwise the masonry grid renders as empty veils.
-  await page.waitForSelector('.masonry-item.is-visible', { timeout: 15_000 });
+  // The five bento cards. StatsGrid replaced NewsSection here, so the old
+  // `.masonry-item.is-visible` wait could never resolve. The headline fitter
+  // steps each card's type down until it fits, so wait for it to have run —
+  // an unfitted headline is a different picture from a fitted one.
+  await page.waitForFunction(
+    () =>
+      document.querySelectorAll('.stats__card').length === 5 &&
+      [...document.querySelectorAll<HTMLElement>('[data-fit]')].every((el) => el.style.fontSize !== ''),
+    undefined,
+    { timeout: 15_000 }
+  );
   // Footer sunset clock hydrates from ?screenshotTime= and splits the value into
   // spans around a `.sunset-colon`. Until that exists, only the dash placeholder
   // shows, and the location label is also missing.
