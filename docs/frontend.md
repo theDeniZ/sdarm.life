@@ -116,6 +116,8 @@ col 3  350 + 24 + 350 = 724
 
 `'use client'`. 3-column CSS grid (`1fr 1fr 260px`). Props: `config?: FooterConfig`, `apiUrl?`, `webUrl?`, `songbookUrl?`, `eventsUrl?`, `treasuresUrl?`. All visible text uses `useTranslations('common.footer')` and `useTranslations('common.clock')`.
 
+**The newsletter capsule has one fixed width** (`max-width: 220px`). It used to start at 150px and animate to 220px on focus or once text was typed; that moved the submit button 70px out from under the pointer mid-click and reflowed the column beside it, while revealing nothing — the field was equally usable at either width (issue #132). Only colour reacts to focus now.
+
 **Columns:**
 1. **Contact** — heading, social links (fb/wa/ig/yt), email subscribe form with status feedback
 2. **Nav** — navigation links (translated via `useTranslations('common.nav')`)

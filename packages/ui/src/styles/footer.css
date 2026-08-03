@@ -152,10 +152,13 @@
 }
 /* Newsletter form — iOS-pill capsule (variant 16 from /de/newsletter-variants).
    Form is a single rounded object: input on the left, gold round submit
-   button on the right. Subtle inner gradient + glow ring on focus.
-   Compact-by-default behaviour: starts ~150px wide showing just enough
-   for the placeholder + button. Expands to 300px on focus, OR while the
-   input has typed content (via :has(:not(:placeholder-shown))). */
+   button on the right.
+
+   The capsule used to start at 150px and grow to 220px on focus or once
+   something was typed. A control that changes size while you are using it
+   moves itself out from under the cursor and reflows whatever sits beside
+   it, and the growth carried no information — the field was equally usable
+   at either width. It is one fixed width now; only colour reacts to focus. */
 .footer-form {
   display: flex;
   align-items: stretch;
@@ -164,15 +167,10 @@
   border-radius: 999px;
   padding: 0.2rem 0.2rem 0.2rem 1rem;
   width: 100%;
-  max-width: 150px;
+  max-width: 220px;
   transition:
-    max-width 0.55s cubic-bezier(0.76, 0, 0.24, 1),
     border-color 0.45s ease,
     box-shadow 0.45s ease;
-}
-.footer-form:focus-within,
-.footer-form:has(.footer-input:not(:placeholder-shown)) {
-  max-width: 220px;
 }
 .footer-form:focus-within {
   border-color: rgba(201, 169, 110, 0.6);
