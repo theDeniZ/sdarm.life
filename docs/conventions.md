@@ -50,13 +50,16 @@ No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
 | --------------- | ------------------------------------- | -------------------------------- |
 | `API_URL`       | `http://localhost:8787/api/v1`        | `https://api.sdarm.life/api/v1`  |
 | `R2_URL`        | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`      |
+| `NEXT_PUBLIC_R2_URL` | `http://localhost:8787/api/v1/images` | _(unset — the fallback is already the production host)_ |
 | `WEB_URL`       | `http://localhost:3000`               | `https://sdarm.life`             |
 | `TREASURES_URL` | `http://localhost:3002`               | `https://treasures.sdarm.life`   |
 | `SONGBOOK_URL`  | `http://localhost:3003`               | `https://songs.sdarm.life`       |
 | `EVENTS_URL`    | `http://localhost:3004`               | `https://events.sdarm.life`      |
 | `R2_TRANSFORMS` | _(not set)_                           | _(not set — enabled by default)_ |
 
-Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — pass as props from the server component.
+Server-only (no `NEXT_PUBLIC_` prefix) apart from `NEXT_PUBLIC_R2_URL`. Client components cannot read these — pass as props from the server component.
+
+`NEXT_PUBLIC_R2_URL` exists because `StatsGrid` is a client component and resolves the grid card photos through `r2url()`. With only the server-only `R2_URL`, the server rendered `http://localhost:8787/...` while the browser fell back to `https://images.sdarm.life` — a hydration mismatch on every card image, and in local dev the client asked the production host for a file that only exists in `.wrangler`. Production does not need it set: the fallback is already the production host. Same reason `apps/treasures` carries it.
 
 `WEB_URL`, `TREASURES_URL`, `SONGBOOK_URL`, and `EVENTS_URL` are used to build cross-app links (e.g. NewsSection cards linking to other apps). Never hardcode these URLs — always read from `lib/api.ts`.
 

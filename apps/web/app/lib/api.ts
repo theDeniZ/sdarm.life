@@ -1,7 +1,13 @@
 import type { PostDto, ConfigDto, ListResponse, TreasureDto, SongbookDto } from '@sdarm/types';
 
 export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
-export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
+// R2 is referenced from a client component (StatsGrid resolves the grid card
+// photos). process.env.R2_URL is server-only in Next.js, so without the
+// NEXT_PUBLIC_ variant the browser silently fell back to the production host
+// while the server rendered the local one — a hydration mismatch on every card
+// image, and in local dev the client asked images.sdarm.life for a file that
+// only exists in .wrangler. Same fix as apps/treasures.
+export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? process.env.R2_URL ?? 'https://images.sdarm.life';
 export const WEB_URL = process.env.WEB_URL ?? 'https://sdarm.life';
 export const TREASURES_URL = process.env.TREASURES_URL ?? 'https://treasures.sdarm.life';
 export const SONGBOOK_URL = process.env.SONGBOOK_URL ?? 'https://songs.sdarm.life';
