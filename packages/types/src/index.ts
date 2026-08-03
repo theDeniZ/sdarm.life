@@ -232,8 +232,6 @@ export interface GridBlockConfig {
 }
 
 export interface HomeGridConfig {
-  eyebrow: { de: string; en: string };
-  title: { de: string; en: string };
   blocks: Record<GridBlockId, GridBlockConfig>;
 }
 
@@ -281,11 +279,7 @@ export function defaultGridConfig(): HomeGridConfig {
   blocks.faith.showLabel = false;
   blocks.book.showButton = false;
 
-  return {
-    eyebrow: { de: '', en: '' },
-    title: { de: '', en: '' },
-    blocks,
-  };
+  return { blocks };
 }
 
 const SCRIMS: GridScrim[] = ['none', 'light', 'medium', 'strong'];
@@ -349,18 +343,12 @@ export function parseGridConfig(raw: string | null | undefined): HomeGridConfig 
   if (!parsed || typeof parsed !== 'object') return base;
 
   const o = parsed as Record<string, unknown>;
-  const eyebrow = (o.eyebrow ?? {}) as Record<string, unknown>;
-  const title = (o.title ?? {}) as Record<string, unknown>;
   const blocks = (o.blocks ?? {}) as Record<string, unknown>;
 
   const merged = {} as Record<GridBlockId, GridBlockConfig>;
   for (const id of GRID_BLOCK_IDS) merged[id] = mergeBlock(blocks[id], base.blocks[id]);
 
-  return {
-    eyebrow: { de: str(eyebrow.de, base.eyebrow.de), en: str(eyebrow.en, base.eyebrow.en) },
-    title: { de: str(title.de, base.title.de), en: str(title.en, base.title.en) },
-    blocks: merged,
-  };
+  return { blocks: merged };
 }
 
 /** Config text wins when set; otherwise the translation does. */

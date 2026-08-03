@@ -74,6 +74,18 @@ col 3  350 + 24 + 350 = 724
 
 **Verse emphasis.** `splitVerse()` in [lib/verses.ts](../apps/web/app/lib/verses.ts) picks one word to mark: a concept (`Liebe`, `Gnade`, `Hirte`, `erquicken`, …) first, the divine name only if the verse carries no concept, and the longest word as a last resort. Concepts come first because `Gott` appears in most verses — marking it every hour marks nothing. Across the 32 German verses this picks 25 distinct words. The mark is a hand-drawn SVG stroke, not a rectangle.
 
+**No section heading.** The five cards speak for themselves; there is no eyebrow and no `<h2>` above them. `HomeGridConfig` therefore carries `blocks` only.
+
+**Card heights are fixed, not floors.** Each is one number on `--stats-card-h` applied as `height`. As a `min-height` a long verse pushed its card taller, and because the mobile columns are balanced by those heights (240 + 12 + 192 = 444 = 216 + 12 + 216) the two columns stopped ending level — 37px apart at 360px. It looked intermittent only because the verse rotates hourly and only the long ones did it.
+
+**The fitter compares edges, not heights.** A fixed box reports its own clamped height at every size, so asking the *card* whether it fits always says yes while the text is quietly clipped. The body's `scrollHeight` is no better: `.stats__card-content` sits on `margin-top: auto`, and an auto margin in a fixed-height flex column leaves `scrollHeight` a few pixels above `clientHeight` whatever the type size — 4px on the songbook card at every rung from 64 down to 13, which set 17px type on a card with room for 56. It compares the last child's bottom edge against the body's instead, which is exact and blind to the auto margin. `HEADLINE_SIZES` reaches 13px so the worst case in the pool — a 112-character verse in a 156px-wide card at 360px — still fits.
+
+**Button labels are one word** (`Öffnen` · `Besuchen` · `Nachlesen`) and `.stats__btn` carries `white-space: nowrap`. A pill that wraps stops being a pill: with the old multi-word labels the text broke over three lines inside the capsule at 360px and grew past the card edge.
+
+**The `book` block is the songbook.** It links to `newsData.song.href`, which already carries the songbook URL per environment. With a photo it shows only its label — the picture says "songbooks" and a headline on top competes with it. Without one it falls back to the headline, because the default config has no image and the card would otherwise be a label on an empty rectangle. An editor's override always wins.
+
+**`SHOW_VERSE_SAVE` is temporarily `false`** — the save-as-image affordance on the verse card is hidden while the image `QuoteShareModal` produces is still being designed. The button and the modal are untouched underneath. Note the whole verse card is still clickable and opens the same modal.
+
 **Config.** `HomeGridConfig` decides visibility, clickability, link, label/button visibility, per-locale text overrides and the image (key, crop, scrim, text colour). Empty text means "use the translation", so copy stays in the message files unless an editor overrides it.
 
 **Preview.** With `?gridPreview=1` the section listens for a `sdarm:grid-preview` `postMessage` and renders that draft instead, and scrolls itself into view. The admin's preview is this page in an iframe, so it cannot drift from what visitors see.
@@ -513,7 +525,11 @@ Settings panel on the left, preview on the right. Route `/home-grid`, domain fol
 
 **Per block:** show/hide · clickable · link (empty = built-in destination) · open in new tab · show label · show button · label / headline / button text per locale · image with crop, scrim strength and text colour.
 
+The section has no heading of its own — the five cards carry it. There is no eyebrow or title to configure.
+
 **Preview is the real site.** Each pane is an `<iframe>` of `${NEXT_PUBLIC_WEB_URL}/{locale}?gridPreview=1&theme=…`, and the draft config goes in over `postMessage` on every keystroke. Rebuilding the card inside the admin would mean two implementations and a preview that lies the first time either changes. Theme (dark / light / both side by side), locale and width (desktop / tablet / mobile) are switchable; the iframe renders at its true width and is scaled with a transform, because resizing it would trip a different media query and preview the wrong layout.
+
+**Frame sizes are real devices** — 1280×900, 900×1180, 390×844. The mobile frame was once 1900px tall, which is no phone that exists; every `vh` rule on the page resolved against it and the preview showed a hero nobody would ever get. A preview with an invented viewport previews an invented layout.
 
 **Auto text colour.** `measureLuminance()` reads the mean Rec. 709 luma of the lower third of the file **in the admin, before upload** — that region is what sits behind the card's text. The number is stored with the config, so the site paints the right colour on first render. Sampling on the public site would need cross-origin pixel access and would repaint the text after the photo loads, a visible flash on every visit. Images picked from the library instead of uploaded have no measurement; `auto` then falls back to light text and the editor can set it by hand.
 

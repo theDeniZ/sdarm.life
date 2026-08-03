@@ -43,35 +43,6 @@
   margin: 0 auto;
 }
 
-.stats__head {
-  max-width: 800px;
-  margin: 0 auto 64px;
-  text-align: center;
-}
-
-.stats__eyebrow {
-  margin: 0 0 24px;
-  font:
-    600 12px/1 var(--stats-sans);
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  color: var(--stats-muted);
-}
-
-.stats__title {
-  margin: 0;
-  font:
-    400 56px/1.1 var(--stats-serif);
-  color: var(--stats-text);
-  letter-spacing: -0.02em;
-  text-wrap: balance;
-}
-
-.stats__title em {
-  color: var(--stats-accent);
-  font-style: italic;
-}
-
 /* ── Grid ── */
 .stats__grid {
   display: grid;
@@ -113,18 +84,27 @@
   border-color: var(--stats-line-hover);
 }
 
-/* Height modifiers — see the arithmetic in the header comment */
+/* Height modifiers — see the arithmetic in the header comment.
+   Each height is one number applied as both bounds, so a card is a container
+   the text must fit into rather than a floor the text can push past. A card
+   that grows drags its column out of line with the other two. */
 .stats__card--tall {
-  min-height: 724px;
+  --stats-card-h: 724px;
 }
 .stats__card--media {
-  min-height: 420px;
+  --stats-card-h: 420px;
 }
 .stats__card--short {
-  min-height: 280px;
+  --stats-card-h: 280px;
 }
 .stats__card--mid {
-  min-height: 350px;
+  --stats-card-h: 350px;
+}
+.stats__card--tall,
+.stats__card--media,
+.stats__card--short,
+.stats__card--mid {
+  height: var(--stats-card-h);
 }
 
 .stats__card-body {
@@ -246,6 +226,11 @@
   gap: 0.6em;
   margin-top: 28px;
   padding: 13px 24px;
+  /* A pill that wraps stops being a pill. With multi-word labels the text
+     broke over three lines inside the capsule on a 360px screen and the whole
+     shape grew past the card edge. The label stays on one line; keeping it
+     short enough to fit is the label's job, not the layout's. */
+  white-space: nowrap;
   border: 1px solid var(--stats-line);
   border-radius: 999px;
   font:
@@ -388,16 +373,15 @@
   .stats__col:nth-child(3) {
     grid-column: auto;
   }
-  /* Banner needs to read as solid as the cards below it */
+  /* Banner needs to read as solid as the cards below it. Sets the variable,
+     not min-height — a stray min-height outranks the fixed height whenever it
+     is the larger of the two and quietly puts the card back to variable. */
   .stats__card--tall {
-    min-height: 350px;
+    --stats-card-h: 350px;
   }
   /* Wide and short — the phone in the photo needs to stay in frame */
   .stats__card-photo {
     object-position: 58% 30%;
-  }
-  .stats__title {
-    font-size: 48px;
   }
 }
 
@@ -405,6 +389,14 @@
 @media (max-width: 640px) {
   .stats {
     padding: 48px 16px;
+  }
+  /* Two cards sit side by side here, so a pill has roughly 140px to live in.
+     The desktop padding leaves no room for the label and the arrow. */
+  .stats__btn {
+    margin-top: 18px;
+    padding: 10px 16px;
+    font-size: 13px;
+    gap: 0.45em;
   }
   .stats__grid {
     grid-template-columns: repeat(2, 1fr);
@@ -421,22 +413,34 @@
     grid-column: span 1;
   }
 
-  .stats__card--tall {
-    min-height: 280px;
-  }
   /* 240 + 12 + 192 = 444 = 216 + 12 + 216. The short card is 192 rather than
      the 180 it started at: at 180 column 2 came to 432 against column 3's 444,
      the grid stretched it to match, and its last card ended 12px above the
      neighbouring one. The same arithmetic that aligns the desktop columns has
-     to hold at every breakpoint. */
+     to hold at every breakpoint.
+
+     Each height is one number on --stats-card-h. min-height alone was a floor:
+     content that outgrew it — a 112-character verse in a 156px card — pushed
+     the card taller and the two columns stopped ending level. A fixed height
+     makes the card a container the text has to fit into, which is what the
+     fitter in StatsGrid is for. */
+  .stats__card--tall {
+    --stats-card-h: 280px;
+  }
   .stats__card--media {
-    min-height: 240px;
+    --stats-card-h: 240px;
   }
   .stats__card--short {
-    min-height: 192px;
+    --stats-card-h: 192px;
   }
   .stats__card--mid {
-    min-height: 216px;
+    --stats-card-h: 216px;
+  }
+  .stats__card--tall,
+  .stats__card--media,
+  .stats__card--short,
+  .stats__card--mid {
+    height: var(--stats-card-h);
   }
 
   .stats__card {
@@ -444,9 +448,6 @@
     gap: 24px;
   }
 
-  .stats__title {
-    font-size: 32px;
-  }
   .stats__card-label {
     font-size: 11px;
   }
