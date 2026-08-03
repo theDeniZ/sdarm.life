@@ -89,7 +89,7 @@
       "faith": {
         "label": "Faith · 25 Points",
         "title": "Foundations of our faith",
-        "sub": "discover now"
+        "sub": "Read"
       },
       "quote": {
         "openShare": "Share Bible verse",
@@ -99,21 +99,23 @@
       }
     },
     "stats": {
-      "eyebrow": "Our community",
-      "title": "A work that crosses <em>borders</em>",
       "plan": {
         "label": "Reading plan on YouVersion",
         "title": "Before<br></br><em>everything starts</em>",
-        "cta": "Open the reading plan",
+        "cta": "Open",
         "phoneAlt": "Reading plan in the YouVersion app"
       },
       "invite": {
-        "title": "Come as you are",
-        "cta": "Where we meet",
+        "title": "Come<br></br><em>as you are</em>",
+        "cta": "Visit",
         "photoAlt": "Congregation at Sabbath worship"
       },
       "verse": {
         "label": "Together in faith"
+      },
+      "songs": {
+        "label": "Hymnal",
+        "title": "Songs of <em>faith</em>"
       },
       "faith": {
         "title": "Foundations<br></br>of our faith"
