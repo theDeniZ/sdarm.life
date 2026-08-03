@@ -2543,6 +2543,11 @@ input[type="file"]::file-selector-button:hover {
   display: flex;
   flex-direction: column;
   gap: 0.9rem;
+  /* Grid items default to min-width: auto, so this column refused to shrink
+     below the two preview frames' combined min-content width (~1090px) and
+     pushed the whole page sideways — 1738px of content in a 1440px window,
+     with the sidebar off-screen and the Apply button cut off. */
+  min-width: 0;
 }
 
 .grid-editor__toolbar {
@@ -2578,9 +2583,15 @@ input[type="file"]::file-selector-button:hover {
 .grid-editor__frames {
   display: grid;
   gap: 0.9rem;
+  min-width: 0;
 }
 .grid-editor__frames--split {
   grid-template-columns: 1fr 1fr;
+}
+/* Same reason as the column above: without this the two frames set a floor the
+   panel beside them cannot argue with. */
+.grid-editor__frame {
+  min-width: 0;
 }
 
 .grid-editor__frame-label {
@@ -2598,6 +2609,9 @@ input[type="file"]::file-selector-button:hover {
   border: 1px solid var(--border);
   border-radius: var(--r);
   background: var(--surface-2);
+  /* The wrapper carries the scaled size inline; cap it so a narrow window
+     crops the frame instead of widening the page. */
+  max-width: 100%;
 }
 
 @media (max-width: 1200px) {
