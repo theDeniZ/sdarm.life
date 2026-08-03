@@ -25,3 +25,10 @@ tests/screenshot/results/
 .claude-backup.tgz
 tests/a11y/results/
 
+# Local scratch that never belongs in the repo.
+# sketches/ holds source photographs and standalone HTML mockups — the images
+# alone run to megabytes, and the ones that ship go to R2 through the admin.
+sketches/
+# .claude/skills/ is per-machine tooling. The commands under .claude/commands/
+# are shared and stay tracked; skills are not.
+.claude/skills/
