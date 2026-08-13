@@ -144,19 +144,7 @@ export default function NewsSection({ newsData }: { newsData?: NewsData }) {
             </div>
 
             {/* 3: Quote — φ² panoramic · click anywhere opens share modal */}
-            <div
-              className="masonry-item ratio-phi-h"
-              onClick={() => setModalOpen(true)}
-              style={{ cursor: 'pointer' }}
-              role="button"
-              tabIndex={0}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  setModalOpen(true);
-                }
-              }}
-            >
+            <div className="masonry-item ratio-phi-h" onClick={() => setModalOpen(true)} style={{ cursor: 'pointer' }}>
               <div className="img-wrap">
                 <div className="nc nc--quote">
                   <div className="nc-bg" />

@@ -9,6 +9,12 @@ export function partLabel(type: string, label: string): string {
   return type.charAt(0).toUpperCase() + type.slice(1);
 }
 
+// Default the projector slide theme to whatever the site theme currently is.
+export function getSiteTheme(): 'dark' | 'light' {
+  if (typeof document === 'undefined') return 'dark';
+  return document.documentElement.getAttribute('data-theme') === 'light' ? 'light' : 'dark';
+}
+
 // Interleaves chorus parts after each verse so the chorus repeats between verses.
 // Chorus parts are removed from their original position and re-inserted after every verse.
 // If there are no chorus parts, returns the original array unchanged.

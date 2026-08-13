@@ -38,7 +38,7 @@ export default async function LocaleLayout({
       <ThemeProvider />
       <NextIntlClientProvider messages={messages}>
         <ConnectedNavbar locale={locale} />
-        {children}
+        <main id="main-content">{children}</main>
       </NextIntlClientProvider>
     </>
   );

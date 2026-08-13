@@ -306,6 +306,9 @@ export default function QuoteShareModal({ open, text, ref_, onClose }: Props) {
       }}
       role="dialog"
       aria-modal="true"
+      aria-label={t('dialogLabel')}
+      aria-hidden={!open}
+      inert={!open || undefined}
     >
       <div className="qsm-panel">
         <button className="qsm-close" onClick={onClose} aria-label={t('close')} />

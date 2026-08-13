@@ -1,3 +1,17 @@
+# Unit Tests
+
+Pure-logic modules (no DOM, no Workers runtime) get plain [Vitest](https://vitest.dev) unit tests colocated with the source file (`foo.ts` → `foo.test.ts`).
+
+| Package | Config | Example |
+|---|---|---|
+| `@sdarm/songbook` | `apps/songbook/vitest.config.mts` (default node environment) | `app/lib/chords.test.ts` |
+| `@sdarm/types` | `packages/types/vitest.config.mts` (default node environment) | `src/psalms.test.ts` |
+| `@sdarm/api` | `apps/api/vitest.config.mts` (`@cloudflare/vitest-pool-workers` — needed for Worker-specific APIs) | `test/index.spec.ts` |
+
+⚠️ **The `@sdarm/api` suite currently does not run.** `vitest run` there fails at config load with `Missing "./config" specifier in "@cloudflare/vitest-pool-workers"` — the installed pool (`0.16.13`) does not satisfy the declared `vitest@~4.1.8`. This predates the Bible feature and affects the pre-existing `test/index.spec.ts` too. Put pure-logic tests in a plain-node package until the pool/vitest versions are realigned.
+
+Run per-app: `pnpm --filter @sdarm/songbook test`. Only add the `@cloudflare/vitest-pool-workers` pool when the code under test touches Worker bindings (D1, KV, R2, `env`) — plain TS/business logic runs faster under the default node environment.
+
 # Screenshot Tests
 
 Visual regression tests using Playwright. Tests run against a mock API so no real Cloudflare infrastructure is needed.
@@ -180,3 +194,43 @@ if (url === '/api/v1/my-endpoint') {
 ## CI
 
 Playwright is not wired into CI yet — tests run manually. Snapshots are committed so the baselines are always available. When CI is added, use `pnpm test:screenshots` without `--update-snapshots` (failures will surface visual regressions).
+
+---
+
+# Accessibility (axe-core) Tests
+
+Automated WCAG 2.1 AA checks using `@axe-core/playwright`. Tests run against the same mock API as the screenshot tests — no real Cloudflare infrastructure needed.
+
+## Running
+
+```bash
+# Run all accessibility tests
+pnpm test:a11y
+```
+
+Config: `playwright.a11y.config.ts`. Results (failures) go to `tests/a11y/results/` (gitignored).
+
+## Test inventory
+
+| Pages tested | App | Port |
+|---|---|---|
+| `/de`, `/en` | `@sdarm/web` | 3000 |
+| `/de/about` | `@sdarm/web` | 3000 |
+| `/de` | `@sdarm/songbook` | 3002 |
+| `/de` | `@sdarm/events` | 3003 |
+| `/de` | `@sdarm/treasures` | 3004 |
+
+All tests load the page, wait for `networkidle`, then run `axe-core` across the full DOM.
+
+## Excluded rules
+
+| Rule | Reason |
+|---|---|
+| `color-contrast` | Checked manually (dark theme `--muted` raised to 4.6:1). axe mis-fires on text over gradients/images — false positives. |
+| `aria-allowed-attr` | Three.js `<canvas>` has no ARIA support; excluded globally. |
+
+`<canvas>` elements are also excluded from the axe scan via `.exclude('canvas')`.
+
+## Adding a test
+
+Add pages to the `PAGES` array in `tests/a11y/a11y.spec.ts`. If the page requires a new mock API route, add it to `tests/screenshot/mock-server/index.ts` (the a11y tests reuse the same mock server).

@@ -8,7 +8,7 @@ import { fetchSongs, fetchSong } from '@/app/lib/api';
 import { highlightMatch } from '@/app/lib/highlight';
 import SongView from './SongView';
 
-const LIMIT = 50;
+const LIMIT = 2000;
 
 interface Props {
   songbook: SongbookDto;
@@ -24,7 +24,6 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
   const locale = useLocale();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [q, setQ] = useState('');
-  const [page, setPage] = useState(1);
   const [items, setItems] = useState<SongListItemDto[]>(initialSongs.items);
   const [total, setTotal] = useState(initialSongs.total);
   const [listLoading, setListLoading] = useState(false);
@@ -42,21 +41,17 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
       setListLoading(true);
-      fetchSongs(slug, { q: q || undefined, limit: LIMIT, offset: (page - 1) * LIMIT }, apiUrl).then(
-        ({ items, total }) => {
-          setItems(items);
-          setTotal(total);
-          setListLoading(false);
-        }
-      );
+      fetchSongs(slug, { q: q || undefined, limit: LIMIT, offset: 0 }, apiUrl).then(({ items, total }) => {
+        setItems(items);
+        setTotal(total);
+        setListLoading(false);
+      });
     }, 200);
-  }, [q, page, slug]);
+  }, [q, slug]);
 
   useEffect(() => {
     activeItemRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [currentSong.id]);
-
-  const pages = Math.ceil(total / LIMIT);
 
   function navigateTo(id: number) {
     if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
@@ -114,7 +109,6 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
                 placeholder={t('searchPlaceholder')}
                 value={q}
                 onChange={(e) => {
-                  setPage(1);
                   setQ(e.target.value);
                 }}
               />
@@ -145,29 +139,15 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
                 );
               })}
             </div>
-
-            {pages > 1 && (
-              <div className="reader-sidebar-pagination">
-                <button disabled={page === 1} onClick={() => setPage((p) => p - 1)}>
-                  ←
-                </button>
-                <span>
-                  {page} / {pages}
-                </span>
-                <button disabled={page >= pages} onClick={() => setPage((p) => p + 1)}>
-                  →
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
-        {/* Main reading area */}
-        <main className="reader-main">
+        {/* Main reading area — outer <main> is in layout.tsx */}
+        <div className="reader-main">
           <div className={`reader-content${songLoading ? ' reader-content--loading' : ''}`}>
             <SongView song={currentSong} />
           </div>
-        </main>
+        </div>
       </div>
     </>
   );

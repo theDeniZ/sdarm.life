@@ -18,7 +18,7 @@ export default async function UnsubscribePage({
   if (!token) {
     return (
       <>
-        <main className="page unsubscribe-page">
+        <main id="main-content" className="page unsubscribe-page">
           <p>{t('invalidLink')}</p>
         </main>
         <ConnectedFooter locale={locale} />
@@ -38,7 +38,9 @@ export default async function UnsubscribePage({
 
   return (
     <>
-      <main className="page unsubscribe-page">{ok ? <p>{t('success')}</p> : <p>{t('error')}</p>}</main>
+      <main id="main-content" className="page unsubscribe-page">
+        {ok ? <p>{t('success')}</p> : <p>{t('error')}</p>}
+      </main>
       <ConnectedFooter locale={locale} />
     </>
   );

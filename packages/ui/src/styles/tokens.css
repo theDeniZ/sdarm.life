@@ -35,7 +35,7 @@
   --gold: #c9a96e;
   --dark: #0c0b09;
   --text: #d6d0c8;
-  --muted: #7a7470;
+  --muted: #9e9891;
   --border: rgba(201, 169, 110, 0.12);
 
   /* Semantic tokens used across components */
@@ -73,7 +73,7 @@
 [data-theme='light'] .site-footer {
   --gold: #c9a96e;
   --text: #d6d0c8;
-  --muted: #7a7470;
+  --muted: #9e9891;
   --border: rgba(201, 169, 110, 0.12);
 }
 

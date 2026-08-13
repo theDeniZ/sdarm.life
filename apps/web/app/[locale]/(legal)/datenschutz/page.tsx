@@ -12,7 +12,7 @@ export default async function DatenschutzPage({ params }: { params: Promise<{ lo
   const t = await getTranslations('web.legal.datenschutz');
 
   return (
-    <main className="page legal-page">
+    <main id="main-content" className="page legal-page">
       <h1>{t('title')}</h1>
 
       <h2>{t('section1Title')}</h2>
@@ -52,6 +52,15 @@ export default async function DatenschutzPage({ params }: { params: Promise<{ lo
       <h2>{t('section6Title')}</h2>
       <p>
         {t('section6Body')} <a href="mailto:info@sdarm.life">info@sdarm.life</a>.
+      </p>
+
+      <h2>{t('section8Title')}</h2>
+      <p>
+        {t('section8Body')}{' '}
+        <a href="https://www.youversion.com/privacy/" target="_blank" rel="noopener noreferrer">
+          {t('section8PrivacyLink')}
+        </a>
+        .
       </p>
 
       <h2>{t('section7Title')}</h2>

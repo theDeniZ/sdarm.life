@@ -286,7 +286,6 @@ a {
   font-size: 0.88rem;
   font-weight: 300;
   color: var(--text);
-  outline: none;
   width: 240px;
   transition: border-color 0.3s;
 }
@@ -407,13 +406,19 @@ a {
   color: #fff;
   line-height: 1.3;
   margin-bottom: 0.5rem;
+  position: relative;
 }
 .song-header__num {
+  position: absolute;
+  left: -3.2rem;
+  width: 1.8rem;
+  text-align: right;
   font-family: 'Lexend', sans-serif;
   font-size: 1em;
   font-weight: 300;
-  color: rgba(201, 169, 110, 0.45);
+  color: rgba(201, 169, 110, 0.7);
   font-style: normal;
+  letter-spacing: 0;
 }
 .song-header__meta {
   font-family: 'Lexend', sans-serif;
@@ -431,10 +436,11 @@ a {
   border: 1px solid var(--border);
   background: transparent;
   padding: 0.45rem 1.1rem;
-  font-family: 'Cormorant Garamond', serif;
+  border-radius: 999px;
+  font-family: 'Lexend', sans-serif;
   font-size: 0.82rem;
   font-weight: 300;
-  letter-spacing: 0.06em;
+  letter-spacing: 0;
   color: var(--text);
   cursor: pointer;
   transition:
@@ -446,10 +452,78 @@ a {
   border-color: rgba(201, 169, 110, 0.3);
   color: #fff;
 }
+[data-theme='light'] .mode-btn:hover {
+  border-color: var(--gold);
+  color: var(--text-strong);
+}
 .mode-btn.active {
   background: var(--gold);
   color: var(--dark);
   border-color: var(--gold);
+}
+
+/* ── TRANSPOSE BAR ── */
+.transpose-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+.transpose-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  padding: 0.3rem 0.7rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s,
+    border-color 0.2s;
+  line-height: 1;
+}
+.transpose-btn:hover {
+  border-color: rgba(201, 169, 110, 0.4);
+  color: var(--gold);
+}
+.transpose-btn--reset {
+  font-size: 1rem;
+  padding: 0.2rem 0.55rem;
+  color: var(--muted);
+}
+.transpose-btn--reset:hover {
+  color: var(--gold);
+}
+.transpose-label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  min-width: 4.5rem;
+  justify-content: center;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 300;
+  color: var(--muted);
+  letter-spacing: 0.03em;
+}
+.transpose-key {
+  font-weight: 500;
+  color: var(--muted);
+}
+.transpose-key--active {
+  color: var(--gold);
+}
+.transpose-arrow {
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+.transpose-offset {
+  color: var(--muted);
+}
+.transpose-offset--active {
+  color: var(--gold);
 }
 
 .song-part {
@@ -502,10 +576,16 @@ a {
 
 /* ── PROJECTOR ── */
 .projector {
+  --proj-bg:     #0c0b09;
+  --proj-text:   #ffffff;
+  --proj-muted:  rgba(255, 255, 255, 0.4);
+  --proj-symbol: rgba(255, 255, 255, 0.10);
+  --proj-chord:  #c9a96e;
+  --proj-bar-bg: rgba(12, 11, 9, 0.85);
   position: fixed;
   inset: 0;
-  background: #0c0b09;
-  color: #fff;
+  background: var(--proj-bg);
+  color: var(--proj-text);
   z-index: 10000;
   display: flex;
   flex-direction: column;
@@ -525,7 +605,7 @@ a {
   font-style: italic;
   font-size: min(80vh, 55vw);
   line-height: 1;
-  color: rgba(255, 255, 255, 0.1);
+  color: var(--proj-symbol);
   pointer-events: none;
   user-select: none;
   white-space: nowrap;
@@ -554,13 +634,22 @@ a {
   flex-shrink: 0;
   position: relative;
   z-index: 1;
+  transition: opacity 0.3s ease;
+}
+
+/* Auto-hide chrome after inactivity (mouse move / tap reveals it again).
+   Opacity only — no layout shift; hidden bars must not catch clicks. */
+.projector--idle .projector__topbar,
+.projector--idle .projector__bottombar {
+  opacity: 0;
+  pointer-events: none;
 }
 .projector__logo {
   font-family: 'Cormorant Garamond', serif;
   font-size: 14px;
   font-weight: 400;
   letter-spacing: 0.06em;
-  color: #fff;
+  color: var(--proj-text);
   opacity: 0.35;
   pointer-events: none;
   line-height: 1;
@@ -577,14 +666,14 @@ a {
   font-style: normal;
   font-size: 18px;
   font-weight: 400;
-  color: rgba(255, 255, 255, 0.5);
+  color: var(--proj-muted);
   line-height: 1.3;
 }
 .projector__close {
   margin-left: auto;
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.4);
+  color: var(--proj-muted);
   font-size: 22px;
   cursor: pointer;
   padding: 6px 10px;
@@ -592,7 +681,7 @@ a {
   line-height: 1;
 }
 .projector__close:hover {
-  color: #fff;
+  color: var(--proj-text);
 }
 .projector__screen-btn {
   font-size: 16px;
@@ -627,7 +716,7 @@ a {
   font-size: 1em;
   font-weight: 500;
   line-height: 1.3;
-  color: #fff;
+  color: var(--proj-text);
   letter-spacing: 0.02em;
   font-optical-sizing: auto;
 }
@@ -654,7 +743,7 @@ a {
   font-family: 'DM Serif Display', serif;
   font-style: italic;
   font-size: 1em;
-  color: #fff;
+  color: var(--proj-text);
   text-align: center;
   padding: 5vh 5vw;
 }
@@ -664,20 +753,20 @@ a {
   justify-content: center;
 }
 .projector__content .chord-token__chord {
-  color: rgba(201, 169, 110, 0.7);
+  color: var(--proj-chord);
   font-size: 0.45em;
   min-height: 16px;
 }
 .projector__content .chord-token__word {
   font-size: 1em;
-  color: #fff;
+  color: var(--proj-text);
 }
 .projector__content .chord-token {
   white-space: pre;
 }
 .projector__content .chord-token__word--plain {
   font-size: 1em;
-  color: #fff;
+  color: var(--proj-text);
   line-height: 1.6;
   display: block;
 }
@@ -694,6 +783,8 @@ a {
   position: relative;
   z-index: 1;
   gap: 12px;
+  background-color: var(--proj-bar-bg);
+  transition: opacity 0.3s ease;
 }
 .projector__nav {
   grid-column: 2;
@@ -731,7 +822,7 @@ a {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.82rem;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.3);
+  color: var(--proj-muted);
   min-width: 60px;
   text-align: center;
 }
@@ -764,6 +855,15 @@ a {
 .projector__ctrl-btn:hover {
   background: rgba(201, 169, 110, 0.1);
   border-color: var(--gold);
+}
+
+.projector[data-slide-theme='light'] {
+  --proj-bg:     #ffffff;
+  --proj-text:   #1a1a1a;
+  --proj-muted:  rgba(0, 0, 0, 0.45);
+  --proj-symbol: rgba(0, 0, 0, 0.06);
+  --proj-chord:  #8a6a2a;
+  --proj-bar-bg: rgba(255, 255, 255, 0.90);
 }
 
 /* ── PRESENTER VIEW ── */
@@ -971,6 +1071,19 @@ a {
   font-size: 0.78rem;
   color: rgba(255, 255, 255, 0.18);
   font-style: italic;
+}
+
+.pres-slide[data-slide-theme='light'] {
+  background: #ffffff;
+  color: #1a1a1a;
+}
+.pres-slide[data-slide-theme='light'] .pres-slide__bg {
+  color: rgba(0, 0, 0, 0.06);
+}
+.pres-slide[data-slide-theme='light'] .pres-slide__title,
+.pres-slide[data-slide-theme='light'] .chord-token__word,
+.pres-slide[data-slide-theme='light'] .chord-token__word--plain {
+  color: #1a1a1a;
 }
 
 /* Background symbol inside preview */
@@ -1360,7 +1473,6 @@ a {
 
 .reader-sidebar-book {
   padding: 1.4rem 1.6rem 1.2rem;
-  border-bottom: 1px solid rgba(201, 169, 110, 0.08);
   flex-shrink: 0;
 }
 .reader-sidebar-eyebrow {
@@ -1390,26 +1502,25 @@ a {
 
 .reader-sidebar-search {
   padding: 0.9rem 1.2rem;
-  border-bottom: 1px solid rgba(201, 169, 110, 0.08);
   flex-shrink: 0;
 }
 .reader-sidebar-search-input {
   width: 100%;
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(201, 169, 110, 0.15);
-  padding: 0.45rem 0.75rem;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.18);
+  padding: 0.45rem 0.1rem;
   font-family: 'Lexend', sans-serif;
   font-size: 0.82rem;
   font-weight: 300;
   color: var(--text);
-  outline: none;
   transition: border-color 0.25s;
 }
 .reader-sidebar-search-input::placeholder {
   color: rgba(122, 116, 112, 0.6);
 }
 .reader-sidebar-search-input:focus {
-  border-color: rgba(201, 169, 110, 0.4);
+  border-bottom-color: rgba(201, 169, 110, 0.5);
 }
 
 .reader-sidebar-toc-label {
@@ -1546,7 +1657,7 @@ a {
 .reader-content {
   max-width: 700px;
   width: 100%;
-  padding: 3.5rem 2.5rem 5rem;
+  padding: 3.5rem 2.5rem 5rem 3.5rem; /* extra left for hanging numbers */
 }
 /* Override song-view max-width in reader context */
 .reader-content .song-view {
@@ -1609,6 +1720,12 @@ a {
     padding: 2.5rem 1.2rem 3rem;
     text-align: center;
   }
+  /* not enough left margin for hanging numbers on mobile */
+  .song-header__num {
+    position: static;
+    display: inline;
+    margin-right: 0.4rem;
+  }
   .reader-content .song-part__lyrics {
     text-align: center;
   }
@@ -1657,6 +1774,34 @@ a {
   }
 }
 
+/* ── VERSE NUMBER INLINE ── */
+.song-part--verse {
+  position: relative;
+  /* no padding — lyrics align with title and mode-bar */
+}
+.song-part--verse .song-part__label {
+  position: absolute;
+  /* hang into the 3.5rem left padding; right edge aligns with song-header__num */
+  left: -3.0rem;
+  width: 1.6rem;
+  /* optically centre the number with the first lyric line */
+  top: calc((1.15rem * 1.7 - 0.72rem * 1.4) / 2);
+  text-align: right;
+  margin-bottom: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  opacity: 0.6;
+}
+/* on mobile the layout is centred — hide hanging numbers */
+@media (max-width: 700px) {
+  .song-part--verse .song-part__label {
+    display: none;
+  }
+}
+
 /* ═══ LIGHT THEME ═══ */
 
 /* Top nav */
@@ -1670,31 +1815,71 @@ a {
 [data-theme='light'] .top-nav__link.active { color: var(--gold); }
 
 /* Songbook landing */
-[data-theme='light'] .songbook-landing { background: var(--dark); }
 [data-theme='light'] .songbook-landing-card { background: var(--bg-card); }
 [data-theme='light'] .songbook-landing-card__name { color: var(--text-strong); }
 [data-theme='light'] .songbook-landing-card__subtitle { color: var(--muted); }
-[data-theme='light'] .book-visual { background: #c4a870; }
 
 /* Song list */
-[data-theme='light'] .song-list-wrap { background: var(--dark); }
 [data-theme='light'] .song-list-header h1 { color: var(--text-strong); }
 [data-theme='light'] .song-row { border-bottom-color: rgba(146, 114, 35, 0.32); }
 [data-theme='light'] .song-row:hover { background: var(--bg-card); }
-[data-theme='light'] .song-row__number { color: var(--gold); }
+[data-theme='light'] .song-row__num { color: var(--gold); }
 [data-theme='light'] .song-row__title { color: var(--text-strong); }
 [data-theme='light'] .song-row__author { color: var(--muted); }
 
 /* Song detail */
-[data-theme='light'] .song-page { background: var(--dark); }
-[data-theme='light'] .song-header { background: var(--bg-section); }
 [data-theme='light'] .song-header__title { color: var(--text-strong); }
 [data-theme='light'] .song-header__meta { color: var(--muted); }
 [data-theme='light'] .back-link { color: var(--muted); }
 [data-theme='light'] .back-link:hover { color: var(--text-strong); }
-[data-theme='light'] .part-block { border-bottom-color: var(--border); }
-[data-theme='light'] .part-label { color: var(--muted); }
-[data-theme='light'] .lyrics-line { color: var(--text); }
+[data-theme='light'] .song-part { border-bottom-color: var(--border); }
+[data-theme='light'] .song-part__label { color: var(--gold); }
+[data-theme='light'] .song-part__lyrics { color: var(--text); }
+
+/* Reader toolbar */
+[data-theme='light'] .reader-toolbar-bar {
+  background: var(--bg-section);
+  border-bottom-color: rgba(146, 114, 35, 0.08);
+}
+[data-theme='light'] .reader-breadcrumb__link { color: var(--muted); }
+[data-theme='light'] .reader-icon-btn { color: var(--muted); }
+[data-theme='light'] .reader-icon-btn:hover {
+  background: rgba(146, 114, 35, 0.08);
+  color: var(--text);
+}
+[data-theme='light'] .reader-icon-btn.active { color: var(--gold); }
+
+/* Reader sidebar */
+[data-theme='light'] .reader-sidebar {
+  background: var(--bg-section);
+  border-right-color: rgba(146, 114, 35, 0.08);
+}
+[data-theme='light'] .reader-sidebar-eyebrow { color: rgba(146, 114, 35, 0.6); }
+[data-theme='light'] .reader-sidebar-title { color: var(--text-strong); }
+[data-theme='light'] .reader-sidebar-desc { color: var(--muted); }
+[data-theme='light'] .reader-sidebar-search-input {
+  border-bottom-color: rgba(146, 114, 35, 0.2);
+  color: var(--text);
+}
+[data-theme='light'] .reader-sidebar-search-input::placeholder { color: var(--muted); }
+[data-theme='light'] .reader-sidebar-toc-label { color: rgba(146, 114, 35, 0.5); }
+[data-theme='light'] .reader-toc-item { color: rgba(28, 28, 34, 0.65); }
+[data-theme='light'] .reader-toc-item:hover {
+  color: var(--text);
+  background: rgba(146, 114, 35, 0.06);
+}
+[data-theme='light'] .reader-toc-item.active {
+  color: var(--text-strong);
+  background: rgba(146, 114, 35, 0.1);
+}
+[data-theme='light'] .reader-toc-num { color: rgba(146, 114, 35, 0.5); }
+[data-theme='light'] .reader-toc-item:hover .reader-toc-num { color: rgba(146, 114, 35, 0.75); }
+[data-theme='light'] .reader-toc-item.active .reader-toc-num { color: var(--gold); }
+[data-theme='light'] .reader-sidebar-pagination { border-top-color: var(--border); }
+[data-theme='light'] .reader-sidebar-pagination button {
+  border-color: rgba(146, 114, 35, 0.25);
+  color: var(--gold);
+}
 
 /* Reader toolbar and sidebar */
 [data-theme='light'] .reader-toolbar-bar {
@@ -1714,8 +1899,13 @@ a {
   border-color: rgba(0, 0, 0, 0.3);
 }
 
-/* Projector — keep dark always */
-[data-theme='light'] .projector { background: #0c0b09; color: #d6d0c8; }
+/* Projector — keep dark by default, but let the slide-theme toggle override it */
+[data-theme='light'] .projector:not([data-slide-theme='light']) {
+  --proj-bg: #0c0b09;
+  --proj-text: #d6d0c8;
+  background: var(--proj-bg);
+  color: var(--proj-text);
+}
 
 /* Sheet display */
 [data-theme='light'] .sheet-display { background: var(--bg-section); }
@@ -1751,4 +1941,26 @@ a {
   color: #5a3d00;
   background: rgba(255, 226, 125, 0.35);
   border-color: rgba(146, 114, 35, 0.4);
+}
+
+/* ── REDUCED MOTION ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .presenter__connecting-dots span {
+    animation: none;
+    opacity: 1;
+  }
+  .reader-content--loading {
+    animation: none;
+    opacity: 0.5;
+  }
+  .reader-sidebar {
+    transition: none;
+  }
 }

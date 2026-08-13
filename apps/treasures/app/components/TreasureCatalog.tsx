@@ -1,7 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { useTranslations } from 'next-intl';
+import Link from 'next/link';
+import { useLocale, useTranslations } from 'next-intl';
 import { PageHero } from '@sdarm/ui';
 import type { Treasure, TreasureType } from '../lib/api';
 import TreasuresFilterBar, { type CategoryFilter, type Language } from './TreasuresFilterBar';
@@ -45,6 +46,7 @@ export default function TreasureCatalog({
   r2Url?: string;
 }) {
   const tBr = useTranslations('treasures.bookRequest');
+  const locale = useLocale();
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [lang, setLang] = useState<Language>('all');
   const [modalOpen, setModalOpen] = useState(false);
@@ -147,20 +149,36 @@ export default function TreasureCatalog({
           title={tBr('bannerTitle')}
           centered
           cta={
-            <button className="br-hero-cta" onClick={() => setModalOpen(true)}>
-              {tBr('cta')}
-              <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                <polyline
-                  points="3,1 8,1 8,6"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.4"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+            <div className="br-hero-ctas">
+              <button className="br-hero-cta" onClick={() => setModalOpen(true)}>
+                {tBr('cta')}
+                <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <polyline
+                    points="3,1 8,1 8,6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </button>
+              <Link href={`/${locale}/bible`} className="br-hero-cta br-hero-cta--ghost">
+                {tBr('bibleCta')}
+                <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  <polyline
+                    points="3,1 8,1 8,6"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.4"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </Link>
+            </div>
           }
         />
       </div>

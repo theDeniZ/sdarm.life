@@ -87,6 +87,18 @@ export default function Navbar({
     setMenuOpen(false);
   }, [pathname]);
 
+  // Close the mobile menu when the viewport grows to desktop — the burger that
+  // would close it is hidden there, so a menu left open would otherwise stay
+  // stuck open (aria-expanded, scroll-lock, inert) behind the desktop nav.
+  useEffect(() => {
+    const mq = window.matchMedia('(min-width: 768px)');
+    const onChange = () => {
+      if (mq.matches) setMenuOpen(false);
+    };
+    mq.addEventListener('change', onChange);
+    return () => mq.removeEventListener('change', onChange);
+  }, []);
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setMenuOpen(false);
@@ -112,7 +124,12 @@ export default function Navbar({
 
   return (
     <>
-      <nav className={`${scrolled ? 'scrolled' : ''}${overDark ? ' over-dark' : ''}`.trim()}>
+      <a href="#main-content" className="skip-link">
+        {t('skipToContent')}
+      </a>
+      {/* Stable .site-nav class scopes navbar.css — a bare `nav` element selector
+          would also style other <nav> landmarks (e.g. the footer nav). */}
+      <nav aria-label={t('primaryNavAria')} className={`site-nav${scrolled ? ' scrolled' : ''}${overDark ? ' over-dark' : ''}`}>
         <Link href={withTheme(webUrl, theme)} className="nav-logo">
           SDARM<span>.life</span>
         </Link>
@@ -163,8 +180,8 @@ export default function Navbar({
         </div>
       </nav>
 
-      {/* Mobile overlay */}
-      <div className={`nav-mobile${menuOpen ? ' nav-mobile--open' : ''}`} aria-hidden={!menuOpen}>
+      {/* Mobile overlay — inert when closed so hidden links are not tabbable (WCAG 4.1.2) */}
+      <div className={`nav-mobile${menuOpen ? ' nav-mobile--open' : ''}`} aria-hidden={!menuOpen} inert={!menuOpen || undefined}>
         <div className="nav-mobile__links">
           {navLinks.map(({ label, href }) => (
             <Link

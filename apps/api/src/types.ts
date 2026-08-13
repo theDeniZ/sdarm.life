@@ -6,4 +6,6 @@ export type Bindings = {
 	RESEND_API_KEY: string;
 	CF_ZONE_ID?: string;
 	CF_PURGE_TOKEN?: string;
+	YOUVERSION_API_KEY?: string;
+	YOUVERSION_DEVELOPER_ID?: string;
 };

@@ -4,8 +4,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import type { SongDto, SongPartDto } from '@sdarm/types';
-import { expandParts } from '@/app/lib/format';
+import { expandParts, getSiteTheme } from '@/app/lib/format';
 import ChordLine from './ChordLine';
+import { amenLabel, chorusLabel } from './slide-labels';
 
 interface Props {
   song: SongDto;
@@ -17,11 +18,11 @@ interface SlideViewProps {
   index: number;
   parts: SongPartDto[];
   verseNumbers: (number | null)[];
-  partT: (key: string) => string;
   variant: 'current' | 'next';
+  slideTheme: 'dark' | 'light';
 }
 
-function SlideView({ song, index, parts, verseNumbers, partT, variant }: SlideViewProps) {
+function SlideView({ song, index, parts, verseNumbers, variant, slideTheme }: SlideViewProps) {
   const total = parts.length + 2;
   const isTitleSlide = index === 0;
   const isAmenSlide = index === total - 1;
@@ -31,15 +32,15 @@ function SlideView({ song, index, parts, verseNumbers, partT, variant }: SlideVi
 
   const bgSymbol = (() => {
     if (isTitleSlide) return String(song.number);
-    if (isAmenSlide) return 'Amen';
+    if (isAmenSlide) return amenLabel(song.songbook.language);
     const partIndex = index - 1;
-    if (part?.type === 'chorus') return partT('chorus').slice(0, 3);
+    if (part?.type === 'chorus') return chorusLabel(song.songbook.language);
     const vn = verseNumbers[partIndex];
     return vn !== null ? String(vn) : null;
   })();
 
   return (
-    <div className={`pres-slide pres-slide--${variant}`}>
+    <div className={`pres-slide pres-slide--${variant}`} data-slide-theme={slideTheme}>
       {bgSymbol && (
         <div
           className={`pres-slide__bg${isTitleSlide || isAmenSlide ? ' pres-slide__bg--center' : ''}${part?.type === 'chorus' ? ' pres-slide__bg--word pres-slide__bg--ref' : ''}${isAmenSlide ? ' pres-slide__bg--word' : ''}`}
@@ -71,6 +72,7 @@ export default function PresenterDashboard({ song, onClose }: Props) {
 
   const [index, setIndex] = useState(0);
   const [fontScale, setFontScale] = useState(1);
+  const [slideTheme, setSlideTheme] = useState<'dark' | 'light'>(getSiteTheme);
   const [mounted, setMounted] = useState(false);
   const [connected, setConnected] = useState(false);
 
@@ -82,17 +84,22 @@ export default function PresenterDashboard({ song, onClose }: Props) {
   // Refs so the channel message handler always sees the latest values
   const indexRef = useRef(0);
   const fontScaleRef = useRef(1);
+  const slideThemeRef = useRef<'dark' | 'light'>('dark');
   useEffect(() => {
     indexRef.current = index;
   }, [index]);
   useEffect(() => {
     fontScaleRef.current = fontScale;
   }, [fontScale]);
+  useEffect(() => {
+    slideThemeRef.current = slideTheme;
+  }, [slideTheme]);
 
   // BroadcastChannel — keep in sync with the display window
   const channelRef = useRef<BroadcastChannel | null>(null);
   const isSlideRemote = useRef(false);
   const isFontRemote = useRef(false);
+  const isSlideThemeRemote = useRef(false);
 
   useEffect(() => {
     const BC = (globalThis as { BroadcastChannel?: typeof BroadcastChannel }).BroadcastChannel;
@@ -104,12 +111,16 @@ export default function PresenterDashboard({ song, onClose }: Props) {
         setConnected(true);
         ch.postMessage({ type: 'slide', index: indexRef.current });
         ch.postMessage({ type: 'fontScale', value: fontScaleRef.current });
+        ch.postMessage({ type: 'slideTheme', value: slideThemeRef.current });
       } else if (e.data.type === 'slide') {
         isSlideRemote.current = true;
         setIndex(e.data.index);
       } else if (e.data.type === 'fontScale') {
         isFontRemote.current = true;
         setFontScale(e.data.value);
+      } else if (e.data.type === 'slideTheme') {
+        isSlideThemeRemote.current = true;
+        setSlideTheme(e.data.value);
       }
     };
     channelRef.current = ch;
@@ -131,6 +142,21 @@ export default function PresenterDashboard({ song, onClose }: Props) {
     }
     channelRef.current?.postMessage({ type: 'fontScale', value: fontScale });
   }, [fontScale]);
+
+  const slideThemeMounted = useRef(false);
+  useEffect(() => {
+    // Skip the mount broadcast — the display window's 'ready' handler pushes
+    // the presenter's current theme; announcing the default here would race it.
+    if (!slideThemeMounted.current) {
+      slideThemeMounted.current = true;
+      return;
+    }
+    if (isSlideThemeRemote.current) {
+      isSlideThemeRemote.current = false;
+      return;
+    }
+    channelRef.current?.postMessage({ type: 'slideTheme', value: slideTheme });
+  }, [slideTheme]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -200,6 +226,14 @@ export default function PresenterDashboard({ song, onClose }: Props) {
           </button>
           <div className="presenter__header-divider" />
           <button
+            className="presenter__ctrl-btn presenter__ctrl-btn--icon"
+            onClick={() => setSlideTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}
+            title={slideTheme === 'dark' ? t('lightMode') : t('darkMode')}
+          >
+            {slideTheme === 'dark' ? '☀' : '☾'}
+          </button>
+          <div className="presenter__header-divider" />
+          <button
             className="presenter__ctrl-btn"
             onClick={() => setFontScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}
             title={t('decreaseFont')}
@@ -230,8 +264,8 @@ export default function PresenterDashboard({ song, onClose }: Props) {
             index={index}
             parts={parts}
             verseNumbers={verseNumbers}
-            partT={partT}
             variant="current"
+            slideTheme={slideTheme}
           />
           <div className="presenter__slide-meta">{slideLabel}</div>
         </div>
@@ -245,11 +279,11 @@ export default function PresenterDashboard({ song, onClose }: Props) {
               index={nextIndex}
               parts={parts}
               verseNumbers={verseNumbers}
-              partT={partT}
               variant="next"
+              slideTheme={slideTheme}
             />
           ) : (
-            <div className="pres-slide pres-slide--next pres-slide--end">
+            <div className="pres-slide pres-slide--next pres-slide--end" data-slide-theme={slideTheme}>
               <span>{t('endOfSong')}</span>
             </div>
           )}

@@ -115,14 +115,14 @@ export interface SongDto {
   title: string;
   author: string | null;
   copyright: string | null;
-  songbook: { id: number; title: string; slug: string };
+  songbook: { id: number; title: string; slug: string; language: string };
   parts: SongPartDto[];
   sheets: SongSheetDto[];
   createdAt: string;
   updatedAt: string;
 }
 
-export type TreasureType = 'book';  // extensible — new types added here
+export type TreasureType = 'book';
 
 export interface TreasureDto {
   id: number;
@@ -142,6 +142,10 @@ export interface TreasureDto {
   updatedAt: string;
 }
 ```
+
+`@sdarm/types` also exports the Bible DTOs (`BibleTranslationDto`, `BibleBookDto`, `BibleChapterDto`, `ParallelChapterDto`, …) and the shared Psalm-numbering helpers (`src/psalms.ts` — LXX ↔ Hebrew chapter mapping used by both the API service layer and the parallel reader UI).
+
+**Bible content has no repository** — it is not in D1. `services/bible/` fetches from YouVersion and caches in KV; the only persisted state is the `bible_translations` config key. Repositories are for D1 tables only; anything that proxies an external API belongs in `services/`.
 
 `apps/web` and `apps/admin` import from `@sdarm/types`. `apps/api` uses the same interfaces to type `c.json()` responses — enforcing the contract at the source.
 
@@ -241,24 +245,38 @@ apps/api/src/
     images.ts          — GET /images/* (local dev proxy)
     subscribers.ts     — POST /subscribe, GET /unsubscribe
     treasures.ts       — GET /treasures, GET /treasures/:id
+    bible.ts           — GET /bible/translations[/:code[/books[/:bookCode[/chapters/:n]]]], GET /bible/parallel
     admin/
       posts.ts         — CRUD /admin/posts
       config.ts        — PUT /admin/config/:key
       images.ts        — GET|DELETE|POST /admin/images
       subscribers.ts   — GET|DELETE /admin/subscribers
       treasures.ts     — GET|POST|POST batch|PATCH|DELETE /admin/treasures
+      bible.ts         — GET /admin/bible/catalog (YouVersion browse for the allowlist picker)
   repositories/
     posts.ts           — all DB queries for the posts table
     config.ts          — all DB queries for site_config
     images.ts          — all DB queries for the images table
     subscribers.ts     — all DB queries for the subscribers table
     treasures.ts       — all DB queries for the treasures table
+  services/
+    bible/
+      youversion.ts    — YouVersion Platform API client (server-side only)
+      cache.ts         — KV read-through cache + TTLs for Bible payloads
+      catalog.ts       — resolves the KV-configured enabled Bible IDs into translations/books/chapters
   middleware/
     auth.ts            — CF Access header verification middleware
+  og/
+    card.ts            — OG social-card HTML for Satori (workers-og)
+    fonts/*.ttf        — self-hosted Lexend (Latin) + Noto Sans (Cyrillic subset), bundled via the wrangler `Data` rule
   schemas.ts           — shared Zod schemas (PostSchema, ImageSchema, etc.) — source of truth for OpenAPI spec
   types.ts             — Bindings type, shared request body shapes
   index.ts             — CORS, route mounting, OpenAPI spec + Swagger UI, export default app
 ```
+
+**Binary/OG responders bypass zod-openapi.** `routes/og.ts` (and the local-dev R2 proxy) return image bytes, not a JSON contract, so they mount as plain Hono routes excluded from the OpenAPI spec. `.ttf` fonts are imported as `ArrayBuffer`s — enabled by the `rules: [{ type: "Data", globs: ["**/*.ttf"] }]` entry in `wrangler.jsonc`.
+
+**`services/` vs `repositories/`.** A repository owns queries against a D1 table and takes a `db` as its first argument. A service wraps an external system (currently only YouVersion) and takes `env` so it can reach bindings such as KV. Route handlers call one or the other; they never contain raw Drizzle queries or raw `fetch` to third parties.
 
 **Repository pattern for Workers.** Repositories are plain modules exporting functions that take a `db` (Drizzle instance) as their first argument. No classes, no constructors — Workers have no persistent state between requests.
 

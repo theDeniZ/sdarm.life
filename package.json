@@ -1,6 +1,6 @@
 {
   "name": "sdarm.life",
-  "version": "1.0.1",
+  "version": "1.1.0-rc.2",
   "description": "",
   "private": true,
   "main": "index.js",
@@ -27,9 +27,11 @@
     "lint:fix": "turbo lint -- --fix",
     "test:screenshots": "playwright test",
     "test:screenshots:update": "playwright test --update-snapshots",
-    "test:screenshots:install": "playwright install chromium"
+    "test:screenshots:install": "playwright install chromium",
+    "test:a11y": "playwright test --config=playwright.a11y.config.ts"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.10.1",
     "@playwright/test": "^1.60.0",
     "@semantic-release/changelog": "^6.0.3",
     "@semantic-release/git": "^10.0.1",

@@ -21,11 +21,18 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/songbooks/:slug` | Songbook metadata + `songCount`. 404 if not found. |
 | `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number, title, and `song_parts.lyrics`. `?limit=N&offset=N`. Returns `{ items, total }`. When `?q=` is set, each item includes `matchType: 'title' \| 'number' \| 'lyrics'` indicating which field caused the match (used by the songbook UI to highlight title hits with `<mark>` and label lyrics-only hits with a small pill). |
 | `GET` | `/api/v1/songs/search` | Global search across all songbooks. `?q=` (required, max 100 chars), `?limit=N&offset=N`. Returns `{ items, total }` of `SongSearchResultDto` (id, number, title, author, songbook). |
-| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays. 404 if not found. |
+| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays; `songbook` includes `language` (drives the projector's chorus/Amen slide labels). 404 if not found. |
 | `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |
+| `GET` | `/api/v1/bible/translations` | Translations the operator enabled in Admin → Bible, in the configured order. Empty array when none are configured. |
+| `GET` | `/api/v1/bible/translations/:code` | Translation metadata. `:code` is the slug (`delut`, `nrt`) or the raw YouVersion ID. 404 if unknown or not enabled. |
+| `GET` | `/api/v1/bible/translations/:code/books` | Books in canonical order with localized names and chapter counts. 404 if unknown/not enabled. |
+| `GET` | `/api/v1/bible/translations/:code/books/:bookCode` | Single book metadata (USFM code, e.g. `JHN`). 404 if not found. |
+| `GET` | `/api/v1/bible/translations/:code/books/:bookCode/chapters/:n` | Chapter with all verses. 404 if translation/book/chapter not found. |
+| `GET` | `/api/v1/bible/parallel` | `?a=&b=&book=&chapter=` — two translations side-by-side, aligned by verse number. Psalm chapters are remapped between LXX and Hebrew numbering (see below). 400 if `a === b`, 404 if anything is missing. |
 | `POST` | `/api/v1/book-request` | Submit a free-book delivery request. Body: `{ name, email, phone?, land (DE/AT/CH), street, plz, city, books[] (min 1), wish?, language? }`. Sends a formatted email to `info@sdarm.life` via Resend (background, non-blocking). Rate-limited: 2 requests per IP per minute. Returns `{ ok: true }` (201). |
 | `GET` | `/api/v1/geocode` | Geocode proxy. `?q=` (1–100 chars, required), `?limit=N` (1–10, default 3). Forwards to Nominatim with the project User-Agent and caches the upstream JSON in KV for 30 days. Hides the user's IP from OpenStreetMap (DSGVO). Response: `X-Cache: HIT|MISS`; upstream errors return `[]` to keep the autocomplete resilient. |
+| `GET` | `/api/v1/og` | Generated OpenGraph social card (1200×630 PNG). `?type=post\|song\|treasure`, `?slug=` (post) or `?id=` (song/treasure), `?locale=de\|en`, optional `?v=` (content `updatedAt`, makes the URL self-busting). Rendered with `workers-og` (Satori + resvg-wasm), self-hosted Lexend + Noto-Sans-Cyrillic fonts (DSGVO-clean, no external fetch). KV-cached 24 h (`X-Cache: HIT\|MISS`) + `Cache-Control: public, max-age=3600`. Cover fetched from the R2 binding and embedded. Binary responder — excluded from the OpenAPI spec, like the local-dev R2 proxy. 400 on missing/invalid params, 404 if the content doesn't exist. |
 
 ## Admin routes
 
@@ -65,11 +72,43 @@ Require `Authorization: Bearer <key>` on every request.
 | `POST` | `/api/v1/admin/api-keys` | Create key. Body: `{ name }`. Returns `{ key, apiKey }` — plaintext shown once. |
 | `DELETE` | `/api/v1/admin/api-keys/:id` | Revoke key — removes from KV, marks revoked in index. |
 | `POST` | `/api/v1/admin/email/send` | Send a single email. Body: `{ to, subject, html }`. Uses Resend. |
+| `GET` | `/api/v1/admin/bible/catalog` | One page of the YouVersion catalog for the Admin → Bible picker. `?language=deu\|eng\|rus\|…\|all`, `?pageToken=`, `?allAvailable=true` (include Bibles our key holds no license for, flagged `licensed: false`). Returns `{ items, total, nextPageToken }`. 503 when `YOUVERSION_API_KEY` is unset or YouVersion is unreachable. |
+| `GET` | `/api/v1/admin/bible/licenses` | Licenses available to the app key, each with the Bible IDs it governs. `?bibleId=N` narrows to the one covering that Bible. Reference data only — **acceptance state is deliberately not exposed** (see below). 503 when unset/unreachable. |
 | `POST` | `/api/v1/admin/email/broadcast` | Bulk-send the updates email template to subscribers. Body: `{ subject, posts: [{ title, excerpt?, href }], locale? }`. `locale` omitted = send to all subscribers in their preferred language; `'de'`/`'en'` = filter to that language only. Sends via Resend batch API (100 per chunk). Returns `{ sent: N }`. |
 
 **Image usage** — `GET /admin/images` cross-references `posts` (`cover_key`, `thumb_key`) and `site_config` to compute `usedIn` per image. Each item: `{ key, size, uploaded, usedIn: { type, label }[] }`. `?unused=1` filters to images not referenced in either table.
 
 **CORS origins:** `https://sdarm.life`, `https://admin.sdarm.life`, `http://localhost:3000`, `http://localhost:3001`
+
+## Bible content
+
+Bible text comes from the **YouVersion Platform API** (`api.youversion.com/v1`), proxied entirely server-side by `apps/api/src/services/bible/`. **Nothing is stored in D1.**
+
+| Layer | What it holds |
+|---|---|
+| KV config key `bible_translations` | JSON array of enabled YouVersion Bible IDs — the only persisted state |
+| KV `bible:*` | Cached YouVersion responses: catalog 1 d, Bible metadata 1 d, books 7 d, chapters 30 d |
+| Edge cache | books / chapters / parallel for 1 day, applied **per route** via `cached()` — the translation endpoints are deliberately uncached |
+
+**Service layer** (`apps/api/src/services/bible/`):
+
+- `youversion.ts` — the HTTP client. Auth header is `X-YVP-App-Key`; `page_size` must be **< 100** (the API rejects 100). Chapters are requested with `format=html` because `format=text` drops verse boundaries, then parsed on the `<span class="yv-v" v="N">` markers.
+- `cache.ts` — KV read-through helpers and TTLs. Failures are silent and never break a request.
+- `catalog.ts` — resolves the enabled-ID list into translations, books and chapters.
+
+**Translation identity.** A translation's URL slug is its Latin `abbreviation`, lowercased (`delut`, `nrt`). The localized abbreviation is used for *display* only — it can be non-Latin (`НРП`) and would sanitise to nothing. Routes also accept the raw numeric YouVersion ID, so links survive an abbreviation change upstream.
+
+**Psalm numbering** is detected, not hardcoded: Psalm 119 is the 176-verse acrostic under Hebrew numbering but sits at 118 under the Septuagint, so `detectLxxPsalms()` reads the verse count of PSA.118 from the books payload. The resulting `lxxPsalms` flag drives the chapter remap in parallel mode (verified against DELUT/ASV/NIV vs NRT/CARS).
+
+**License acceptance is not observable.** `GET /v1/licenses` returns `agreed_dt` and `yvp_user_id` on every row, but under app-key auth **both are always `null`** — even when every license has been accepted in the YouVersion developer dashboard (verified live 2026-07-25: all 9 available licenses reported `agreed_dt: null` while their Bibles fetched fine). They are user-scoped fields that only a "Sign in with YouVersion" token would populate, and that flow is forbidden by [dsgvo.md](dsgvo.md). Never derive an "accepted" badge from them.
+
+The signal that *does* work is the default `/v1/bibles` listing: it returns only Bibles the key may read. That is what `listLicensedIds()` crawls and what the catalog's `licensed` flag reports. A Bible absent from it returns **403** on a passage fetch, versus 404 for one that does not exist at all.
+
+**Failure behaviour.** With no D1 fallback, an unreachable YouVersion or missing key yields 404 (public) / 503 (admin catalog), and the reader renders its `BibleUnavailable` state. When no translations are enabled, `/bible/translations` returns an empty list and the landing page says so.
+
+**Enabling a translation** writes `bible_translations` through the ordinary `PUT /admin/config/:key` route. That route does **not** purge anything — it does not need to for the translation endpoints, which are uncached at the edge precisely so an allowlist change shows up immediately.
+
+⚠️ **Disabling a translation is not immediate.** Books/chapters/parallel URLs already at the edge keep serving that translation's text for up to 24 h, and `apps/treasures` holds its own Next Data Cache window on top. `PUT /admin/config/:key` cannot enumerate those URLs to purge them. If a translation must come down *now* (a licensing complaint, say), purge the Cloudflare cache for `api.sdarm.life/api/v1/bible/*` manually — removing it from the allowlist alone is not enough.
 
 ## Rate limiting
 

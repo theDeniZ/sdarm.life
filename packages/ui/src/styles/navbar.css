@@ -1,5 +1,32 @@
+/* ── Skip navigation link (visually hidden until focused) ── */
+/* Hidden via transform (relative to the element's own height) rather than
+   top:-100% (relative to the containing block) so it stays off-screen no
+   matter what ancestor wraps the Navbar. Revealed only on keyboard focus. */
+.skip-link {
+  position: fixed;
+  top: 0;
+  left: 50%;
+  /* Centered so the focused banner never covers the logo (top-left). */
+  transform: translate(-50%, -150%);
+  padding: 0.5rem 1rem;
+  background: var(--gold);
+  color: var(--dark);
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.86rem;
+  font-weight: 600;
+  border-radius: 0 0 4px 4px;
+  z-index: 9999;
+  transition: transform 0.1s;
+  text-decoration: none;
+}
+.skip-link:focus {
+  transform: translate(-50%, 0);
+  outline: 2px solid var(--dark);
+  outline-offset: 2px;
+}
+
 /* ═══ NAV ═══ */
-nav {
+nav.site-nav {
   position: fixed;
   top: 0;
   left: 0;
@@ -18,7 +45,7 @@ nav {
     background 0.8s ease,
     backdrop-filter 0.8s ease;
 }
-nav.scrolled {
+nav.site-nav.scrolled {
   background: var(--nav-bg-scrolled);
   backdrop-filter: blur(20px);
 }
@@ -201,6 +228,14 @@ nav.scrolled {
   pointer-events: auto;
   transform: translateY(0);
 }
+/* The overlay is a mobile-only affordance (the burger that toggles it is
+   hidden ≥768px). Force it gone on desktop so a menu left open while
+   resizing up can never render on top of the desktop nav. */
+@media (min-width: 768px) {
+  .nav-mobile {
+    display: none;
+  }
+}
 .nav-mobile__links {
   display: flex;
   flex-direction: column;
@@ -237,7 +272,7 @@ nav.scrolled {
 
 /* Small desktop / large tablet landscape */
 @media (max-width: 1199px) {
-  nav {
+  nav.site-nav {
     padding: 1.2rem 2rem;
     padding-left: max(2rem, env(safe-area-inset-left));
     padding-right: max(2rem, env(safe-area-inset-right));
@@ -253,7 +288,7 @@ nav.scrolled {
 
 /* Tablet portrait — last viable point for inline nav */
 @media (max-width: 1023px) {
-  nav {
+  nav.site-nav {
     padding: 1.05rem 1.6rem;
     gap: 1.4rem;
   }
@@ -271,7 +306,7 @@ nav.scrolled {
 
 /* Mobile / small tablet — switch to burger */
 @media (max-width: 767px) {
-  nav {
+  nav.site-nav {
     padding: 0.85rem 1.1rem;
     padding-left: max(1.1rem, env(safe-area-inset-left));
     padding-right: max(1.1rem, env(safe-area-inset-right));
@@ -290,7 +325,7 @@ nav.scrolled {
 
 /* Very small phones — tightest layout */
 @media (max-width: 380px) {
-  nav {
+  nav.site-nav {
     padding: 0.75rem 0.85rem;
     padding-left: max(0.85rem, env(safe-area-inset-left));
     padding-right: max(0.85rem, env(safe-area-inset-right));
@@ -335,36 +370,36 @@ nav.scrolled {
 /* ── Adaptive contrast: navbar over a [data-nav-overlay="dark"] section ──
    Forces the dark-style (white) palette regardless of the active theme so
    the nav stays legible while it floats over the cosmic hero. */
-[data-theme='light'] nav.over-dark .nav-logo {
+[data-theme='light'] nav.site-nav.over-dark .nav-logo {
   color: rgba(240, 235, 225, 0.92);
 }
-[data-theme='light'] nav.over-dark .nav-logo:hover {
+[data-theme='light'] nav.site-nav.over-dark .nav-logo:hover {
   color: rgba(235, 226, 210, 1);
 }
-[data-theme='light'] nav.over-dark .nav-links a {
+[data-theme='light'] nav.site-nav.over-dark .nav-links a {
   color: rgba(255, 255, 255, 0.88);
 }
-[data-theme='light'] nav.over-dark .nav-links a:hover {
+[data-theme='light'] nav.site-nav.over-dark .nav-links a:hover {
   color: #fff;
 }
-[data-theme='light'] nav.over-dark .nav-links a.active {
+[data-theme='light'] nav.site-nav.over-dark .nav-links a.active {
   color: var(--gold);
 }
-[data-theme='light'] nav.over-dark .nav-lang {
+[data-theme='light'] nav.site-nav.over-dark .nav-lang {
   color: rgba(210, 200, 185, 0.28);
 }
-[data-theme='light'] nav.over-dark .nav-lang:hover {
+[data-theme='light'] nav.site-nav.over-dark .nav-lang:hover {
   color: rgba(201, 169, 110, 0.65);
 }
-[data-theme='light'] nav.over-dark .nav-theme {
+[data-theme='light'] nav.site-nav.over-dark .nav-theme {
   color: rgba(210, 200, 185, 0.55);
 }
-[data-theme='light'] nav.over-dark .nav-theme:hover {
+[data-theme='light'] nav.site-nav.over-dark .nav-theme:hover {
   color: rgba(228, 218, 200, 0.95);
 }
-[data-theme='light'] nav.over-dark .nav-burger__line {
+[data-theme='light'] nav.site-nav.over-dark .nav-burger__line {
   background: rgba(210, 200, 185, 0.65);
 }
-[data-theme='light'] nav.over-dark.scrolled {
+[data-theme='light'] nav.site-nav.over-dark.scrolled {
   background: rgba(9, 8, 6, 0.62);
 }
