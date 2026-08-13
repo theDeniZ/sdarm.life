@@ -1,3 +1,24 @@
+# [1.1.0](https://github.com/theDeniZ/sdarm.life/compare/v1.0.1...v1.1.0) (2026-08-13)
+
+
+### Bug Fixes
+
+* **#62:** songbook reader light theme, verse numbers, UX polish ([4cdf7b7](https://github.com/theDeniZ/sdarm.life/commit/4cdf7b74d8c0edd3e3d31337a19bf7288d4265a8)), closes [#62](https://github.com/theDeniZ/sdarm.life/issues/62) [#62](https://github.com/theDeniZ/sdarm.life/issues/62)
+* songbook edit 500 and redesign admin Songbooks as card grid ([4044683](https://github.com/theDeniZ/sdarm.life/commit/404468326875153c7b95ed14199ba1cdc5c73aab)), closes [#104](https://github.com/theDeniZ/sdarm.life/issues/104)
+
+
+### Features
+
+* **#102:** auto-generate OpenGraph card images ([c0b16e4](https://github.com/theDeniZ/sdarm.life/commit/c0b16e42de0f37720ffa3c205a994d923ed79665)), closes [#102](https://github.com/theDeniZ/sdarm.life/issues/102) [#102](https://github.com/theDeniZ/sdarm.life/issues/102)
+* **#5:** WCAG 2.1 AA accessibility — first-pass legal blockers ([9d33bf8](https://github.com/theDeniZ/sdarm.life/commit/9d33bf8787a5d9e4ba176ebeacc34d8a7efd7a3e)), closes [#5](https://github.com/theDeniZ/sdarm.life/issues/5) [#5](https://github.com/theDeniZ/sdarm.life/issues/5)
+* **#60:** chord transposition +/- semitone in SongReader ([6208d8c](https://github.com/theDeniZ/sdarm.life/commit/6208d8c2246d87ce796c9ee53beb7fcdcd101c5e)), closes [#60](https://github.com/theDeniZ/sdarm.life/issues/60) [#60](https://github.com/theDeniZ/sdarm.life/issues/60)
+* **#93:** projector slide color theme — light mode ([eb475de](https://github.com/theDeniZ/sdarm.life/commit/eb475defc916b40ad7b81e90ebd4d192f3d8a96f)), closes [#93](https://github.com/theDeniZ/sdarm.life/issues/93) [#93](https://github.com/theDeniZ/sdarm.life/issues/93)
+* **#95:** language-aware chorus label and Amen slide in projector ([141fbd8](https://github.com/theDeniZ/sdarm.life/commit/141fbd89859d0840001e2cf58a88d83eb2e004cb)), closes [#95](https://github.com/theDeniZ/sdarm.life/issues/95) [#95](https://github.com/theDeniZ/sdarm.life/issues/95)
+* **#96:** auto-hide projector chrome after inactivity ([db5573a](https://github.com/theDeniZ/sdarm.life/commit/db5573a18f032fa4e97227b03cb720a503a38c21)), closes [#96](https://github.com/theDeniZ/sdarm.life/issues/96) [#96](https://github.com/theDeniZ/sdarm.life/issues/96)
+* add admin Dashboard overview page ([5854a8b](https://github.com/theDeniZ/sdarm.life/commit/5854a8b147e0f1a8cd95cb8d0ade217237f9d9f0)), closes [#107](https://github.com/theDeniZ/sdarm.life/issues/107)
+* add admin Statistics charts from existing data ([7b3299f](https://github.com/theDeniZ/sdarm.life/commit/7b3299f5855866f7033d98703571c65f819d01a1)), closes [#109](https://github.com/theDeniZ/sdarm.life/issues/109)
+* youversion bible ([69b3ac6](https://github.com/theDeniZ/sdarm.life/commit/69b3ac66e02c8073aad04fa5596110a1611af3a2))
+
 ## [1.0.1](https://github.com/theDeniZ/sdarm.life/compare/v1.0.0...v1.0.1) (2026-07-07)
 
 
