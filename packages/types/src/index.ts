@@ -60,6 +60,7 @@ export interface SongListItemDto {
 
 export type SongPartType = 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda';
 export type SongSheetType = 'pdf' | 'image';
+export type TranslationType = 'original' | 'singable' | 'reference';
 
 export interface SongPartDto {
   id: number;
@@ -67,6 +68,8 @@ export interface SongPartDto {
   label: string;
   sortOrder: number;
   lyrics: string;
+  language: string | null;
+  translationType: TranslationType | null;
 }
 
 export interface SongSheetDto {

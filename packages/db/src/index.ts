@@ -103,12 +103,14 @@ export const songs = sqliteTable('songs', {
 ]);
 
 export const songParts = sqliteTable('song_parts', {
-  id:        integer('id').primaryKey({ autoIncrement: true }),
-  songId:    integer('song_id').notNull().references(() => songs.id),
-  type:      text('type', { enum: ['verse', 'chorus', 'bridge', 'intro', 'outro', 'coda'] }).notNull(),
-  label:     text('label').notNull(),
-  sortOrder: integer('sort_order').notNull().default(0),
-  lyrics:    text('lyrics').notNull().default(''),
+  id:              integer('id').primaryKey({ autoIncrement: true }),
+  songId:          integer('song_id').notNull().references(() => songs.id),
+  type:            text('type', { enum: ['verse', 'chorus', 'bridge', 'intro', 'outro', 'coda'] }).notNull(),
+  label:           text('label').notNull(),
+  sortOrder:       integer('sort_order').notNull().default(0),
+  lyrics:          text('lyrics').notNull().default(''),
+  language:        text('language'),
+  translationType: text('translation_type').$type<'original' | 'singable' | 'reference'>(),
 }, (t) => [
   index('song_parts_song_id_idx').on(t.songId),
 ]);

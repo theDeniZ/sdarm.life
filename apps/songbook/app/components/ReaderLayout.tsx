@@ -16,13 +16,26 @@ interface Props {
   initialSongs: ListResponse<SongListItemDto>;
   slug: string;
   apiUrl?: string;
+  forcePresenter?: boolean;
+  projectorUrl?: string;
 }
 
-export default function ReaderLayout({ songbook, song: initialSong, initialSongs, slug, apiUrl }: Props) {
+export default function ReaderLayout({
+  songbook,
+  song: initialSong,
+  initialSongs,
+  slug,
+  apiUrl,
+  forcePresenter,
+  projectorUrl,
+}: Props) {
   const t = useTranslations('songbook.reader');
   const tSearch = useTranslations('songbook.search');
   const locale = useLocale();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  useEffect(() => {
+    setSidebarOpen(window.innerWidth > 700);
+  }, []);
   const [q, setQ] = useState('');
   const [items, setItems] = useState<SongListItemDto[]>(initialSongs.items);
   const [total, setTotal] = useState(initialSongs.total);
@@ -145,7 +158,7 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
         {/* Main reading area — outer <main> is in layout.tsx */}
         <div className="reader-main">
           <div className={`reader-content${songLoading ? ' reader-content--loading' : ''}`}>
-            <SongView song={currentSong} />
+            <SongView song={currentSong} forcePresenter={forcePresenter} projectorUrl={projectorUrl} />
           </div>
         </div>
       </div>

@@ -30,7 +30,7 @@ export default function NewSongPage() {
       <div className="page-header">
         <h1>New Song — {book.title}</h1>
       </div>
-      <SongForm songbookId={songbookId} />
+      <SongForm songbookId={songbookId} initialNumber={book.songCount + 1} />
     </>
   );
 }

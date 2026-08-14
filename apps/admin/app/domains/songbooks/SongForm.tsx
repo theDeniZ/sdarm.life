@@ -7,12 +7,13 @@ import type { SongFormData } from './types';
 
 type Props = {
   songbookId: number;
+  initialNumber?: number;
 };
 
-export default function SongForm({ songbookId }: Props) {
+export default function SongForm({ songbookId, initialNumber = 1 }: Props) {
   const router = useRouter();
 
-  const [form, setForm] = useState<SongFormData>({ number: 1, title: '', author: '', copyright: '' });
+  const [form, setForm] = useState<SongFormData>({ number: initialNumber, title: '', author: '', copyright: '' });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
