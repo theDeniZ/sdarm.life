@@ -35,7 +35,12 @@ export const kvKey = {
   licensedIds: (language: string) => `bible:licids:${language}:v2`,
   bible: (id: number) => `bible:v:${id}:v1`,
   books: (id: number) => `bible:v:${id}:books:v1`,
-  chapter: (id: number, bookCode: string, chapter: number) => `bible:ch:${id}:${bookCode}:${chapter}:v1`,
+  /**
+   * Bumped to v2: chapters parsed before the numeric-entity fix in
+   * `decodeEntities` stored literal `&#34;` / `&#39;` in the verse text and
+   * would keep serving it for up to 30 days.
+   */
+  chapter: (id: number, bookCode: string, chapter: number) => `bible:ch:${id}:${bookCode}:${chapter}:v2`,
 };
 
 export async function cacheGet<T>(env: Bindings, key: string): Promise<T | null> {
