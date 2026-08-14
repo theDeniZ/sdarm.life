@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/theDeniZ/sdarm.life/compare/v1.2.0...v1.2.1) (2026-08-14)
+
+
+### Bug Fixes
+
+* youversion escaping ([0c7f329](https://github.com/theDeniZ/sdarm.life/commit/0c7f329a36d7da12ffb1cb454408666d360eb67f))
+
 # [1.2.0](https://github.com/theDeniZ/sdarm.life/compare/v1.1.0...v1.2.0) (2026-08-14)
 
 
