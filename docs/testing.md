@@ -134,6 +134,9 @@ forEachTheme('songbook / my new page', async (page, theme) => {
 **When to use `waitForLoadState('networkidle')` vs a fixed timeout:**
 - `networkidle` — works for most pages (waits until no in-flight requests for 500 ms).
 - Fixed `waitForTimeout` — needed for WebGL (globe), stagger animations, or any async rendering that fires after `networkidle`. Use the smallest value that makes the test stable.
+- A selector wait tied to a component's own class names — `web / home` waits on the `StatsGrid` verse card and its fitted headlines, because both are filled in after hydration and `networkidle` says nothing about either.
+
+⚠️ **A selector waiter outlives the component it was written for.** `web / home` waited on `.masonry-item.is-visible` long after `StatsGrid` replaced `NewsSection` on the home page, so the wait could never resolve and `update-snapshots` failed on a workflow nobody had run since the redesign. **When a page's section is replaced, grep the specs for the old section's class names in the same commit** — a stale waiter fails loudly, but only the next time someone runs the workflow.
 
 ## Adding a mock endpoint
 

@@ -1,0 +1,490 @@
+/* This file owns every rule for this section, including its @media
+   breakpoints and its [data-theme="light"] overrides. Imported from
+   app/layout.tsx. */
+
+/* ═══ STATS BENTO GRID ═══
+   Three equal columns; each column is a flex stack sharing the same gap, so
+   the column bottoms line up. Heights do the arithmetic:
+     col 1  724
+     col 2  420 + 24 + 280 = 724
+     col 3  350 + 24 + 350 = 724
+   Palette is driven by the --stats-* custom properties below: the base values
+   are the site's dark tokens, the [data-theme='light'] block at the bottom
+   swaps in the light bento palette. */
+
+.stats {
+  /* Espresso, not the site's --bg-section/--bg-card. Those sit at R14 G13 B11
+     and R17 G16 B9 — blue is roughly half of red, which reads as olive-green
+     across a large flat panel. Here the gap between the red and blue channels
+     is 3, so it stays warm without the green cast. The hairline is neutral
+     white for the same reason: --border is a translucent gold. */
+  --stats-bg: #12100f;
+  --stats-card-bg: #1a1716;
+  --stats-text: var(--text-strong);
+  --stats-muted: var(--muted);
+  --stats-accent: var(--gold);
+  --stats-line: rgba(255, 250, 244, 0.09);
+  --stats-line-hover: rgba(255, 250, 244, 0.2);
+  --stats-mark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44' preserveAspectRatio='none'><path fill='rgb(150,196,140)' fill-opacity='0.34' d='M3,16 C30,10 70,12.4 110,9.2 C140,6.8 172,8.6 196,10.5 C198.5,14.4 199,22.6 197,27.8 C170,32.4 130,29.4 92,31.2 C64,32.4 28,31 5,28.4 C1.6,25 1,20.2 3,16 Z'/></svg>");
+  --stats-gap: 24px;
+  --stats-radius: 24px;
+  --stats-serif: 'Playfair Display', Georgia, serif;
+  --stats-sans: 'Lexend', system-ui, sans-serif;
+
+  background: var(--stats-bg);
+  color: var(--stats-text);
+  font-family: var(--stats-sans);
+  -webkit-font-smoothing: antialiased;
+  padding: 100px 24px;
+}
+
+.stats__inner {
+  max-width: 1360px;
+  margin: 0 auto;
+}
+
+/* ── Grid ── */
+.stats__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--stats-gap);
+}
+
+/* min-width:0 on both levels: grid and flex items default to min-width:auto,
+   so a long headline word widens its track and pushes the grid past the
+   viewport instead of wrapping. */
+.stats__col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--stats-gap);
+  min-width: 0;
+}
+
+/* ── Card ── */
+.stats__card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: var(--stats-card-bg);
+  border: 1px solid var(--stats-line);
+  border-radius: var(--stats-radius);
+  padding: 40px 32px;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.4s ease;
+}
+
+/* No lift on hover — five cards jumping under the cursor is restless, and the
+   grid's whole point is that the columns sit still. The border carries it
+   instead, one step up from the resting hairline rather than a jump to full
+   text colour, which reads as a hard outline. */
+.stats__card:hover {
+  border-color: var(--stats-line-hover);
+}
+
+/* Height modifiers — see the arithmetic in the header comment.
+   Each height is one number applied as both bounds, so a card is a container
+   the text must fit into rather than a floor the text can push past. A card
+   that grows drags its column out of line with the other two. */
+.stats__card--tall {
+  --stats-card-h: 724px;
+}
+.stats__card--media {
+  --stats-card-h: 420px;
+}
+.stats__card--short {
+  --stats-card-h: 280px;
+}
+.stats__card--mid {
+  --stats-card-h: 350px;
+}
+.stats__card--tall,
+.stats__card--media,
+.stats__card--short,
+.stats__card--mid {
+  height: var(--stats-card-h);
+}
+
+.stats__card-body {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.stats__card-label {
+  margin: 0;
+  font:
+    500 13px/1.4 var(--stats-sans);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--stats-muted);
+}
+
+/* Pins the headline block to the bottom of the card */
+.stats__card-content {
+  margin-top: auto;
+}
+
+.stats__card-big {
+  margin: 0;
+  font:
+    400 64px/1.05 var(--stats-serif);
+  color: var(--stats-text);
+  letter-spacing: -0.01em;
+}
+.stats__card-big em {
+  font-style: italic;
+  color: var(--stats-accent);
+}
+
+.stats__card-num {
+  margin: 0;
+  font:
+    400 96px/0.9 var(--stats-serif);
+  color: var(--stats-text);
+  letter-spacing: -0.03em;
+  display: flex;
+  align-items: flex-start;
+}
+.stats__card-num sup {
+  font-size: 40px;
+  color: var(--stats-accent);
+  margin-top: 12px;
+  margin-left: 4px;
+}
+
+.stats__card-sub {
+  margin: 20px 0 0;
+  font:
+    400 16px/1.6 var(--stats-sans);
+  color: var(--stats-muted);
+}
+
+/* ── Photo cards ──
+   Any block can be given a photo from the admin, so the treatment is generic
+   rather than pinned to one card. The card stops following the section palette
+   and switches to a light-on-dark or dark-on-light pair, and the scrim tints
+   toward whichever side the text needs. */
+.stats__card--photo {
+  overflow: hidden;
+}
+
+.stats__card--on-light {
+  --stats-scrim: 10, 9, 8;
+  --stats-text: #f6f2ec;
+  --stats-muted: rgba(246, 242, 236, 0.74);
+  --stats-accent: #e8c9a0;
+  --stats-line: rgba(255, 250, 244, 0.32);
+  --stats-line-hover: rgba(255, 250, 244, 0.6);
+}
+
+.stats__card--on-dark {
+  --stats-scrim: 252, 250, 246;
+  --stats-text: #14110d;
+  --stats-muted: rgba(20, 17, 13, 0.72);
+  --stats-accent: #6b4f2a;
+  --stats-line: rgba(20, 17, 13, 0.24);
+  --stats-line-hover: rgba(20, 17, 13, 0.5);
+}
+
+.stats__card-photo {
+  object-fit: cover;
+  z-index: 0;
+}
+
+.stats__card-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+.stats__card--scrim-none .stats__card-scrim {
+  display: none;
+}
+.stats__card--scrim-light .stats__card-scrim {
+  background: linear-gradient(to top, rgba(var(--stats-scrim), 0.6) 0%, rgba(var(--stats-scrim), 0.16) 55%, transparent 100%);
+}
+.stats__card--scrim-medium .stats__card-scrim {
+  background: linear-gradient(to top, rgba(var(--stats-scrim), 0.8) 0%, rgba(var(--stats-scrim), 0.36) 50%, rgba(var(--stats-scrim), 0.1) 100%);
+}
+.stats__card--scrim-strong .stats__card-scrim {
+  background: linear-gradient(to top, rgba(var(--stats-scrim), 0.92) 0%, rgba(var(--stats-scrim), 0.55) 45%, rgba(var(--stats-scrim), 0.25) 100%);
+}
+
+.stats__card--photo .stats__card-body {
+  position: relative;
+  z-index: 2;
+}
+
+/* Neutral on purpose — the accent is spent on the headline italics, and a
+   second accented element in the same card reads as noise. */
+.stats__btn {
+  align-self: flex-start;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+  margin-top: 28px;
+  padding: 13px 24px;
+  /* A pill that wraps stops being a pill. With multi-word labels the text
+     broke over three lines inside the capsule on a 360px screen and the whole
+     shape grew past the card edge. The label stays on one line; keeping it
+     short enough to fit is the label's job, not the layout's. */
+  white-space: nowrap;
+  border: 1px solid var(--stats-line);
+  border-radius: 999px;
+  font:
+    500 14px/1 var(--stats-sans);
+  letter-spacing: 0.04em;
+  color: var(--stats-text);
+  transition:
+    background 0.4s ease,
+    color 0.4s ease,
+    border-color 0.4s ease;
+}
+.stats__btn::after {
+  content: '\2192';
+  transition: transform 0.4s ease;
+}
+.stats__card:hover .stats__btn {
+  background: var(--stats-text);
+  color: var(--stats-card-bg);
+  border-color: var(--stats-text);
+}
+.stats__card:hover .stats__btn::after {
+  transform: translateX(4px);
+}
+
+/* On a photo there is no card background behind the button, so the filled
+   hover takes the opposite of the text colour rather than the card colour. */
+.stats__card--on-light:hover .stats__btn {
+  color: #14110d;
+}
+.stats__card--on-dark:hover .stats__btn {
+  color: #f6f2ec;
+}
+
+/* ── Invitation card ──
+   No accent and no label — one quiet voice, centred rather than pinned to the
+   bottom. Its job is to be read, not to be looked at. */
+.stats__card--invite .stats__card-content {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+
+/* ── Faith card ──
+   The 25 points are the identity, so the numeral carries it instead of an
+   accent colour. Set large and very low contrast, it reads as texture until
+   you look for it. */
+.stats__card--faith {
+  overflow: hidden;
+}
+.stats__ghost {
+  position: absolute;
+  top: -0.24em;
+  right: 0.06em;
+  z-index: 0;
+  font:
+    400 200px/1 var(--stats-serif);
+  color: var(--stats-text);
+  opacity: 0.05;
+  pointer-events: none;
+}
+.stats__card--faith .stats__card-body {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Verse card ──
+   The verse rotates hourly and its length varies 5x, so StatsGrid measures the
+   card and steps the type size down until it fits. overflow:hidden is the last
+   line of defence if even the smallest rung is too big for a very narrow card. */
+.stats__card--quote {
+  overflow: hidden;
+  cursor: pointer;
+}
+.stats__card--quote .stats__card-big {
+  line-height: 1.12;
+}
+
+/* Highlighter, the way people actually mark a verse in a Bible app — the same
+   gesture the photo on the reading-plan card shows. The band covers the lower
+   part of the line rather than the whole box, so it reads as a marker stroke
+   and not as a filled label. The word itself keeps the body colour and stays
+   upright: a marker emphasises text, it does not restyle it. */
+/* A flat rectangle reads as a label, so the stroke is a drawn shape: the top
+   and bottom edges waver, the ends do not line up, and the whole thing tilts
+   slightly — the way a marker actually lands on a page. The tilt and the
+   uneven edges are baked into the path, and the colour with it, because a
+   background image cannot be rotated or recoloured from CSS. It rides on the
+   word itself rather than a pseudo-element: a negative z-index would put it
+   behind the card's own background and disappear. */
+.stats__card--quote .stats__card-big em {
+  font-style: normal;
+  color: inherit;
+  padding: 0 0.1em;
+  margin: 0 -0.06em;
+  background-image: var(--stats-mark);
+  background-repeat: no-repeat;
+  background-size: 100% 0.54em;
+  background-position: 0 82%;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+
+/* Save-image button. Base rules live in quote-share.css and key off the old
+   .nc--quote card, so the reveal is re-declared here — and the gold is dropped
+   for the card's own neutrals. Hidden at rest, shown on hover; keyboard focus
+   also reveals it, otherwise it would be unreachable without a mouse. */
+.stats__card--quote .quote-save-btn {
+  background: transparent;
+  border-color: var(--stats-line);
+  color: var(--stats-muted);
+}
+.stats__card--quote:hover .quote-save-btn,
+.stats__card--quote:focus-within .quote-save-btn {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stats__card--quote .quote-save-btn:hover {
+  background: transparent;
+  border-color: var(--stats-text);
+  color: var(--stats-text);
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  .stats__card,
+  .stats__btn,
+  .stats__btn::after,
+  .quote-save-btn {
+    transition: none;
+  }
+}
+
+/* ── Responsive — tablet: first column becomes a full-width banner ── */
+@media (max-width: 1024px) {
+  .stats__grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stats__col:nth-child(1) {
+    grid-column: 1 / -1;
+  }
+  .stats__col:nth-child(3) {
+    grid-column: auto;
+  }
+  /* Banner needs to read as solid as the cards below it. Sets the variable,
+     not min-height — a stray min-height outranks the fixed height whenever it
+     is the larger of the two and quietly puts the card back to variable. */
+  .stats__card--tall {
+    --stats-card-h: 350px;
+  }
+  /* Wide and short — the phone in the photo needs to stay in frame */
+  .stats__card-photo {
+    object-position: 58% 30%;
+  }
+}
+
+/* ── Responsive — mobile: banner on top, two columns beneath ── */
+@media (max-width: 640px) {
+  .stats {
+    padding: 48px 16px;
+  }
+  /* Two cards sit side by side here, so a pill has roughly 140px to live in.
+     The desktop padding leaves no room for the label and the arrow. */
+  .stats__btn {
+    margin-top: 18px;
+    padding: 10px 16px;
+    font-size: 13px;
+    gap: 0.45em;
+  }
+  .stats__grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+  }
+  .stats__col {
+    gap: 12px;
+  }
+  .stats__col:nth-child(1) {
+    grid-column: 1 / -1;
+  }
+  .stats__col:nth-child(2),
+  .stats__col:nth-child(3) {
+    grid-column: span 1;
+  }
+
+  /* 240 + 12 + 192 = 444 = 216 + 12 + 216. The short card is 192 rather than
+     the 180 it started at: at 180 column 2 came to 432 against column 3's 444,
+     the grid stretched it to match, and its last card ended 12px above the
+     neighbouring one. The same arithmetic that aligns the desktop columns has
+     to hold at every breakpoint.
+
+     Each height is one number on --stats-card-h. min-height alone was a floor:
+     content that outgrew it — a 112-character verse in a 156px card — pushed
+     the card taller and the two columns stopped ending level. A fixed height
+     makes the card a container the text has to fit into, which is what the
+     fitter in StatsGrid is for. */
+  .stats__card--tall {
+    --stats-card-h: 280px;
+  }
+  .stats__card--media {
+    --stats-card-h: 240px;
+  }
+  .stats__card--short {
+    --stats-card-h: 192px;
+  }
+  .stats__card--mid {
+    --stats-card-h: 216px;
+  }
+  .stats__card--tall,
+  .stats__card--media,
+  .stats__card--short,
+  .stats__card--mid {
+    height: var(--stats-card-h);
+  }
+
+  .stats__card {
+    padding: 28px 20px;
+    gap: 24px;
+  }
+
+  .stats__card-label {
+    font-size: 11px;
+  }
+  .stats__card-sub {
+    font-size: 13px;
+    margin-top: 12px;
+  }
+  .stats__card-big {
+    font-size: 36px;
+    line-height: 1.1;
+  }
+  .stats__card-num {
+    font-size: 56px;
+  }
+  .stats__card-num sup {
+    font-size: 24px;
+    margin-top: 6px;
+  }
+
+}
+
+/* ── Light theme — the bento palette ── */
+/* Warm off-white ground, pure white cards — the cards read as lifted without
+   needing a shadow, and the ground stays warm rather than grey. */
+[data-theme='light'] .stats {
+  --stats-bg: #f7f4ef;
+  --stats-card-bg: #ffffff;
+  --stats-text: #111111;
+  --stats-muted: #666666;
+  /* Umbra: the dark theme's gold, deepened for paper. Not the sketch's brick
+     red — red reads as a warning, the wrong signal on a church page — and not
+     a green either, because the highlighter is green and two greens in one
+     card compete. One accent hue across both themes, one green for marking.
+     7.56:1 on white. The photo card keeps the gold: it is a dark surface in
+     both themes. */
+  --stats-accent: #6b4f2a;
+  --stats-mark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44' preserveAspectRatio='none'><path fill='rgb(118,170,108)' fill-opacity='0.42' d='M3,16 C30,10 70,12.4 110,9.2 C140,6.8 172,8.6 196,10.5 C198.5,14.4 199,22.6 197,27.8 C170,32.4 130,29.4 92,31.2 C64,32.4 28,31 5,28.4 C1.6,25 1,20.2 3,16 Z'/></svg>");
+  --stats-line: #e8e4dc;
+  --stats-line-hover: #cdc7bb;
+}

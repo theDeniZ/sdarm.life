@@ -140,7 +140,7 @@ jobs:
 
   migrate-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-pages, build-admin, build-admin-staging, playwright]
+    needs: [build-api, build-pages, build-admin, build-admin-staging]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -154,7 +154,7 @@ jobs:
 
   sync-secrets-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-pages, build-admin, build-admin-staging, playwright]
+    needs: [build-api, build-pages, build-admin, build-admin-staging]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7

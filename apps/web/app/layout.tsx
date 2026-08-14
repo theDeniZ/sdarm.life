@@ -1,5 +1,30 @@
 import '@sdarm/ui/src/styles/index.css';
-import './globals.css';
+
+/* One stylesheet per section/page. Each file owns everything for that section —
+   base rules, @media breakpoints and [data-theme='light'] overrides — so a
+   section is changed in one place instead of four.
+
+   These are imported here rather than @import-ed from a single globals.css:
+   Turbopack does not invalidate its CSS cache when a file reached through a
+   CSS @import changes, so edits only appear after `rm -rf .next`. Imported as
+   modules they hot-reload normally. Order here is the cascade order.
+
+   styles/uber-uns.css is intentionally absent — UberUnsSection.tsx exists but
+   is not rendered anywhere. Add the import to re-enable it. */
+import './styles/fonts.css';
+import './styles/hero-welcome.css';
+/* styles/news.css is intentionally absent — NewsSection.tsx still exists but
+   the homepage renders StatsGrid in its place, so none of it is loaded.
+   Its warm gold section background lived there. */
+import './styles/stats-grid.css';
+import './styles/quote-share.css';
+import './styles/glaubens.css';
+import './styles/post.css';
+import './styles/legal.css';
+import './styles/about.css';
+import './styles/kontakt.css';
+import './styles/not-found.css';
+
 import { getLocale } from 'next-intl/server';
 import { ThemeScript } from '@sdarm/ui';
 

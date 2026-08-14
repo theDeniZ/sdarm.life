@@ -72,9 +72,8 @@
       "eyebrow": "Word of the Hour"
     },
     "heroWelcome": {
-      "badge": "Since 1925 · Faithful to Scripture · Worldwide",
-      "title": "God <em>loves</em> you deeply",
-      "subtitle": "The Seventh Day Adventist Reform Movement — Bible-grounded, Sabbath-keeping, globally connected.",
+      "title": "For God so <em>loved</em> the world",
+      "subtitle": "The Seventh Day Adventist Reform Movement",
       "ctaPrimary": "About us",
       "ctaSecondary": "Contact"
     },
@@ -89,13 +88,36 @@
       "faith": {
         "label": "Faith · 25 Points",
         "title": "Foundations of our faith",
-        "sub": "discover now"
+        "sub": "Read"
       },
       "quote": {
         "openShare": "Share Bible verse",
         "saveImage": "Save as image",
         "close": "Close",
         "dialogLabel": "Share Bible verse as image"
+      }
+    },
+    "stats": {
+      "plan": {
+        "label": "Reading plan on YouVersion",
+        "title": "Before<br></br><em>everything starts</em>",
+        "cta": "Open",
+        "phoneAlt": "Reading plan in the YouVersion app"
+      },
+      "invite": {
+        "title": "Come<br></br><em>as you are</em>",
+        "cta": "Visit",
+        "photoAlt": "Congregation at Sabbath worship"
+      },
+      "verse": {
+        "label": "Together in faith"
+      },
+      "songs": {
+        "label": "Hymnal",
+        "title": "Songs of <em>faith</em>"
+      },
+      "faith": {
+        "title": "Foundations<br></br>of our faith"
       }
     },
     "post": {
@@ -665,7 +687,9 @@
       "subtitle": "Sacred songs from the tradition of the Reform Movement — to the praise of God, the comfort of the soul, the strengthening of the community.",
       "discover": "Discover",
       "songCount": "{count} songs",
-      "openSongbook": "Open songbook"
+      "openSongbook": "Open songbook",
+      "verseText": "Sing to the LORD a new song; sing to the LORD, all the earth!",
+      "verseRef": "Psalm 96:1"
     },
     "reader": {
       "songs": "Songs",

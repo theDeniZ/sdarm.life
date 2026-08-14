@@ -10,9 +10,23 @@ forEachTheme('web / home', async (page, theme) => {
   // captures a half-hydrated page (globe missing, cards empty, clock blank).
   // PlanetEarth WebGL canvas (Suspense fallback is null, so canvas == mounted).
   await page.waitForSelector('.hero-welcome canvas', { timeout: 30_000 });
-  // NewsSection cards fade in via IntersectionObserver — at least one must land
-  // before we screenshot, otherwise the masonry grid renders as empty veils.
-  await page.waitForSelector('.masonry-item.is-visible', { timeout: 15_000 });
+  // StatsGrid replaced the masonry section on the home page. Two things happen
+  // after hydration and both change what the cards look like: the verse card is
+  // filled by an effect (the hour-based pick is kept out of SSR to avoid a
+  // hydration mismatch, so it is empty in the server HTML), and every
+  // [data-fit] headline is then stepped down a size ladder until it fits its
+  // card. Screenshotting before both have run captures a blank quote card and
+  // unfitted type.
+  await page.waitForFunction(
+    () => {
+      const ref = document.querySelector('.stats__card--quote .stats__card-sub');
+      if (!ref?.textContent?.trim()) return false;
+      const headlines = Array.from(document.querySelectorAll<HTMLElement>('.stats [data-fit]'));
+      return headlines.length > 0 && headlines.every((el) => el.style.fontSize !== '');
+    },
+    undefined,
+    { timeout: 15_000 }
+  );
   // Footer sunset clock hydrates from ?screenshotTime= and splits the value into
   // spans around a `.sunset-colon`. Until that exists, only the dash placeholder
   // shows, and the location label is also missing.

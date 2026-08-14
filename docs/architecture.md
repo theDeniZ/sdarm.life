@@ -22,7 +22,7 @@ API response shapes (`PostDto`, `ImageDto`, etc.) are currently redefined in bot
 
 **Separation of concerns:**
 - `@sdarm/db` — Drizzle schema definitions (DB layer). Types have `Date` objects and internal fields.
-- `@sdarm/types` — HTTP response types (API contract layer). Types have ISO strings and only publicly surfaced fields.
+- `@sdarm/types` — HTTP response types (API contract layer). Types have ISO strings and only publicly surfaced fields. Also holds the homepage grid config (`HomeGridConfig`) together with the pure functions that read it — `defaultGridConfig`, `parseGridConfig`, `pick`, `resolveTextColor`. Both `apps/web` (renders the grid) and `apps/admin` (edits it) need that logic, neither may import from the other, and a duplicated merge routine is exactly how the two would drift apart.
 - `@sdarm/ui` — Shared React components and the dark museum CSS design system used by all public-facing apps.
 - `@sdarm/i18n` — Shared i18n config (`locales`, `defaultLocale`) and message JSON files (`de.json`, `en.json`).
 
@@ -437,6 +437,27 @@ apps/admin/app/lib/
   format.ts    — fmtDate(), fmtSize(), toLocalDatetime()
   hooks.ts     — usePaginatedList()
 ```
+
+### `styles/` folder per app
+
+`apps/web/app/globals.css` is an `@import` index with no rules of its own. Each section or page owns one file under `apps/web/app/styles/`, containing its base rules, its `@media` breakpoints and its `[data-theme='light']` overrides together.
+
+```
+apps/web/app/styles/
+  fonts.css          — @font-face declarations
+  hero-welcome.css   — home hero (cosmic intro)
+  news.css           — NewsSection masonry + card internals
+  quote-share.css    — QuoteShareModal + save button
+  glaubens.css       — faith long-read + grid (about page)
+  post.css           — post detail + .img16
+  legal.css          — Impressum / Datenschutz
+  about.css          — about page
+  kontakt.css        — kontakt page
+  not-found.css      — 404
+  uber-uns.css       — NOT imported; UberUnsSection.tsx is not rendered
+```
+
+Mirrors `packages/ui/src/styles/index.css`. See [conventions.md](conventions.md) for the rule.
 
 Do not create `utils/` at the monorepo root for app-specific code — it breaks isolation. Only framework-free, truly cross-app logic belongs in a shared package.
 

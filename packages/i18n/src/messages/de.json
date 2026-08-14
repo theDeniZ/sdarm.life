@@ -72,9 +72,8 @@
       "eyebrow": "Wort der Stunde"
     },
     "heroWelcome": {
-      "badge": "Seit 1925 · Bibeltreu · Weltweit",
-      "title": "Gott <em>liebt</em> dich sehr",
-      "subtitle": "Die Siebenten-Tags-Adventisten Reformationsbewegung — bibelgegründet, sabbathaltend, weltweit verbunden.",
+      "title": "Also hat Gott die Welt <em>geliebt</em>",
+      "subtitle": "Die Siebenten-Tags-Adventisten Reformationsbewegung",
       "ctaPrimary": "Über uns",
       "ctaSecondary": "Kontakt"
     },
@@ -89,13 +88,36 @@
       "faith": {
         "label": "Glaube · 25 Punkte",
         "title": "Grundlagen unseres Glaubens",
-        "sub": "jetzt entdecken"
+        "sub": "Nachlesen"
       },
       "quote": {
         "openShare": "Bibelvers teilen",
         "saveImage": "Als Bild speichern",
         "close": "Schließen",
         "dialogLabel": "Bibelvers als Bild teilen"
+      }
+    },
+    "stats": {
+      "plan": {
+        "label": "Leseplan auf YouVersion",
+        "title": "Bevor<br></br><em>alles losgeht</em>",
+        "cta": "Öffnen",
+        "phoneAlt": "Leseplan in der YouVersion-App"
+      },
+      "invite": {
+        "title": "Komm,<br></br><em>wie du bist</em>",
+        "cta": "Besuchen",
+        "photoAlt": "Gemeinde beim Sabbatgottesdienst"
+      },
+      "verse": {
+        "label": "Gemeinsam im Glauben"
+      },
+      "songs": {
+        "label": "Gesangbuch",
+        "title": "Lieder des <em>Glaubens</em>"
+      },
+      "faith": {
+        "title": "Grundlagen<br></br>unseres Glaubens"
       }
     },
     "post": {
@@ -665,7 +687,9 @@
       "subtitle": "Heilige Gesänge aus der Tradition der Reformationsbewegung — zum Lob Gottes, zum Trost der Seele, zur Stärkung der Gemeinschaft.",
       "discover": "Entdecken",
       "songCount": "{count} Lieder",
-      "openSongbook": "Gesangbuch öffnen"
+      "openSongbook": "Gesangbuch öffnen",
+      "verseText": "Singet dem HERRN ein neues Lied; singet dem HERRN, alle Welt!",
+      "verseRef": "Psalm 96,1"
     },
     "reader": {
       "songs": "Lieder",

@@ -116,61 +116,106 @@ a {
   margin: 0 auto;
 }
 
-/* ── SONGBOOK LANDING PAGE ── */
+/* ── SONGBOOK LANDING PAGE ──
+   Same visual language as the homepage grid: separate cards on a shared 24px
+   gap rather than one slab divided by hairlines.
+
+   The old grid was locked to four columns and removed the right-hand border
+   with :last-child, which only lines up when there are exactly four songbooks.
+   At five the first row's last card kept a border sitting on the container
+   edge and the fifth card's floated in empty space, and nothing separated the
+   rows at all. Cards on a gap have no such counting to get wrong: auto-fill
+   decides how many fit, and every card is identical. */
+/* Same ground-and-card relationship as the homepage grid: a warm off-white
+   panel with cards a shade lighter than it, so they read as lifted rather than
+   recessed. The site's --bg-card is darker than the page background, which
+   inverts that. */
 .songbooks-section {
-  border-top: 1px solid rgba(201, 169, 110, 0.07);
+  --sb-ground: #12100f;
+  --sb-card: #1a1716;
+  --sb-line: rgba(255, 250, 244, 0.09);
+  --sb-line-hover: rgba(255, 250, 244, 0.2);
+  --sb-text: #f0ebe3;
+  --sb-muted: #9e9891;
+
+  background: var(--sb-ground);
+  border-top: 1px solid var(--sb-line);
+}
+
+[data-theme='light'] .songbooks-section {
+  --sb-ground: #f7f4ef;
+  --sb-card: #ffffff;
+  --sb-line: #e8e4dc;
+  --sb-line-hover: #cdc7bb;
+  --sb-text: #111111;
+  --sb-muted: #666666;
 }
 
 .songbooks-grid {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  border-top: 1px solid rgba(201, 169, 110, 0.07);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  /* Every row the same height, not just every card within a row. Without this
+     a row of short descriptions sits a few pixels shorter than the row above
+     and the cards stop reading as one set. */
+  grid-auto-rows: 1fr;
+  gap: 24px;
+  max-width: 1360px;
+  margin: 0 auto;
+  padding: 4rem 24px 6rem;
 }
 
 .songbook-landing-card {
-  display: block;
-  text-decoration: none;
-  padding: 3.2rem 2.5rem 3rem;
-  border-right: 1px solid rgba(201, 169, 110, 0.07);
   position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 300px;
+  padding: 40px 32px;
+  background: var(--sb-card);
+  border: 1px solid var(--sb-line);
+  border-radius: 24px;
+  text-decoration: none;
   overflow: hidden;
-  transition: background 0.4s ease;
   cursor: pointer;
-}
-.songbook-landing-card:last-child {
-  border-right: none;
-}
-.songbook-landing-card:hover {
-  background: rgba(201, 169, 110, 0.03);
-}
-.songbook-landing-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--gold);
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
-}
-.songbook-landing-card:hover::after {
-  transform: scaleX(1);
+  transition: border-color 0.4s ease;
 }
 
+/* No lift on hover — the cards sit in a grid and should stay put; the border
+   carries it, one step up from the resting hairline. */
+.songbook-landing-card:hover {
+  border-color: var(--sb-line-hover);
+}
+
+/* The language code as a ghost mark in the corner, the same device the faith
+   card on the homepage uses for its 25: large, very low contrast, read as
+   texture until you look for it. In the content flow at 3.5rem it competed
+   with the songbook's own name. */
 .songbook-landing-card__lang {
-  font-family: 'Lexend', sans-serif;
-  font-weight: 300;
-  font-size: 3.5rem;
+  position: absolute;
+  /* Anchored below the card edge so the descender space clips and the
+     cap-heights stay whole — the mark reads as cropped on purpose. */
+  bottom: -0.2em;
+  right: 0.04em;
+  z-index: 0;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-weight: 400;
+  font-size: 150px;
   line-height: 1;
-  color: rgba(201, 169, 110, 0.1);
-  margin-bottom: 1.4rem;
-  transition: color 0.4s ease;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.03em;
+  color: var(--sb-text);
+  opacity: 0.038;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
 }
 .songbook-landing-card:hover .songbook-landing-card__lang {
-  color: rgba(201, 169, 110, 0.22);
+  opacity: 0.07;
+}
+
+.songbook-landing-card__icon,
+.songbook-landing-card__name,
+.songbook-landing-card__subtitle,
+.songbook-landing-card__count {
+  position: relative;
+  z-index: 1;
 }
 
 .songbook-landing-card__icon {
@@ -188,11 +233,14 @@ a {
   fill: none;
 }
 
+/* The songbook's name is what the card is for — it carries the weight, the
+   description and the count sit under it. */
 .songbook-landing-card__name {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.1rem;
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.6rem;
+  line-height: 1.15;
   font-weight: 400;
-  color: rgba(220, 210, 195, 0.9);
+  color: var(--sb-text);
   margin-bottom: 0.5rem;
   letter-spacing: 0.01em;
 }
@@ -201,63 +249,42 @@ a {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.82rem;
   font-weight: 300;
-  color: rgba(170, 160, 145, 0.82);
+  color: var(--sb-muted);
   line-height: 1.6;
   margin-bottom: 1.2rem;
 }
 
+/* Pinned to the bottom so the count sits on the same line on every card
+   regardless of how long the title and description are. */
 .songbook-landing-card__count {
+  margin-top: auto;
   font-family: 'Lexend', sans-serif;
   font-size: 0.72rem;
   font-weight: 300;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(201, 169, 110, 0.68);
+  color: var(--sb-muted);
 }
 
-.songbook-landing-card__arrow {
-  position: absolute;
-  bottom: 2rem;
-  right: 2rem;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1rem;
-  color: rgba(201, 169, 110, 0.3);
-  transition:
-    color 0.3s,
-    transform 0.3s;
-}
-.songbook-landing-card:hover .songbook-landing-card__arrow {
-  color: var(--gold);
-  transform: translateX(4px);
+/* No arrow. The whole card is the link and it lifts its border on hover — a
+   glyph in the corner named nothing and read as a stray mark. */
+
+@media (prefers-reduced-motion: reduce) {
+  .songbook-landing-card,
+  .songbook-landing-card__lang {
+    transition: none;
+  }
 }
 
-@media (max-width: 900px) {
-  .songbooks-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .songbook-landing-card:nth-child(2) {
-    border-right: none;
-  }
-  .songbook-landing-card:nth-child(n + 3) {
-    border-top: 1px solid rgba(201, 169, 110, 0.07);
-  }
-  .songbook-landing-card:last-child {
-    border-right: none;
-  }
-  .songbook-landing-card:nth-child(odd):last-child {
-    border-right: none;
-  }
-}
 @media (max-width: 600px) {
   .songbooks-grid {
     grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 2.5rem 16px 4rem;
   }
   .songbook-landing-card {
-    border-right: none;
-    border-top: 1px solid rgba(201, 169, 110, 0.07);
-  }
-  .songbook-landing-card:first-child {
-    border-top: none;
+    min-height: 240px;
+    padding: 28px 20px;
   }
 }
 
@@ -1815,9 +1842,9 @@ a {
 [data-theme='light'] .top-nav__link.active { color: var(--gold); }
 
 /* Songbook landing */
-[data-theme='light'] .songbook-landing-card { background: var(--bg-card); }
-[data-theme='light'] .songbook-landing-card__name { color: var(--text-strong); }
-[data-theme='light'] .songbook-landing-card__subtitle { color: var(--muted); }
+/* The songbook cards set their own light theme next to their base rules —
+   see .songbooks-section. Overriding them from down here is what made the card
+   background ignore the value declared with the card itself. */
 
 /* Song list */
 [data-theme='light'] .song-list-header h1 { color: var(--text-strong); }

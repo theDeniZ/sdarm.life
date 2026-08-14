@@ -1,0 +1,526 @@
+/* This file owns every rule for this section, including its @media
+   breakpoints and its [data-theme="light"] overrides. Imported from
+   app/layout.tsx. */
+
+/* ═══ EVENTS / RELEASES ═══
+   Light glass cards on a softer base + drifting gold orbs + film-grain.
+   Cards stay light in both themes; only the section base swaps. */
+.events-section {
+  background: linear-gradient(180deg, #2a2620 0%, #1f1c17 100%);
+  padding: 0;
+  position: relative;
+  overflow: hidden;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+/* Animated drifting orbs — gold accents that float gently. Adds the
+   "breathing" depth from the maestro reference without locking us to
+   purple. */
+.events-section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 8%, rgba(201, 169, 110, 0.32) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 88% 85%, rgba(180, 130, 65, 0.26) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 70% 20%, rgba(220, 190, 130, 0.18) 0%, transparent 50%),
+    radial-gradient(ellipse 35% 45% at 20% 75%, rgba(160, 110, 60, 0.16) 0%, transparent 50%);
+  animation: events-bg-drift 18s ease-in-out infinite alternate;
+}
+@keyframes events-bg-drift {
+  0%   { transform: translate(0, 0) scale(1); }
+  25%  { transform: translate(2%, 1%) scale(1.03); }
+  50%  { transform: translate(-1%, 2%) scale(1.01); }
+  75%  { transform: translate(1%, -1%) scale(1.04); }
+  100% { transform: translate(-2%, 1%) scale(1.02); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .events-section::before { animation: none; }
+}
+/* Film-grain — BLACK noise + overlay blend (the technique from
+   quote-cards.html card #10). */
+.events-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1;
+  opacity: 0.55;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.45 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.events-section > * {
+  position: relative;
+  z-index: 2;
+}
+/* Light theme — pale cream base, orbs slightly softer */
+[data-theme='light'] .events-section {
+  background: linear-gradient(180deg, #f0e8d8 0%, #e0d6c2 100%);
+  border-top-color: rgba(80, 70, 50, 0.12);
+}
+[data-theme='light'] .events-section::before {
+  background:
+    radial-gradient(ellipse 60% 50% at 15% 8%, rgba(201, 169, 110, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 50% 60% at 88% 85%, rgba(180, 130, 65, 0.14) 0%, transparent 55%),
+    radial-gradient(ellipse 40% 40% at 70% 20%, rgba(220, 190, 130, 0.12) 0%, transparent 50%),
+    radial-gradient(ellipse 35% 45% at 20% 75%, rgba(160, 110, 60, 0.1) 0%, transparent 50%);
+}
+[data-theme='light'] .events-section::after {
+  opacity: 0.18;
+  mix-blend-mode: multiply;
+}
+.neues-header {
+  padding: 2rem 4rem 1.4rem;
+  text-align: center;
+}
+.neues-eyebrow {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.5);
+  margin-bottom: 1.1rem;
+}
+.neues-title {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 400;
+  color: #fff;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+  margin-bottom: 0.9rem;
+}
+.neues-title em {
+  color: var(--gold);
+  font-style: italic;
+}
+.neues-subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1rem;
+  font-weight: 300;
+  color: rgba(180, 170, 155, 0.55);
+  line-height: 1.7;
+  max-width: 520px;
+  margin: 0 auto;
+  letter-spacing: 0.02em;
+}
+
+.masonry-wrap {
+  padding: 0 clamp(1.2rem, 3vw, 3.5rem) clamp(1.5rem, 2.5vw, 2.5rem);
+}
+.masonry-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: clamp(10px, 1.2vw, 16px);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.masonry-item {
+  width: 100%;
+  overflow: hidden;
+  border-radius: 20px;
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.65s ease,
+    transform 0.5s cubic-bezier(0.76, 0, 0.24, 1),
+    box-shadow 0.4s ease,
+    border-color 0.4s ease;
+  cursor: pointer;
+  /* Photo card — image as main background, dark scrim only behind the
+     text at the bottom (defined per-variant in .nc-bg). No card-level
+     glass tint — that was muddying the photos. */
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow:
+    0 6px 28px rgba(0, 0, 0, 0.3),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+.masonry-item.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.masonry-item.is-visible:hover {
+  border-color: rgba(201, 169, 110, 0.28);
+  box-shadow:
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  transform: translateY(-3px);
+  z-index: 2;
+}
+
+[data-theme='light'] .masonry-item {
+  background: transparent;
+  border-color: rgba(40, 32, 22, 0.18);
+  box-shadow:
+    0 6px 24px rgba(80, 60, 30, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+[data-theme='light'] .masonry-item.is-visible:hover {
+  border-color: rgba(40, 32, 22, 0.32);
+  box-shadow:
+    0 14px 40px rgba(80, 60, 30, 0.22),
+    inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.masonry-item .img-wrap {
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+/* ── Golden ratio card proportions (φ = 1.618) ── */
+/* landscape φ  : w/h = 1.618  → padding = 1/1.618 = 61.8% */
+.ratio-phi-h .img-wrap {
+  padding-top: 61.8%;
+}
+/* portrait φ   : h/w = 1.618  → padding = 1.618 = 161.8% */
+.ratio-phi-v .img-wrap {
+  padding-top: 161.8%;
+}
+/* panoramic φ² : w/h = 2.618  → padding = 1/2.618 = 38.2% */
+.ratio-phi-w .img-wrap {
+  padding-top: 38.2%;
+}
+/* ── Legacy ratio aliases (used by NewsSection cards) ── */
+.ratio-1-1 .img-wrap {
+  padding-top: 68%;
+}
+.ratio-16-9 .img-wrap {
+  padding-top: 44%;
+}
+.ratio-9-16 .img-wrap {
+  padding-top: 95%;
+}
+.ratio-3-4 .img-wrap {
+  padding-top: 70%;
+}
+.ratio-quote .img-wrap {
+  padding-top: 34%;
+}
+
+/* ── News card inner structure ── */
+.nc {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.nc-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  transition: transform 0.85s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+.masonry-item:hover .nc-bg {
+  transform: scale(1.06);
+}
+.nc-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(160deg, rgba(201, 169, 110, 0.06) 0%, transparent 55%, rgba(0, 0, 0, 0.12) 100%);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+.masonry-item:hover .nc-veil {
+  opacity: 1;
+}
+
+/* per-card backgrounds — photo cards with bottom-heavy dark scrim.
+   Layer order (top to bottom in CSS = front to back visually):
+     1. Bottom-heavy linear scrim (transparent top → dark bottom) for text legibility
+     2. Subtle gold radial tint at top (brand warmth)
+     3. Cover photo
+   Photo dominates upper 2/3 of card; text sits on the dark bottom band. */
+.nc--book .nc-bg {
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
+    radial-gradient(ellipse 70% 40% at 70% 10%, rgba(201, 169, 110, 0.18) 0%, transparent 65%),
+    url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80&fit=crop') center/cover no-repeat;
+}
+.nc--faith .nc-bg {
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
+    radial-gradient(ellipse 60% 40% at 80% 10%, rgba(201, 169, 110, 0.18) 0%, transparent 60%),
+    url('https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=800&q=80&fit=crop') center/cover no-repeat;
+}
+.nc--quote .nc-bg {
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.7) 75%, rgba(0, 0, 0, 0.95) 100%),
+    radial-gradient(ellipse 55% 50% at 0% 30%, rgba(201, 169, 110, 0.14) 0%, transparent 60%),
+    url('https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=80&fit=crop') center/cover no-repeat;
+}
+.nc--song .nc-bg {
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
+    radial-gradient(ellipse 60% 40% at 50% 5%, rgba(201, 169, 110, 0.16) 0%, transparent 60%),
+    url('https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&fit=crop') center/cover no-repeat;
+}
+.nc--youversion .nc-bg {
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
+    radial-gradient(ellipse 70% 40% at 25% 10%, rgba(201, 169, 110, 0.16) 0%, transparent 60%),
+    url('https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=800&q=80&fit=crop') center/cover no-repeat;
+}
+.nc--event .nc-bg {
+  background:
+    linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
+    radial-gradient(ellipse 80% 40% at 50% 5%, rgba(201, 169, 110, 0.16) 0%, transparent 55%),
+    url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=800&q=80&fit=crop') center/cover no-repeat;
+}
+
+
+/* decorative large background icon */
+.nc-bigicon {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  right: -4%;
+  top: 50%;
+  transform: translateY(-50%);
+  opacity: 0.05;
+  color: #c9a96e;
+}
+.nc-bigicon svg {
+  width: clamp(90px, 20vw, 150px);
+  height: auto;
+  stroke: currentColor;
+  stroke-width: 0.7;
+  fill: none;
+}
+
+/* book cover decoration */
+.nc-bookdeco {
+  position: absolute;
+  top: 1.1rem;
+  right: 1.1rem;
+  z-index: 2;
+  width: 48px;
+  height: 68px;
+  background: linear-gradient(145deg, #1c150e 0%, #0e0a06 100%);
+  border-radius: 1px 3px 3px 1px;
+  border: 1px solid rgba(201, 169, 110, 0.22);
+  box-shadow:
+    3px 5px 16px rgba(0, 0, 0, 0.65),
+    inset -2px 0 5px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+  opacity: 0.8;
+}
+.nc-bookdeco::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 5px;
+  background: linear-gradient(
+    to bottom,
+    rgba(201, 169, 110, 0.55),
+    rgba(201, 169, 110, 0.2),
+    rgba(201, 169, 110, 0.55)
+  );
+}
+.nc-bookdeco-text {
+  padding: 0.45rem 0.3rem 0.45rem 0.7rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: rgba(201, 169, 110, 0.75);
+  line-height: 1.5;
+  letter-spacing: 0.04em;
+}
+
+/* waveform (song card) */
+.nc-wave {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 38%;
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  padding: 0 1.1rem 0;
+  opacity: 0.09;
+  z-index: 1;
+}
+.nc-wave span {
+  flex: 1;
+  background: #c9a96e;
+  border-radius: 1px 1px 0 0;
+}
+
+/* quote accent bar */
+.nc-quote-accent {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3.2rem;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1.15rem;
+}
+.nc-quote-bar {
+  width: 1px;
+  flex: 1;
+  background: linear-gradient(to bottom, rgba(201, 169, 110, 0.7) 0%, rgba(201, 169, 110, 0.08) 80%, transparent 100%);
+  margin-bottom: 0.3rem;
+}
+.nc-quote-glyph {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: 4.5rem;
+  line-height: 0.6;
+  color: rgba(201, 169, 110, 0.55);
+  writing-mode: vertical-rl;
+  transform: rotate(180deg) translateX(-0.08em);
+  user-select: none;
+  pointer-events: none;
+  text-shadow: 0 0 40px rgba(201, 169, 110, 0.18);
+  padding-bottom: 1rem;
+}
+
+/* body / text */
+.nc-body {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 1.2rem 1.15rem;
+  justify-content: flex-end;
+}
+.nc--quote .nc-body {
+  justify-content: center;
+  align-items: flex-start;
+  text-align: left;
+  padding-left: 3.8rem;
+}
+
+.nc-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.6);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.nc-label::before {
+  content: '';
+  width: 12px;
+  height: 1px;
+  background: rgba(201, 169, 110, 0.38);
+  flex-shrink: 0;
+}
+.nc-title {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: clamp(0.85rem, 1.6vw, 1.15rem);
+  color: rgba(228, 218, 202, 0.9);
+  line-height: 1.25;
+  margin-bottom: 0.35rem;
+}
+.nc--quote .nc-title {
+  font-size: clamp(0.9rem, 1.6vw, 1.1rem);
+  color: rgba(228, 218, 202, 0.88);
+  line-height: 1.55;
+  margin-bottom: 0.55rem;
+}
+.nc-sub {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.75rem;
+  font-weight: 300;
+  color: rgba(145, 135, 120, 0.85);
+  letter-spacing: 0.03em;
+  line-height: 1.55;
+}
+.nc-ref {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.5);
+}
+.nc-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid rgba(201, 169, 110, 0.25);
+  color: rgba(201, 169, 110, 0.45);
+  text-decoration: none;
+  margin-top: 0.75rem;
+  flex-shrink: 0;
+  transition:
+    color 0.3s,
+    border-color 0.3s,
+    background 0.3s,
+    transform 0.3s;
+}
+.nc:hover .nc-cta {
+  color: rgba(201, 169, 110, 0.9);
+  border-color: rgba(201, 169, 110, 0.55);
+  background: rgba(201, 169, 110, 0.07);
+  transform: scale(1.08);
+}
+.nc-cta svg {
+  width: 10px;
+  height: 10px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  /* Events */
+  .events-section {
+    padding: 0;
+  }
+  .neues-header {
+    padding: 3.5rem 2.5rem 3rem;
+  }
+  .masonry-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .masonry-item:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Events */
+  .neues-header {
+    padding: 3rem 1.6rem 2.5rem;
+  }
+  .masonry-wrap {
+    padding: 0 1rem 3rem;
+  }
+  .masonry-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+}
+
+/* ── Light theme ── */
+/* News section — merge with page bg in light theme (one continuous paper) */
+[data-theme='light'] .events-section { background: var(--dark); border-top-color: var(--border); }
+[data-theme='light'] .neues-title { color: var(--text-strong); }
+[data-theme='light'] .neues-subtitle { color: var(--muted); }
+[data-theme='light'] .masonry-item::after { background: rgba(146, 114, 35, 0.10); }
+
+/* News cards — photo cards work the same in both themes (photo + dark
+   scrim + light text). No theme-specific bg/text overrides needed. */

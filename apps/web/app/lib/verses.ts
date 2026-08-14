@@ -132,3 +132,104 @@ export function pickVerse(locale: string): Verse {
   const hourOfWeek = now.getDay() * 24 + now.getHours(); // 0–167
   return verses[hourOfWeek % verses.length];
 }
+
+/**
+ * Words worth setting apart inside a verse.
+ *
+ * Two tiers, and the order matters. Concepts come first because the divine
+ * name appears in most verses — highlighting "Gott" every hour marks nothing,
+ * it just repeats what the reader already knows. Reaching for the image of the
+ * verse instead (Hirte, erquicken, Herzen, Gnade) makes each hour read
+ * differently: across the 32 German verses this picks 25 distinct words.
+ * Names are the fallback for verses that carry no such concept, and a long
+ * word is the last resort — in German the theologically weighty term is
+ * usually the long compound anyway.
+ */
+const CONCEPTS_DE = new Set([
+  'Liebe',
+  'Leben',
+  'Licht',
+  'Wahrheit',
+  'Gnade',
+  'Frieden',
+  'Friede',
+  'Hoffnung',
+  'Kraft',
+  'Freude',
+  'Trost',
+  'Gerechtigkeit',
+  'Barmherzigkeit',
+  'Ewigkeit',
+  'Glaube',
+  'Glauben',
+  'Herz',
+  'Herzen',
+  'Seele',
+  'Geist',
+  'Weg',
+  'Hirte',
+  'Heil',
+  'erquicken',
+  'überwunden',
+  'Ruhe',
+  'Weisheit',
+  'Wort',
+]);
+const NAMES_DE = new Set(['Gott', 'Gottes', 'HERR', 'HERRN', 'Herr', 'Herrn', 'Jesus', 'Christus', 'Vater', 'Sohn']);
+
+const CONCEPTS_EN = new Set([
+  'love',
+  'life',
+  'light',
+  'truth',
+  'grace',
+  'peace',
+  'hope',
+  'strength',
+  'joy',
+  'comfort',
+  'righteousness',
+  'mercy',
+  'eternal',
+  'faith',
+  'heart',
+  'soul',
+  'spirit',
+  'Spirit',
+  'way',
+  'shepherd',
+  'rest',
+  'wisdom',
+  'word',
+  'Word',
+  'saved',
+  'free',
+]);
+const NAMES_EN = new Set(['God', 'LORD', 'Lord', 'Jesus', 'Christ', 'Father', 'Son']);
+
+export interface VerseParts {
+  before: string;
+  word: string;
+  after: string;
+}
+
+/** Split a verse around its one emphasised word. Returns null when nothing stands out. */
+export function splitVerse(text: string, locale: string): VerseParts | null {
+  const concepts = locale === 'en' ? CONCEPTS_EN : CONCEPTS_DE;
+  const names = locale === 'en' ? NAMES_EN : NAMES_DE;
+
+  const matches = Array.from(text.matchAll(/[\wÄÖÜäöüß]+/g));
+  if (matches.length === 0) return null;
+
+  const hit =
+    matches.find((m) => concepts.has(m[0])) ??
+    matches.find((m) => names.has(m[0])) ??
+    matches.filter((m) => m[0].length >= 8).sort((a, b) => b[0].length - a[0].length)[0];
+  if (!hit || hit.index === undefined) return null;
+
+  return {
+    before: text.slice(0, hit.index),
+    word: hit[0],
+    after: text.slice(hit.index + hit[0].length),
+  };
+}

@@ -56,9 +56,18 @@ hero_bg_key, hero_bg_alt
 about_text_1, about_text_2, about_image_key, about_image_alt, about_link_url
 facebook_url, whatsapp_url, instagram_url, youtube_url
 bible_translations
+home_grid
 ```
 
 `bible_translations` is a JSON array of enabled YouVersion Bible IDs (e.g. `"[51,143]"`), written by Admin → Bible and read by the public `/bible/*` routes. **Bible text itself is never stored** — see [api.md](api.md#bible-content).
+
+**`home_grid` is the one key that holds a document, not a scalar.** Its value is
+`JSON.stringify(HomeGridConfig)` — the five homepage bento blocks with roughly a
+dozen settings each in two languages, about a hundred values. Flat keys cannot
+carry that. Read it with `parseGridConfig()` from `@sdarm/types`, which merges
+whatever is stored onto the defaults and tolerates missing or malformed fields
+rather than throwing: a bad value in KV must not be able to blank the homepage.
+The generic admin Config page excludes this key; it is edited at `/home-grid`.
 
 ## Drizzle notes
 

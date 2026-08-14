@@ -14,7 +14,25 @@
 
 ## Styling
 
-No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
+No Tailwind, no CSS-in-JS. Pure class-based CSS, loaded through the app's `globals.css`.
+
+**One CSS file per section or page.** A section's file owns *everything* for that section — its base rules, its `@media` breakpoints, and its `[data-theme='light']` overrides. There are no global "responsive" or "light theme" blocks: if you are changing a section, everything you need is in one file.
+
+`globals.css` is an `@import` index only — no rules of its own. Import order mirrors the intended cascade order.
+
+```
+apps/web/app/
+  globals.css              ← @import index, no rules
+  styles/
+    fonts.css
+    hero-welcome.css       ← base + @media + [data-theme='light']
+    news.css
+    …
+```
+
+The same pattern is used by `packages/ui/src/styles/index.css`. It exists so that (a) a section can be changed in one place instead of four, and (b) parallel feature branches edit different files instead of colliding in one trailing block.
+
+Styles for a component that exists but is not rendered anywhere stay in `styles/` **without** an `@import` line, with a comment saying why. Do not delete them; do not load them.
 
 **Design tokens (CSS custom properties):**
 
@@ -26,7 +44,7 @@ No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
   --sidebar-w: 220px --admin-bg: #f4f2ef;
 ```
 
-**Typography stack (web):** Cormorant Garamond (body), DM Serif Display (headings, italic), Playfair Display (logo, footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Loaded via `@import` in `globals.css`.
+**Typography stack (web):** Cormorant Garamond (body), DM Serif Display (headings, italic), Playfair Display (logo, footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Self-hosted via `@fontsource/*` in `packages/ui/src/styles/tokens.css`.
 
 **Full-width layout.** All sections are full-width (no `.page` wrapper, no grid margins). Section backgrounds span the viewport.
 
@@ -50,13 +68,16 @@ No Tailwind, no CSS-in-JS. Pure class-based CSS in the app's `globals.css`.
 | --------------- | ------------------------------------- | -------------------------------- |
 | `API_URL`       | `http://localhost:8787/api/v1`        | `https://api.sdarm.life/api/v1`  |
 | `R2_URL`        | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life`      |
+| `NEXT_PUBLIC_R2_URL` | `http://localhost:8787/api/v1/images` | _(unset — the fallback is already the production host)_ |
 | `WEB_URL`       | `http://localhost:3000`               | `https://sdarm.life`             |
 | `TREASURES_URL` | `http://localhost:3002`               | `https://treasures.sdarm.life`   |
 | `SONGBOOK_URL`  | `http://localhost:3003`               | `https://songs.sdarm.life`       |
 | `EVENTS_URL`    | `http://localhost:3004`               | `https://events.sdarm.life`      |
 | `R2_TRANSFORMS` | _(not set)_                           | _(not set — enabled by default)_ |
 
-Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — pass as props from the server component.
+Server-only (no `NEXT_PUBLIC_` prefix) apart from `NEXT_PUBLIC_R2_URL`. Client components cannot read these — pass as props from the server component.
+
+`NEXT_PUBLIC_R2_URL` exists because `StatsGrid` is a client component and resolves the grid card photos through `r2url()`. With only the server-only `R2_URL`, the server rendered `http://localhost:8787/...` while the browser fell back to `https://images.sdarm.life` — a hydration mismatch on every card image, and in local dev the client asked the production host for a file that only exists in `.wrangler`. Production does not need it set: the fallback is already the production host. Same reason `apps/treasures` carries it.
 
 `WEB_URL`, `TREASURES_URL`, `SONGBOOK_URL`, and `EVENTS_URL` are used to build cross-app links (e.g. NewsSection cards linking to other apps). Never hardcode these URLs — always read from `lib/api.ts`.
 
@@ -69,10 +90,13 @@ Server-only (no `NEXT_PUBLIC_` prefix). Client components cannot read these — 
 | `API_URL`             | `http://localhost:8787`               | `https://api.sdarm.life`    | server-only |
 | `API_KEY`             | `dev`                                 | managed API key             | **server-only** |
 | `NEXT_PUBLIC_R2_URL`  | `http://localhost:8787/api/v1/images` | `https://images.sdarm.life` | browser OK  |
+| `NEXT_PUBLIC_WEB_URL` | `http://localhost:3000`               | `https://sdarm.life`        | browser OK  |
 
 **Never prefix `API_KEY` with `NEXT_PUBLIC_`** — it would embed the bearer token in the JS bundle. Admin API calls go same-origin (`/api/v1/*`) and are proxied server-side by `apps/admin/app/api/v1/[...path]/route.ts`, which injects the bearer from the server-only `API_KEY` env var.
 
 `API_URL` has **no `/api/v1` suffix** — the proxy appends the path itself.
+
+`NEXT_PUBLIC_WEB_URL` is the site the homepage-grid preview iframe points at. Browser-exposed by necessity, and harmless — it is a public URL.
 
 ### `apps/songbook`
 
