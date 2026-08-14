@@ -1,3 +1,25 @@
+# [1.2.0](https://github.com/theDeniZ/sdarm.life/compare/v1.1.0...v1.2.0) (2026-08-14)
+
+
+### Bug Fixes
+
+* **admin:** stop the homepage grid editor pushing the page sideways ([783b437](https://github.com/theDeniZ/sdarm.life/commit/783b437a37e6450680e3fa0e045455d8f344089e))
+* **admin:** stop the song editor deleting a song's parts on Save ([756c6a4](https://github.com/theDeniZ/sdarm.life/commit/756c6a4ebb8d54acef88361fbb5d11c68040edc5)), closes [#141](https://github.com/theDeniZ/sdarm.life/issues/141)
+* screenshot tests ([1343dfe](https://github.com/theDeniZ/sdarm.life/commit/1343dfe90f6fa536752e4c1326610c0a7ef13756))
+* **songbook:** landing grid stops depending on there being four songbooks ([bdf0382](https://github.com/theDeniZ/sdarm.life/commit/bdf0382ea78a2ffe5187a59d16ed365038d75da0)), closes [#f3f1ec](https://github.com/theDeniZ/sdarm.life/issues/f3f1ec) [#127](https://github.com/theDeniZ/sdarm.life/issues/127)
+* **ui:** the footer newsletter field stops resizing itself ([dad9b2e](https://github.com/theDeniZ/sdarm.life/commit/dad9b2e3793de7ec0d8585159bf20f477508564d)), closes [#132](https://github.com/theDeniZ/sdarm.life/issues/132)
+* **web:** bound the hero's height and shrink the planet ([ecb9ea5](https://github.com/theDeniZ/sdarm.life/commit/ecb9ea545bf5124bd7cd11cfbfe8e0d77667b6da))
+* **web:** keep the grid preview pinned to the section it is previewing ([0648b95](https://github.com/theDeniZ/sdarm.life/commit/0648b95dcd329cc0ab63f150a12dd1e5f9815d93))
+* **web:** mobile column heights were 12px apart ([fb89d70](https://github.com/theDeniZ/sdarm.life/commit/fb89d70dd4a2d3f50ae7c25344d47e5f15fcbc92))
+* **web:** resolve R2 from NEXT_PUBLIC_R2_URL so card images hydrate ([e28aeda](https://github.com/theDeniZ/sdarm.life/commit/e28aedab6350a771d7bddb759d7816b8192d5598))
+
+
+### Features
+
+* **admin:** configure the homepage grid, with a live preview ([fe2e1bf](https://github.com/theDeniZ/sdarm.life/commit/fe2e1bf47b35869d91ccaf9cc09a60169170c974)), closes [#6b4f2a](https://github.com/theDeniZ/sdarm.life/issues/6b4f2a)
+* **web:** bento stats grid replaces the Releases section ([d8279b3](https://github.com/theDeniZ/sdarm.life/commit/d8279b307422d963512168cd334a818c0f230f5f)), closes [#126](https://github.com/theDeniZ/sdarm.life/issues/126)
+* **web:** fix the card heights, drop the section heading, point the book block at the songbook ([415a2c7](https://github.com/theDeniZ/sdarm.life/commit/415a2c789179a26d7fc693dedd6b7dcd6e96eb7f))
+
 # [1.1.0](https://github.com/theDeniZ/sdarm.life/compare/v1.0.1...v1.1.0) (2026-08-13)
 
 
