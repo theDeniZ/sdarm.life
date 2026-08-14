@@ -212,6 +212,31 @@ function mapBook(b: YvBookMeta, index: number): BookRow {
   };
 }
 
+const NAMED_ENTITIES: Record<string, string> = {
+  nbsp: ' ',
+  amp: '&',
+  lt: '<',
+  gt: '>',
+  quot: '"',
+  apos: "'",
+};
+
+/**
+ * Decode the HTML entities YouVersion emits in passage content.
+ *
+ * They are mostly *numeric* — DELUT Matthew 2:6 comes over the wire as
+ * `&#34;Und du Bethlehem…&#34;` and `Juda&#39;s` — so a fixed list of named
+ * entities is not enough. One pass, not a chain of `.replace()` calls: chained
+ * decoding of `&amp;` before the rest turns a literal `&amp;quot;` into a quote.
+ */
+function decodeEntities(s: string): string {
+  return s.replace(/&(#\d+|#[xX][0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g, (whole, body: string) => {
+    if (body[0] !== '#') return NAMED_ENTITIES[body.toLowerCase()] ?? whole;
+    const cp = body[1] === 'x' || body[1] === 'X' ? parseInt(body.slice(2), 16) : Number(body.slice(1));
+    return Number.isInteger(cp) && cp > 0 && cp <= 0x10ffff ? String.fromCodePoint(cp) : whole;
+  });
+}
+
 /**
  * Split a YouVersion HTML passage into verses.
  *
@@ -231,20 +256,15 @@ export function parseHtmlPassage(html: string): { verse: number; text: string }[
 
   const out = new Map<number, string>();
   for (let i = 0; i < hits.length; i++) {
-    const slice = html
+    const raw = html
       .slice(hits[i].end, i + 1 < hits.length ? hits[i + 1].start : html.length)
       .replace(/<span class="yv-vlbl"[^>]*>[^<]*<\/span>/g, '')
       // Poetry lines are separate block elements; without this, the last word of
       // one line runs into the first word of the next ("мой;я ни в чем").
       .replace(/<br\s*\/?>/gi, ' ')
       .replace(/<\/(p|div|li)>/gi, ' ')
-      .replace(/<[^>]+>/g, '')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
+      .replace(/<[^>]+>/g, '');
+    const slice = decodeEntities(raw)
       .replace(/\s+/g, ' ')
       .trim();
     if (!slice) continue;
