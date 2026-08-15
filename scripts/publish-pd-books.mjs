@@ -19,12 +19,26 @@
  * Promise.all(items.map(createTreasure)) with no upsert and no unique constraint
  * on title or epub_url, so re-running it duplicates every row with no way back
  * except manual deletes. This script therefore reads the existing treasures
- * first and only creates what is genuinely missing.
+ * first and only creates what is genuinely missing — and, as of this version,
+ * only *uploads* what is genuinely missing too (see UPLOAD MECHANISM below).
+ *
+ * UPLOAD MECHANISM — deliberately not wrangler for remote environments:
+ * staging/production uploads go through POST /admin/treasures/epub/upload
+ * (the same authenticated endpoint the admin UI's EpubPicker uses), not
+ * `wrangler r2 object put`. Direct R2 access needs a Cloudflare account-level
+ * API token; this script is meant to run with only the app's ADMIN_API_KEY,
+ * which is the credential actually available in CI and to non-infra operators.
+ * The one exception is `--env local`, where `wrangler ... --local` writes to
+ * the same on-disk Miniflare state `wrangler dev` reads — no network, no
+ * Cloudflare credentials, and it keeps the deterministic `books/<slug>.epub`
+ * key from the manifest. The upload-endpoint path generates its own UUID key
+ * per file (same as a human uploading one book by hand in the admin UI) —
+ * treasures.epub_key does not need to be human-readable, only stable.
  */
 
 import { readFileSync, existsSync, statSync } from 'node:fs';
 import { execFileSync } from 'node:child_process';
-import { resolve, dirname } from 'node:path';
+import { resolve, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -35,7 +49,8 @@ const LOCAL_R2_PERSIST = resolve(ROOT, 'apps/api/.wrangler/state');
 // instead ignores that pin — with no cached npx install, every single call (one per
 // book) re-resolves and reinstalls wrangler from the registry into ~/.npm/_npx, which
 // is both ~100x slower per call and enough memory/IO pressure under this container's
-// limits to OOM-kill unrelated processes (including a running `wrangler dev`).
+// limits to OOM-kill unrelated processes (including a running `wrangler dev`). Only
+// used for --env local; never falls back to npx.
 const WRANGLER_BIN = resolve(ROOT, 'apps/api/node_modules/.bin/wrangler');
 
 const ENVS = {
@@ -78,10 +93,14 @@ publish-pd-books — upload PD EPUBs to R2 and register them as treasures
                               third-party copyright assertion in its OPF
                               (default: these are HELD BACK pending legal review)
   --only <substring>          restrict to slugs containing this substring
-  --skip-upload               only sync metadata, assume R2 objects already exist
+  --skip-upload               don't upload — assume the manifest's r2Key already
+                              exists in the bucket (only meaningful if a prior
+                              run already uploaded under that deterministic key,
+                              e.g. a previous --env local run)
 
-Requires ADMIN_API_KEY in the environment for the metadata step.
-R2 upload shells out to wrangler, which must already be authenticated.
+Requires ADMIN_API_KEY in the environment — used both to read/write treasures
+and, for staging/production, to upload EPUBs via POST /admin/treasures/epub/upload.
+No Cloudflare account credentials are needed for any environment.
 `;
 
 /** OPF rights strings that mean "someone else asserts a copyright over this file". */
@@ -104,13 +123,30 @@ async function fetchExistingTreasures(api, key) {
   return body.items ?? [];
 }
 
-function uploadToR2(env, key, file, execute) {
-  const args = ['r2', 'object', 'put', `${env.bucket}/${key}`, '--file', file, '--content-type', 'application/epub+zip'];
-  if (env.local) args.push('--local', '--persist-to', LOCAL_R2_PERSIST);
-  else args.push('--remote');
-  if (!execute) return `wrangler ${args.join(' ')}`;
+/** --env local only: writes straight into the Miniflare state `wrangler dev` reads. */
+function uploadToR2Local(env, key, file) {
+  const args = [
+    'r2', 'object', 'put', `${env.bucket}/${key}`,
+    '--file', file,
+    '--content-type', 'application/epub+zip',
+    '--local', '--persist-to', LOCAL_R2_PERSIST,
+  ];
   execFileSync(WRANGLER_BIN, args, { cwd: ROOT, stdio: 'pipe' });
-  return null;
+}
+
+/** staging/production: the same authenticated upload the admin UI's EpubPicker uses. */
+async function uploadEpubViaApi(api, apiKey, file) {
+  const buf = readFileSync(file);
+  const form = new FormData();
+  form.append('file', new File([buf], basename(file), { type: 'application/epub+zip' }));
+  const res = await fetch(`${api}/api/v1/admin/treasures/epub/upload`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${apiKey}` },
+    body: form,
+  });
+  if (!res.ok) throw new Error(`upload of ${basename(file)} failed: ${res.status} ${await res.text()}`);
+  const { key } = await res.json();
+  return key;
 }
 
 async function main() {
@@ -121,8 +157,8 @@ async function main() {
   if (!env) throw new Error(`--env must be one of: ${Object.keys(ENVS).join(', ')}`);
   if (!existsSync(MANIFEST)) throw new Error(`Manifest not found: ${MANIFEST}\nRun pd-books/catalog/build_catalog.mjs first.`);
   // Fail fast, before the upload loop starts, with a fix rather than a stack trace on
-  // book 1 of 68. Deliberately never falls back to `npx wrangler` — see WRANGLER_BIN comment.
-  if (args.execute && !args.skipUpload && !existsSync(WRANGLER_BIN)) {
+  // book 1 of N. Deliberately never falls back to `npx wrangler` — see WRANGLER_BIN comment.
+  if (args.execute && !args.skipUpload && env.local && !existsSync(WRANGLER_BIN)) {
     throw new Error(`wrangler binary not found at ${WRANGLER_BIN}\nRun: cd apps/api && pnpm install`);
   }
 
@@ -175,21 +211,31 @@ async function main() {
     console.log();
   }
 
-  if (!toCreate.length && !args.skipUpload && !publish.length) {
-    console.log('Nothing to do.');
+  if (!toCreate.length) {
+    console.log('Nothing to do — everything publishable already has a treasure row.');
     return;
   }
 
-  // ── 1. R2 upload ───────────────────────────────────────────────────────────
+  // ── 1. upload EPUBs (only for books that don't have a treasure row yet — the batch
+  // ── create below is what actually makes a book "done", so an upload with no matching
+  // ── row is safe to retry; a duplicate upload for an already-created book is not) ──
   if (!args.skipUpload) {
     let bytes = 0;
-    console.log(`UPLOADING ${publish.length} EPUBs to r2://${env.bucket}/books/`);
-    for (const w of publish) {
+    console.log(`${args.execute ? 'UPLOADING' : 'WOULD UPLOAD'} ${toCreate.length} EPUBs to ${env.local ? `r2://${env.bucket}/books/` : `${env.api} (via admin API)`}`);
+    for (const w of toCreate) {
       const size = statSync(w.file).size;
       bytes += size;
-      const cmd = uploadToR2(env, w.r2Key, w.file, args.execute);
-      console.log(`   ${args.execute ? 'put ' : '    '}${w.r2Key.padEnd(56)} ${(size / 1024).toFixed(0)} kB`);
-      if (cmd) console.log(`        ${cmd}`);
+      if (!args.execute) {
+        console.log(`        ${w.r2Key.padEnd(56)} ${(size / 1024).toFixed(0)} kB`);
+        continue;
+      }
+      if (env.local) {
+        uploadToR2Local(env, w.r2Key, w.file);
+        w.uploadedKey = w.r2Key;
+      } else {
+        w.uploadedKey = await uploadEpubViaApi(env.api, apiKey, w.file);
+      }
+      console.log(`   put ${w.uploadedKey.padEnd(56)} ${(size / 1024).toFixed(0)} kB`);
     }
     console.log(`   total ${(bytes / 1e6).toFixed(1)} MB\n`);
   }
@@ -208,7 +254,7 @@ async function main() {
     price: null,
     sortOrder: w.sortOrder,
     epubUrl: null,
-    epubKey: w.r2Key,
+    epubKey: args.skipUpload ? w.r2Key : w.uploadedKey,
   }));
 
   console.log(`POSTING ${payload.length} treasure rows to ${env.api}/api/v1/admin/treasures/batch`);
@@ -217,10 +263,6 @@ async function main() {
 
   if (!args.execute) {
     console.log('\nDry run — nothing uploaded, nothing posted. Re-run with --execute.');
-    return;
-  }
-  if (!payload.length) {
-    console.log('\nAll rows already present; metadata step skipped.');
     return;
   }
 
