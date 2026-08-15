@@ -1,3 +1,15 @@
+# [1.3.0](https://github.com/theDeniZ/sdarm.life/compare/v1.2.1...v1.3.0) (2026-08-15)
+
+
+### Bug Fixes
+
+* books script ([1889d8b](https://github.com/theDeniZ/sdarm.life/commit/1889d8be78745fec55218cfe9fdb5604968092cc))
+
+
+### Features
+
+* epub books + local hosting ([cb76900](https://github.com/theDeniZ/sdarm.life/commit/cb769005e3cf3f91e0469720bd691f169d55d604))
+
 ## [1.2.1](https://github.com/theDeniZ/sdarm.life/compare/v1.2.0...v1.2.1) (2026-08-14)
 
 
