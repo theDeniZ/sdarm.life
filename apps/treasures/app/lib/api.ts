@@ -38,6 +38,7 @@ export interface Treasure {
   price: string | null;
   sortOrder: number;
   epubUrl: string | null;
+  epubKey: string | null;
 }
 
 export async function fetchTreasureById(id: number): Promise<Treasure | null> {

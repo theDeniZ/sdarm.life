@@ -20,6 +20,7 @@ const TreasureBody = z.object({
   price: z.string().nullable().optional(),
   sortOrder: z.number().int().optional(),
   epubUrl: z.string().nullable().optional(),
+  epubKey: z.string().nullable().optional(),
 });
 
 router.openapi(
@@ -103,6 +104,64 @@ router.openapi(
     const origin = new URL(c.req.url).origin;
     purgeCache(c.executionCtx, origin, ['/api/v1/treasures', `/api/v1/treasures/${treasure.id}`], c.env);
     return c.json(treasure, 200);
+  },
+);
+
+// Browsers inconsistently report the EPUB mime type — some send 'application/octet-stream'
+// or nothing at all since EPUB is an uncommon type on the OS's registry. The extension is
+// the reliable signal; content-type is only used to reject an obviously wrong file.
+const EPUB_CONTENT_TYPES = ['application/epub+zip', 'application/octet-stream', ''];
+
+router.openapi(
+  createRoute({
+    method: 'post',
+    path: '/treasures/epub/upload',
+    tags: ['Admin / Treasures'],
+    security: [{ bearerAuth: [] }],
+    request: {
+      body: {
+        content: {
+          'multipart/form-data': {
+            schema: z.object({
+              file: z.any().openapi({ type: 'string', format: 'binary', description: 'EPUB file to upload' }),
+            }),
+          },
+        },
+        required: true,
+      },
+    },
+    responses: {
+      200: {
+        content: { 'application/json': { schema: z.object({ key: z.string() }) } },
+        description: 'R2 object key of the uploaded EPUB',
+      },
+      400: {
+        content: { 'application/json': { schema: ErrorSchema } },
+        description: 'No file provided, or file is not an EPUB',
+      },
+    },
+  }),
+  // Multipart: use formData() directly — Zod body validation is skipped
+  async (c) => {
+    const form = await c.req.formData();
+    const file = form.get('file') as File | null;
+
+    if (!file) return c.json({ error: 'No file' }, 400);
+
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    if (ext !== 'epub' || !EPUB_CONTENT_TYPES.includes(file.type)) {
+      return c.json({ error: 'File must be an EPUB' }, 400);
+    }
+
+    const key = `books/${crypto.randomUUID()}.epub`;
+
+    // No `images` D1 row here on purpose — that table drives the admin Image Library's
+    // usage tracking against posts/config, and an EPUB isn't part of that domain.
+    await c.env.IMAGES.put(key, file.stream(), {
+      httpMetadata: { contentType: 'application/epub+zip', cacheControl: 'public, max-age=31536000, immutable' },
+    });
+
+    return c.json({ key }, 200);
   },
 );
 

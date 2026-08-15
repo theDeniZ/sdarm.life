@@ -116,7 +116,7 @@ export default function TreasureList() {
                 <td>{t.author ?? '—'}</td>
                 <td>{t.language}</td>
                 <td>{t.isFree ? <span className="badge badge-free">Free</span> : (t.price ?? '—')}</td>
-                <td>{t.epubUrl ? '●' : ''}</td>
+                <td>{t.epubUrl || t.epubKey ? '●' : ''}</td>
                 <td>
                   <div className="td-actions">
                     <Link href={`/treasures/${t.id}`} className="btn-ghost">

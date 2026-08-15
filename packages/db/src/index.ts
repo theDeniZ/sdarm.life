@@ -138,6 +138,7 @@ export const treasures = sqliteTable('treasures', {
   price:            text('price'),
   sortOrder:        integer('sort_order').notNull().default(0),
   epubUrl:          text('epub_url'),
+  epubKey:          text('epub_key'),
   createdAt:        integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
   updatedAt:        integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
 }, (t) => [

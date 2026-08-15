@@ -17,6 +17,7 @@ function row(r: typeof treasures.$inferSelect) {
     price: r.price ?? null,
     sortOrder: r.sortOrder,
     epubUrl: r.epubUrl ?? null,
+    epubKey: r.epubKey ?? null,
     createdAt: r.createdAt.toISOString(),
     updatedAt: r.updatedAt.toISOString(),
   };
@@ -60,6 +61,7 @@ export interface CreateTreasureInput {
   price?: string | null;
   sortOrder?: number;
   epubUrl?: string | null;
+  epubKey?: string | null;
 }
 
 export async function createTreasure(db: DrizzleD1Database, data: CreateTreasureInput) {
@@ -78,6 +80,7 @@ export async function createTreasure(db: DrizzleD1Database, data: CreateTreasure
       price: data.price ?? null,
       sortOrder: data.sortOrder ?? 0,
       epubUrl: data.epubUrl ?? null,
+      epubKey: data.epubKey ?? null,
     })
     .returning();
   return row(r);

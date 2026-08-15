@@ -113,6 +113,7 @@ export interface TreasureDto {
   price: string | null;
   sortOrder: number;
   epubUrl: string | null;
+  epubKey: string | null;
   createdAt: string;
   updatedAt: string;
 }

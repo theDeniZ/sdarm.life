@@ -40,6 +40,7 @@ export default function EditTreasurePage() {
           price: treasure.price ?? '',
           sortOrder: treasure.sortOrder,
           epubUrl: treasure.epubUrl ?? '',
+          epubKey: treasure.epubKey,
         }}
       />
     </>

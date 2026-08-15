@@ -1,0 +1,1 @@
+ALTER TABLE `treasures` ADD `epub_key` text;
