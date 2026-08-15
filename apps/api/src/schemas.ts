@@ -146,6 +146,7 @@ export const TreasureSchema = z
     price: z.string().nullable(),
     sortOrder: z.number(),
     epubUrl: z.string().nullable(),
+    epubKey: z.string().nullable(),
     createdAt: z.string(),
     updatedAt: z.string(),
   })

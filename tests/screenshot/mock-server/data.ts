@@ -92,6 +92,7 @@ export const mockTreasure = {
   price: null,
   sortOrder: 1,
   epubUrl: null,
+  epubKey: null,
   createdAt: '2025-01-01T00:00:00Z',
   updatedAt: '2025-01-01T00:00:00Z',
 };

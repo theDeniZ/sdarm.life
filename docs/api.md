@@ -34,6 +34,8 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/geocode` | Geocode proxy. `?q=` (1–100 chars, required), `?limit=N` (1–10, default 3). Forwards to Nominatim with the project User-Agent and caches the upstream JSON in KV for 30 days. Hides the user's IP from OpenStreetMap (DSGVO). Response: `X-Cache: HIT|MISS`; upstream errors return `[]` to keep the autocomplete resilient. |
 | `GET` | `/api/v1/og` | Generated OpenGraph social card (1200×630 PNG). `?type=post\|song\|treasure`, `?slug=` (post) or `?id=` (song/treasure), `?locale=de\|en`, optional `?v=` (content `updatedAt`, makes the URL self-busting). Rendered with `workers-og` (Satori + resvg-wasm), self-hosted Lexend + Noto-Sans-Cyrillic fonts (DSGVO-clean, no external fetch). KV-cached 24 h (`X-Cache: HIT\|MISS`) + `Cache-Control: public, max-age=3600`. Cover fetched from the R2 binding and embedded. Binary responder — excluded from the OpenAPI spec, like the local-dev R2 proxy. 400 on missing/invalid params, 404 if the content doesn't exist. |
 
+**`epubKey` wins over `epubUrl`.** A treasure carries both fields (see [schema.md](schema.md)); when `epubKey` is set, `apps/treasures` resolves the reader URL via `r2url(epubKey)` (self-hosted, on `images.sdarm.life`) and ignores `epubUrl`. When `epubKey` is null, `epubUrl` is used as-is (external host, e.g. `media2.egwwritings.org`). This lets self-hosted books coexist with the ~49 existing rows that still point at the external host without touching them.
+
 ## Admin routes
 
 Require `Authorization: Bearer <key>` on every request.
@@ -68,6 +70,7 @@ Require `Authorization: Bearer <key>` on every request.
 | `POST` | `/api/v1/admin/treasures/batch` | Bulk-create. Body: array of treasure objects. Returns `{ created: N }`. |
 | `PATCH` | `/api/v1/admin/treasures/:id` | Partial update. |
 | `DELETE` | `/api/v1/admin/treasures/:id` | Hard-delete treasure. |
+| `POST` | `/api/v1/admin/treasures/epub/upload` | `multipart/form-data` (`file`) → validates extension is `.epub` → stores at `books/{uuid}.epub` in R2 (`IMAGES` binding) → returns `{ key }`. Does **not** insert into the `images` D1 table — that table drives Image Library usage-tracking against posts/config, and an EPUB isn't part of that domain. 400 if the file isn't an EPUB. |
 | `GET` | `/api/v1/admin/api-keys` | List all API keys (active + revoked). |
 | `POST` | `/api/v1/admin/api-keys` | Create key. Body: `{ name }`. Returns `{ key, apiKey }` — plaintext shown once. |
 | `DELETE` | `/api/v1/admin/api-keys/:id` | Revoke key — removes from KV, marks revoked in index. |

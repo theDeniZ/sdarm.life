@@ -11,6 +11,7 @@ export type TreasureListItem = Pick<
   | 'price'
   | 'sortOrder'
   | 'epubUrl'
+  | 'epubKey'
   | 'coverKey'
   | 'createdAt'
 >;
@@ -28,4 +29,5 @@ export interface TreasureFormData {
   price: string;
   sortOrder: number;
   epubUrl: string;
+  epubKey: string | null;
 }

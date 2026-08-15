@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import ImagePicker from '../images/ImagePicker';
+import EpubPicker from './EpubPicker';
 import { createTreasure, updateTreasure } from './repository';
 import type { TreasureFormData } from './types';
 
@@ -28,6 +29,7 @@ export default function TreasureForm({ id, initial = {} }: Props) {
     price: initial.price ?? '',
     sortOrder: initial.sortOrder ?? 0,
     epubUrl: initial.epubUrl ?? '',
+    epubKey: initial.epubKey ?? null,
   });
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -90,6 +92,14 @@ export default function TreasureForm({ id, initial = {} }: Props) {
       <div className="form-row">
         <label>EPUB URL</label>
         <input type="url" value={form.epubUrl} onChange={(e) => set('epubUrl', e.target.value)} />
+      </div>
+
+      <div className="form-row">
+        <label>Local EPUB</label>
+        <EpubPicker value={form.epubKey} onChange={(key) => set('epubKey', key)} />
+        <p style={{ fontSize: 12, color: 'var(--muted)', marginTop: 4 }}>
+          Self-hosted on our R2 bucket. When set, this wins over the EPUB URL above.
+        </p>
       </div>
 
       <div className="form-row">
