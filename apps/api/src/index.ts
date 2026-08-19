@@ -24,6 +24,7 @@ import treasuresRouter from './routes/treasures';
 import bibleRouter from './routes/bible';
 import bookRequestRouter from './routes/book-request';
 import geocodeRouter from './routes/geocode';
+import sblRouter from './routes/sbl';
 import ogRouter from './routes/og';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -90,6 +91,13 @@ v1.route('/bible', bibleRouter);
 v1.route('', bookRequestRouter); // /book-request
 
 v1.route('/geocode', geocodeRouter); // KV-cached Nominatim proxy (DSGVO: hides user IP)
+
+// Sabbath Bible Lesson — proxied from app.sdarm.org so the reader's browser
+// never talks to it (DSGVO). Cached at the edge: a quarter is a quarter of a
+// megabyte and an edition four, and neither changes while it is being read.
+v1.use('/sbl/quarter/*', cached(60 * 60 * 6));
+v1.use('/sbl/bible/*', cached(60 * 60 * 24 * 30));
+v1.route('/sbl', sblRouter);
 
 // OG social-card images — binary responder, KV-cached, excluded from OpenAPI (like the R2 proxy)
 v1.route('/og', ogRouter);

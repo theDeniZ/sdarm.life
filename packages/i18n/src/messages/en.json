@@ -944,6 +944,16 @@
       "landAt": "Austria",
       "landCh": "Switzerland",
       "bibleCta": "Open the Bible"
+    },
+    "sections": {
+      "bible": {
+        "title": "The Bible",
+        "description": "Read, compare and copy verses — several translations side by side."
+      },
+      "sbl": {
+        "title": "Sabbath Bible Lesson",
+        "description": "This week's lesson in the printed booklet's layout — mark it, write on it, save it as PDF."
+      }
     }
   }
 }

@@ -54,7 +54,8 @@ export default defineConfig({
     },
     {
       // Use --webpack to avoid Turbopack panics when multiple dev servers start simultaneously
-      command: 'cd apps/events && NODE_OPTIONS="--require ../../tools/silence-next-warnings.cjs" node_modules/.bin/next dev --port 3003 --webpack',
+      command:
+        'cd apps/events && NODE_OPTIONS="--require ../../tools/silence-next-warnings.cjs" node_modules/.bin/next dev --port 3003 --webpack',
       url: 'http://localhost:3003',
       timeout: 120_000,
       reuseExistingServer: !process.env.CI,

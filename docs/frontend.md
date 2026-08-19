@@ -353,8 +353,9 @@ Main screen (presenter)              External screen (display window)
 
 | Component | Type | Notes |
 |---|---|---|
-| `TreasureCatalog` | **Client** | Catalog page — `PageHero` + scripture quote + filter bar + paginated grid of `TreasureCard`s. Owns category/language filter state and pagination. Page size is 8 (2 rows × 4 cols on desktop). Hero renders two CTAs (`.br-hero-ctas`): the primary book-request button and a ghost "Open Bible" link to `/{locale}/bible` — the only entry point to the Bible reader. |
+| `TreasureCatalog` | **Client** | Catalog page — `PageHero` + scripture quote + filter bar + paginated grid of `TreasureCard`s. Owns category/language filter state and pagination. Page size is 8 (2 rows × 4 cols on desktop). The hero carries the book-request button alone (`.br-hero-ctas`); the Bible and the lesson are entered from two `SectionCard`s pinned at the head of the grid instead of from a ghost link above the shelf. |
 | `TreasureCard` | **Client** | One book entry: `Book3DCover` on the visual side, title row + author + description + price/free badge on the body side. Always links to `/{locale}/books/{id}` — Bibles are not treasures and never appear in this grid. |
+| `SectionCard` | **Client** | The two rooms of this app — the Bible and the Sabbath Bible Lesson — standing in the shelf as cards. Same shape, shelf and reveal as a `TreasureCard`, with a paper tint and a drawn mark instead of a cover, because the shelf is where a reader looks for something to read. Pinned ahead of the books and outside the filters and the paging: a section has no language or price to filter by and must not fall onto page three. Copy comes from `treasures.sections.{bible,sbl}.{title,description}`. |
 | `Book3DCover` | **Client** | Perspective-tilted 3D book rendering with drop shadow. Renders a face image when one is available, otherwise a museum-tone gradient fallback with a glyph + title. |
 | `TreasuresFilterBar` | Client | Category + language filter chips. Emits `onChange`. |
 | `BookRequestModal` | Client | Free-book delivery request form. Posts to `POST /api/v1/book-request`. |
@@ -421,6 +422,87 @@ Route structure (all server components fetching via `lib/bible.ts`, silent-error
 **Copyright:** `chapter.translation.copyright` is rendered under the text and under both parallel columns. Several YouVersion per-Bible licenses require the notice — do not remove it.
 
 **Client-side persistence** (functional localStorage, no identifiers — DSGVO-fine): `bible_last_read`, `bible_font_scale`, `bible_copy_options`.
+
+### Sabbath Bible Lesson (`/[locale]/sbl`)
+
+The weekly Sabbath Bible Lesson in the printed booklet's own layout, ported from
+the standalone SBL Edition page into this app. It is a route of `apps/treasures`
+like the Bible reader is, reached from a `SectionCard` at the head of the
+catalogue.
+
+| File | Type | Notes |
+|---|---|---|
+| `app/[locale]/sbl/page.tsx` | Server | `<ConnectedNavbar locale>` + `<div className="sbl">` around `<SblApp>`. Reads `API_URL` and hands it down; `dynamic = 'force-dynamic'`. |
+| `app/[locale]/sbl/layout.tsx` | Server | The only importer of `app/styles/sbl/index.css`. No `<ConnectedFooter>`: the catalogue and the Bible are browsing surfaces and carry the site footer, the lesson is a document that ends in a colophon of its own, exactly where the printed booklet ends. |
+| `components/sbl/SblApp.tsx` | **Client** | The sheet's markup as static JSX, plus a `useEffect` that measures the navbar, calls `initSbl({ apiUrl })` and registers the service worker. |
+| `lib/sbl/engine.ts` | — | ~4400 lines: lesson rendering, settings, calendar, PDF, and the marker/notes subsystem. |
+| `lib/sbl/api.ts` | — | The two proxy URLs (`/sbl/quarter/…`, `/sbl/bible/…`). |
+| `lib/sbl/types.ts` | — | The shapes `app.sdarm.org` serves, and what the pencil stores. |
+| `lib/sbl/index.ts` | — | Re-exports `initSbl`. |
+
+**The locale in the URL is the site's, not the lesson's.** It governs the
+navigation and nothing else; the lesson's own language (`de` · `en` · `ru`) is a
+setting of the sheet in `localStorage` — see
+[conventions.md](conventions.md#appstreasures) for why the two are deliberately
+not tied.
+
+**Why the engine is one imperative module and not a React tree.** The lesson
+body, the marks and the reader's own notes are DOM built and edited through
+`Range`/`Selection`/`TreeWalker` — that is what lets one stroke start mid-word in
+one paragraph and end in another, survive a re-render, and print *with* the text
+instead of floating over it. Marks are stored as character offsets inside a
+block, counted over its text nodes. Rebuilding that as React state would be a
+rewrite of the part with the most behaviour in it, for no gain. So React owns the
+shell and the engine owns what stands inside it.
+
+`initSbl()` guards against a second mount: React runs effects twice in
+development, and the engine binds listeners to `document` and `window` that it
+never unbinds — a second pass would double every key press.
+
+**The navbar's height is measured, not assumed.** The sheet's own bar has to sit
+under the site navigation, and that height is not a constant: `--nav-h` in
+`globals.css` is an arithmetic guess that already reads 67px against the 78px the
+navbar renders, and it would drift again the next time the nav changed. `SblApp`
+measures `nav.site-nav` into `--sbl-nav-h` on mount and on every resize, so the
+two bars cannot overlap.
+
+**Styles are the original stylesheet, split by section and scoped under `.sbl`**
+(`app/styles/sbl/` — `base · toolbar · sheet · marker · rail · days · overlays ·
+print · shell`, imported in that order by `index.css`, which is imported only by
+`app/[locale]/sbl/layout.tsx`). The order is the cascade; do not reorder it. The
+scoping is not cosmetic: Next keeps a visited route's CSS in the document, so an
+unscoped rule here would repaint the catalogue the moment a reader came back from
+a lesson — and the two designs are strangers, white paper in PT Serif against the
+dark museum theme in Cormorant. Unscoping the selectors reproduces the original
+stylesheet exactly, which is what keeps the port auditable against its source.
+
+**`:root` stays global, and must.** The engine writes `--z`, `--barh`, `--railw`,
+`--gray-dk` and the rest onto `<html>` at runtime; a copy of those names on the
+`.sbl` wrapper would win over what it wrote. The two names the site already owns
+are renamed the other way round instead — `--gold` → `--sbl-gold`, `--muted` →
+`--sbl-muted`.
+
+**Fonts are PT Serif / PT Sans self-hosted through `@fontsource`** (imported at
+the top of `styles/sbl/index.css`), not Google Fonts — same faces, Cyrillic
+subsets included, no third-party request ([dsgvo.md](dsgvo.md)).
+
+**Offline** is `public/sbl-sw.js`, registered with scope `/`. The broad scope is
+deliberate — the lesson lives at `/{locale}/sbl` and a worker parked deeper could
+never control it — and the `fetch` handler is what keeps the rest of the app out
+of its way: it answers only `/api/v1/sbl/bible/*` (cache-first, an edition never
+changes), `/api/v1/sbl/quarter/*` (stale-while-revalidate), `/_next/static/*`
+(cache-first, the URL changes when the file does) and navigations matching
+`/{de|en}/sbl` (network-first with a cache fallback). Everything else falls
+through with no `respondWith` at all, so the catalogue and the Bible behave
+exactly as they did before.
+
+The lesson opens with no connection **from the second visit on**, not the first.
+`install` can only precache the shell entry — the rest is a set of hashed chunks
+whose names the worker cannot know in advance, and the first visit's subresources
+are already in flight before the worker controls the page. They are cached on the
+next controlled load. Verified by loading the sheet, reloading, cutting the
+network and reloading again: title, day bands and all verse boxes render from
+cache.
 
 ---
 

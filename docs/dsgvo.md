@@ -43,6 +43,7 @@ These are the only external data recipients currently named in [Datenschutzerkl�
 | Cloudflare | Hosting, Web Analytics, CDN | section4 |
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
 | YouVersion / Life.Church (US) | Bible text for treasures.sdarm.life/bible | section8 |
+| app.sdarm.org (SDARM's own service) | Lesson text and Bible editions for treasures.sdarm.life/{locale}/sbl | **needs disclosure — see below** |
 
 **To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 
@@ -62,6 +63,35 @@ What keeps this defensible:
 - Reader localStorage keys (`bible_last_read`, `bible_font_scale`, `bible_copy_options`) are functional preferences with no identifiers — same category as `sdarm-theme`.
 
 **Which translations are exposed is an operator decision** (Admin → Bible). Each YouVersion Bible carries its own publisher license; enabling a restrictively-licensed translation is a licensing decision, not a technical one.
+
+### Sabbath Bible Lesson (treasures.sdarm.life/{locale}/sbl) — app.sdarm.org
+
+The lesson and the Bible editions it quotes come from the church's own service,
+`app.sdarm.org`. What keeps this clean:
+
+- **Every call is server-side.** `apps/api/src/routes/sbl.ts` runs inside the
+  Worker. The reader's IP, user-agent and reading behaviour never reach
+  app.sdarm.org — it sees our Worker asking for a quarter. Never fetch it from a
+  client component; the standalone SBL Edition original did, which is exactly
+  what the port into `apps/treasures` had to fix.
+- **The fonts are self-hosted.** The original loaded PT Serif and PT Sans from
+  `fonts.googleapis.com`; `apps/treasures/app/styles/sbl/index.css` imports
+  `@fontsource/pt-serif` and `@fontsource/pt-sans` instead — same faces,
+  Cyrillic subsets included, no third-party request.
+- **Nothing is stored.** No D1 table, no KV key — the response is streamed
+  through and cached at the edge.
+- Reader `localStorage` keys (`sbl.lang`, `sbl.verses`, `sbl.zoom`, `sbl.tint`,
+  `sbl.paper`, and the reader's own marks under the same `sbl.` prefix) are
+  functional preferences with no identifiers — same category as `sdarm-theme`.
+- **The service worker** (`apps/treasures/public/sbl-sw.js`) caches the lesson,
+  the two proxied files and hashed build assets in the reader's own browser.
+  Nothing leaves the device and nothing identifies it; it is offline reading,
+  not tracking.
+
+⚠️ **Still to do before this ships publicly:** `app.sdarm.org` is a separate
+service and belongs in the Datenschutzerklärung alongside the others. It is the
+church's own infrastructure rather than a commercial processor, which makes the
+basis simpler, but it is still a named recipient.
 
 ## ⚠️ Known gaps to close
 

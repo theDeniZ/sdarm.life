@@ -30,6 +30,14 @@ export default tseslint.config(
     },
   },
   {
+    /* the service worker runs in a worker, not in the page: its globals are
+       self, caches and fetch, none of which the browser config knows about */
+    files: ['public/sbl-sw.js'],
+    languageOptions: {
+      globals: { self: 'readonly', caches: 'readonly', fetch: 'readonly', URL: 'readonly' },
+    },
+  },
+  {
     plugins: {
       prettier,
       'react-hooks': reactHooks,

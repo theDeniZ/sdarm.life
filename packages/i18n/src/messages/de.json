@@ -944,6 +944,16 @@
       "landAt": "Österreich",
       "landCh": "Schweiz",
       "bibleCta": "Bibel öffnen"
+    },
+    "sections": {
+      "bible": {
+        "title": "Die Bibel",
+        "description": "Lesen, vergleichen, Verse kopieren — mehrere Übersetzungen nebeneinander."
+      },
+      "sbl": {
+        "title": "Sabbatschullektion",
+        "description": "Die Lektion der Woche im Layout des gedruckten Heftes — markieren, notieren, als PDF speichern."
+      }
     }
   }
 }
