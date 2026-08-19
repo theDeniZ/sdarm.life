@@ -63,6 +63,9 @@ export default async function DatenschutzPage({ params }: { params: Promise<{ lo
         .
       </p>
 
+      <h2>{t('section9Title')}</h2>
+      <p>{t('section9Body')}</p>
+
       <h2>{t('section7Title')}</h2>
       <p>
         {t('section7Body')} <a href="mailto:info@sdarm.life">info@sdarm.life</a>.

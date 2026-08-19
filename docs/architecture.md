@@ -145,6 +145,8 @@ export interface TreasureDto {
 
 `@sdarm/types` also exports the Bible DTOs (`BibleTranslationDto`, `BibleBookDto`, `BibleChapterDto`, `ParallelChapterDto`, …) and the shared Psalm-numbering helpers (`src/psalms.ts` — LXX ↔ Hebrew chapter mapping used by both the API service layer and the parallel reader UI).
 
+**The Sabbath Bible Lesson has no repository either.** `routes/sbl.ts` is a whole-file proxy: it fetches `app.sdarm.org`, sets a cache header and streams the body on. There is nothing to model, because nothing is stored and nothing is reshaped — the lesson engine in `apps/treasures` (`app/lib/sbl/engine.ts`) parses the upstream JSON exactly as published.
+
 **Bible content has no repository** — it is not in D1. `services/bible/` fetches from YouVersion and caches in KV; the only persisted state is the `bible_translations` config key. Repositories are for D1 tables only; anything that proxies an external API belongs in `services/`.
 
 `apps/web` and `apps/admin` import from `@sdarm/types`. `apps/api` uses the same interfaces to type `c.json()` responses — enforcing the contract at the source.
@@ -245,6 +247,7 @@ apps/api/src/
     images.ts          — GET /images/* (local dev proxy)
     subscribers.ts     — POST /subscribe, GET /unsubscribe
     treasures.ts       — GET /treasures, GET /treasures/:id
+    sbl.ts             — GET /sbl/quarter/:lang/:year/:quarter, GET /sbl/bible/:version (app.sdarm.org proxy)
     bible.ts           — GET /bible/translations[/:code[/books[/:bookCode[/chapters/:n]]]], GET /bible/parallel
     admin/
       posts.ts         — CRUD /admin/posts

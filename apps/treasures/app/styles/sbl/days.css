@@ -1,0 +1,204 @@
+/* The strip of days beside the sheet.
+   Ported verbatim from the SBL Edition single-page original — the cascade order
+   across these files is the order of the original stylesheet. */
+
+.sbl .days {
+  position: fixed;
+  right: max(10px, calc((100vw - 900px) / 2));
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 59;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 6px;
+  background: var(--mat);
+  -webkit-backdrop-filter: saturate(180%) blur(24px);
+  backdrop-filter: saturate(180%) blur(24px);
+  border-radius: 999px;
+  box-shadow:
+    0 0 0 0.5px var(--hair),
+    0 10px 28px rgba(0, 0, 0, 0.1);
+  transition:
+    opacity 0.22s,
+    transform 0.3s cubic-bezier(0.3, 0.9, 0.3, 1);
+}
+.sbl .days:empty {
+  display: none;
+}
+/* the panel itself never reacts: no grey flash from the system's tap
+   highlight, no accidental selection of the day letters — only the drop moves */
+.sbl .days,
+.sbl .rail,
+.sbl .bub,
+.sbl .rpick,
+.sbl .hintchip,
+.sbl .caretbtn,
+.sbl .mtoast {
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.sbl .days *,
+.sbl .rail * {
+  -webkit-tap-highlight-color: transparent;
+}
+/* the band you jumped to answers with a shine, so the eye lands on it */
+.sbl .sec.flash {
+  overflow: hidden;
+}
+.sbl .sec.flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 22%, rgba(255, 255, 255, 0.6) 46%, transparent 68%);
+  transform: translateX(-110%);
+  animation: secsweep 0.9s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+@keyframes secsweep {
+  to {
+    transform: translateX(110%);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sbl .days .dpill {
+    transition: none;
+  }
+  .sbl .sec.flash::after {
+    display: none;
+  }
+}
+/* The mark moves and changes shape at the same time, and the two are kept
+   apart: the outer layer only travels, the inner one only stretches. One
+   transform cannot be transitioned and animated at once. */
+.sbl .days .dpill {
+  position: absolute;
+  left: 6px;
+  top: 6px;
+  width: 30px;
+  height: 30px;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    transform 0.52s cubic-bezier(0.22, 0.9, 0.25, 1),
+    opacity 0.2s;
+}
+.sbl .days .dpill b {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: var(--gray-dk);
+  transform-origin: 50% 50%;
+}
+.sbl .days .dpill.go b {
+  animation: dropv 0.56s cubic-bezier(0.3, 0.75, 0.25, 1);
+}
+.sbl .days.row .dpill.go b {
+  animation-name: droph;
+}
+@keyframes dropv {
+  0% {
+    transform: scale(1, 1);
+  }
+  22% {
+    transform: scale(0.78, 1.32);
+    border-radius: 50% 50% 46% 46%/60% 60% 40% 40%;
+  }
+  55% {
+    transform: scale(0.94, 1.12);
+  }
+  78% {
+    transform: scale(1.12, 0.9);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+@keyframes droph {
+  0% {
+    transform: scale(1, 1);
+  }
+  22% {
+    transform: scale(1.32, 0.78);
+    border-radius: 46% 46% 46% 46%/50% 50% 50% 50%;
+  }
+  55% {
+    transform: scale(1.12, 0.94);
+  }
+  78% {
+    transform: scale(0.9, 1.12);
+  }
+  100% {
+    transform: scale(1, 1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sbl .days .dpill {
+    transition: none;
+  }
+  .sbl .days .dpill.go b {
+    animation: none;
+  }
+}
+.sbl .days.ready .dpill {
+  opacity: 1;
+}
+.sbl .dchip {
+  position: relative;
+  z-index: 1;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #8a8a8e;
+  text-transform: uppercase;
+  transition:
+    color 0.16s,
+    background 0.16s;
+}
+@media (hover: hover) {
+  .sbl .dchip:hover {
+    background: rgba(120, 120, 128, 0.14);
+    color: #2b2b2b;
+  }
+}
+.sbl .dchip.on {
+  color: #fff;
+}
+body.bare .sbl .days,
+body.writing .sbl .days {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(calc(100% + 22px));
+}
+@media (max-width: 1010px) {
+  .sbl .days {
+    right: 8px;
+  }
+}
+/* the phone rules for the strip live in one place, further down with the rest
+   of the phone layout — a second copy here only argued with it */
+@media (pointer: coarse) {
+  .sbl .dchip,
+  .sbl .days .dpill {
+    width: 36px;
+    height: 36px;
+  }
+  .sbl .dchip {
+    font-size: 11.5px;
+  }
+}
+
+/* one thin line at the top edge for as long as anything is being fetched: the
+   only honest answer to "is it working or is it stuck" */

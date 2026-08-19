@@ -671,6 +671,8 @@
         "section8Title": "Bible Text (YouVersion)",
         "section8Body": "In the Bible section (treasures.sdarm.life/bible), verse and chapter text is retrieved through the YouVersion Platform API (Life.Church, 4600 East 2nd Street, Edmond, Oklahoma, USA). These requests are made exclusively server-side by our Cloudflare Worker: your IP address, browser and reading activity are not transmitted to YouVersion, and the access key never leaves our server. YouVersion only learns which passage was requested, with no personal reference. Retrieved text is cached in Cloudflare Workers KV to keep the number of requests low. The legal basis is our legitimate interest in delivering the requested content (Art. 6(1)(f) GDPR); the transfer to the USA relies on Art. 49(1)(b) GDPR, as it is necessary to fulfil the retrieval you requested. Settings stored by the Bible reader (last passage read, font size, copy options) remain solely in your browser. For more information, see the",
         "section8PrivacyLink": "YouVersion Privacy Policy",
+        "section9Title": "Sabbath Bible Lesson (app.sdarm.org)",
+        "section9Body": "In the Sabbath Bible Lesson section (treasures.sdarm.life/en/sbl), the lesson text and the Bible editions it quotes are retrieved from app.sdarm.org, a service run by the Seventh Day Adventist Reform Movement. These requests are made exclusively server-side by our Cloudflare Worker: your browser never connects to app.sdarm.org, and your IP address, your browser and your reading behaviour are not transmitted there. app.sdarm.org only learns which quarter or which Bible edition our server asked for — nothing that identifies you. The responses are not stored by us; they are held only in Cloudflare's edge cache. The legal basis is our legitimate interest in delivering the content you requested (Art. 6(1)(f) GDPR). Your lesson settings (language, text size, colour, paper) and your own markings and notes remain solely in your browser. For reading without an internet connection your browser additionally keeps a local copy of the lesson; that data does not leave your device either.",
         "section7Title": "Your Rights",
         "section7Body": "You have the right to information, correction, deletion and restriction of processing of your stored data as well as the right to data portability. Please contact"
       }
@@ -944,6 +946,16 @@
       "landAt": "Austria",
       "landCh": "Switzerland",
       "bibleCta": "Open the Bible"
+    },
+    "sections": {
+      "bible": {
+        "title": "The Bible",
+        "description": "Read, compare and copy verses — several translations side by side."
+      },
+      "sbl": {
+        "title": "Sabbath Bible Lesson",
+        "description": "This week's lesson in the printed booklet's layout — mark it, write on it, save it as PDF."
+      }
     }
   }
 }

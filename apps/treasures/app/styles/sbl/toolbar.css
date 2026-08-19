@@ -1,0 +1,708 @@
+/* Control bar, settings popover and the month calendar.
+   Ported verbatim from the SBL Edition single-page original — the cascade order
+   across these files is the order of the original stylesheet. */
+
+/* control bar (screen only) — refined, document-like; hidden when printing */
+.sbl .bar {
+  position: sticky;
+  top: 0;
+  z-index: 70;
+  background: rgba(255, 255, 255, 0.82);
+  backdrop-filter: blur(12px) saturate(1.15);
+  -webkit-backdrop-filter: blur(12px) saturate(1.15);
+  color: #333;
+  border-bottom: 1px solid #ededed;
+}
+/* the buttons line up with the text column, not with the edge of the sheet:
+   same width and the same side margins as the page below */
+.sbl .bar-in {
+  max-width: 820px;
+  margin: 0 auto;
+  padding: 11px 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.sbl .ar {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  border: 1px solid #e6e6e6;
+  background: #fff;
+  color: #555;
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  user-select: none;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    transform 0.1s;
+}
+.sbl .ar:hover {
+  background: #2b2b2b;
+  color: #fff;
+  border-color: #2b2b2b;
+}
+.sbl .ar:active {
+  transform: translateY(1px);
+}
+/* the week label opens the month — it has to look like something you press */
+.sbl .lbl {
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+  color: #8c8c8c;
+  min-width: 104px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 10px;
+  white-space: nowrap;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fff;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.sbl .lbl:hover {
+  border-color: #d3d3d3;
+  background: #fafafa;
+}
+.sbl .lbl::after {
+  content: '';
+  flex: none;
+  width: 4.5px;
+  height: 4.5px;
+  margin-top: -2px;
+  border-right: 1.4px solid #bdbdbd;
+  border-bottom: 1.4px solid #bdbdbd;
+  transform: rotate(45deg);
+}
+.sbl .lbl:hover::after {
+  border-color: #777;
+}
+/* text size — two square buttons cut like the rest of the toolbar */
+.sbl .zoom {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fff;
+  color: #777;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+}
+.sbl .zoom:hover {
+  border-color: #d3d3d3;
+  color: #333;
+}
+.sbl .zoom.off {
+  opacity: 0.32;
+  cursor: default;
+  border-color: #ededed;
+}
+.sbl .zoom.off:hover {
+  color: #777;
+  border-color: #ededed;
+}
+.sbl .lbl b {
+  color: #222;
+  font-weight: 700;
+}
+.sbl .lbl:hover b {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.sbl .seg {
+  display: inline-flex;
+  background: #f0f0f0;
+  border: 1px solid #e7e7e7;
+  border-radius: 10px;
+  padding: 3px;
+}
+.sbl .seg .o {
+  padding: 6px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  color: #8a8a8a;
+  cursor: pointer;
+  border-radius: 7px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.sbl .seg .o:hover {
+  color: #333;
+}
+.sbl .seg .o.active {
+  background: #2b2b2b;
+  color: #fff;
+}
+.sbl .tog {
+  padding: 7px 15px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.7px;
+  color: #777;
+  background: #fff;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.sbl .tog:hover {
+  border-color: #d3d3d3;
+  color: #333;
+}
+.sbl .tog.active {
+  background: #2b2b2b;
+  color: #fff;
+  border-color: #2b2b2b;
+}
+.sbl .tog[hidden] {
+  display: none;
+}
+/* the toolbar carries two things: which lesson, and everything else */
+.sbl .gear {
+  flex: none;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e6e6e6;
+  border-radius: 10px;
+  background: #fff;
+  color: #777;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.sbl .gear:hover {
+  border-color: #d3d3d3;
+  color: #333;
+}
+.sbl .gear.open {
+  background: #2b2b2b;
+  border-color: #2b2b2b;
+  color: #fff;
+}
+.sbl .gear svg {
+  display: block;
+}
+
+/* everything that used to sit in the bar now lives here, one row per setting */
+.sbl .setpop {
+  position: absolute;
+  top: calc(100% + 7px);
+  right: 0;
+  background: #fff;
+  border: 1px solid #e9e9e9;
+  border-radius: 14px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.16);
+  padding: 6px;
+  z-index: 72;
+  width: min(320px, calc(100vw - 24px));
+}
+.sbl .setpop[hidden] {
+  display: none;
+}
+.sbl .srow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 10px;
+  border-radius: 9px;
+}
+/* `display:flex` beats the browser's own [hidden] rule, so a row put away has
+   to be told again — otherwise a setting that cannot work here still shows */
+.sbl .srow[hidden] {
+  display: none;
+}
+.sbl .srow + .srow {
+  border-top: 1px solid #f1f1f1;
+}
+/* one quiet line closes the sheet: which version this is, and where the keys
+   are written down */
+.sbl .sfoot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 10px 4px;
+  margin-top: 2px;
+  border-top: 1px solid #f1f1f1;
+}
+.sbl .sfoot span {
+  font-size: 10.5px;
+  letter-spacing: 0.2px;
+  color: #b0b0b4;
+  cursor: pointer;
+  transition: color 0.15s;
+}
+.sbl .sfoot span:hover {
+  color: #2b2b2b;
+}
+.sbl .slab {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #6f6f6f;
+  white-space: nowrap;
+}
+/* the marking row's label opens the card about where the marks are kept — the
+   counter on the rail used to be that door, and the counter is gone */
+.sbl #lab-mark {
+  cursor: pointer;
+}
+.sbl #lab-mark:hover {
+  color: #2b2b2b;
+}
+.sbl .sctl {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+.sbl .sbtn {
+  padding: 7px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #2b2b2b;
+  background: #f4f4f4;
+  border-radius: 8px;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.sbl .sbtn:hover {
+  background: #2b2b2b;
+  color: #fff;
+}
+/* a switch reads at a glance: the tools are either out or away */
+.sbl .sw2 {
+  position: relative;
+  width: 42px;
+  height: 25px;
+  border-radius: 13px;
+  background: rgba(120, 120, 128, 0.3);
+  cursor: pointer;
+  flex: none;
+  transition: background 0.2s;
+}
+.sbl .sw2 i {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 21px;
+  height: 21px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.28);
+  transition: transform 0.22s cubic-bezier(0.3, 1.3, 0.4, 1);
+}
+.sbl .sw2.on {
+  background: #34c759;
+}
+.sbl .sw2.on i {
+  transform: translateX(17px);
+}
+/* the list of second translations belongs to the switch above it, so it opens
+   under it without a rule of its own — and folds away when the switch is off.
+   Where there is no room for a second column there is no switch either: then
+   the list stands on its own line and takes its own label, because it is still
+   the setting that answers a held verse. */
+.sbl .srow.prow {
+  padding-top: 0;
+  border-top: none;
+}
+.sbl .srow.prow .slab {
+  display: none;
+}
+.sbl .srow.prow.solo {
+  padding-top: 8px;
+  border-top: 1px solid #f1f1f1;
+}
+.sbl .srow.prow.solo .slab {
+  display: block;
+}
+.sbl .srow.prow.solo .ssel {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 60%;
+}
+.sbl .ssel {
+  flex: 1 1 auto;
+  min-width: 0;
+  width: 100%;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #2b2b2b;
+  padding: 7px 9px;
+  border: 1px solid #e6e6e6;
+  border-radius: 9px;
+  background: #fff;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color 0.15s;
+  /* the native arrow differs on every platform; this one matches .lbl above */
+  background-image:
+    linear-gradient(45deg, transparent 50%, #bdbdbd 50%), linear-gradient(135deg, #bdbdbd 50%, transparent 50%);
+  background-position:
+    calc(100% - 15px) calc(50% - 1.5px),
+    calc(100% - 10px) calc(50% - 1.5px);
+  background-size:
+    5px 5px,
+    5px 5px;
+  background-repeat: no-repeat;
+  padding-right: 28px;
+}
+.sbl .ssel:hover {
+  border-color: #d3d3d3;
+}
+/* a select that shares its row with a visible label takes only what it needs,
+   so the row reads like the switches above it and not like a form field */
+.sbl .srow .ssel.short {
+  flex: 0 1 auto;
+  width: auto;
+  max-width: 58%;
+}
+/* the PDF row is the one that does something: its first button says so */
+.sbl .sbtn.pri {
+  background: #2b2b2b;
+  color: #fff;
+}
+.sbl .sbtn.pri:hover {
+  background: #000;
+}
+.sbl .langseg {
+  display: inline-flex;
+  background: #f0f0f0;
+  border: 1px solid #e7e7e7;
+  border-radius: 10px;
+  padding: 3px;
+}
+.sbl .langseg .o {
+  padding: 6px 11px;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  color: #8a8a8a;
+  cursor: pointer;
+  border-radius: 7px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.sbl .langseg .o:hover {
+  color: #333;
+}
+.sbl .langseg .o.active {
+  background: #2b2b2b;
+  color: #fff;
+}
+.sbl .swatches {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.sbl .sw {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 1px #dcdcdc;
+  transition: transform 0.1s;
+}
+.sbl .sw:hover {
+  transform: scale(1.1);
+}
+.sbl .sw.active {
+  box-shadow: 0 0 0 2px #111;
+}
+/* the colour wheel says "any colour you like" better than a plus sign */
+.sbl .sw.custom {
+  background: conic-gradient(from 0.5turn, #e04b4b, #e0a33c, #d6cf3f, #4fb257, #3f9fd6, #5b57c9, #b950b0, #e04b4b);
+}
+/* ——— the hue strip ———
+   The band takes a hue and nothing else. Its lightness is not the reader's to
+   move: the dark tag carries white lettering and the box has to stay light
+   enough to print, so both are fixed and only the hue travels. The system
+   colour dialog offered a whole cube — brightness, saturation, eyedropper —
+   and answered to one axis of it, which reads as a page that ignores you.
+   This strip offers exactly what it can do, and it is drawn in the band's own
+   colours, so the strip is the answer, not a promise about it. */
+.sbl .huebar {
+  position: relative;
+  flex: 1 1 auto;
+  height: 26px;
+  border-radius: 9px;
+  cursor: pointer;
+  touch-action: none;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  background: linear-gradient(
+    90deg,
+    hsl(0, 46%, 38%),
+    hsl(40, 46%, 38%),
+    hsl(80, 46%, 38%),
+    hsl(120, 46%, 38%),
+    hsl(160, 46%, 38%),
+    hsl(200, 46%, 38%),
+    hsl(240, 46%, 38%),
+    hsl(280, 46%, 38%),
+    hsl(320, 46%, 38%),
+    hsl(360, 46%, 38%)
+  );
+}
+.sbl .huebar i {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin: -8px 0 0 -8px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow:
+    0 0 0 1.5px rgba(0, 0, 0, 0.22),
+    0 1px 4px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+/* text size — two square buttons cut like the rest */
+.sbl .zoom {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e6e6e6;
+  border-radius: 9px;
+  background: #fff;
+  color: #777;
+  cursor: pointer;
+  user-select: none;
+  font-size: 13px;
+  font-weight: 700;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s,
+    opacity 0.15s;
+}
+.sbl .zoom:hover {
+  border-color: #d3d3d3;
+  color: #333;
+}
+.sbl .zoom.off {
+  opacity: 0.32;
+  cursor: default;
+  border-color: #ededed;
+}
+.sbl .tog {
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e6e6e6;
+  border-radius: 9px;
+  background: #fff;
+  color: #777;
+  cursor: pointer;
+  user-select: none;
+  transition:
+    background 0.15s,
+    color 0.15s,
+    border-color 0.15s;
+}
+.sbl .tog:hover {
+  border-color: #d3d3d3;
+  color: #333;
+}
+.sbl .tog.active {
+  background: #2b2b2b;
+  color: #fff;
+  border-color: #2b2b2b;
+}
+.sbl .tog svg {
+  display: block;
+}
+
+/* a month at a glance, with the lesson standing beside its week */
+.sbl .calpop {
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border: 1px solid #e9e9e9;
+  border-radius: 14px;
+  box-shadow: 0 16px 44px rgba(0, 0, 0, 0.16);
+  padding: 12px;
+  z-index: 72;
+  width: min(430px, calc(100vw - 24px));
+  max-height: min(70vh, 560px);
+  overflow: auto;
+}
+.sbl .calpop[hidden] {
+  display: none;
+}
+.sbl .calhead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.sbl .calhead b {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: #2b2b2b;
+  letter-spacing: 0.3px;
+  text-transform: capitalize;
+}
+.sbl .calnav {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid #e6e6e6;
+  color: #777;
+  cursor: pointer;
+  font-size: 15px;
+  user-select: none;
+}
+.sbl .calnav:hover {
+  background: #2b2b2b;
+  color: #fff;
+  border-color: #2b2b2b;
+}
+.sbl .calrow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0;
+}
+.sbl .calrow.head .d {
+  color: #b0b0b0;
+  font-size: 9.5px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  cursor: default;
+}
+/* the week inside the calendar. It must NOT be called `days`: that name belongs
+   to the fixed strip of the lesson's own days, and a row carrying it inherited
+   `position:fixed`, the pill and the shadow — the week floated out of the
+   calendar and lay over the list of lessons. */
+.sbl .calrow .dcells {
+  display: flex;
+  gap: 2px;
+  flex: none;
+}
+.sbl .calrow .d {
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  font-size: 11.5px;
+  color: #3a3a3a;
+  cursor: pointer;
+}
+.sbl .calrow .d.out {
+  color: #c9c9c9;
+}
+.sbl .calrow .d.today {
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--gray-dk);
+}
+.sbl .calrow .les {
+  flex: 1;
+  min-width: 0;
+  font-size: 11.5px;
+  line-height: 1.25;
+  color: #8a8a8a;
+  cursor: pointer;
+  padding: 4px 7px;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.sbl .calrow .les b {
+  display: block;
+  color: #2b2b2b;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.3px;
+}
+.sbl .calrow .les span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sbl .calrow.pick:hover .d:not(.head),
+.sbl .calrow.pick:hover .les {
+  background: #f4f4f4;
+}
+.sbl .calrow.on .les {
+  background: var(--box);
+}
+.sbl .calrow.on .les b {
+  color: var(--gray-dk);
+}
+.sbl .calfoot {
+  margin-top: 9px;
+  padding-top: 9px;
+  border-top: 1px solid #eee;
+  display: flex;
+  justify-content: center;
+}
+.sbl .calfoot .it {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2b2b2b;
+  cursor: pointer;
+  padding: 7px 14px;
+  border-radius: 8px;
+}
+.sbl .calfoot .it:hover {
+  background: #f4f4f4;
+}
