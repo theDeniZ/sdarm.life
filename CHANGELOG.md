@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/theDeniZ/sdarm.life/compare/v1.3.0...v1.4.0) (2026-08-22)
+
+
+### Features
+
+* **treasures:** add the Sabbath Bible Lesson to Schätze ([95846f8](https://github.com/theDeniZ/sdarm.life/commit/95846f8a384330d55f774fcd87246c9d250376d8))
+
 # [1.3.0](https://github.com/theDeniZ/sdarm.life/compare/v1.2.1...v1.3.0) (2026-08-15)
 
 
