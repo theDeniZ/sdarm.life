@@ -118,6 +118,12 @@ Server-only (no `NEXT_PUBLIC_` prefix). `R2_TRANSFORMS` — same kill switch as 
 
 `NEXT_PUBLIC_R2_URL` is required because `TreasureCard` and other client components resolve R2 image URLs at runtime. `process.env.R2_URL` is server-only in Next.js and would always fall back to the production URL in the browser bundle, causing 404s in local dev. Set it to the same value as `R2_URL` in `.env.local`. `R2_TRANSFORMS` — same kill switch as `apps/web`.
 
+`API_URL` is also read by `app/[locale]/sbl/page.tsx` and handed to the lesson engine as a prop, which is why that page sets `export const dynamic = 'force-dynamic'`: a statically prerendered page would freeze the build machine's value and staging would then call the production API. Locally the page hands down `/api/v1` instead and `next.config.ts` rewrites `/api/v1/sbl/:path*` to the Worker — the dev servers live in a container and reach the browser through forwarded ports, so serving the page from one port and its data from another leaves the sheet up and empty the first time someone forgets the second forward. The rewrite is local-only; in production the browser calls the API host directly.
+
+`next.config.ts` also sets `allowedDevOrigins` from `os.networkInterfaces()`. `next dev` refuses to serve its own dev resources to a page opened on any host but localhost, so reached through a container IP or a forwarded cloud URL the HTML arrives, the HMR socket is refused and hydration never runs — a page that looks broken rather than blocked. The addresses are read from the machine because a container's IP differs between machines; note the list takes hosts and globs, and silently ignores a CIDR range.
+
+**The lesson's language is not the site's locale, and that is deliberate.** `/[locale]/sbl` carries `de` or `en` like every other route in this app, and that locale governs the navigation only. The lesson's own language (`de` · `en` · `ru`) is a setting of the sheet, kept in `localStorage` under `sbl.lang`, and it governs the lesson text, the Bible edition and every label on the page at once. Tying it to the URL locale would drop the Russian lesson — this site has no Russian locale — and give one sheet two addresses. The engine sets `<html lang>` to the language being read, which is what the PDF's hyphenation follows.
+
 ### `apps/api` (local dev only)
 
 `apps/api/.dev.vars` (gitignored, auto-loaded by `wrangler dev`) — see `.dev.vars.example`:

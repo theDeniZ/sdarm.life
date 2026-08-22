@@ -671,6 +671,8 @@
         "section8Title": "Bibeltexte (YouVersion)",
         "section8Body": "Im Bibel-Bereich (treasures.sdarm.life/bible) werden Vers- und Kapiteltexte über die Plattform-API von YouVersion (Life.Church, 4600 East 2nd Street, Edmond, Oklahoma, USA) bezogen. Diese Abrufe erfolgen ausschließlich serverseitig über unseren Cloudflare Worker: Ihre IP-Adresse, Ihr Browser und Ihre Aufrufe werden nicht an YouVersion übermittelt, und der Zugangsschlüssel verlässt niemals unseren Server. YouVersion erhält lediglich die Information, welche Bibelstelle abgerufen wurde – ohne Personenbezug. Abgerufene Texte werden in Cloudflare Workers KV zwischengespeichert, um die Zahl der Anfragen gering zu halten. Rechtsgrundlage ist unser berechtigtes Interesse an der Bereitstellung des angeforderten Inhalts (Art. 6 Abs. 1 lit. f DSGVO); die Übermittlung in die USA stützt sich auf Art. 49 Abs. 1 lit. b DSGVO, da sie zur Erfüllung des von Ihnen gewünschten Abrufs erforderlich ist. Im Bibel-Leser gespeicherte Einstellungen (zuletzt gelesene Stelle, Schriftgröße, Kopier-Optionen) verbleiben ausschließlich in Ihrem Browser. Weitere Informationen finden Sie in der",
         "section8PrivacyLink": "Datenschutzerklärung von YouVersion",
+        "section9Title": "Sabbatschullektion (app.sdarm.org)",
+        "section9Body": "Im Bereich der Sabbatschullektion (treasures.sdarm.life/de/sbl) werden der Lektionstext und die darin zitierten Bibelausgaben von app.sdarm.org bezogen, einem Dienst der Gemeinschaft der Siebenten Tags Adventisten Reformationsbewegung. Diese Abrufe erfolgen ausschließlich serverseitig über unseren Cloudflare Worker: Ihr Browser nimmt zu app.sdarm.org keine Verbindung auf, und Ihre IP-Adresse, Ihr Browser und Ihr Leseverhalten werden nicht dorthin übermittelt. app.sdarm.org erhält lediglich die Information, welches Quartal oder welche Bibelausgabe unser Server angefordert hat – ohne Personenbezug. Die Antworten werden bei uns nicht gespeichert, sondern nur im Edge-Cache von Cloudflare vorgehalten. Rechtsgrundlage ist unser berechtigtes Interesse an der Bereitstellung des angeforderten Inhalts (Art. 6 Abs. 1 lit. f DSGVO). Ihre Einstellungen zur Lektion (Sprache, Schriftgröße, Farbe, Papier) sowie Ihre eigenen Markierungen und Notizen verbleiben ausschließlich in Ihrem Browser. Für das Lesen ohne Internetverbindung legt Ihr Browser zusätzlich eine lokale Kopie der Lektion an; auch diese Daten verlassen Ihr Gerät nicht.",
         "section7Title": "Ihre Rechte",
         "section7Body": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer gespeicherten Daten sowie das Recht auf Datenübertragbarkeit. Wenden Sie sich dazu an"
       }
@@ -944,6 +946,16 @@
       "landAt": "Österreich",
       "landCh": "Schweiz",
       "bibleCta": "Bibel öffnen"
+    },
+    "sections": {
+      "bible": {
+        "title": "Die Bibel",
+        "description": "Lesen, vergleichen, Verse kopieren — mehrere Übersetzungen nebeneinander."
+      },
+      "sbl": {
+        "title": "Sabbatschullektion",
+        "description": "Die Lektion der Woche im Layout des gedruckten Heftes — markieren, notieren, als PDF speichern."
+      }
     }
   }
 }

@@ -1,12 +1,12 @@
 'use client';
 
 import { useCallback, useEffect, useRef, useState } from 'react';
-import Link from 'next/link';
 import { useLocale, useTranslations } from 'next-intl';
 import { PageHero } from '@sdarm/ui';
 import type { Treasure, TreasureType } from '../lib/api';
 import TreasuresFilterBar, { type CategoryFilter, type Language } from './TreasuresFilterBar';
 import TreasureCard from './TreasureCard';
+import SectionCard from './SectionCard';
 import BookRequestModal from './BookRequestModal';
 
 const PAGE_SIZE = 8; // 2–3 rows × 3 columns
@@ -46,6 +46,7 @@ export default function TreasureCatalog({
   r2Url?: string;
 }) {
   const tBr = useTranslations('treasures.bookRequest');
+  const tSec = useTranslations('treasures.sections');
   const locale = useLocale();
   const [category, setCategory] = useState<CategoryFilter>('all');
   const [lang, setLang] = useState<Language>('all');
@@ -164,20 +165,6 @@ export default function TreasureCatalog({
                   />
                 </svg>
               </button>
-              <Link href={`/${locale}/bible`} className="br-hero-cta br-hero-cta--ghost">
-                {tBr('bibleCta')}
-                <svg viewBox="0 0 9 9" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <line x1="1" y1="8" x2="8" y2="1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                  <polyline
-                    points="3,1 8,1 8,6"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.4"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </Link>
             </div>
           }
         />
@@ -201,6 +188,32 @@ export default function TreasureCatalog({
           </div>
         ) : (
           <div className="shop-grid" ref={gridRef}>
+            <SectionCard
+              href={`/${locale}/bible`}
+              title={tSec('bible.title')}
+              description={tSec('bible.description')}
+              tone="bible"
+              mark={
+                <svg viewBox="0 0 44 52" aria-hidden="true">
+                  <path d="M4 4h15c1.7 0 3 1.3 3 3v41c0-1.7-1.3-3-3-3H4V4Z" />
+                  <path d="M40 4H25c-1.7 0-3 1.3-3 3v41c0-1.7 1.3-3 3-3h15V4Z" />
+                  <path d="M22 14v12M16 20h12" />
+                </svg>
+              }
+            />
+            <SectionCard
+              href={`/${locale}/sbl`}
+              title={tSec('sbl.title')}
+              description={tSec('sbl.description')}
+              tone="sbl"
+              mark={
+                <svg viewBox="0 0 44 52" aria-hidden="true">
+                  <path d="M8 4h28v44H8z" />
+                  <path d="M8 4h28v9H8z" fill="currentColor" stroke="none" opacity=".22" />
+                  <path d="M14 21h16M14 28h16M14 35h10" />
+                </svg>
+              }
+            />
             {displayItems.map((tr) => (
               <TreasureCard key={tr.id} treasure={tr} />
             ))}

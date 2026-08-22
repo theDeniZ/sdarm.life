@@ -20,7 +20,7 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | `@sdarm/admin` | `admin.sdarm.life` | Next.js 16 admin UI |
 | `@sdarm/api` | `api.sdarm.life` | Hono Cloudflare Worker |
 | `@sdarm/events` | `events.sdarm.life` | Next.js 16 events landing page |
-| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 16 analog treasures site |
+| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 16 analog treasures site — book catalogue, Bible reader, Sabbath Bible Lesson (`/{locale}/sbl`) |
 | `@sdarm/songbook` | `songs.sdarm.life` | Next.js 16 songbook site |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
 | `@sdarm/types` | — | Shared API response DTO interfaces |

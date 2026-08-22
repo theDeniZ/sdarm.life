@@ -90,7 +90,6 @@ nav.site-nav {
   background: transparent;
 }
 
-
 .filter-section {
   background: #0a0908;
   position: sticky;
@@ -307,7 +306,9 @@ nav.site-nav {
   border-radius: 10px;
   position: relative;
   overflow: visible;
-  transition: opacity 0.55s var(--ease), transform 0.55s var(--ease);
+  transition:
+    opacity 0.55s var(--ease),
+    transform 0.55s var(--ease);
   cursor: pointer;
   opacity: 0;
   transform: translateY(22px);
@@ -454,7 +455,9 @@ nav.site-nav {
   border-radius: 0 2px 2px 0;
   box-shadow: none;
   opacity: 0;
-  transition: box-shadow 0.6s ease, opacity 0.6s ease;
+  transition:
+    box-shadow 0.6s ease,
+    opacity 0.6s ease;
 }
 
 .tome:hover .tome-bind {
@@ -504,7 +507,6 @@ nav.site-nav {
   hyphens: auto;
   margin-top: 0.45rem;
 }
-
 
 /* ── ITEM BODY ── */
 .item-body {
@@ -598,7 +600,9 @@ nav.site-nav {
   text-transform: uppercase;
   color: rgba(201, 169, 110, 0.45);
   text-decoration: none;
-  transition: color 0.3s, gap 0.3s;
+  transition:
+    color 0.3s,
+    gap 0.3s;
 }
 .item-card:hover .item-cta {
   color: rgba(201, 169, 110, 0.85);
@@ -978,7 +982,9 @@ nav.site-nav {
   z-index: 20;
   overflow: hidden;
   background: var(--reader-bg);
-  transition: background 0.25s, color 0.25s;
+  transition:
+    background 0.25s,
+    color 0.25s;
 }
 
 /* ── Toolbar ─────────────────────────────────────────────── */
@@ -1033,7 +1039,9 @@ nav.site-nav {
   cursor: pointer;
   color: var(--muted);
   flex-shrink: 0;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 
 .epub-icon-btn:hover {
@@ -1310,7 +1318,10 @@ nav.site-nav {
   border-left: 2px solid transparent;
   text-align: left;
   cursor: pointer;
-  transition: color 0.2s, background 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    background 0.2s,
+    border-color 0.2s;
 }
 
 .epub-toc-item:hover {
@@ -1388,7 +1399,9 @@ nav.site-nav {
   line-height: var(--epub-line-height);
   font-weight: 500;
   color: var(--text);
-  transition: font-size 0.15s, line-height 0.15s;
+  transition:
+    font-size 0.15s,
+    line-height 0.15s;
 }
 
 /* Headings follow selected reading font for harmony */
@@ -1557,35 +1570,77 @@ nav.site-nav {
   cursor: pointer;
 }
 .epub-chapter__body .hl-preview {
-  background-color: rgba(160, 160, 160, 0.30);
+  background-color: rgba(160, 160, 160, 0.3);
   border-radius: 3px;
   cursor: default;
 }
 
 /* Pastel highlight colors — simple background-color, works on all themes */
-.epub-chapter__body .hl-cream      { background-color: rgba(238, 225, 183, 0.75); }
-.epub-chapter__body .hl-honey      { background-color: rgba(230, 203, 138, 0.75); }
-.epub-chapter__body .hl-sage       { background-color: rgba(189, 210, 153, 0.75); }
-.epub-chapter__body .hl-mint       { background-color: rgba(225, 233, 183, 0.75); }
-.epub-chapter__body .hl-sky        { background-color: rgba(168, 199, 214, 0.75); }
-.epub-chapter__body .hl-rose       { background-color: rgba(238, 186, 183, 0.75); }
-.epub-chapter__body .hl-peach      { background-color: rgba(238, 211, 183, 0.75); }
-.epub-chapter__body .hl-periwinkle { background-color: rgba(168, 175, 214, 0.75); }
-.epub-chapter__body .hl-lilac      { background-color: rgba(212, 168, 214, 0.75); }
-.epub-chapter__body .hl-lavender   { background-color: rgba(186, 168, 214, 0.75); }
+.epub-chapter__body .hl-cream {
+  background-color: rgba(238, 225, 183, 0.75);
+}
+.epub-chapter__body .hl-honey {
+  background-color: rgba(230, 203, 138, 0.75);
+}
+.epub-chapter__body .hl-sage {
+  background-color: rgba(189, 210, 153, 0.75);
+}
+.epub-chapter__body .hl-mint {
+  background-color: rgba(225, 233, 183, 0.75);
+}
+.epub-chapter__body .hl-sky {
+  background-color: rgba(168, 199, 214, 0.75);
+}
+.epub-chapter__body .hl-rose {
+  background-color: rgba(238, 186, 183, 0.75);
+}
+.epub-chapter__body .hl-peach {
+  background-color: rgba(238, 211, 183, 0.75);
+}
+.epub-chapter__body .hl-periwinkle {
+  background-color: rgba(168, 175, 214, 0.75);
+}
+.epub-chapter__body .hl-lilac {
+  background-color: rgba(212, 168, 214, 0.75);
+}
+.epub-chapter__body .hl-lavender {
+  background-color: rgba(186, 168, 214, 0.75);
+}
 
 /* On dark theme — screen blend mode + higher opacity for visibility on dark #1a1918 background */
-[data-theme='dark'] .epub-chapter__body .hl { mix-blend-mode: screen; }
-[data-theme='dark'] .epub-chapter__body .hl-cream      { background-color: rgba(238, 225, 183, 0.60); }
-[data-theme='dark'] .epub-chapter__body .hl-honey      { background-color: rgba(230, 203, 138, 0.60); }
-[data-theme='dark'] .epub-chapter__body .hl-sage       { background-color: rgba(189, 210, 153, 0.60); }
-[data-theme='dark'] .epub-chapter__body .hl-mint       { background-color: rgba(225, 233, 183, 0.60); }
-[data-theme='dark'] .epub-chapter__body .hl-sky        { background-color: rgba(168, 199, 214, 0.65); }
-[data-theme='dark'] .epub-chapter__body .hl-rose       { background-color: rgba(238, 186, 183, 0.60); }
-[data-theme='dark'] .epub-chapter__body .hl-peach      { background-color: rgba(238, 211, 183, 0.60); }
-[data-theme='dark'] .epub-chapter__body .hl-periwinkle { background-color: rgba(168, 175, 214, 0.65); }
-[data-theme='dark'] .epub-chapter__body .hl-lilac      { background-color: rgba(212, 168, 214, 0.60); }
-[data-theme='dark'] .epub-chapter__body .hl-lavender   { background-color: rgba(186, 168, 214, 0.60); }
+[data-theme='dark'] .epub-chapter__body .hl {
+  mix-blend-mode: screen;
+}
+[data-theme='dark'] .epub-chapter__body .hl-cream {
+  background-color: rgba(238, 225, 183, 0.6);
+}
+[data-theme='dark'] .epub-chapter__body .hl-honey {
+  background-color: rgba(230, 203, 138, 0.6);
+}
+[data-theme='dark'] .epub-chapter__body .hl-sage {
+  background-color: rgba(189, 210, 153, 0.6);
+}
+[data-theme='dark'] .epub-chapter__body .hl-mint {
+  background-color: rgba(225, 233, 183, 0.6);
+}
+[data-theme='dark'] .epub-chapter__body .hl-sky {
+  background-color: rgba(168, 199, 214, 0.65);
+}
+[data-theme='dark'] .epub-chapter__body .hl-rose {
+  background-color: rgba(238, 186, 183, 0.6);
+}
+[data-theme='dark'] .epub-chapter__body .hl-peach {
+  background-color: rgba(238, 211, 183, 0.6);
+}
+[data-theme='dark'] .epub-chapter__body .hl-periwinkle {
+  background-color: rgba(168, 175, 214, 0.65);
+}
+[data-theme='dark'] .epub-chapter__body .hl-lilac {
+  background-color: rgba(212, 168, 214, 0.6);
+}
+[data-theme='dark'] .epub-chapter__body .hl-lavender {
+  background-color: rgba(186, 168, 214, 0.6);
+}
 
 .hl-toolbar {
   position: fixed;
@@ -1598,12 +1653,16 @@ nav.site-nav {
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.22), 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.22),
+    0 2px 8px rgba(0, 0, 0, 0.1);
   transform: translateX(-50%);
   pointer-events: all;
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.15s, visibility 0.15s;
+  transition:
+    opacity 0.15s,
+    visibility 0.15s;
 }
 .hl-grid {
   display: grid;
@@ -1618,7 +1677,9 @@ nav.site-nav {
 [data-theme='light'] .hl-toolbar {
   background: #f5f4f2;
   border-color: rgba(0, 0, 0, 0.1);
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12), 0 1px 4px rgba(0, 0, 0, 0.06);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.06);
 }
 
 .hl-color {
@@ -1628,23 +1689,55 @@ nav.site-nav {
   border: 2px solid transparent;
   cursor: pointer;
   flex-shrink: 0;
-  transition: transform 0.15s, border-color 0.15s;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
 }
 .hl-color:hover {
   transform: scale(1.2);
   border-color: rgba(0, 0, 0, 0.18);
 }
 
-.hl-c-cream      { background: #EEE1B7; box-shadow: 0 0 0 1px rgba(238,225,183,0.6); }
-.hl-c-honey      { background: #E6CB8A; box-shadow: 0 0 0 1px rgba(230,203,138,0.6); }
-.hl-c-sage       { background: #BDD299; box-shadow: 0 0 0 1px rgba(189,210,153,0.6); }
-.hl-c-mint       { background: #E1E9B7; box-shadow: 0 0 0 1px rgba(225,233,183,0.6); }
-.hl-c-sky        { background: #A8C7D6; box-shadow: 0 0 0 1px rgba(168,199,214,0.6); }
-.hl-c-rose       { background: #EEBAB7; box-shadow: 0 0 0 1px rgba(238,186,183,0.6); }
-.hl-c-peach      { background: #EED3B7; box-shadow: 0 0 0 1px rgba(238,211,183,0.6); }
-.hl-c-periwinkle { background: #A8AFD6; box-shadow: 0 0 0 1px rgba(168,175,214,0.6); }
-.hl-c-lilac      { background: #D4A8D6; box-shadow: 0 0 0 1px rgba(212,168,214,0.6); }
-.hl-c-lavender   { background: #BAA8D6; box-shadow: 0 0 0 1px rgba(186,168,214,0.6); }
+.hl-c-cream {
+  background: #eee1b7;
+  box-shadow: 0 0 0 1px rgba(238, 225, 183, 0.6);
+}
+.hl-c-honey {
+  background: #e6cb8a;
+  box-shadow: 0 0 0 1px rgba(230, 203, 138, 0.6);
+}
+.hl-c-sage {
+  background: #bdd299;
+  box-shadow: 0 0 0 1px rgba(189, 210, 153, 0.6);
+}
+.hl-c-mint {
+  background: #e1e9b7;
+  box-shadow: 0 0 0 1px rgba(225, 233, 183, 0.6);
+}
+.hl-c-sky {
+  background: #a8c7d6;
+  box-shadow: 0 0 0 1px rgba(168, 199, 214, 0.6);
+}
+.hl-c-rose {
+  background: #eebab7;
+  box-shadow: 0 0 0 1px rgba(238, 186, 183, 0.6);
+}
+.hl-c-peach {
+  background: #eed3b7;
+  box-shadow: 0 0 0 1px rgba(238, 211, 183, 0.6);
+}
+.hl-c-periwinkle {
+  background: #a8afd6;
+  box-shadow: 0 0 0 1px rgba(168, 175, 214, 0.6);
+}
+.hl-c-lilac {
+  background: #d4a8d6;
+  box-shadow: 0 0 0 1px rgba(212, 168, 214, 0.6);
+}
+.hl-c-lavender {
+  background: #baa8d6;
+  box-shadow: 0 0 0 1px rgba(186, 168, 214, 0.6);
+}
 
 .hl-remove {
   width: 22px;
@@ -1659,7 +1752,9 @@ nav.site-nav {
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 }
 .hl-remove:hover {
   border-color: #ff3b30;
@@ -1668,11 +1763,22 @@ nav.site-nav {
 
 /* Cross-block selection shake feedback */
 @keyframes epub-shake {
-  0%, 100% { transform: translateX(0); }
-  20%       { transform: translateX(-4px); }
-  40%       { transform: translateX(4px); }
-  60%       { transform: translateX(-3px); }
-  80%       { transform: translateX(2px); }
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
 }
 .epub-content--shake {
   animation: epub-shake 0.5s ease;
@@ -1732,7 +1838,9 @@ nav.site-nav {
   cursor: pointer;
   padding: 0.5rem 1.2rem;
   border-radius: 4px;
-  transition: color 0.2s, border-color 0.2s;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
 }
 
 .epub-retry-btn:hover {
@@ -1796,7 +1904,9 @@ nav.site-nav {
   cursor: pointer;
   flex-shrink: 0;
   box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
-  transition: border-color 0.15s, transform 0.15s;
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
 }
 
 .epub-theme-dot:hover {
@@ -1827,7 +1937,9 @@ nav.site-nav {
   color: var(--text);
   font-family: 'Inter', sans-serif;
   font-size: 0.85rem;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   flex-shrink: 0;
 }
 
@@ -1884,7 +1996,10 @@ nav.site-nav {
   border: 1px solid var(--border);
   background: none;
   color: var(--text);
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
 }
 
 .epub-font-btn--active {
@@ -1910,7 +2025,10 @@ nav.site-nav {
   color: var(--text);
   letter-spacing: 0.04em;
   font-family: 'Inter', sans-serif;
-  transition: border-color 0.2s, background 0.2s, color 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
 }
 
 .epub-lh-btn--active {
@@ -1978,7 +2096,9 @@ nav.site-nav {
   text-decoration: none;
   border: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.03);
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
 }
 .book-detail__back:hover {
   color: var(--gold);
@@ -2059,7 +2179,9 @@ nav.site-nav {
   box-shadow:
     0 4px 20px rgba(90, 60, 20, 0.45),
     inset 0 1px 0 rgba(255, 220, 160, 0.15);
-  transition: transform 0.35s cubic-bezier(0.76, 0, 0.24, 1), box-shadow 0.35s ease;
+  transition:
+    transform 0.35s cubic-bezier(0.76, 0, 0.24, 1),
+    box-shadow 0.35s ease;
 }
 
 .br-hero-cta:hover {
@@ -2143,17 +2265,26 @@ nav.site-nav {
   }
 }
 
-
 /* ── BOOK REQUEST MODAL ────────────────────────────────────────────────────── */
 
 @keyframes br-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes br-slide-up {
-  from { opacity: 0; transform: translateY(24px) scale(0.98); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(24px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .br-overlay {
@@ -2179,7 +2310,9 @@ nav.site-nav {
   overflow-y: auto;
   position: relative;
   padding: 48px;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(201, 169, 110, 0.04);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.7),
+    0 0 0 1px rgba(201, 169, 110, 0.04);
   animation: br-slide-up 0.28s cubic-bezier(0.22, 1, 0.36, 1);
   scrollbar-width: thin;
   scrollbar-color: rgba(201, 169, 110, 0.2) transparent;
@@ -2298,7 +2431,9 @@ nav.site-nav {
   font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 1.05rem;
   padding: 12px 14px;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   appearance: none;
   -webkit-appearance: none;
 }
@@ -2392,7 +2527,9 @@ nav.site-nav {
   font-size: 11px;
   font-weight: 700;
   color: #0c0b09;
-  transition: border-color 0.15s, background 0.15s;
+  transition:
+    border-color 0.15s,
+    background 0.15s;
 }
 
 .br-check-item.selected .br-box,
@@ -2413,7 +2550,9 @@ nav.site-nav {
   padding: 14px 16px;
   border: 1px solid rgba(201, 169, 110, 0.1);
   border-radius: 3px;
-  transition: border-color 0.2s, background 0.2s;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
   user-select: none;
 }
 
@@ -2605,8 +2744,8 @@ nav.site-nav {
 [data-theme='light'] .item-card:hover {
   background: #ffffff;
   box-shadow:
-    0 10px 32px rgba(0, 0, 0, 0.10),
-    0 0 0 1px rgba(146, 114, 35, 0.10);
+    0 10px 32px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(146, 114, 35, 0.1);
 }
 [data-theme='light'] .book-visual {
   background: transparent;
@@ -2617,8 +2756,12 @@ nav.site-nav {
   background: var(--bg-card);
   color: var(--text-strong);
 }
-[data-theme='light'] .br-modal-title { color: var(--text-strong); }
-[data-theme='light'] .br-field label { color: var(--muted); }
+[data-theme='light'] .br-modal-title {
+  color: var(--text-strong);
+}
+[data-theme='light'] .br-field label {
+  color: var(--muted);
+}
 [data-theme='light'] .br-field input,
 [data-theme='light'] .br-field select,
 [data-theme='light'] .br-field textarea {
@@ -2626,8 +2769,12 @@ nav.site-nav {
   color: var(--text);
   border-color: var(--border);
 }
-[data-theme='light'] .br-banner { background: var(--bg-section); }
-[data-theme='light'] .sheet-display { background: var(--bg-section); }
+[data-theme='light'] .br-banner {
+  background: var(--bg-section);
+}
+[data-theme='light'] .sheet-display {
+  background: var(--bg-section);
+}
 
 /* ── REDUCED MOTION ── */
 @media (prefers-reduced-motion: reduce) {
@@ -2827,8 +2974,7 @@ nav.site-nav {
 .bible-passage-picker__input {
   width: 100%;
   padding: 0.72rem 1rem 0.72rem 2.4rem;
-  background:
-    transparent
+  background: transparent
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%23a09890' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='7'/%3E%3Cpath d='m21 21-4.35-4.35'/%3E%3C/svg%3E")
     no-repeat left 0.5rem center / 15px 15px;
   border: none;
@@ -4385,7 +4531,9 @@ body:has(.bible-parallel) .bible-parallel {
   font-size: 0.78rem;
   font-weight: 500;
   cursor: pointer;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
   white-space: nowrap;
 }
 .bible-presenter__ctrl-btn:hover:not(:disabled) {
@@ -4424,7 +4572,9 @@ body:has(.bible-parallel) .bible-parallel {
   place-items: center;
   font-size: 0.85rem;
   margin-left: 0.1rem;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 .bible-presenter__close:hover {
   color: var(--text-strong);
@@ -4443,16 +4593,18 @@ body:has(.bible-parallel) .bible-parallel {
   font-weight: 500;
   cursor: pointer;
   max-width: 160px;
-  transition: border-color 0.15s, color 0.15s;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
 }
 .bible-presenter__compare:hover,
 .bible-presenter__compare:focus {
   color: var(--text-strong);
-  border-color: rgba(128,128,128,0.4);
+  border-color: rgba(128, 128, 128, 0.4);
   outline: none;
 }
 .bible-presenter__compare--active {
-  border-color: rgba(128,128,128,0.35);
+  border-color: rgba(128, 128, 128, 0.35);
   color: var(--text);
 }
 
@@ -4501,7 +4653,9 @@ body:has(.bible-parallel) .bible-parallel {
   font-family: 'Cormorant Garamond', serif;
   font-size: 1.9rem;
   cursor: pointer;
-  transition: background 0.12s, border-color 0.12s;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
 }
 .bible-presenter__strip-row:hover {
   background: rgba(128, 128, 128, 0.06);
@@ -4615,8 +4769,16 @@ body:has(.bible-parallel) .bible-parallel {
   margin-bottom: 1rem;
 }
 @keyframes bible-pres-dot {
-  0%, 80%, 100% { opacity: 0.25; transform: translateY(0); }
-  40%            { opacity: 1;    transform: translateY(-4px); }
+  0%,
+  80%,
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  40% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
 }
 .bible-presenter__connecting-dots span {
   width: 7px;
@@ -4625,8 +4787,12 @@ body:has(.bible-parallel) .bible-parallel {
   background: var(--muted);
   animation: bible-pres-dot 1.4s ease-in-out infinite;
 }
-.bible-presenter__connecting-dots span:nth-child(2) { animation-delay: 0.2s; }
-.bible-presenter__connecting-dots span:nth-child(3) { animation-delay: 0.4s; }
+.bible-presenter__connecting-dots span:nth-child(2) {
+  animation-delay: 0.2s;
+}
+.bible-presenter__connecting-dots span:nth-child(3) {
+  animation-delay: 0.4s;
+}
 .bible-presenter__connecting-text {
   font-family: 'Cormorant Garamond', serif;
   font-style: italic;
@@ -4655,7 +4821,9 @@ body:has(.bible-parallel) .bible-parallel {
   cursor: pointer;
   display: grid;
   place-items: center;
-  transition: color 0.15s, background 0.15s;
+  transition:
+    color 0.15s,
+    background 0.15s;
 }
 .bible-presenter__nav-btn:hover:not(:disabled) {
   color: var(--text-strong);
@@ -4721,4 +4889,59 @@ body:has(.bible-parallel) .bible-parallel {
   line-height: 1.6;
   color: var(--muted);
   text-align: center;
+}
+
+/* ─── Sections on the shelf: the Bible and the Sabbath Bible Lesson ──────────
+   They are cards like the books, pinned ahead of them, and they carry a tint of
+   paper so the eye separates "a room to enter" from "a book to receive" without
+   being told. The tint is deliberately faint — a shelf that shouts in two
+   places is no longer a shelf. Both themes are set: on the dark ground the
+   colour is a wash, on white it is the paper itself. */
+
+.item-card--section .section-visual svg {
+  width: 62px;
+  height: 74px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.55;
+  transition: opacity 0.4s var(--ease);
+}
+.item-card--section:hover .section-visual svg {
+  opacity: 0.8;
+}
+
+/* the Bible: warm parchment */
+.item-card--bible {
+  background: rgba(201, 169, 110, 0.07);
+  border-color: rgba(201, 169, 110, 0.22);
+}
+.item-card--bible .section-visual {
+  color: var(--gold);
+}
+
+/* the lesson: the navy of the quarterly's own cover */
+.item-card--sbl {
+  background: rgba(122, 152, 196, 0.08);
+  border-color: rgba(122, 152, 196, 0.24);
+}
+.item-card--sbl .section-visual {
+  color: #9db4d4;
+}
+
+[data-theme='light'] .item-card--bible {
+  background: #faf6ee;
+  border-color: rgba(146, 114, 35, 0.18);
+}
+[data-theme='light'] .item-card--bible .section-visual {
+  color: #927223;
+}
+[data-theme='light'] .item-card--sbl {
+  background: #f2f5fa;
+  border-color: rgba(36, 66, 110, 0.16);
+}
+[data-theme='light'] .item-card--sbl .section-visual {
+  color: #24426e;
 }

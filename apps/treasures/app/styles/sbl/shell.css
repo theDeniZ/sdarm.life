@@ -1,0 +1,106 @@
+/* Where the lesson meets the site.
+ *
+ * The sheet was built as a page of its own, with its own fixed bar at the very
+ * top of the window. Inside Schätze it now sits under the site's navigation,
+ * which is fixed there too — so the bar is moved down by the height of the nav
+ * and the sheet with it. That offset is the only thing about the lesson that
+ * differs from the standalone original on screen, and it exists because two
+ * fixed bars cannot both own the top edge.
+ *
+ * On paper none of it survives: the navigation, like the lesson's own bar, is
+ * screen furniture, and the PDF is the reason this page exists. */
+
+.sbl {
+  /* the sheet is the ground here — Schätze paints the body dark, and a lesson
+     is white paper */
+  min-height: 100dvh;
+  padding-top: var(--sbl-nav-h, var(--nav-h));
+}
+
+.sbl .bar {
+  top: var(--sbl-nav-h, var(--nav-h));
+  /* Opaque here. The frosted glass was written for a bar at the very top of the
+     window, with nothing above it but the sheet's own white paper. Under the
+     site's navigation it has that bar showing through it instead, and two
+     stacked translucent strips read as a smear rather than as chrome. */
+  background: #fff;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+/* No scroll-margin override here, deliberately. --barh is measured from the
+   bar's lower edge, so it already carries the navigation's height with it, and
+   the sheet's own rule (sheet.css) lands a day in the right place unchanged.
+   Adding the navigation a second time here counted it twice: the day scrolled
+   past the line the strip uses to decide which day is current, and the strip
+   then marked the day before it. */
+
+/* the rail and the strip of days are measured against the window; both bars
+   stand above them */
+.sbl .rail,
+.sbl .days {
+  --sbl-top-inset: var(--sbl-nav-h, var(--nav-h));
+}
+
+@media print {
+  /* paper has no navigation */
+  nav.site-nav,
+  .skip-link {
+    display: none !important;
+  }
+  .sbl {
+    padding-top: 0;
+    min-height: 0;
+  }
+}
+
+/* ─── the arrow at the head of the day strip ────────────────────────────────
+   It is a .dchip, so the circle, the size, the colour, the hover and the
+   travelling pill all come from the days themselves. Only the mark inside is
+   different — an arrow instead of three letters. */
+
+.sbl .dchip.dtop svg {
+  width: 15px;
+  height: 15px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* The same sweep the day bands get, for the plate at the head of the sheet.
+ *
+ * Nothing about the plate itself is touched. It is `position: absolute` at
+ * `top: -40px` on purpose — it bleeds off the top edge of the sheet, the way
+ * the printed booklet has it — so it already carries a positioning context and
+ * must not be given another. An earlier attempt added `position: relative` and
+ * `overflow: hidden` here to clip the sweep, and that dropped the plate back
+ * into the flow and cut off the part that bleeds.
+ *
+ * So the light is moved inside the pseudo-element instead of moving the
+ * pseudo-element: the gradient slides across a background three times the
+ * width, and nothing ever leaves the box that would need clipping. */
+.sbl .lesson.flash::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: linear-gradient(100deg, transparent 22%, rgba(255, 255, 255, 0.6) 46%, transparent 68%) no-repeat;
+  background-size: 300% 100%;
+  animation: lessonsweep 0.9s cubic-bezier(0.3, 0.7, 0.3, 1);
+}
+@keyframes lessonsweep {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -100% 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sbl .lesson.flash::after {
+    display: none;
+  }
+}

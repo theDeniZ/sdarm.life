@@ -1,0 +1,247 @@
+/* The tool rail: strokes, inks, colour picker.
+   Ported verbatim from the SBL Edition single-page original — the cascade order
+   across these files is the order of the original stylesheet. */
+
+.sbl .rail {
+  transition:
+    opacity 0.22s,
+    transform 0.3s cubic-bezier(0.3, 0.9, 0.3, 1);
+}
+body.bare .sbl .bar {
+  transform: translateY(-110%);
+  opacity: 0;
+  pointer-events: none;
+}
+/* `writing` goes the same way as `bare`, and for the same reason: while the
+   reader is putting down his own words nothing else belongs on the screen.
+   On a phone this is what keeps the strip of days off the note when the
+   keyboard is up and the visible half of the screen is all there is. */
+.sbl body.bare .rail,
+body.writing .sbl .rail {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-50%) translateX(calc(-100% - 22px));
+}
+@media (max-width: 700px) {
+  body.bare .sbl .rail,
+  body.writing .sbl .rail {
+    transform: translate(calc(-100% - 14px), -50%);
+  }
+}
+
+/* ——— THE RAIL ———
+   The tools stand beside the sheet and stay there. What is in hand is visible
+   at a glance, nothing has to pop up to be found, and nothing closes after a
+   click: take a marker, run through the lesson, put it back. */
+.sbl .rail {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 60;
+  /* it keeps to the left margin: outside the sheet where there is room, and
+     over the sheet's own white edge on a tablet — never over the text */
+  left: max(10px, calc((100vw - 900px) / 2));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 7px;
+  background: var(--mat);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  backdrop-filter: saturate(180%) blur(28px);
+  border-radius: 19px;
+  box-shadow:
+    0 0 0 0.5px var(--hair),
+    0 14px 36px rgba(0, 0, 0, 0.15);
+  transition: opacity 0.2s;
+}
+/* ——— it comes when it is called ———
+   Standing in the margin all day, the rail was the darkest thing on a bright
+   page: the eye found it before it found a word, and a tool nobody asked for
+   was guarding the lesson. Now the margin is empty while reading, and the rail
+   appears at the three moments a tool is actually wanted — something is chosen
+   on the page, the hand reaches into the margin where the rail lives, or a mark
+   has just been made and may want changing. Then it goes away again.
+   The margin is its handle: that is what keeps a marker from being trapped in
+   the hand on a tablet, where there is no hover to reach with — after every
+   mark it lingers a moment, long enough to change the colour or put the tool
+   down. A phone never sees this rule: there the rail is a drawer behind a tab
+   (see the narrow block below) and is off screen already. */
+@media (min-width: 701px) {
+  .sbl .rail {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-50%) translateX(-7px);
+    transition:
+      opacity 0.18s ease,
+      transform 0.24s cubic-bezier(0.25, 1.1, 0.35, 1);
+  }
+  body.railcall:not(.bare):not(.writing) .sbl .rail {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(-50%);
+  }
+}
+.sbl .rail .sep {
+  width: 24px;
+  height: 0.5px;
+  background: var(--hair);
+  margin: 2px 0;
+}
+.sbl .rail .two {
+  display: grid;
+  grid-template-columns: repeat(2, 30px);
+  gap: 4px;
+}
+.sbl .rbtn {
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9px;
+  color: #5b5b60;
+  cursor: pointer;
+  transition:
+    background 0.16s,
+    color 0.16s,
+    transform 0.12s;
+}
+@media (hover: hover) {
+  .sbl .rbtn:hover {
+    background: rgba(120, 120, 128, 0.16);
+    color: #1c1c1e;
+  }
+}
+.sbl .rbtn:active {
+  transform: scale(0.92);
+}
+.sbl .rbtn:focus,
+.sbl .mtool:focus,
+.sbl .ink:focus,
+.sbl .dchip:focus {
+  outline: none;
+}
+.sbl .rbtn.on {
+  background: #2b2b2b;
+  color: #fff;
+}
+.sbl .rbtn.own.on {
+  background: var(--mine);
+  color: #fff;
+}
+.sbl .rbtn svg {
+  display: block;
+}
+.sbl .inks {
+  display: grid;
+  grid-template-columns: repeat(2, 22px);
+  gap: 6px;
+  justify-content: center;
+}
+.sbl .ink {
+  position: relative;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  cursor: pointer;
+  flex: none;
+  box-shadow:
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.14),
+    inset 0 -3px 5px rgba(0, 0, 0, 0.06),
+    inset 0 3px 4px rgba(255, 255, 255, 0.5);
+  transition:
+    transform 0.16s cubic-bezier(0.3, 1.4, 0.4, 1),
+    box-shadow 0.16s;
+}
+@media (hover: hover) {
+  .sbl .ink:hover {
+    transform: scale(1.14);
+  }
+}
+.sbl .ink:active {
+  transform: scale(0.94);
+}
+.sbl .ink.on {
+  box-shadow:
+    inset 0 0 0 0.5px rgba(0, 0, 0, 0.14),
+    0 0 0 2px #2b2b2b;
+}
+/* a pinned ink keeps its place: the row may reshuffle around it, it will not */
+.sbl .ink.pin::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: -1px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3);
+}
+.sbl .ink.more {
+  background: conic-gradient(from 0.5turn, #ff6b6b, #ffb35c, #ffe066, #8fe08f, #7fc8f8, #b39ddb, #f48fb1, #ff6b6b);
+}
+
+/* the gamut opens beside the rail, in the same block — never as a window */
+.sbl .rpick {
+  position: absolute;
+  left: calc(100% + 9px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 9px;
+  background: var(--mat);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  backdrop-filter: saturate(180%) blur(28px);
+  border-radius: 14px;
+  box-shadow:
+    0 0 0 0.5px var(--hair),
+    0 12px 30px rgba(0, 0, 0, 0.16);
+}
+.sbl .rpick[hidden] {
+  display: none;
+}
+.sbl .area {
+  position: relative;
+  width: 190px;
+  height: 110px;
+  border-radius: 9px;
+  cursor: crosshair;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18);
+}
+.sbl .hue {
+  position: relative;
+  width: 190px;
+  height: 14px;
+  border-radius: 7px;
+  cursor: pointer;
+  background: linear-gradient(to right, #f00, #ff0, #0f0, #0ff, #00f, #f0f, #f00);
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.18);
+}
+.sbl .area .dot,
+.sbl .hue .dot {
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 2px solid #fff;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.35),
+    0 1px 3px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+.sbl .hue .dot {
+  top: 50%;
+}
+
+/* ——— the days of the lesson, down the right edge ———
+   A lesson is seven days long; this is the thread you pull to get to any of
+   them, and it says which one you are reading now.
+   `days` is a LAYER name: everything under it is torn out of the page and made
+   to float. Nothing inside a panel may carry it — the calendar's own week is
+   `dcells` for exactly that reason. */

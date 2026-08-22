@@ -10,6 +10,8 @@ import {
   mockBibleTranslation,
   mockBibleBooks,
   mockBibleChapter,
+  mockSblQuarter,
+  mockSblBible,
 } from './data';
 
 const PORT = 8788;
@@ -43,6 +45,18 @@ function handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
   // Health check
   if (url === '/health') {
     sendJSON(res, 200, { ok: true });
+    return;
+  }
+
+  // /api/v1/sbl/quarter/:lang/:year/:quarter — the weekly lesson booklet
+  if (url.startsWith('/api/v1/sbl/quarter/')) {
+    sendJSON(res, 200, mockSblQuarter);
+    return;
+  }
+
+  // /api/v1/sbl/bible/:version
+  if (url.startsWith('/api/v1/sbl/bible/')) {
+    sendJSON(res, 200, mockSblBible);
     return;
   }
 

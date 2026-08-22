@@ -1,0 +1,569 @@
+/* Loading bar, hint chip, grips, selection bubble, toast, shortcuts card.
+   Ported verbatim from the SBL Edition single-page original — the cascade order
+   across these files is the order of the original stylesheet. */
+
+.sbl #load {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  z-index: 75;
+  overflow: hidden;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s;
+}
+body.loading .sbl #load {
+  opacity: 1;
+}
+.sbl #load i {
+  display: block;
+  width: 38%;
+  height: 100%;
+  border-radius: 0 2px 2px 0;
+  background: var(--gray-dk);
+  animation: loadrun 1.15s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+}
+@keyframes loadrun {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(365%);
+  }
+}
+@media print {
+  .sbl #load {
+    display: none;
+  }
+}
+
+/* the quiet invitation: shown a few times, never again after that */
+.sbl .hintchip {
+  position: absolute;
+  z-index: 61;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  border-radius: 11px;
+  cursor: pointer;
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  color: #fff;
+  background: rgba(28, 28, 30, 0.92);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  animation: hintin 0.22s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.sbl .hintchip.on {
+  display: flex;
+}
+@keyframes hintin {
+  from {
+    opacity: 0;
+    transform: translateY(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* the ends of a stroke can be taken and pulled: two knobs, the way a phone
+   offers them for text */
+.sbl .grip {
+  position: fixed;
+  z-index: 63;
+  display: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--gray-dk);
+  box-shadow:
+    0 0 0 2px #fff,
+    0 2px 6px rgba(0, 0, 0, 0.3);
+  cursor: ew-resize;
+  touch-action: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.sbl .grip.on {
+  display: block;
+}
+.sbl .grip::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--gray-dk);
+  border-radius: 1px;
+}
+.sbl .grip.s::after {
+  bottom: 100%;
+  height: var(--gh, 18px);
+}
+.sbl .grip.e::after {
+  top: 100%;
+  height: var(--gh, 18px);
+}
+@media (pointer: coarse) {
+  .sbl .grip {
+    width: 19px;
+    height: 19px;
+  }
+}
+
+/* ——— the bubble on a stroke already laid down ——— */
+.sbl .bub {
+  position: fixed;
+  z-index: 62;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 6px;
+  background: var(--mat);
+  -webkit-backdrop-filter: saturate(180%) blur(28px);
+  backdrop-filter: saturate(180%) blur(28px);
+  border-radius: 13px;
+  box-shadow:
+    0 0 0 0.5px var(--hair),
+    0 10px 28px rgba(0, 0, 0, 0.18);
+  opacity: 0;
+  transform: scale(0.92) translateY(3px);
+  pointer-events: none;
+  transform-origin: 50% 0;
+  transition:
+    opacity 0.14s,
+    transform 0.2s cubic-bezier(0.2, 1.4, 0.4, 1);
+}
+.sbl .bub.on {
+  opacity: 1;
+  transform: none;
+  pointer-events: auto;
+}
+.sbl .bub .mhair {
+  width: 0.5px;
+  height: 20px;
+  background: var(--hair);
+  margin: 0 2px;
+}
+.sbl .mtool {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: #5b5b60;
+  cursor: pointer;
+  transition:
+    background 0.16s,
+    color 0.16s,
+    transform 0.12s;
+}
+@media (hover: hover) {
+  .sbl .mtool:hover {
+    background: rgba(120, 120, 128, 0.16);
+    color: #1c1c1e;
+  }
+}
+.sbl .mtool:active {
+  transform: scale(0.92);
+}
+.sbl .mtool.own {
+  color: var(--mine);
+}
+
+/* the toast stands above whatever is already pinned to the bottom edge, so it
+   and the strip of days never land in the same place */
+.sbl .mtoast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(var(--gut-b, 0px) + 24px);
+  transform: translateX(-50%) translateY(8px);
+  opacity: 0;
+  z-index: 70;
+  background: rgba(28, 28, 30, 0.92);
+  color: #fff;
+  font-size: 12.5px;
+  padding: 9px 16px;
+  border-radius: 12px;
+  pointer-events: none;
+  transition:
+    opacity 0.2s,
+    transform 0.3s cubic-bezier(0.2, 1.3, 0.4, 1);
+}
+.sbl .mtoast.on {
+  opacity: 1;
+  transform: translateX(-50%);
+}
+.sbl .mtoast b {
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 0.5px solid rgba(255, 255, 255, 0.25);
+  color: #8fb8ff;
+  cursor: pointer;
+  pointer-events: auto;
+  font-weight: 700;
+}
+.sbl .mtoast b:hover {
+  color: #fff;
+}
+
+/* the crib sheet: everything that can be pressed, in one list */
+.sbl .keysback {
+  position: fixed;
+  inset: 0;
+  z-index: 78;
+  background: rgba(20, 20, 22, 0.28);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+}
+.sbl .keysback[hidden],
+.sbl .keyspop[hidden] {
+  display: none;
+}
+.sbl .keyspop {
+  position: fixed;
+  z-index: 79;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: min(420px, calc(100vw - 32px));
+  max-height: min(80vh, 640px);
+  overflow: auto;
+  padding: 18px 20px 16px;
+  background: var(--mat);
+  -webkit-backdrop-filter: saturate(180%) blur(30px);
+  backdrop-filter: saturate(180%) blur(30px);
+  border-radius: 18px;
+  box-shadow:
+    0 0 0 0.5px var(--hair),
+    0 26px 60px rgba(0, 0, 0, 0.28);
+}
+.sbl .keyspop h4 {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: #1c1c1e;
+  margin-bottom: 12px;
+}
+.sbl .keyspop .cap {
+  font-size: 9px;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  color: #8a8a8e;
+  margin: 15px 0 7px;
+}
+.sbl .krow {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 5px 0;
+}
+.sbl .krow kbd {
+  flex: none;
+  min-width: 46px;
+  text-align: center;
+  font-family: var(--sans);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: #3a3a3c;
+  background: rgba(120, 120, 128, 0.14);
+  border-radius: 7px;
+  padding: 5px 7px;
+  line-height: 1.1;
+}
+.sbl .krow span {
+  font-size: 13px;
+  line-height: 1.4;
+  color: #4a4a4e;
+  padding-top: 3px;
+}
+@media (prefers-color-scheme: dark) {
+  .sbl .keyspop {
+    --mat: rgba(44, 44, 46, 0.9);
+    --hair: rgba(255, 255, 255, 0.12);
+  }
+  .sbl .keyspop h4 {
+    color: #fff;
+  }
+  .sbl .krow kbd {
+    color: #e5e5ea;
+    background: rgba(120, 120, 128, 0.3);
+  }
+  .sbl .krow span {
+    color: #c7c7cc;
+  }
+}
+/* ——— a finger, not a mouse ———
+   On a tablet the lesson is read at arm's length and marked with the thumb, so
+   every target grows. Where the sheet leaves no gutter — a phone — the rail
+   lies down along the bottom edge instead of standing beside the page. */
+@media (pointer: coarse) {
+  .sbl .page {
+    -webkit-touch-callout: none;
+  }
+  .sbl .rail {
+    left: 10px;
+    padding: 9px 8px;
+    gap: 6px;
+    border-radius: 22px;
+  }
+  .sbl .rail .two {
+    grid-template-columns: repeat(2, 38px);
+    gap: 5px;
+  }
+  .sbl .rbtn {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+  }
+  .sbl .hand {
+    width: 42px;
+    height: 42px;
+  }
+  .sbl .inks {
+    grid-template-columns: repeat(2, 28px);
+    gap: 7px;
+  }
+  .sbl .ink {
+    width: 28px;
+    height: 28px;
+  }
+  .sbl .mtool {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+  }
+  .sbl .area {
+    width: min(260px, 66vw);
+    height: 130px;
+  }
+  .sbl .hue {
+    width: min(260px, 66vw);
+    height: 20px;
+  }
+  .sbl .area .dot,
+  .sbl .hue .dot {
+    width: 17px;
+    height: 17px;
+  }
+  /* a finger has no hover, so the cross is simply there on a touch device */
+  .sbl .mynote .del {
+    display: flex;
+    width: 28px;
+    height: 28px;
+  }
+}
+/* a tablet: the sheet stays where it is — centred, not nudged aside — and the
+   rail goes down to a single narrow column so it fits inside the sheet's own
+   white margin without touching a letter */
+@media (min-width: 701px) and (max-width: 1010px) {
+  .sbl .rail {
+    left: 9px;
+    padding: 7px 6px;
+    gap: 4px;
+    border-radius: 20px;
+  }
+  /* one narrow column, and every row centred on its own width — a finger makes
+     the buttons bigger than the inks, and a fixed grid column would push them
+     off to one side */
+  .sbl .rail .two,
+  .sbl .rail .inks {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+  .sbl .rail .sep {
+    width: 20px;
+  }
+  .sbl .days {
+    right: 9px;
+  }
+}
+/* the tab that says the tools are there — only on a phone, where the rail is
+   put away by default so it never takes half the screen */
+.sbl .railtab {
+  display: none;
+  position: fixed;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 58;
+  width: 20px;
+  height: 56px;
+  border-radius: 0 12px 12px 0;
+  cursor: pointer;
+  background: var(--mat);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  backdrop-filter: saturate(180%) blur(20px);
+  box-shadow:
+    0 0 0 0.5px var(--hair),
+    0 6px 18px rgba(0, 0, 0, 0.12);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  -webkit-tap-highlight-color: transparent;
+}
+.sbl .railtab i {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: #9a9aa0;
+}
+
+/* only a phone has no margin at all: there the rail slides in from the edge,
+   and the sheet gives it the room instead of being covered by it */
+@media (max-width: 700px) {
+  .sbl .railtab {
+    display: flex;
+  }
+  .sbl .rail {
+    left: 0;
+    top: 50%;
+    bottom: auto;
+    transform: translate(calc(-100% - 14px), -50%);
+    flex-direction: column;
+    flex-wrap: nowrap;
+    width: auto;
+    max-width: none;
+    border-radius: 0 20px 20px 0;
+    padding: 9px 8px;
+    gap: 5px;
+    transition:
+      transform 0.34s cubic-bezier(0.25, 1.1, 0.35, 1),
+      opacity 0.2s;
+  }
+  body.railout .sbl .rail {
+    transform: translate(0, -50%);
+  }
+  body.railout .sbl .railtab {
+    transform: translateY(-50%) translateX(-24px);
+    opacity: 0;
+  }
+  /* The rail out means a left gutter, and the gutter is the rail's own measured
+     width (`--railw`, set in `mkDrawer`): the buttons grow on a finger device,
+     so any number written here would be wrong on exactly the screens that
+     matter. The sheet is set beside the rail, never under it. */
+  .sbl body.railout {
+    --gut-l: var(--railw, 106px);
+  }
+  /* One narrow column down the left edge, and everything in it a tenth smaller
+     than anywhere else — on a phone the width taken from the lesson matters
+     more than the size of the target. These sizes deliberately undercut the
+     coarse-pointer block above: it grows the buttons for a finger, which is
+     right on a tablet and too wide here. Small enough that a single column
+     still ends above the bottom edge, which is what put the counter off screen
+     when it was full size. */
+  .sbl .rail {
+    padding: 7px 6px;
+    gap: 4px;
+  }
+  .sbl .rail .two,
+  .sbl .rail .inks {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .sbl .rbtn,
+  .sbl .mtool {
+    width: 27px;
+    height: 27px;
+    border-radius: 8px;
+  }
+  .sbl .hand {
+    width: 31px;
+    height: 31px;
+  }
+  .sbl .ink {
+    width: 20px;
+    height: 20px;
+  }
+  .sbl .rail .sep {
+    width: 20px;
+    height: 0.5px;
+    margin: 1px 0;
+  }
+  .sbl .rpick {
+    left: calc(100% + 9px);
+    right: auto;
+    top: 50%;
+    bottom: auto;
+    transform: translateY(-50%);
+  }
+  /* the strip of days lies along the bottom, and the sheet ends above it */
+  .sbl .days {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: calc(env(safe-area-inset-bottom) + 12px);
+    transform: translateX(-50%);
+    flex-direction: row;
+    border-radius: 999px;
+  }
+  body.bare .sbl .days,
+  body.writing .sbl .days {
+    transform: translateX(-50%) translateY(140%);
+  }
+  .sbl {
+    --gut-b: calc(env(safe-area-inset-bottom) + 66px);
+  }
+  body.bare .sbl,
+  body.writing .sbl {
+    --gut-b: 0px;
+  }
+  body.writing .sbl {
+    --gut-l: 0px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  .sbl .rail,
+  .sbl .rpick,
+  .sbl .bub {
+    --mat: rgba(44, 44, 46, 0.86);
+    --hair: rgba(255, 255, 255, 0.12);
+  }
+  .sbl .rbtn {
+    color: #c7c7cc;
+  }
+  .sbl .rbtn:hover {
+    background: rgba(120, 120, 128, 0.28);
+    color: #fff;
+  }
+  .sbl .rbtn.on {
+    background: #f2f2f7;
+    color: #1c1c1e;
+  }
+  .sbl .hand {
+    background: rgba(120, 120, 128, 0.28);
+    color: #c7c7cc;
+  }
+  .sbl .hand.on {
+    box-shadow:
+      0 0 0 2px rgba(255, 255, 255, 0.5),
+      0 2px 6px rgba(0, 0, 0, 0.4);
+  }
+  .sbl .ink.on {
+    box-shadow:
+      inset 0 0 0 0.5px rgba(0, 0, 0, 0.14),
+      0 0 0 2px #fff;
+  }
+  .sbl .mtool {
+    color: #c7c7cc;
+  }
+  .sbl .mtool:hover {
+    background: rgba(120, 120, 128, 0.28);
+    color: #fff;
+  }
+  .sbl .mtool.own {
+    color: #83a9ff;
+  }
+}
