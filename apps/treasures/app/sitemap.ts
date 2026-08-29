@@ -24,9 +24,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = LOCALES.flatMap((l) => [
     { url: `${BASE}/${l}`, lastModified: now, changeFrequency: 'daily' as const, priority: 1.0 },
     { url: `${BASE}/${l}/bible`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
-    /* weekly: the sheet shows the lesson of the current week, so the page a
-       crawler fetched last Tuesday is not the page that is there today */
-    { url: `${BASE}/${l}/sbl`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.9 },
   ]);
 
   // Book treasure detail pages

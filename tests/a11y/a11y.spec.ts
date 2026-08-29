@@ -8,7 +8,6 @@ const PAGES = [
   { name: 'songbook / home', url: 'http://localhost:3002/de' },
   { name: 'events / home', url: 'http://localhost:3003/de' },
   { name: 'treasures / catalog', url: 'http://localhost:3004/de' },
-  { name: 'treasures / sbl lesson', url: 'http://localhost:3004/de/sbl' },
 ];
 
 // Rules we explicitly exclude with rationale:

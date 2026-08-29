@@ -43,7 +43,7 @@ These are the only external data recipients currently named in [Datenschutzerkl�
 | Cloudflare | Hosting, Web Analytics, CDN | section4 |
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
 | YouVersion / Life.Church (US) | Bible text for treasures.sdarm.life/bible | section8 |
-| app.sdarm.org (SDARM's own service) | Lesson text and Bible editions for treasures.sdarm.life/{locale}/sbl | section9 |
+| sbl.sdarm.life (third-party page we host) | The Sabbath Bible Lesson — governed by **its own** Datenschutzerklärung, not ours | section9 |
 
 **To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 
@@ -64,37 +64,45 @@ What keeps this defensible:
 
 **Which translations are exposed is an operator decision** (Admin → Bible). Each YouVersion Bible carries its own publisher license; enabling a restrictively-licensed translation is a licensing decision, not a technical one.
 
-### Sabbath Bible Lesson (treasures.sdarm.life/{locale}/sbl) — app.sdarm.org
+### Sabbath Bible Lesson (sbl.sdarm.life) — hosted, not operated
 
-The lesson and the Bible editions it quotes come from the church's own service,
-`app.sdarm.org`. What keeps this clean:
+`sbl.sdarm.life` serves the **SBL Edition**, an independent page maintained at
+[TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl) by its author. We host it
+on a subdomain; we do not write it, patch it or proxy it. It is served byte for
+byte as published (`apps/sbl`).
 
-- **Every call is server-side.** `apps/api/src/routes/sbl.ts` runs inside the
-  Worker. The reader's IP, user-agent and reading behaviour never reach
-  app.sdarm.org — it sees our Worker asking for a quarter. Never fetch it from a
-  client component; the standalone SBL Edition original did, which is exactly
-  what the port into `apps/treasures` had to fix.
-- **The fonts are self-hosted.** The original loaded PT Serif and PT Sans from
-  `fonts.googleapis.com`; `apps/treasures/app/styles/sbl/index.css` imports
-  `@fontsource/pt-serif` and `@fontsource/pt-sans` instead — same faces,
-  Cyrillic subsets included, no third-party request.
-- **Nothing is stored.** No D1 table, no KV key — the response is streamed
-  through and cached at the edge.
-- Reader `localStorage` keys (`sbl.lang`, `sbl.verses`, `sbl.zoom`, `sbl.tint`,
-  `sbl.paper`, and the reader's own marks under the same `sbl.` prefix) are
-  functional preferences with no identifiers — same category as `sdarm-theme`.
-- **The service worker** (`apps/treasures/public/sbl-sw.js`) caches the lesson,
-  the two proxied files and hashed build assets in the reader's own browser.
-  Nothing leaves the device and nothing identifies it; it is offline reading,
-  not tracking.
+**It therefore carries its own Datenschutzerklärung and Impressum**, maintained
+upstream and reachable from the page itself. `legal.datenschutz.section9` says
+exactly that and nothing more: it names the address, says the offering is
+separate and independently maintained, and states that this policy does not
+apply there. It deliberately no longer describes *how* the lesson is retrieved —
+we would be describing someone else's code, and any description we wrote would
+go stale the next time upstream changed.
 
-**Disclosed in `section9`** of the Datenschutzerklärung (`legal.datenschutz` in
-de.json + en.json). The section says in as many words that the retrieval is
-server-side — that the reader's browser never connects to app.sdarm.org and that
-the only thing app.sdarm.org learns is which quarter our Worker asked for. That
-distinction is the whole legal argument here, so if the proxy is ever bypassed
-and the engine goes back to fetching upstream directly, the section becomes
-false and has to change with it.
+⚠️ **What that page does from the reader's browser, and what upstream's policy
+must therefore cover:**
+
+| Call | To | Why it is a transfer |
+|---|---|---|
+| Web fonts | `fonts.googleapis.com`, `fonts.gstatic.com` | Reader IP to Google on page load. This is the LG München I 3 O 17493/20 fact pattern — the highest-risk item on this page. |
+| Bible editions, and any quarter not in its own mirror | `app.sdarm.org` | Reader IP to a third party on page load |
+
+Both are disclosure obligations that **moved upstream — they did not disappear.**
+A subdomain of `sdarm.life` reads as our service to a German visitor, so if that
+page's own policy does not cover those two calls, the exposure lands here. That
+is the standing condition of hosting it, and it is the thing to re-check when
+the submodule pointer is moved.
+
+**Do not "fix" this in `apps/sbl`.** Rewriting the page's fetches or its font
+tags would fork it, which is the exact coupling the split exists to remove. If
+the arrangement has to change, the answer is upstream, or a transform in
+`scripts/stage.mjs` agreed with upstream — not a local edit.
+
+*Historical note:* v1.4.0 shipped the lesson as a route of `apps/treasures`, with
+`apps/api/src/routes/sbl.ts` proxying `app.sdarm.org` server-side and the fonts
+self-hosted via `@fontsource`. That is why this file used to describe a
+server-side retrieval. All of it — route, proxy, section9 wording — was removed
+when the lesson moved to its own host.
 
 ## ⚠️ Known gaps to close
 

@@ -41,9 +41,11 @@ const BANNER_KEY = 'uploads/998516df-c8b7-4492-a11f-7785412673d6.png';
 export default function TreasureCatalog({
   apiUrl,
   r2Url = 'https://images.sdarm.life',
+  sblUrl = 'https://sbl.sdarm.life',
 }: {
   apiUrl: string;
   r2Url?: string;
+  sblUrl?: string;
 }) {
   const tBr = useTranslations('treasures.bookRequest');
   const tSec = useTranslations('treasures.sections');
@@ -201,8 +203,13 @@ export default function TreasureCatalog({
                 </svg>
               }
             />
+            {/* The one card in this shelf that leaves the app: the lesson is
+                its own site now. No `withTheme` — the sheet is paper, it has
+                its own light and dark of its own choosing, and it never reads
+                this site's theme token. */}
             <SectionCard
-              href={`/${locale}/sbl`}
+              href={sblUrl}
+              external
               title={tSec('sbl.title')}
               description={tSec('sbl.description')}
               tone="sbl"

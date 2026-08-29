@@ -31,8 +31,6 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/bible/translations/:code/books/:bookCode/chapters/:n` | Chapter with all verses. 404 if translation/book/chapter not found. |
 | `GET` | `/api/v1/bible/parallel` | `?a=&b=&book=&chapter=` — two translations side-by-side, aligned by verse number. Psalm chapters are remapped between LXX and Hebrew numbering (see below). 400 if `a === b`, 404 if anything is missing. |
 | `POST` | `/api/v1/book-request` | Submit a free-book delivery request. Body: `{ name, email, phone?, land (DE/AT/CH), street, plz, city, books[] (min 1), wish?, language? }`. Sends a formatted email to `info@sdarm.life` via Resend (background, non-blocking). Rate-limited: 2 requests per IP per minute. Returns `{ ok: true }` (201). |
-| `GET` | `/api/v1/sbl/quarter/:lang/:year/:quarter` | One quarter of Sabbath Bible Lessons (13 lessons), proxied from `app.sdarm.org`. `:lang` is `de\|en\|ru`. Passed through byte for byte; edge-cached 6 h. 400 on a bad parameter, 404 if the quarter is not published yet, 503 if app.sdarm.org is erroring or rate-limiting, 502 if it refused us or could not be reached. |
-| `GET` | `/api/v1/sbl/bible/:version` | One whole Bible edition (`de-lut`, `en-kjv`, `ru-rst`, …) as `{ books: { BOOK: verses[][] } }` — about 4 MB. Proxied from `app.sdarm.org`, edge-cached 30 days. Same status mapping as the quarter route. |
 | `GET` | `/api/v1/geocode` | Geocode proxy. `?q=` (1–100 chars, required), `?limit=N` (1–10, default 3). Forwards to Nominatim with the project User-Agent and caches the upstream JSON in KV for 30 days. Hides the user's IP from OpenStreetMap (DSGVO). Response: `X-Cache: HIT|MISS`; upstream errors return `[]` to keep the autocomplete resilient. |
 | `GET` | `/api/v1/og` | Generated OpenGraph social card (1200×630 PNG). `?type=post\|song\|treasure`, `?slug=` (post) or `?id=` (song/treasure), `?locale=de\|en`, optional `?v=` (content `updatedAt`, makes the URL self-busting). Rendered with `workers-og` (Satori + resvg-wasm), self-hosted Lexend + Noto-Sans-Cyrillic fonts (DSGVO-clean, no external fetch). KV-cached 24 h (`X-Cache: HIT\|MISS`) + `Cache-Control: public, max-age=3600`. Cover fetched from the R2 binding and embedded. Binary responder — excluded from the OpenAPI spec, like the local-dev R2 proxy. 400 on missing/invalid params, 404 if the content doesn't exist. |
 
@@ -115,18 +113,6 @@ The signal that *does* work is the default `/v1/bibles` listing: it returns only
 **Enabling a translation** writes `bible_translations` through the ordinary `PUT /admin/config/:key` route. That route does **not** purge anything — it does not need to for the translation endpoints, which are uncached at the edge precisely so an allowlist change shows up immediately.
 
 ⚠️ **Disabling a translation is not immediate.** Books/chapters/parallel URLs already at the edge keep serving that translation's text for up to 24 h, and `apps/treasures` holds its own Next Data Cache window on top. `PUT /admin/config/:key` cannot enumerate those URLs to purge them. If a translation must come down *now* (a licensing complaint, say), purge the Cloudflare cache for `api.sdarm.life/api/v1/bible/*` manually — removing it from the allowlist alone is not enough.
-
-## Sabbath Bible Lesson content
-
-Lesson text and the Bible editions it quotes come from the church's own source, **`app.sdarm.org`**, proxied server-side by `apps/api/src/routes/sbl.ts`. **Nothing is stored** — no D1 table, no KV key. The upstream JSON is streamed through untouched, because the lesson engine (`apps/treasures/app/lib/sbl/engine.ts`) parses exactly the shape app.sdarm.org publishes.
-
-The proxy exists for one reason: the original standalone SBL Edition page fetched both files from the browser, which hands every reader's IP to a third party on page load ([dsgvo.md](dsgvo.md)). Fetched here, app.sdarm.org sees our Worker asking for a quarter and nothing about the reader.
-
-⚠️ **`app.sdarm.org` answers `406` to a tool-shaped User-Agent.** A request identifying itself as `curl/8.x` — or sending no UA at all — is refused by its WAF; `sdarm.life-sbl (info@sdarm.life)` is accepted. Keep the header when changing the route, and use the same shape when testing by hand.
-
-**Upstream's status is passed through, not flattened.** An earlier version answered 404 to every failure, which hid the two cases that look nothing alike from here: app.sdarm.org being down or rate-limiting us (→ **503**, the quarter exists, try again) versus a quarter that genuinely is not published yet (→ **404**, do not). Any other 4xx is upstream refusing *our* request rather than missing the file — the 406 its WAF answers a tool-shaped User-Agent with is exactly that — and comes back as **502**, logged with `console.error`. Only 404 is silent; the rest are worth an operator seeing in the Worker log.
-
-Caching is at the edge only, via `cached()` — an edition is 4 MB and a quarter 250 KB, which is what a whole-file proxy wants and not what KV is for. `cached()` stores 200s only, so none of the failure statuses are ever held. The reader's own service worker (`apps/treasures/public/sbl-sw.js`) keeps the last copy after that, which is what makes the lesson work offline.
 
 ## Rate limiting
 

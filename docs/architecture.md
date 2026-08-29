@@ -34,6 +34,34 @@ packages/
   i18n/    — @sdarm/i18n : Locale config, de/en message files
 ```
 
+### `apps/sbl` is hosting, not an app
+
+`sbl.sdarm.life` serves the **SBL Edition** — an independent typesetting of the
+Sabbath Bible Lesson maintained at [TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl)
+— and contains no application code of ours. Upstream is a zero-build static site
+(one `index.html` with its CSS and JS inline, a service worker, a mirror of the
+quarters, the recordings); it is pinned here as a git submodule and served
+verbatim by an assets-only Worker.
+
+```
+apps/sbl/
+  upstream/          submodule, pinned to a commit   ← the whole contract
+  scripts/stage.mjs  copies the served subset into dist/
+  wrangler.jsonc     assets-only Worker: no `main`, no bindings, no vars
+```
+
+Every principle above — package boundaries, repositories, DTOs — is about code
+we write, and none of it applies here. The one rule that does: **nothing in
+`apps/sbl` may be edited except `stage.mjs`, `wrangler.jsonc` and the submodule
+pointer.** A fix belongs upstream; a change made here would be silently
+overwritten by the next sync.
+
+v1.4.0 shipped the opposite arrangement — the page hand-transliterated into a
+4,700-line module inside `apps/treasures` — and it was a week stale on arrival:
+upstream went from 3 lesson languages to 18, added 19 Bible editions, a dark
+sheet and an audio player in the six days after the port landed. A pin costs one
+commit to move; a transliteration costs a rewrite.
+
 ```ts
 // packages/types/src/index.ts
 
@@ -145,8 +173,6 @@ export interface TreasureDto {
 
 `@sdarm/types` also exports the Bible DTOs (`BibleTranslationDto`, `BibleBookDto`, `BibleChapterDto`, `ParallelChapterDto`, …) and the shared Psalm-numbering helpers (`src/psalms.ts` — LXX ↔ Hebrew chapter mapping used by both the API service layer and the parallel reader UI).
 
-**The Sabbath Bible Lesson has no repository either.** `routes/sbl.ts` is a whole-file proxy: it fetches `app.sdarm.org`, sets a cache header and streams the body on. There is nothing to model, because nothing is stored and nothing is reshaped — the lesson engine in `apps/treasures` (`app/lib/sbl/engine.ts`) parses the upstream JSON exactly as published.
-
 **Bible content has no repository** — it is not in D1. `services/bible/` fetches from YouVersion and caches in KV; the only persisted state is the `bible_translations` config key. Repositories are for D1 tables only; anything that proxies an external API belongs in `services/`.
 
 `apps/web` and `apps/admin` import from `@sdarm/types`. `apps/api` uses the same interfaces to type `c.json()` responses — enforcing the contract at the source.
@@ -247,7 +273,6 @@ apps/api/src/
     images.ts          — GET /images/* (local dev proxy)
     subscribers.ts     — POST /subscribe, GET /unsubscribe
     treasures.ts       — GET /treasures, GET /treasures/:id
-    sbl.ts             — GET /sbl/quarter/:lang/:year/:quarter, GET /sbl/bible/:version (app.sdarm.org proxy)
     bible.ts           — GET /bible/translations[/:code[/books[/:bookCode[/chapters/:n]]]], GET /bible/parallel
     admin/
       posts.ts         — CRUD /admin/posts

@@ -10,6 +10,15 @@ on:
         description: Workspace-relative path to the app (e.g. apps/web)
         required: true
         type: string
+      dist-path:
+        description: >-
+          Directory, relative to app-path, that the build artifact unpacks into —
+          it must match the `assets.directory` in that app's wrangler.jsonc. The
+          Next apps all build to `.open-next`; @sdarm/sbl stages static files to
+          `dist`.
+        required: false
+        type: string
+        default: .open-next
       env:
         description: Wrangler environment to deploy to (e.g. staging). Leave empty for production.
         required: false
@@ -38,7 +47,7 @@ jobs:
       - uses: actions/download-artifact@v8
         with:
           name: ${{ inputs.artifact-name }}
-          path: ${{ inputs.app-path }}/.open-next
+          path: ${{ inputs.app-path }}/${{ inputs.dist-path }}
       - name: Deploy Worker
         working-directory: ${{ inputs.app-path }}
         run: |

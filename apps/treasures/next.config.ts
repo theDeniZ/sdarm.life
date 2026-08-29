@@ -5,9 +5,7 @@ import createNextIntlPlugin from 'next-intl/plugin';
 
 const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
-const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
-/* the lesson is the one page here whose data is fetched from the browser */
-const isLocal = API.includes('localhost') || API.includes('127.0.0.1');
+const SBL_URL = process.env.SBL_URL ?? 'https://sbl.sdarm.life';
 
 const nextConfig: NextConfig = {
   turbopack: { root: path.resolve(process.cwd(), '../..') },
@@ -28,13 +26,13 @@ const nextConfig: NextConfig = {
     '*.githubpreview.dev',
     '*.gitpod.io',
   ],
-  async rewrites() {
-    /* Local development only: the dev servers live in a container and reach the
-       browser through forwarded ports. Serving the page from one port and its
-       data from another means a single missing forward leaves the sheet up and
-       empty. In production the browser calls the API host directly. */
-    if (!isLocal) return [];
-    return [{ source: '/api/v1/sbl/:path*', destination: `${API}/sbl/:path*` }];
+  async redirects() {
+    /* The Sabbath Bible Lesson was a route of this app in 1.4.0 and now has its
+       own host. That version is live and the route is in the sitemap, so the
+       address has been shared and crawled — it must lead somewhere rather than
+       404. Permanent (308), so a crawler transfers what it knows about the page
+       to the new host instead of holding two records. */
+    return [{ source: '/:locale/sbl', destination: SBL_URL, permanent: true }];
   },
   images: {
     unoptimized: true,

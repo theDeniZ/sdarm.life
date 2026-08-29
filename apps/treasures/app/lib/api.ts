@@ -4,6 +4,11 @@ export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 // browser bundle would always fall back to the production URL and 404 in dev.
 export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? process.env.R2_URL ?? 'https://images.sdarm.life';
 
+/* The Sabbath Bible Lesson is its own app on its own host now (apps/sbl). It is
+   linked to from the shelf, so the URL belongs here with the other cross-app
+   addresses rather than inline at the call site. */
+export const SBL = process.env.SBL_URL ?? 'https://sbl.sdarm.life';
+
 const TRANSFORMS_ENABLED = process.env.R2_TRANSFORMS !== 'false';
 
 export interface ImageTransform {
