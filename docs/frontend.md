@@ -423,6 +423,14 @@ Route structure (all server components fetching via `lib/bible.ts`, silent-error
 
 **Client-side persistence** (functional localStorage, no identifiers — DSGVO-fine): `bible_last_read`, `bible_font_scale`, `bible_copy_options`.
 
+**Crawl budget is a running cost in this section, and it is guarded in three places.** The Bible tree is ~1,189 chapters per translation per locale, every page of it is a Worker invocation, and nothing caches between requests in production (see [gotchas.md](gotchas.md) on `staticAssetsIncrementalCache`), so an unbounded sweep can spend the account's whole daily request budget.
+
+- [sitemap.ts](../apps/treasures/app/sitemap.ts) lists translation landings and **book indexes only** — never the chapters. Listing them came to ~2,400 URLs per translation. The chapters stay linked from each book index and stay indexable; they are simply not broadcast.
+- [robots.ts](../apps/treasures/app/robots.ts) disallows `?compare=` and `?projector=` — utility variants of a page that already canonicalises to its plain URL — and refuses the AI and SEO/backlink crawler user-agents outright. In a sampled day of Worker logs SemrushBot was 73% of all requests to this app and MJ12bot a further 12%, all of it inside `/bible/`, against two requests from Googlebot.
+- The chapter page resolves its translation with `findTranslation()` from the list it already fetches, rather than a second API call. **When adding a fetch to any page under `bible/`, count it**: each one is another `sdarm-api` invocation on every view, multiplied by the size of the tree.
+
+The app's Data Cache is backed by R2 (see [gotchas.md](gotchas.md)) so a repeat view of a chapter costs no API Worker invocations. Neither robots rule is enforceable — crawlers that ignore `robots.txt` have to be stopped by a WAF rate-limiting rule, which runs before the Worker and therefore costs no quota.
+
 ---
 
 ## `@sdarm/ui` shared components

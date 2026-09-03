@@ -8,6 +8,15 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Backs Next's Data Cache (see open-next.config.ts). Its own bucket, not
+  // sdarm-images: POST /admin/images/backfill enumerates that bucket into the
+  // `images` D1 table, and cache objects are not images.
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "sdarm-next-cache"
+    }
+  ],
   "vars": {
     "API_URL": "https://api.sdarm.life/api/v1",
     "R2_URL": "https://images.sdarm.life",
@@ -20,6 +29,14 @@
   "env": {
     "staging": {
       "name": "sdarm-treasures-staging",
+      // Named environments do not inherit top-level bindings — without this,
+      // staging silently runs with no Data Cache at all.
+      "r2_buckets": [
+        {
+          "binding": "NEXT_INC_CACHE_R2_BUCKET",
+          "bucket_name": "sdarm-next-cache"
+        }
+      ],
       "vars": {
         "API_URL": "https://sdarm-api-staging.mine-a8f.workers.dev/api/v1",
         "R2_URL": "https://images.sdarm.life",
