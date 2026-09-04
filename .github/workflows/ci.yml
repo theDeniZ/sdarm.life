@@ -113,6 +113,19 @@ jobs:
       dist-path: ${{ matrix.path }}
       upload-artifact: ${{ github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' }}
 
+  # Not in the matrix above: sbl builds from a pinned upstream submodule and
+  # stages static files rather than compiling a Next app, so it is the one build
+  # that needs `submodules` and a `dist` path.
+  build-sbl:
+    needs: lint
+    uses: ./.github/workflows/_build-pages.yml
+    with:
+      filter: '@sdarm/sbl'
+      artifact-name: sbl-dist
+      dist-path: apps/sbl/dist
+      submodules: true
+      upload-artifact: ${{ github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' }}
+
   build-admin:
     needs: lint
     uses: ./.github/workflows/_build-pages.yml
@@ -140,7 +153,7 @@ jobs:
 
   migrate-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-pages, build-admin, build-admin-staging]
+    needs: [build-api, build-pages, build-sbl, build-admin, build-admin-staging]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -154,7 +167,7 @@ jobs:
 
   sync-secrets-staging:
     if: github.ref == 'refs/heads/develop'
-    needs: [build-api, build-pages, build-admin, build-admin-staging]
+    needs: [build-api, build-pages, build-sbl, build-admin, build-admin-staging]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -196,10 +209,14 @@ jobs:
             app-path: apps/events
           - artifact: treasures-dist
             app-path: apps/treasures
+          - artifact: sbl-dist
+            app-path: apps/sbl
+            dist-path: dist
     uses: ./.github/workflows/_deploy-pages.yml
     with:
       artifact-name: ${{ matrix.artifact }}
       app-path: ${{ matrix.app-path }}
+      dist-path: ${{ matrix.dist-path || '.open-next' }}
       env: staging
     secrets: inherit
 

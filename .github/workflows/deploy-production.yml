@@ -39,6 +39,16 @@ jobs:
       artifact-name: ${{ matrix.artifact }}
       dist-path: ${{ matrix.path }}
 
+  # Not in the matrix above: sbl builds from a pinned upstream submodule and
+  # stages static files rather than compiling a Next app.
+  build-sbl:
+    uses: ./.github/workflows/_build-pages.yml
+    with:
+      filter: '@sdarm/sbl'
+      artifact-name: sbl-dist
+      dist-path: apps/sbl/dist
+      submodules: true
+
   build-admin:
     uses: ./.github/workflows/_build-pages.yml
     with:
@@ -49,7 +59,7 @@ jobs:
       NEXT_PUBLIC_API_KEY: ${{ secrets.API_KEY }}
 
   migrate:
-    needs: [build-api, build-pages, build-admin]
+    needs: [build-api, build-pages, build-sbl, build-admin]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -62,7 +72,7 @@ jobs:
           command: d1 migrations apply sdarm-db --remote
 
   sync-secrets:
-    needs: [build-api, build-pages, build-admin]
+    needs: [build-api, build-pages, build-sbl, build-admin]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
@@ -104,10 +114,14 @@ jobs:
             app-path: apps/events
           - artifact: treasures-dist
             app-path: apps/treasures
+          - artifact: sbl-dist
+            app-path: apps/sbl
+            dist-path: dist
     uses: ./.github/workflows/_deploy-pages.yml
     with:
       artifact-name: ${{ matrix.artifact }}
       app-path: ${{ matrix.app-path }}
+      dist-path: ${{ matrix.dist-path || '.open-next' }}
     secrets: inherit
 
   sync-secrets-admin:

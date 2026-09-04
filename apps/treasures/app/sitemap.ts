@@ -24,9 +24,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = LOCALES.flatMap((l) => [
     { url: `${BASE}/${l}`, lastModified: now, changeFrequency: 'daily' as const, priority: 1.0 },
     { url: `${BASE}/${l}/bible`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
-    /* weekly: the sheet shows the lesson of the current week, so the page a
-       crawler fetched last Tuesday is not the page that is there today */
-    { url: `${BASE}/${l}/sbl`, lastModified: now, changeFrequency: 'weekly' as const, priority: 0.9 },
   ]);
 
   // Book treasure detail pages
@@ -41,7 +38,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       }))
     );
 
-  // Bible: translation landing + every chapter of every book × every locale
+  /* Bible: translation landings and book indexes only — deliberately not the
+     chapters. Listing every chapter of every book of every translation in both
+     locales came to some 2,400 URLs per translation, and each of those pages is
+     a Worker invocation that fans out to the API Worker, so a single crawler
+     reading this file could spend the account's whole daily request budget. The
+     chapter pages are still linked from each book index and still indexable —
+     a crawler reaches them at its own pace instead of being handed the entire
+     tree at once. */
   const allBooks = await Promise.all(translations.map(async (tr) => ({ tr, books: await fetchBooks(tr.code) })));
 
   const biblePages: MetadataRoute.Sitemap = allBooks.flatMap(({ tr, books }) => {
@@ -51,17 +55,15 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'yearly' as const,
       priority: 0.7,
     }));
-    const chapters = books.flatMap((b) =>
-      Array.from({ length: b.chapterCount }, (_, i) => i + 1).flatMap((n) =>
-        LOCALES.map((l) => ({
-          url: `${BASE}/${l}/bible/${tr.code}/${b.code}/${n}`,
-          lastModified: now,
-          changeFrequency: 'yearly' as const,
-          priority: 0.6,
-        }))
-      )
+    const bookIndexes = books.flatMap((b) =>
+      LOCALES.map((l) => ({
+        url: `${BASE}/${l}/bible/${tr.code}/${b.code}`,
+        lastModified: now,
+        changeFrequency: 'yearly' as const,
+        priority: 0.6,
+      }))
     );
-    return [...translationLanding, ...chapters];
+    return [...translationLanding, ...bookIndexes];
   });
 
   return [...staticPages, ...bookPages, ...biblePages];

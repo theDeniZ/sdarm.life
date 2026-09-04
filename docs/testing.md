@@ -24,21 +24,20 @@ Visual regression tests using Playwright. Tests run against a mock API so no rea
 | `tests/screenshot/songbook.spec.ts` | `@sdarm/songbook` | 3002 | home, song view |
 | `tests/screenshot/events.spec.ts` | `@sdarm/events` | 3003 | home |
 | `tests/screenshot/treasures.spec.ts` | `@sdarm/treasures` | 3004 | catalog |
-| `tests/screenshot/sbl.spec.ts` | `@sdarm/treasures` | 3004 | lesson sheet (`/de/sbl`) |
 
-**10 pages × 2 themes = 20 tests, plus one single-theme test for the lesson sheet — 21 total.**
+**10 pages × 2 themes = 20 tests.**
 
-The lesson has its own spec but no server of its own: it is a route of
-`apps/treasures`, so the spec drives port 3004 at `/de/sbl` like the catalog
-spec does. It is the one page captured once rather than per theme — the sheet is
-paper, its stylesheet is scoped under `.sbl` and carries no `[data-theme]`
-variant at all, so the only thing a second capture would show differently is the
-site navigation above it, which every other spec already covers in both themes.
-It is also the one spec that pins the clock (`page.clock.setFixedTime`) — the
-page picks its lesson from today's date, so without a fixed day the baseline
-would go stale every week. Every other page is captured in both dark and light
-theme via the `forEachTheme` helper (see [Themes](#themes) below). All run on
-Chromium, 1280×800, `de-DE` locale.
+Every page is captured in both dark and light theme via the `forEachTheme`
+helper (see [Themes](#themes) below). All run on Chromium, 1280×800, `de-DE`
+locale.
+
+**`sbl.sdarm.life` is not covered here, deliberately.** `apps/sbl` serves a
+pinned copy of a third-party page verbatim (see
+[architecture.md](architecture.md#appssbl-is-hosting-not-an-app)). A baseline
+over it would assert nothing about our code — it would fail on every upstream
+design change and pass on every one of our own, since we have none there. What
+is worth checking when the pin moves is that `pnpm --filter @sdarm/sbl build`
+stages without warning about unknown upstream entries, and that the page loads.
 
 ## Running tests
 

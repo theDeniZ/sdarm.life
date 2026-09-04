@@ -6,8 +6,8 @@ import {
   fetchBooks,
   fetchChapter,
   fetchParallelChapter,
-  fetchTranslation,
   fetchTranslations,
+  findTranslation,
 } from '../../../../../lib/bible';
 import BibleChapterReader from '../../../../../components/bible/BibleChapterReader';
 import BibleParallelReader from '../../../../../components/bible/BibleParallelReader';
@@ -81,13 +81,13 @@ export default async function ChapterPage({
   }
 
   if (compare) {
-    const [translationA, translationB, allTranslations, books, parallel] = await Promise.all([
-      fetchTranslation(code),
-      fetchTranslation(compare),
+    const [allTranslations, books, parallel] = await Promise.all([
       fetchTranslations(),
       fetchBooks(code),
       fetchParallelChapter(code, compare, book, chapterNum),
     ]);
+    const translationA = findTranslation(allTranslations, code);
+    const translationB = findTranslation(allTranslations, compare);
     if (!translationA || !translationB || books.length === 0) notFound();
     const bookMeta = books.find((b) => b.code === book);
     if (!bookMeta || chapterNum > bookMeta.chapterCount) notFound();
@@ -105,12 +105,12 @@ export default async function ChapterPage({
     );
   }
 
-  const [translation, allTranslations, books, ch] = await Promise.all([
-    fetchTranslation(code),
+  const [allTranslations, books, ch] = await Promise.all([
     fetchTranslations(),
     fetchBooks(code),
     fetchChapter(code, book, chapterNum),
   ]);
+  const translation = findTranslation(allTranslations, code);
   if (!translation || books.length === 0) notFound();
   const bookMeta = books.find((b) => b.code === book);
   if (!bookMeta || chapterNum > bookMeta.chapterCount) notFound();

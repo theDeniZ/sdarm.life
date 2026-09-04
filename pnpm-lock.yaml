@@ -221,6 +221,12 @@ importers:
         specifier: ^4
         version: 4.98.0(@cloudflare/workers-types@4.20260605.1)
 
+  apps/sbl:
+    devDependencies:
+      wrangler:
+        specifier: ^4
+        version: 4.98.0(@cloudflare/workers-types@4.20260605.1)
+
   apps/songbook:
     dependencies:
       '@fontsource/lexend':
@@ -293,12 +299,6 @@ importers:
       '@fontsource/lora':
         specifier: ^5.2.8
         version: 5.2.8
-      '@fontsource/pt-sans':
-        specifier: ^5.3.0
-        version: 5.3.0
-      '@fontsource/pt-serif':
-        specifier: ^5.3.0
-        version: 5.3.0
       '@sdarm/types':
         specifier: workspace:*
         version: link:../../packages/types
@@ -1522,12 +1522,6 @@ packages:
 
   '@fontsource/playfair-display@5.2.8':
     resolution: {integrity: sha512-fUEhib70SszNhQVsGbUMSsWJhr7Je0rdeuZdtGpDNu0GKF1xJM8QhpI/y0pckU25GcChXm9TLOmeZupkvvZo2g==}
-
-  '@fontsource/pt-sans@5.3.0':
-    resolution: {integrity: sha512-qisFKuquwSWlELeuQHQldOa4oSxDAOFpak2hj3FjFcdo4eCUGV0trhIBk3qt+Py50L8JKWHKnnL7/JPxRH0TPw==}
-
-  '@fontsource/pt-serif@5.3.0':
-    resolution: {integrity: sha512-ST+j/byBGZw6H+TQMX78o6Qlngfj2Va/Q9fAJxq54Is1ZQk1/FhBIuqyJcLmnpi0trG8V/hWO9Bx6ZY09A0DBQ==}
 
   '@fontsource/raleway@5.2.8':
     resolution: {integrity: sha512-OATNM+J4XniKQRlI1e67v3euOnCUiXwpqgMofomKc5JNYOq0JPE6E5uTXMnFaZejKN1Z7s05JrHpmYB7/tg1Fw==}
@@ -6966,10 +6960,6 @@ snapshots:
   '@fontsource/oswald@5.2.8': {}
 
   '@fontsource/playfair-display@5.2.8': {}
-
-  '@fontsource/pt-sans@5.3.0': {}
-
-  '@fontsource/pt-serif@5.3.0': {}
 
   '@fontsource/raleway@5.2.8': {}
 

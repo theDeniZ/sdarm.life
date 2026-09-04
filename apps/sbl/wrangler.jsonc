@@ -1,0 +1,28 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "sdarm-sbl",
+  "compatibility_date": "2024-09-23",
+
+  // Assets only — there is no `main`. The upstream page is static: one HTML
+  // file with its CSS and JS inline, a service worker and its data. No Worker
+  // code of ours runs in front of it, which is the point: nothing of ours can
+  // break it, and nothing of it can reach the rest of the site.
+  //
+  // Deliberately NOT `not_found_handling: "single-page-application"`. The page
+  // asks for `data/<lang>/<lang>-<year>-<q>.json` first and falls back to the
+  // publisher when that 404s. Under SPA handling every miss would answer 200
+  // with index.html, `r.ok` would be true, the JSON parse would throw, and the
+  // fallback would never run — a quarter that is not mirrored would come up
+  // empty instead. A real 404 is load-bearing here.
+  "assets": {
+    "directory": "dist"
+  },
+
+  // Only `name` here: `assets` and `compatibility_date` are inherited by an
+  // environment, the same way the other five app Workers rely on it.
+  "env": {
+    "staging": {
+      "name": "sdarm-sbl-staging"
+    }
+  }
+}

@@ -23,6 +23,14 @@ on:
         required: false
         type: boolean
         default: true
+      submodules:
+        description: >-
+          Check out git submodules. Only @sdarm/sbl needs this — it builds from a
+          pinned copy of an upstream repository. Left false elsewhere so the other
+          five app builds do not clone it for nothing.
+        required: false
+        type: boolean
+        default: false
     secrets:
       NEXT_PUBLIC_API_KEY:
         description: Value for NEXT_PUBLIC_API_KEY (admin builds only).
@@ -36,6 +44,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
+        with:
+          submodules: ${{ inputs.submodules }}
       - uses: pnpm/action-setup@v6
       - uses: actions/setup-node@v7
         with:

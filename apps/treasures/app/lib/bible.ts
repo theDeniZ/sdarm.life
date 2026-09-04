@@ -84,6 +84,17 @@ export async function fetchTranslations(opts: FetchOpts = {}): Promise<BibleTran
   }
 }
 
+/**
+ * Pick a translation out of a list already fetched for the same render, rather
+ * than asking the API for it again. Every avoided call here is one fewer
+ * invocation of the API Worker per page view — the chapter page needs the full
+ * list anyway for its compare picker. Matches the slug or the raw YouVersion
+ * ID, because the API accepts either in the URL.
+ */
+export function findTranslation(list: BibleTranslation[], code: string): BibleTranslation | null {
+  return list.find((t) => t.code === code || String(t.id) === code) ?? null;
+}
+
 export async function fetchTranslation(code: string): Promise<BibleTranslation | null> {
   try {
     const res = await fetch(`${API}/bible/translations/${code}`, { next: { revalidate: METADATA_REVALIDATE } });

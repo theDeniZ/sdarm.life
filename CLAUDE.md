@@ -20,8 +20,9 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | `@sdarm/admin` | `admin.sdarm.life` | Next.js 16 admin UI |
 | `@sdarm/api` | `api.sdarm.life` | Hono Cloudflare Worker |
 | `@sdarm/events` | `events.sdarm.life` | Next.js 16 events landing page |
-| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 16 analog treasures site — book catalogue, Bible reader, Sabbath Bible Lesson (`/{locale}/sbl`) |
+| `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 16 analog treasures site — book catalogue, Bible reader |
 | `@sdarm/songbook` | `songs.sdarm.life` | Next.js 16 songbook site |
+| `@sdarm/sbl` | `sbl.sdarm.life` | Sabbath Bible Lesson — **hosting only.** No code of ours; serves a pinned submodule of [TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl) verbatim |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
 | `@sdarm/types` | — | Shared API response DTO interfaces |
 | `@sdarm/ui` | — | Shared React components + dark museum CSS design system |
@@ -42,6 +43,7 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | Worker | `sdarm-events` |
 | Worker | `sdarm-treasures` |
 | Worker | `sdarm-songbook` |
+| Worker | `sdarm-sbl` |
 
 Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV namespace). Secrets: `API_KEY`, `RESEND_API_KEY`, `CF_ZONE_ID?`, `CF_PURGE_TOKEN?`.
 
@@ -56,6 +58,7 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `IMAGES` (R2), `KV` (KV 
 | `events.sdarm.life` | `apps/events` | Public |
 | `treasures.sdarm.life` | `apps/treasures` | Public |
 | `songs.sdarm.life` | `apps/songbook` | Public |
+| `sbl.sdarm.life` | `apps/sbl` | Public — third-party page, own Datenschutz/Impressum |
 
 ⚠️ **Reference for manual git work:** @docs/gitflow.md — guidelines for how you work with git. Claude does not automatically commit or push.
 

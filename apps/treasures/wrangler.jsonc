@@ -8,24 +8,43 @@
     "directory": ".open-next/assets",
     "binding": "ASSETS"
   },
+  // Backs Next's Data Cache (see open-next.config.ts). Its own bucket, not
+  // sdarm-images: POST /admin/images/backfill enumerates that bucket into the
+  // `images` D1 table, and cache objects are not images.
+  "r2_buckets": [
+    {
+      "binding": "NEXT_INC_CACHE_R2_BUCKET",
+      "bucket_name": "sdarm-next-cache"
+    }
+  ],
   "vars": {
     "API_URL": "https://api.sdarm.life/api/v1",
     "R2_URL": "https://images.sdarm.life",
     "WEB_URL": "https://sdarm.life",
     "SONGBOOK_URL": "https://songs.sdarm.life",
     "EVENTS_URL": "https://events.sdarm.life",
-    "TREASURES_URL": "https://treasures.sdarm.life"
+    "TREASURES_URL": "https://treasures.sdarm.life",
+    "SBL_URL": "https://sbl.sdarm.life"
   },
   "env": {
     "staging": {
       "name": "sdarm-treasures-staging",
+      // Named environments do not inherit top-level bindings — without this,
+      // staging silently runs with no Data Cache at all.
+      "r2_buckets": [
+        {
+          "binding": "NEXT_INC_CACHE_R2_BUCKET",
+          "bucket_name": "sdarm-next-cache"
+        }
+      ],
       "vars": {
         "API_URL": "https://sdarm-api-staging.mine-a8f.workers.dev/api/v1",
         "R2_URL": "https://images.sdarm.life",
         "WEB_URL": "https://sdarm-web-staging.mine-a8f.workers.dev",
         "SONGBOOK_URL": "https://sdarm-songbook-staging.mine-a8f.workers.dev",
         "EVENTS_URL": "https://sdarm-events-staging.mine-a8f.workers.dev",
-        "TREASURES_URL": "https://sdarm-treasures-staging.mine-a8f.workers.dev"
+        "TREASURES_URL": "https://sdarm-treasures-staging.mine-a8f.workers.dev",
+        "SBL_URL": "https://sdarm-sbl-staging.mine-a8f.workers.dev"
       }
     }
   }

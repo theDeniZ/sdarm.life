@@ -1,5 +1,6 @@
 import { setRequestLocale } from 'next-intl/server';
 import TreasureCatalog from '../../components/TreasureCatalog';
+import { SBL } from '../../lib/api';
 
 export default async function TreasuresPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
@@ -8,6 +9,7 @@ export default async function TreasuresPage({ params }: { params: Promise<{ loca
     <TreasureCatalog
       apiUrl={process.env.API_URL ?? 'https://api.sdarm.life/api/v1'}
       r2Url={process.env.R2_URL ?? 'https://images.sdarm.life'}
+      sblUrl={SBL}
     />
   );
 }

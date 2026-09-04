@@ -1,0 +1,3 @@
+[submodule "apps/sbl/upstream"]
+	path = apps/sbl/upstream
+	url = https://github.com/TheMaestr-o/sbl.git
