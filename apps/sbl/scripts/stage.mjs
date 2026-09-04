@@ -3,8 +3,9 @@
  *
  * This is the whole "build". Upstream (github.com/TheMaestr-o/sbl, pinned here
  * as the `upstream/` submodule) is a zero-build static site — one index.html
- * with its CSS and JS inline, a service worker, a mirror of the quarters and
- * the recordings. Nothing is compiled and, deliberately, nothing is rewritten:
+ * with its CSS and JS inline, a service worker, its own web fonts, its own
+ * legal pages and a mirror of the quarters. Nothing is compiled and,
+ * deliberately, nothing is rewritten:
  * the page is served exactly as its author publishes it, and it carries its own
  * Datenschutzerklärung and Impressum for what it does from the reader's
  * browser. See docs/dsgvo.md.
@@ -26,7 +27,7 @@ const out = join(root, 'dist');
    served means a file appearing up there is never published here by accident.
    The cost is that a genuinely new asset directory has to be added below — so
    anything unrecognised is reported rather than passed over in silence. */
-const SERVE = ['index.html', 'sw.js', 'data', 'audio'];
+const SERVE = ['index.html', 'sw.js', 'datenschutz.html', 'impressum.html', 'legal.css', 'fonts', 'data', 'audio'];
 
 /* Never served: upstream's own tooling and working files. Listed so the report
    at the end can tell "known, deliberately skipped" from "new upstream, look
@@ -40,10 +41,7 @@ const KNOWN_SKIP = [
   'README.md',
   'PLAN.md',
   'IDEAS.md',
-  'sbloutline.css',
-  'sbloutline-preview.html',
-  'sbloutline-test.html',
-  'sbloutlinedemo.html',
+  'LICENSE',
 ];
 
 /* An unchecked-out submodule is an empty directory, and an empty directory

@@ -84,14 +84,27 @@ must therefore cover:**
 
 | Call | To | Why it is a transfer |
 |---|---|---|
-| Web fonts | `fonts.googleapis.com`, `fonts.gstatic.com` | Reader IP to Google on page load. This is the LG München I 3 O 17493/20 fact pattern — the highest-risk item on this page. |
 | Bible editions, and any quarter not in its own mirror | `app.sdarm.org` | Reader IP to a third party on page load |
 
-Both are disclosure obligations that **moved upstream — they did not disappear.**
+That is a disclosure obligation which **moved upstream — it did not disappear.**
 A subdomain of `sdarm.life` reads as our service to a German visitor, so if that
-page's own policy does not cover those two calls, the exposure lands here. That
-is the standing condition of hosting it, and it is the thing to re-check when
-the submodule pointer is moved.
+page's own policy does not cover the call, the exposure lands here. That is the
+standing condition of hosting it, and it is the thing to re-check when the
+submodule pointer is moved.
+
+Checked at the `37a2f1d` pin: that page's § 3 names Cloudflare (and the
+`__cf_bm` cookie) in both languages, § 4 names `app.sdarm.org`, and the
+Impressum names the Verein. It covers what the page does.
+
+**Google Fonts left this table at the `10788f5e` pin.** Until then the page
+pulled its faces from `fonts.googleapis.com` / `fonts.gstatic.com` on load — the
+LG München I 3 O 17493/20 fact pattern, and the highest-risk item on it.
+Upstream now ships all 32 woff2 files in `fonts/` and has dropped the
+preconnects; `scripts/stage.mjs` serves that directory, so the faces come from
+`sbl.sdarm.life` and nothing is asked of Google. **When the pin moves, grep the
+staged `index.html` for `fonts.googleapis` before deploying** — a page that
+starts asking a CDN for its type again is a fine letter, and it would arrive
+here without a line of our code changing.
 
 **Do not "fix" this in `apps/sbl`.** Rewriting the page's fetches or its font
 tags would fork it, which is the exact coupling the split exists to remove. If

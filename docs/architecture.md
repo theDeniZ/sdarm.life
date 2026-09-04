@@ -39,9 +39,10 @@ packages/
 `sbl.sdarm.life` serves the **SBL Edition** — an independent typesetting of the
 Sabbath Bible Lesson maintained at [TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl)
 — and contains no application code of ours. Upstream is a zero-build static site
-(one `index.html` with its CSS and JS inline, a service worker, a mirror of the
-quarters, the recordings); it is pinned here as a git submodule and served
-verbatim by an assets-only Worker.
+(one `index.html` with its CSS and JS inline, a service worker, its own web
+fonts, its own `datenschutz.html` / `impressum.html`, a mirror of the quarters);
+it is pinned here as a git submodule and served verbatim by an assets-only
+Worker.
 
 ```
 apps/sbl/
