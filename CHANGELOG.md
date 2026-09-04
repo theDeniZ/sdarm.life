@@ -1,3 +1,16 @@
+# [1.5.0](https://github.com/theDeniZ/sdarm.life/compare/v1.4.0...v1.5.0) (2026-09-04)
+
+
+### Bug Fixes
+
+* worker usage, optimized ([ffedcdc](https://github.com/theDeniZ/sdarm.life/commit/ffedcdc768eb7d738956e924c980b20fdbd5a1fc))
+
+
+### Features
+
+* **sbl:** extract to sub-app ([df5c4ab](https://github.com/theDeniZ/sdarm.life/commit/df5c4ab8b5b118c2563d0c61171168cae1e25134))
+* **sbl:** move upstream pin to 37a2f1d ([9b43711](https://github.com/theDeniZ/sdarm.life/commit/9b43711fecb937907a0c8168911958a9787efdb9))
+
 # [1.4.0](https://github.com/theDeniZ/sdarm.life/compare/v1.3.0...v1.4.0) (2026-08-22)
 
 
