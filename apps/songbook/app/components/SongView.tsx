@@ -70,10 +70,11 @@ export default function SongView({ song }: { song: SongDto }) {
         )}
       </div>
 
+      {/* No "Reader" button here. Reader is the default state, so it was permanently
+          active and its click a no-op; the fullscreen and presenter modes render as
+          portals that cover this bar, and the only mode it could ever return from —
+          sheet music — now carries its own back control. */}
       <div className="mode-bar">
-        <button className={`mode-btn${mode === 'reader' ? ' active' : ''}`} onClick={() => setMode('reader')}>
-          {t('reader')}
-        </button>
         {anyChords && mode === 'reader' && (
           <button className={`mode-btn${showChords ? ' active' : ''}`} onClick={() => setShowChords((v) => !v)}>
             {t('chords')}
@@ -97,7 +98,7 @@ export default function SongView({ song }: { song: SongDto }) {
       {mode === 'reader' && <SongReader parts={song.parts} showChords={showChords} songId={song.id} />}
       {mode === 'fullscreen' && <Projector song={song} onClose={() => setMode('reader')} />}
       {mode === 'presenter' && <PresenterDashboard song={song} onClose={closePresenter} />}
-      {mode === 'sheets' && <SheetViewer sheets={song.sheets} />}
+      {mode === 'sheets' && <SheetViewer sheets={song.sheets} onClose={() => setMode('reader')} />}
     </div>
   );
 }
