@@ -5,7 +5,7 @@ import { useTranslations } from 'next-intl';
 import type { SongSheetDto } from '@sdarm/types';
 import { r2url } from '@/app/lib/api';
 
-export default function SheetViewer({ sheets }: { sheets: SongSheetDto[] }) {
+export default function SheetViewer({ sheets, onClose }: { sheets: SongSheetDto[]; onClose: () => void }) {
   const t = useTranslations('songbook.sheets');
   const [selectedId, setSelectedId] = useState<number | null>(sheets.length > 0 ? sheets[0].id : null);
 
@@ -19,6 +19,9 @@ export default function SheetViewer({ sheets }: { sheets: SongSheetDto[] }) {
   return (
     <div className="sheet-viewer">
       <div className="sheet-thumbs">
+        <button className="sheet-back" onClick={onClose}>
+          ← {t('backToLyrics')}
+        </button>
         {sheets.map((sheet, i) => (
           <button
             key={sheet.id}

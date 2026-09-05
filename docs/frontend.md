@@ -368,6 +368,45 @@ Image fields render `<ImagePicker>`. Text-area fields render `<textarea>`. URL a
 
 Closing presenter also closes the display window via the stored `displayWinRef`.
 
+**There is no "Reader" button in the mode bar, and adding one back would be a regression.** `reader`
+is the initial mode, so the button was permanently `.active` — filled solid `--gold`, the loudest
+element on the page — while its click was a no-op. `fullscreen` and `presenter` render through
+`createPortal` and cover the bar, so it was unreachable from them. The single case where it did
+something, returning from `sheets`, is now `SheetViewer`'s own `onClose` back control, which is
+where a way out belongs. `SheetViewer` therefore takes a required `onClose` prop.
+
+### Part labels and the transpose control
+
+**Part labels come from the part's `type`, localised in `SongReader`, never from `song_parts.label`.**
+The stored label is whatever the bulk importer typed — "Куплет 1" in a Russian book — so a site
+running in `de` and `en` produced "Куплет 1" over one part and "CHORUS" (the capitalised enum name,
+via a `partLabel()` helper that no longer exists) over the next. Verses are numbered in render order,
+because `expandParts()` repeats the chorus between them and the stored ordinal cannot be trusted.
+Keys live under `songbook.parts.*`.
+
+**Every part type is labelled in the same place.** Verses used to hang their label in a 1.6rem column
+carved out of `.reader-content`'s left padding — sized for a numeral, given an eight-character phrase,
+so it wrapped and spilled into the margin — and that column was hidden below 700px, leaving verses
+unlabelled on a phone while choruses were not. `.song-part--verse` is gone.
+
+**The transpose control is one capsule, not four boxes.** `.transpose-group` is a single pill of the
+same shape as `.mode-btn` above it, divided by hairlines; `.transpose-reset` sits outside it, so
+picking a key never changes the capsule's width. Hover washes use `color-mix(in srgb, var(--gold) …)`
+so one rule serves both themes instead of a duplicated `[data-theme='light']` block.
+
+### ReaderLayout sidebar
+
+The song list is a docked column **only above 1100px**. At or below that it is an off-canvas overlay
+with a scrim, closed by default, and picking a song closes it again. Below 1100px there is not room
+for both: at 834px (iPad Pro 11 portrait) the docked list took 270px and left the song 468px — a
+third of the screen spent on a list the reader had already finished with. It is now 0 and 700px.
+
+`sidebarOpen` is `boolean | null`, not `boolean`, and the distinction matters. `null` means the
+reader has not touched the toggle, and **no class is emitted** — the breakpoint decides, in CSS.
+A boolean default cannot: deriving it from `window` breaks SSR, `true` flashes the list open on a
+tablet, and `false` flashes it closed on a desktop. `.reader-sidebar.is-open` / `.is-closed` are
+applied only once there is an explicit choice.
+
 ### Projector / PresenterDashboard — multi-window architecture
 
 ```

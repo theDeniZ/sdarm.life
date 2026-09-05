@@ -4,11 +4,6 @@ export function formatDate(iso: string | null): string {
   return `${String(d.getDate()).padStart(2, '0')}.${String(d.getMonth() + 1).padStart(2, '0')}.${d.getFullYear()}`;
 }
 
-export function partLabel(type: string, label: string): string {
-  if (label) return label;
-  return type.charAt(0).toUpperCase() + type.slice(1);
-}
-
 // Default the projector slide theme to whatever the site theme currently is.
 export function getSiteTheme(): 'dark' | 'light' {
   if (typeof document === 'undefined') return 'dark';

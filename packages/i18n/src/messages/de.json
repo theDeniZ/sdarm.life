@@ -697,7 +697,6 @@
       "songs": "Lieder",
       "searchPlaceholder": "Suchen…",
       "songListAria": "Liedliste",
-      "songbook": "Gesangbuch",
       "title": "Titel",
       "author": "Autor",
       "searchByNumberOrTitle": "Nach Nummer, Titel oder Liedtext suchen…"
@@ -706,14 +705,22 @@
       "lyricsMatch": "Liedtext"
     },
     "view": {
-      "reader": "Leser",
       "chords": "Akkorde",
       "projector": "Projektor",
       "presenter": "Präsentator",
       "fullscreen": "Vollbild",
       "sheetMusic": "Noten"
     },
+    "parts": {
+      "verse": "Strophe",
+      "chorus": "Refrain",
+      "bridge": "Bridge",
+      "intro": "Intro",
+      "outro": "Outro",
+      "coda": "Coda"
+    },
     "sheets": {
+      "backToLyrics": "Zum Liedtext",
       "noSheets": "Keine Noten für dieses Lied verfügbar.",
       "sheetTab": "Blatt {n}",
       "sheetAlt": "Notenblatt {id}",
