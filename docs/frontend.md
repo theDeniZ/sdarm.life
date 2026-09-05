@@ -268,6 +268,7 @@ The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html
 - Always shows drag-drop zone for uploading new images
 - "⊞ Pick from library" toggle opens a scrollable grid of existing images
 - Shows current image preview with "✕ Remove" overlay when a value is set
+- **The preview is a fixed 3:2 box and uses `object-fit: contain`, never `cover`.** It exists to show the editor the file they just picked, so cropping it defeats its only purpose — a `max-height` plus `cover` showed a horizontal band of every portrait cover. The box is fixed rather than sized by the image so the form does not jump on each pick. The library thumbnail grid (`.image-picker-item img`) keeps `cover` on purpose: a 72px tile in a picker grid should crop to a uniform square.
 - On upload: `POST /admin/images/upload` → R2 + D1 → `onChange(key)`
 - On library pick: `onChange(key)` + close library
 - On remove: `onChange(null)`
