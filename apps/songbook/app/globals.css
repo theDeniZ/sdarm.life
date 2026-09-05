@@ -14,10 +14,17 @@
 :root {
   /* Songbook-specific tokens (common tokens inherited from @sdarm/ui tokens.css) */
   --chord: #c9a96e;
+  /* Depth for the off-canvas song list. Per theme, because a shadow is light
+     falling on a surface: the same 45% black that separates a near-black panel
+     from a near-black page is a bruise under a white one. */
+  --reader-overlay-shadow: rgba(0, 0, 0, 0.45);
+  --reader-scrim: rgba(4, 3, 2, 0.5);
 }
 
 [data-theme='light'] {
   --chord: #b8872c;
+  --reader-overlay-shadow: rgba(28, 28, 34, 0.13);
+  --reader-scrim: rgba(28, 28, 34, 0.26);
 }
 
 html,
@@ -490,50 +497,62 @@ a {
 }
 
 /* ── TRANSPOSE BAR ── */
+/* The mode bar directly above this is a row of pills. Four square hairline boxes
+   beside them read as a different era of the interface, so the control is one
+   capsule of the same shape and height, divided rather than fragmented.
+   Hover washes use color-mix on --gold so the one rule serves both themes —
+   --gold already flips, and a duplicated [data-theme='light'] block would be
+   one more place for the two to drift apart. */
 .transpose-bar {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  gap: 0.5rem;
   margin-bottom: 1.5rem;
 }
-.transpose-btn {
+
+.transpose-group {
+  display: inline-flex;
+  align-items: stretch;
   border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--gold) 3%, transparent);
+}
+
+.transpose-btn {
+  border: none;
   background: transparent;
-  padding: 0.3rem 0.7rem;
+  padding: 0.42rem 0.9rem;
   font-family: 'Lexend', sans-serif;
-  font-size: 0.78rem;
-  font-weight: 400;
-  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--muted);
   cursor: pointer;
-  transition:
-    background 0.2s,
-    color 0.2s,
-    border-color 0.2s;
   line-height: 1;
+  transition:
+    background 0.25s,
+    color 0.25s;
 }
 .transpose-btn:hover {
-  border-color: rgba(201, 169, 110, 0.4);
   color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
 }
-.transpose-btn--reset {
-  font-size: 1rem;
-  padding: 0.2rem 0.55rem;
-  color: var(--muted);
-}
-.transpose-btn--reset:hover {
-  color: var(--gold);
-}
+
+/* Hairlines between the parts, not around each of them. */
 .transpose-label {
   display: flex;
   align-items: center;
-  gap: 0.25rem;
-  min-width: 4.5rem;
   justify-content: center;
+  gap: 0.3rem;
+  min-width: 5.2rem;
+  padding: 0 0.3rem;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
   font-family: 'Lexend', sans-serif;
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 300;
   color: var(--muted);
-  letter-spacing: 0.03em;
+  letter-spacing: 0.04em;
 }
 .transpose-key {
   font-weight: 500;
@@ -544,13 +563,37 @@ a {
 }
 .transpose-arrow {
   color: var(--muted);
-  font-size: 0.7rem;
+  font-size: 0.66rem;
+  opacity: 0.7;
 }
 .transpose-offset {
   color: var(--muted);
 }
 .transpose-offset--active {
   color: var(--gold);
+}
+
+/* Outside the capsule: undoing is not a third way to transpose, and putting it
+   inside would make the control change width every time a key is picked. */
+.transpose-reset {
+  border: none;
+  background: transparent;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+.transpose-reset:hover {
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
 }
 
 .song-part {
@@ -609,6 +652,13 @@ a {
   --proj-symbol: rgba(255, 255, 255, 0.10);
   --proj-chord:  #c9a96e;
   --proj-bar-bg: rgba(12, 11, 9, 0.85);
+  /* Display leading, not body leading. 1.5–1.6 is right for running prose and is
+     what conventions.md asks for there, but the rule inverts as type grows: at
+     76px it put 122px between baselines and a four-line verse read as four
+     unrelated statements. One variable because two rules need this number —
+     .projector__lyrics and .chord-token__word--plain — and separate literals
+     are how they drift apart. */
+  --proj-leading: 1.15;
   position: fixed;
   inset: 0;
   background: var(--proj-bg);
@@ -620,14 +670,31 @@ a {
   height: 100dvh;
   overflow: hidden;
   font-size: clamp(36px, 6vw, 76px);
+  /* Two fingers resize the lyrics, so the browser must not claim that gesture
+     for its own page zoom. pan-y rather than none: the content still scrolls
+     vertically when the text outgrows the slide. preventDefault() alone is not
+     enough on iOS, which needs the declaration too. */
+  touch-action: pan-y;
 }
 
 /* Background symbol (verse number, "Ref", song number) — purely decorative */
+/* The verse mark sits in the corner and bleeds off it — it is not a backdrop.
+   At right: 5vw and min(80vh, 55vw) it was a 640px numeral centred on the same
+   band the lyrics occupy, so every line of the verse crossed it. A mark that
+   overlaps what it annotates stops being ornament and becomes noise.
+   Anchored to the bottom-right and allowed past both edges, it reads as the
+   corner of a page: present, placeable, never in the way of a word. */
 .projector__bg-symbol {
   position: absolute;
-  right: 5vw;
+  /* Centred on the golden section horizontally — the same 61.8% that
+     .projector__title-slide already uses vertically, so the two slides are cut
+     by the same proportion. A fraction, not a length: it holds at any screen and
+     any aspect ratio, which a vw/px offset never could.
+     Vertically it stays centred, because at min(80vh, 55vw) the mark is 80% of
+     the viewport height and 61.8% would push its foot past the bottom edge. */
+  left: 61.8%;
   top: 50%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
   font-family: 'DM Serif Display', serif;
   font-style: italic;
   font-size: min(80vh, 55vw);
@@ -638,13 +705,23 @@ a {
   white-space: nowrap;
   z-index: 0;
 }
+/* Title and Amen slides carry a single short mark and no competing text, so
+   there the mark is the composition and stays centred. */
+/* Words centre; only numerals sit on the golden section. A numeral is a compact
+   mark and a division point suits it. "Припев" is 710px wide against the digit's
+   246px at 1280 — it does not overrun the edge, but a block that wide placed
+   off-centre reads as badly centred rather than as deliberately placed, and it
+   crowds the right margin. Centred, it matches how the Amen slide already sits.
+   Everything else — top, transform, size — comes from the base rule. */
 .projector__bg-symbol--center {
-  right: auto;
   left: 50%;
-  transform: translate(-50%, -50%);
   font-style: normal;
 }
+/* Words, not numerals: Cormorant carries Cyrillic, DM Serif Display does not
+   (latin and latin-ext only), so "Припев" and "Аминь" fell through to whatever
+   the device happened to have while the numerals stayed in DM Serif. */
 .projector__bg-symbol--word {
+  font-family: 'Cormorant Garamond', serif;
   font-size: min(50vh, 20vw);
   font-style: normal;
 }
@@ -717,16 +794,37 @@ a {
 }
 
 /* Main content */
+/* A+ must grow the lyrics and nothing else. Both bars already carry
+   flex-shrink: 0, but this item had flex: 1 with the default min-height: auto,
+   which makes a flex item refuse to shrink below its own content. So the growing
+   text pushed the bottom bar past 100dvh and .projector's overflow: hidden cut it
+   away — the A− button left the screen and there was no way back down.
+
+   min-height: 0 lets the item shrink; overflow: auto gives the text somewhere to
+   go instead of shoving the chrome out. `safe center` is required with both: a
+   plain centred flex line that overflows becomes unreachable at the top edge. */
 .projector__content {
   flex: 1;
+  min-height: 0;
+  overflow: auto;
+  overscroll-behavior: contain;
   display: flex;
-  justify-content: center;
-  align-items: center;
+  justify-content: safe center;
+  align-items: safe center;
   text-align: center;
   width: 100%;
   padding: 0 5vw;
   position: relative;
   z-index: 1;
+}
+/* Kept visible rather than hidden: if the text no longer fits, silently clipping
+   it is worse than a hairline telling the operator to press A−. */
+.projector__content::-webkit-scrollbar {
+  width: 4px;
+}
+.projector__content::-webkit-scrollbar-thumb {
+  background: var(--proj-muted);
+  border-radius: 2px;
 }
 
 /* Title slide — positioned at golden ratio (61.8% from top) */
@@ -759,7 +857,7 @@ a {
 .projector__lyrics {
   font-family: 'Lexend', sans-serif;
   font-size: 1em;
-  line-height: 1.6;
+  line-height: var(--proj-leading);
   font-weight: 400;
   letter-spacing: 0.02em;
   font-optical-sizing: auto;
@@ -794,7 +892,7 @@ a {
 .projector__content .chord-token__word--plain {
   font-size: 1em;
   color: var(--proj-text);
-  line-height: 1.6;
+  line-height: var(--proj-leading);
   display: block;
 }
 
@@ -1335,6 +1433,26 @@ a {
   flex-wrap: wrap;
   margin-bottom: 1.2rem;
 }
+/* The way back to the lyrics. It used to be the "Reader" button in the mode bar,
+   which was permanently active everywhere else and therefore read as decoration.
+   No border: it is a way out, not another sheet tab, and must not compete with
+   them for the same meaning. */
+.sheet-back {
+  border: none;
+  background: transparent;
+  padding: 0.45rem 0.9rem 0.45rem 0;
+  margin-right: 0.3rem;
+  cursor: pointer;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.82rem;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  transition: color 0.25s;
+}
+.sheet-back:hover {
+  color: var(--gold);
+}
 .sheet-thumb {
   border: 1px solid var(--border);
   background: transparent;
@@ -1378,13 +1496,28 @@ a {
 }
 
 /* ── READER LAYOUT ── */
+
+/* The reader is a fixed, full-screen surface, so window.scrollY never moves —
+   and Navbar decides its backdrop from exactly that (`scrollY > 40`). Over the
+   reader it therefore never gains .scrolled and stays fully transparent, with
+   the logo and links sitting straight on the song. Scoped to this app rather
+   than changed in @sdarm/ui: the rule is about this layout, not about the nav.
+   --nav-bg-scrolled already flips per theme. */
+body:has(.reader-wrap) nav.site-nav {
+  background: var(--nav-bg-scrolled);
+  backdrop-filter: blur(20px);
+}
+
 .reader-wrap {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  padding-top: 62px; /* navbar height */
+  /* Measured by ReaderLayout into --reader-nav-h; the fallback only covers the
+     frame before the effect runs. The navbar is 59–72px depending on width, so
+     any single hardcoded number is wrong somewhere. */
+  padding-top: var(--reader-nav-h, 62px);
   display: flex;
   flex-direction: column;
   background: var(--dark);
@@ -1398,7 +1531,9 @@ a {
   align-items: center;
   gap: 0.8rem;
   padding: 0 1.2rem 0 1.6rem;
-  border-bottom: 1px solid rgba(201, 169, 110, 0.1);
+  /* Neutral and very quiet. A gold hairline reads as an accent, and an accent on
+     a strip that only holds a hamburger and a breadcrumb is spent on nothing. */
+  border-bottom: 1px solid color-mix(in srgb, var(--text) 7%, transparent);
   background: #0a0908;
 }
 
@@ -1479,14 +1614,22 @@ a {
   width: 320px;
   flex-shrink: 0;
   background: #0a0908;
-  border-right: 1px solid rgba(201, 169, 110, 0.1);
+  /* No border. The sidebar already has its own background against the reading
+     area, so a hairline on top of that boundary is a second line drawn where
+     one edge is enough — and at 1px it is the thing that catches the eye. */
   display: flex;
   flex-direction: column;
   overflow: hidden;
   transition: width 0.38s cubic-bezier(0.76, 0, 0.24, 1);
 }
-.reader-sidebar.collapsed {
+.reader-sidebar.is-closed {
   width: 0;
+}
+
+/* Behind the list while it overlays the song. Only rendered in that state, so it
+   never sits over the docked layout. */
+.reader-scrim {
+  display: none;
 }
 
 .reader-sidebar-inner {
@@ -1501,23 +1644,6 @@ a {
 .reader-sidebar-book {
   padding: 1.4rem 1.6rem 1.2rem;
   flex-shrink: 0;
-}
-.reader-sidebar-eyebrow {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.72rem;
-  font-weight: 300;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  color: rgba(201, 169, 110, 0.5);
-  margin-bottom: 0.5rem;
-}
-.reader-sidebar-title {
-  font-family: 'Lexend', sans-serif;
-  font-size: 0.92rem;
-  font-weight: 500;
-  font-style: normal;
-  color: var(--text);
-  line-height: 1.3;
 }
 .reader-sidebar-desc {
   font-family: 'Lexend', sans-serif;
@@ -1635,7 +1761,6 @@ a {
   align-items: center;
   gap: 0.8rem;
   padding: 0.75rem 1.6rem;
-  border-top: 1px solid rgba(201, 169, 110, 0.08);
   font-family: 'Lexend', sans-serif;
   font-size: 0.75rem;
   font-weight: 300;
@@ -1713,33 +1838,59 @@ a {
   .page {
     padding: 72px 2rem 3.5rem;
   }
+}
+
+/* ── The song list stops being a column and becomes an overlay ──
+   Above 1100px there is room for the list and the song side by side. Below it
+   there is not: at 834px the docked list took 270px of 834 and left 468px of
+   song — a third of the screen spent on a list the reader has already finished
+   with. So from here down the list behaves the way it always did on a phone —
+   off-canvas by default, sliding in over the song when asked for, and closing
+   itself the moment a song is picked.
+
+   The default is closed and lives here in CSS, not in React state: the class is
+   absent until the reader touches the toggle (see ReaderLayout), which is what
+   keeps the server render and the first client render identical. */
+@media (max-width: 1100px) {
   .reader-sidebar {
-    width: 270px;
+    position: fixed;
+    /* Below the navbar, not under it: at top: 0 the list slid beneath the site
+       logo, which sits at z-index 200 against the list's 150. */
+    top: var(--reader-nav-h, 62px);
+    bottom: 0;
+    left: 0;
+    width: min(320px, 85vw) !important;
+    z-index: 150;
+    transform: translateX(-100%);
+    transition: transform 0.38s cubic-bezier(0.76, 0, 0.24, 1);
   }
   .reader-sidebar-inner {
-    width: 270px;
+    width: 100%;
+  }
+  /* Floating over the song, so depth separates it — a shadow, not a line.
+     The negative spread cancels the blur vertically: 24px blur reaches 12px in
+     every direction, -12px spread pulls the shadow box back by the same, so
+     nothing bleeds above the panel's top edge or below its foot. What is left
+     is 10px of shadow to the right, which is the only edge that needs it.
+
+     On the open state only. Closed, the panel sits at translateX(-100%) with its
+     right edge on x=0, so a shadow offset 10px to the right stays in frame — a
+     stripe down the side of the song with no panel attached to it. */
+  .reader-sidebar.is-open {
+    transform: translateX(0);
+    box-shadow: 10px 0 24px -12px var(--reader-overlay-shadow);
+  }
+  .reader-scrim {
+    display: block;
+    position: fixed;
+    inset: var(--reader-nav-h, 62px) 0 0 0;
+    z-index: 140;
+    background: var(--reader-scrim);
+    backdrop-filter: blur(1px);
   }
 }
 
 @media (max-width: 700px) {
-  .reader-sidebar {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 280px !important;
-    z-index: 150;
-    transform: translateX(-100%);
-    transition: transform 0.38s cubic-bezier(0.76, 0, 0.24, 1);
-    border-right: 1px solid rgba(201, 169, 110, 0.15);
-  }
-  .reader-sidebar.collapsed {
-    width: 280px !important;
-    transform: translateX(-100%);
-  }
-  .reader-sidebar:not(.collapsed) {
-    transform: translateX(0);
-  }
   .reader-breadcrumb__current {
     max-width: 140px;
   }
@@ -1801,33 +1952,14 @@ a {
   }
 }
 
-/* ── VERSE NUMBER INLINE ── */
-.song-part--verse {
-  position: relative;
-  /* no padding — lyrics align with title and mode-bar */
-}
-.song-part--verse .song-part__label {
-  position: absolute;
-  /* hang into the 3.5rem left padding; right edge aligns with song-header__num */
-  left: -3.0rem;
-  width: 1.6rem;
-  /* optically centre the number with the first lyric line */
-  top: calc((1.15rem * 1.7 - 0.72rem * 1.4) / 2);
-  text-align: right;
-  margin-bottom: 0;
-  font-family: 'Lexend', sans-serif;
-  font-size: 0.72rem;
-  font-weight: 400;
-  letter-spacing: 0;
-  text-transform: none;
-  opacity: 0.6;
-}
-/* on mobile the layout is centred — hide hanging numbers */
-@media (max-width: 700px) {
-  .song-part--verse .song-part__label {
-    display: none;
-  }
-}
+/* Every part is labelled the same way — see .song-part__label above.
+   Verses used to hang their label in a 1.6rem column carved out of the content's
+   left padding. That column was sized for a numeral, but the label came straight
+   from song_parts.label, where the importer had written "Куплет 1"; eight
+   characters in 26px wrapped onto two lines and spilled into the margin. The
+   column also vanished below 700px, so on a phone verses were unlabelled while
+   choruses were not. One placement for all part types removes the whole class of
+   problem, and the label text is now localised by type in SongReader. */
 
 /* ═══ LIGHT THEME ═══ */
 
@@ -1866,7 +1998,6 @@ a {
 /* Reader toolbar */
 [data-theme='light'] .reader-toolbar-bar {
   background: var(--bg-section);
-  border-bottom-color: rgba(146, 114, 35, 0.08);
 }
 [data-theme='light'] .reader-breadcrumb__link { color: var(--muted); }
 [data-theme='light'] .reader-icon-btn { color: var(--muted); }
@@ -1879,10 +2010,7 @@ a {
 /* Reader sidebar */
 [data-theme='light'] .reader-sidebar {
   background: var(--bg-section);
-  border-right-color: rgba(146, 114, 35, 0.08);
 }
-[data-theme='light'] .reader-sidebar-eyebrow { color: rgba(146, 114, 35, 0.6); }
-[data-theme='light'] .reader-sidebar-title { color: var(--text-strong); }
 [data-theme='light'] .reader-sidebar-desc { color: var(--muted); }
 [data-theme='light'] .reader-sidebar-search-input {
   border-bottom-color: rgba(146, 114, 35, 0.2);
@@ -1902,7 +2030,6 @@ a {
 [data-theme='light'] .reader-toc-num { color: rgba(146, 114, 35, 0.5); }
 [data-theme='light'] .reader-toc-item:hover .reader-toc-num { color: rgba(146, 114, 35, 0.75); }
 [data-theme='light'] .reader-toc-item.active .reader-toc-num { color: var(--gold); }
-[data-theme='light'] .reader-sidebar-pagination { border-top-color: var(--border); }
 [data-theme='light'] .reader-sidebar-pagination button {
   border-color: rgba(146, 114, 35, 0.25);
   color: var(--gold);
@@ -1911,11 +2038,9 @@ a {
 /* Reader toolbar and sidebar */
 [data-theme='light'] .reader-toolbar-bar {
   background: var(--bg-card);
-  border-bottom-color: var(--border);
 }
 [data-theme='light'] .reader-sidebar {
   background: var(--bg-card);
-  border-right-color: var(--border);
 }
 [data-theme='light'] .reader-sidebar-search-input {
   background: rgba(0, 0, 0, 0.03);

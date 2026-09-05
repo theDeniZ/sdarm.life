@@ -22,7 +22,13 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
   const t = useTranslations('songbook.reader');
   const tSearch = useTranslations('songbook.search');
   const locale = useLocale();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Three states, not two. `null` means the reader has not chosen, and the
+  // breakpoint decides: docked open on a wide screen, off-canvas closed below
+  // DOCKED_FROM. Deriving that from `window` in the initial state would not
+  // survive SSR, and defaulting to a boolean either flashes the list open on a
+  // tablet or flashes it closed on a desktop. The class is simply absent until
+  // the reader touches the toggle, so CSS owns the default and React owns intent.
+  const [sidebarOpen, setSidebarOpen] = useState<boolean | null>(null);
   const [q, setQ] = useState('');
   const [items, setItems] = useState<SongListItemDto[]>(initialSongs.items);
   const [total, setTotal] = useState(initialSongs.total);
@@ -53,8 +59,43 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
     activeItemRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
   }, [currentSong.id]);
 
+  // The site navbar's height is not a constant: it measures 59px at 390, 63px at
+  // 834 and 72px at 1024. `.reader-wrap` hardcoded 62px, so it was wrong at every
+  // one of those widths, and the off-canvas list — position: fixed, top: 0 —
+  // slid up underneath the navbar, putting the site logo (z-index 200) on top of
+  // the list's own header (z-index 150). Measure it instead, the same way
+  // SblApp does for the lesson sheet.
+  useEffect(() => {
+    const nav = document.querySelector<HTMLElement>('nav.site-nav');
+    if (!nav) return;
+    const measure = () =>
+      document.documentElement.style.setProperty(
+        '--reader-nav-h',
+        `${Math.round(nav.getBoundingClientRect().height)}px`
+      );
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(nav);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  // Below this the list is an overlay over the song, not a column beside it.
+  const DOCKED_FROM = '(min-width: 1101px)';
+  const isDocked = () => window.matchMedia(DOCKED_FROM).matches;
+
+  function toggleSidebar() {
+    // With no explicit choice yet, flip whatever the breakpoint defaulted to.
+    setSidebarOpen((open) => (open === null ? !isDocked() : !open));
+  }
+
   function navigateTo(id: number) {
-    if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
+    // Picking a song is the moment the list has done its job — get it out of the
+    // way. On a docked layout there is room for both, so it stays.
+    if (!isDocked()) setSidebarOpen(false);
     if (id === currentSong.id) return;
     setSongLoading(true);
     window.history.pushState(null, '', `/${locale}/songbooks/${slug}/${id}`);
@@ -70,7 +111,8 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
       <div className="reader-toolbar-bar">
         <button
           className={`reader-icon-btn${sidebarOpen ? ' active' : ''}`}
-          onClick={() => setSidebarOpen((o) => !o)}
+          onClick={toggleSidebar}
+          aria-expanded={sidebarOpen ?? undefined}
           aria-label={t('songListAria')}
         >
           <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeWidth="1.6">
@@ -93,14 +135,26 @@ export default function ReaderLayout({ songbook, song: initialSong, initialSongs
       </div>
 
       <div className="reader-body">
-        {/* Sidebar */}
-        <div className={`reader-sidebar${sidebarOpen ? '' : ' collapsed'}`}>
+        {/* Scrim — only rendered while the list is an overlay, so tapping the song
+            closes the list instead of trapping the reader behind it. */}
+        {sidebarOpen === true && (
+          <div className="reader-scrim" onClick={() => setSidebarOpen(false)} aria-hidden="true" />
+        )}
+
+        {/* Sidebar. No class at all until the reader chooses — see the state above. */}
+        <div
+          className={`reader-sidebar${sidebarOpen === true ? ' is-open' : sidebarOpen === false ? ' is-closed' : ''}`}
+        >
           <div className="reader-sidebar-inner">
-            <div className="reader-sidebar-book">
-              <div className="reader-sidebar-eyebrow">{t('songbook')}</div>
-              <div className="reader-sidebar-title">{songbook.title}</div>
-              {songbook.description && <div className="reader-sidebar-desc">{songbook.description}</div>}
-            </div>
+            {/* No eyebrow, no title. The breadcrumb 44px above already reads
+                "Lieder › Breezify › Кто же я", so the name was on screen twice,
+                and an eyebrow saying "Songbook" over a songbook's name labels
+                what needs no label. Only a real description survives. */}
+            {songbook.description && (
+              <div className="reader-sidebar-book">
+                <div className="reader-sidebar-desc">{songbook.description}</div>
+              </div>
+            )}
 
             <div className="reader-sidebar-search">
               <input
