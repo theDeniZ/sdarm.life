@@ -37,6 +37,41 @@ const THEME_NAMES: Record<string, Record<ReaderTheme, string>> = {
 };
 const THEME_LABEL: Record<string, string> = { de: 'Thema', en: 'Theme' };
 
+// The reader's palette, applied as inline custom properties on the reader root —
+// the same way font size and line height already are. Inline beats every
+// stylesheet, so the canvas cannot be left painted by a rule that lost a
+// specificity contest or by a stale cached file. The attribute below stays for
+// the handful of descendant rules (borders, hover washes) that need a selector.
+const READER_THEMES: Record<ReaderTheme, Record<string, string>> = {
+  dark: {
+    '--reader-bg': '#0c0b09',
+    '--reader-toolbar': '#0e0d0b',
+    '--reader-sidebar': '#0a0908',
+    '--text': '#d6d0c8',
+    '--muted': '#7a7470',
+    '--gold': '#c9a96e',
+    '--border': 'rgba(201, 169, 110, 0.12)',
+  },
+  sepia: {
+    '--reader-bg': '#faf6ef',
+    '--reader-toolbar': '#faf6ef',
+    '--reader-sidebar': '#fdf9f4',
+    '--text': '#3b2f1e',
+    '--muted': '#9c8468',
+    '--gold': '#a0692a',
+    '--border': 'rgba(100, 70, 30, 0.12)',
+  },
+  light: {
+    '--reader-bg': '#f5f4f2',
+    '--reader-toolbar': '#f0efed',
+    '--reader-sidebar': '#f5f4f2',
+    '--text': '#1c1c1e',
+    '--muted': '#8a8a8e',
+    '--gold': '#b8924a',
+    '--border': 'rgba(0, 0, 0, 0.1)',
+  },
+};
+
 const FONT_MAP: Record<ReaderFont, string> = {
   lora: "'Lora', serif",
   cormorant: "'Cormorant Garamond', serif",
@@ -51,10 +86,24 @@ const FONT_LABELS: Record<ReaderFont, string> = {
   inter: 'Inter',
 };
 
-const LH_OPTIONS = [
-  { value: 1.6, label: 'Kompakt' },
-  { value: 1.9, label: 'Normal' },
-];
+// Reading is always compact. The looser 1.9 setting and the Kompakt/Normal
+// buttons that chose between them are gone: one good measure beats a control
+// that asks the reader to pick one, and the panel is shorter for it.
+const READER_LINE_HEIGHT = 1.6;
+
+// These four values are restored from localStorage inside useState initialisers,
+// and those run during server rendering too, where localStorage does not exist.
+// Unguarded, the read threw and the whole book page answered 500 for every
+// treasure that has an EPUB. Pre-existing and unrelated to theme scoping, but
+// the reader cannot render at all without it.
+function readStored(key: string): string | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    return localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
 
 interface Props {
   epubUrl: string;
@@ -250,24 +299,31 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   const [chapters, setChapters] = useState<Chapter[]>([]);
   const [toc, setToc] = useState<TocEntry[]>([]);
   const [currentIdx, setCurrentIdx] = useState(0);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  // Three states, not two. `null` means the reader has not chosen and the
+  // breakpoint decides in CSS: docked open on a wide screen, off-canvas closed
+  // on a narrow one. A boolean default cannot do that — deriving it from
+  // `window` breaks SSR, `true` flashes the contents list open over the page on
+  // a phone, `false` flashes it shut on a desktop. Same shape as ReaderLayout in
+  // the songbook.
+  const [sidebarOpen, setSidebarOpen] = useState<boolean | null>(null);
+  const DOCKED_FROM = '(min-width: 769px)';
+  const toggleSidebar = () => setSidebarOpen((o) => (o === null ? !window.matchMedia(DOCKED_FROM).matches : !o));
   const [errorMsg, setErrorMsg] = useState('');
   const [theme, setThemeState] = useState<ReaderTheme>(() => {
-    const saved = localStorage.getItem('sdarm_theme') as ReaderTheme | null;
+    // 'sdarm_reader_theme', not 'sdarm_theme': the site stores its own theme under
+    // 'sdarm-theme', one character away, and two keys that read as the same one is
+    // how they get confused for each other. These are deliberately separate themes.
+    const saved = readStored('sdarm_reader_theme') as ReaderTheme | null;
     return saved && (saved === 'dark' || saved === 'sepia' || saved === 'light') ? saved : 'dark';
   });
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [fontSize, setFontSizeState] = useState(() => {
-    const saved = localStorage.getItem('sdarm_fs');
+    const saved = readStored('sdarm_fs');
     return saved ? Math.max(13, Math.min(32, Number(saved))) : 26;
   });
   const [fontKey, setFontKeyState] = useState<ReaderFont>(() => {
-    const saved = localStorage.getItem('sdarm_font') as ReaderFont | null;
+    const saved = readStored('sdarm_font') as ReaderFont | null;
     return saved && FONT_MAP[saved] ? saved : 'cormorant';
-  });
-  const [lineHeight, setLineHeightState] = useState(() => {
-    const saved = localStorage.getItem('sdarm_lh');
-    return saved ? Number(saved) : 1.9;
   });
 
   // Search
@@ -313,11 +369,38 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   // retrySignal increments on manual retry to re-trigger the effect
   const [retrySignal, setRetrySignal] = useState(0);
 
-  // Mirror theme to <html data-theme> so body bg and scrollbar also respond
+  // --nav-h in globals.css is arithmetic — calc(2 * 1.3rem + 1.15rem * 1.4) —
+  // and the arithmetic is stale: nav.site-nav pads 1.4rem and its logo is
+  // 1.35rem, so it renders 73px against the formula's 67. The reader is placed
+  // at top: var(--nav-h) and therefore sat 6px under the navbar, which left 7px
+  // of air above the breadcrumb and 14px below it. Measure the bar instead; a
+  // formula cannot follow it across breakpoints anyway.
+  const [navH, setNavH] = useState<number | null>(null);
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    return () => document.documentElement.removeAttribute('data-theme');
-  }, [theme]);
+    const nav = document.querySelector<HTMLElement>('nav.site-nav');
+    if (!nav) return;
+    const measure = () => setNavH(Math.ceil(nav.getBoundingClientRect().height));
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(nav);
+    window.addEventListener('resize', measure);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', measure);
+    };
+  }, []);
+
+  // The reader's theme is the book's, not the site's, and it stays inside the
+  // reader — see the `data-reader-theme` attribute on the root element below.
+  //
+  // It used to be mirrored onto <html data-theme>, which had two consequences.
+  // The navbar and logo were painted by the book's theme rather than the site's.
+  // And on unmount the effect ran removeAttribute('data-theme'), stripping the
+  // attribute outright instead of restoring what was there: nothing puts it
+  // back — ThemeProvider only listens for the toggle event, ThemeScript only
+  // runs on a full page load, and leaving the reader is a client navigation —
+  // so the cascade fell through to :root, which is the dark palette. A visitor
+  // who arrived with a light site left the reader with a dark one, permanently.
 
   // Close settings panel on outside click
   useEffect(() => {
@@ -347,7 +430,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
 
   function setTheme(t: ReaderTheme) {
     setThemeState(t);
-    localStorage.setItem('sdarm_theme', t);
+    localStorage.setItem('sdarm_reader_theme', t);
   }
 
   function setFontSize(n: number) {
@@ -359,11 +442,6 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   function setFont(key: ReaderFont) {
     setFontKeyState(key);
     localStorage.setItem('sdarm_font', key);
-  }
-
-  function setLineHeight(lh: number) {
-    setLineHeightState(lh);
-    localStorage.setItem('sdarm_lh', String(lh));
   }
 
   // ── Highlight functions ────────────────────────────────────────────────────
@@ -835,11 +913,14 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
   return (
     <div
       className="epub-reader"
+      data-reader-theme={theme}
       style={
         {
+          ...READER_THEMES[theme],
+          ...(navH !== null ? { '--nav-h': `${navH}px` } : {}),
           '--epub-font-size': `${fontSize}px`,
           '--epub-font-family': FONT_MAP[fontKey],
-          '--epub-line-height': lineHeight,
+          '--epub-line-height': READER_LINE_HEIGHT,
         } as React.CSSProperties
       }
     >
@@ -847,14 +928,43 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
       <div className="epub-toolbar">
         <div className="epub-toolbar__left">
           <button
-            className="epub-icon-btn"
-            onClick={() => setSidebarOpen((v) => !v)}
+            className={`epub-icon-btn epub-toc-btn${
+              sidebarOpen === true ? ' epub-toc-btn--open' : sidebarOpen === false ? ' epub-toc-btn--closed' : ''
+            }`}
+            onClick={toggleSidebar}
             aria-label={locale === 'de' ? 'Inhaltsverzeichnis umschalten' : 'Toggle table of contents'}
+            aria-expanded={sidebarOpen ?? undefined}
           >
-            <svg viewBox="0 0 18 18" fill="none">
-              <line x1="2" y1="4" x2="16" y2="4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              <line x1="2" y1="9" x2="16" y2="9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-              <line x1="2" y1="14" x2="10" y2="14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+            {/* Two rules that fold into a cross. Each rule is wrapped in its own
+                group so the slide and the fold are separate transforms with
+                separate timing — see the CSS. No class at all until the reader
+                chooses: the breakpoint decides the resting look, the same way it
+                decides whether the panel is docked. */}
+            <svg viewBox="0 0 18 18" fill="none" aria-hidden="true">
+              <g className="epub-toc-btn__row epub-toc-btn__row--top">
+                <line
+                  className="epub-toc-btn__bar"
+                  x1="3"
+                  y1="6"
+                  x2="15"
+                  y2="6"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </g>
+              <g className="epub-toc-btn__row epub-toc-btn__row--bottom">
+                <line
+                  className="epub-toc-btn__bar"
+                  x1="3"
+                  y1="12"
+                  x2="15"
+                  y2="12"
+                  stroke="currentColor"
+                  strokeWidth="1.6"
+                  strokeLinecap="round"
+                />
+              </g>
             </svg>
           </button>
           <div className="epub-breadcrumb">
@@ -942,19 +1052,6 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                     </button>
                   ))}
                 </div>
-
-                <span className="epub-settings__label">Zeilenabstand</span>
-                <div className="epub-lh-row">
-                  {LH_OPTIONS.map(({ value, label }) => (
-                    <button
-                      key={value}
-                      className={`epub-lh-btn${lineHeight === value ? ' epub-lh-btn--active' : ''}`}
-                      onClick={() => setLineHeight(value)}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
               </div>
             )}
           </div>
@@ -962,16 +1059,33 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
       </div>
 
       {/* Reading progress */}
-      <div className="epub-progress" role="progressbar" aria-valuenow={readingProgress}>
-        <div className="epub-progress__fill" style={{ width: `${readingProgress}%` }} />
-      </div>
+      {/* The progress bar is not rendered for now — the percentage still shows in
+          the toolbar as .epub-chapter-pos, and the bar itself is moving to
+          another surface. Its styles are kept below in globals.css. */}
 
       {/* Layout */}
-      <div className={`epub-layout${sidebarOpen ? ' epub-layout--sidebar-open' : ''}`}>
+      <div className={`epub-layout${sidebarOpen === false ? '' : ' epub-layout--sidebar-open'}`}>
         {/* Sidebar */}
-        <aside className={`epub-sidebar${sidebarOpen ? '' : ' epub-sidebar--collapsed'}`}>
+        <aside
+          className={`epub-sidebar${sidebarOpen === true ? ' epub-sidebar--open' : sidebarOpen === false ? ' epub-sidebar--collapsed' : ''}`}
+        >
           <div className="epub-sidebar__inner">
             <div className="epub-sidebar__search">
+              {/* The glyph is inside the field, not beside it: one object, not a
+                  row of two. It is decorative — the placeholder already says what
+                  the field is for — so it is hidden from assistive tech. */}
+              <svg className="epub-sidebar__search-icon" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <circle cx="7" cy="7" r="4.4" stroke="currentColor" strokeWidth="1.4" />
+                <line
+                  x1="10.4"
+                  y1="10.4"
+                  x2="14"
+                  y2="14"
+                  stroke="currentColor"
+                  strokeWidth="1.4"
+                  strokeLinecap="round"
+                />
+              </svg>
               <input
                 className="epub-sidebar__search-input"
                 type="search"
@@ -1049,7 +1163,7 @@ export default function EpubReader({ epubUrl, title, author }: Props) {
                     className={`epub-toc-item${entry.chapterIndex === currentIdx ? ' epub-toc-item--active' : ''}`}
                     onClick={() => {
                       setCurrentIdx(entry.chapterIndex);
-                      if (window.matchMedia('(max-width: 700px)').matches) setSidebarOpen(false);
+                      if (!window.matchMedia(DOCKED_FROM).matches) setSidebarOpen(false);
                     }}
                   >
                     <span className="epub-toc-item__num">{entry.chapterIndex + 1}</span>
