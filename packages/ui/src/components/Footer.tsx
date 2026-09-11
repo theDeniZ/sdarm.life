@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import SunCalc from 'suncalc';
+import { getTimes } from 'suncalc';
 import CommunityMap from './CommunityMap';
 import {
   DEFAULT_COORDS,
@@ -94,7 +94,9 @@ function extractDropdownLabel(r: NominatimResult): string {
   return country ? `${city}, ${country}` : city;
 }
 
-function dateToMsOfDay(d: Date): number {
+function dateToMsOfDay(d: Date | null): number {
+  // suncalc 2 returns null where v1 returned an Invalid Date (polar day/night).
+  if (!d) return NaN;
   return (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) * 1000;
 }
 
@@ -198,8 +200,8 @@ function computeClock(sun: SunData, now: number, dow: number, clockT: (key: stri
 function fetchSunData(lat: number, lng: number): SunData {
   const today = new Date();
   const tomorrow = new Date(today.getTime() + 86400000);
-  const t1 = SunCalc.getTimes(today, lat, lng);
-  const t2 = SunCalc.getTimes(tomorrow, lat, lng);
+  const t1 = getTimes(today, lat, lng);
+  const t2 = getTimes(tomorrow, lat, lng);
   return {
     todaySunrise: dateToMsOfDay(t1.sunrise),
     todaySunset: dateToMsOfDay(t1.sunset),

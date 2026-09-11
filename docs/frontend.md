@@ -124,7 +124,7 @@ col 3  350 + 24 + 350 = 724
 3. **Sunset clock** — SVG arc ring + countdown label
 
 **Sunset clock logic:**
-- Sunrise/sunset times computed locally via `suncalc` (no third-party API call → DSGVO clean)
+- Sunrise/sunset times computed locally via `suncalc` (no third-party API call → DSGVO clean). v2 is ESM-only — import `{ getTimes }`, not a default — and returns `null` for a sun event that never occurs at that latitude, so `dateToMsOfDay()` maps `null` to `NaN` (see [gotchas.md](gotchas.md#third-party-api-breaks))
 - Default location: Pforzheim, Baden-Württemberg. Persisted user picks override the default via `localStorage.sdarm_sunset_location`
 - Updates every 1 s via `setInterval`; SVG ring transition is `0.9s` cubic-bezier
 - SVG ring: `r=76`, `CIRC ≈ 477.52px`, `strokeDashoffset = CIRC * (1 - progress)`
