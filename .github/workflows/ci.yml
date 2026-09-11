@@ -53,6 +53,14 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm turbo lint
 
+  test:
+    if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'chore(release):')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm turbo test
+
   playwright:
     if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ubuntu-latest

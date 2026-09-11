@@ -8,9 +8,35 @@ Pure-logic modules (no DOM, no Workers runtime) get plain [Vitest](https://vites
 | `@sdarm/types` | `packages/types/vitest.config.mts` (default node environment) | `src/psalms.test.ts` |
 | `@sdarm/api` | `apps/api/vitest.config.mts` (`@cloudflare/vitest-pool-workers` — needed for Worker-specific APIs) | `test/index.spec.ts` |
 
-⚠️ **The `@sdarm/api` suite currently does not run,** and bumping the pool does not fix it. `vitest run` there fails at config load with `Missing "./config" specifier in "@cloudflare/vitest-pool-workers"`, because `apps/api/vitest.config.mts` imports `defineWorkersConfig` from `@cloudflare/vitest-pool-workers/config`. This was first read as a version mismatch against the declared `vitest`, but it is not: the pool **deleted that export**. At `0.22.0` its `exports` map is `.`, `./types` and `./codemods/vitest-v3-to-v4` only, and `defineWorkersConfig` is gone from the public surface entirely — the main export now offers `cloudflarePool` / `cloudflareTest` instead. Restoring the suite therefore means rewriting the config against the new API, not realigning versions. It predates the Bible feature and affects the pre-existing `test/index.spec.ts` too. Put pure-logic tests in a plain-node package until someone does that migration.
+All three suites run, and `pnpm turbo test` runs all of them — it is a CI job
+(see [CI](#ci) below), so a broken suite fails the PR.
 
-⚠️ **`vitest` is deliberately split across the monorepo: 5.x everywhere except `apps/api`, which stays on `~4.1.11`.** `@cloudflare/vitest-pool-workers@0.22.0` peer-requires `vitest@^4.1.0` (likewise `@vitest/runner` and `@vitest/snapshot`), so moving `apps/api` to 5 leaves an unmet peer on every install. The plain-node suites in `@sdarm/types` and `@sdarm/songbook` have no such constraint and run fine on 5. The split is not an oversight — do not "tidy" it by aligning the versions. It resolves when the config migration above happens and a pool that supports vitest 5 exists; until then `apps/api` moves only together with its pool.
+**`apps/api` uses the pool as a Vite plugin, not a config wrapper.**
+`@cloudflare/vitest-pool-workers` deleted the `./config` entrypoint that used to
+export `defineWorkersConfig`; at `0.22.0` its `exports` map is `.`, `./types`
+and `./codemods/vitest-v3-to-v4` only. The config composes `cloudflareTest()`
+into a plain `defineConfig({ plugins: [...] })` instead. If you ever see
+`Missing "./config" specifier in "@cloudflare/vitest-pool-workers"`, something
+has reintroduced the old import — that error is **not** a version mismatch and
+bumping versions will not fix it.
+
+The suite binds its own `API_KEY` through `miniflare.bindings` so the auth
+middleware can be exercised from both sides. Do not make it depend on
+`.dev.vars` — that file is gitignored and absent in CI.
+
+⚠️ **`apps/api` tests must not touch D1-backed routes.** The test D1 has no
+migrations applied, so a query against a table says nothing about the code under
+test. `test/index.spec.ts` covers the wiring that actually breaks silently —
+routing, the admin auth gate, the CORS origin list (which drifted once, see
+[api.md](api.md)) and the OpenAPI document. Testing a repository properly means
+first applying migrations via the pool's `readD1Migrations`; that has not been
+set up yet.
+
+⚠️ **`vitest` is deliberately split across the monorepo: 5.x everywhere except `apps/api`, which stays on `~4.1.11`.** `@cloudflare/vitest-pool-workers@0.22.0` peer-requires `vitest@^4.1.0` (likewise `@vitest/runner` and `@vitest/snapshot`), so moving `apps/api` to 5 leaves an unmet peer on every install. The plain-node suites in `@sdarm/types` and `@sdarm/songbook` have no such constraint and run fine on 5. The split is not an oversight — do not "tidy" it by aligning the versions; `apps/api` moves only together with its pool.
+
+⚠️ **Every `test` script must be `vitest run`, never bare `vitest`.** Bare
+`vitest` is watch mode: it never exits, so a CI runner sits on it until the job
+times out. `apps/api` shipped that way while nothing ran it.
 
 Run per-app: `pnpm --filter @sdarm/songbook test`. Only add the `@cloudflare/vitest-pool-workers` pool when the code under test touches Worker bindings (D1, KV, R2, `env`) — plain TS/business logic runs faster under the default node environment.
 
@@ -210,7 +236,28 @@ if (url === '/api/v1/my-endpoint') {
 
 ## CI
 
-Playwright is not wired into CI yet — tests run manually. Snapshots are committed so the baselines are always available. When CI is added, use `pnpm test:screenshots` without `--update-snapshots` (failures will surface visual regressions).
+[`ci.yml`](../.github/workflows/ci.yml) runs three checks on every PR and on
+every push to `develop`, alongside the builds:
+
+| Job | Command | Covers |
+|---|---|---|
+| `lint` | `pnpm turbo lint` | ESLint across the 5 apps |
+| `test` | `pnpm turbo test` | the three unit suites above |
+| `playwright` | `pnpm test:screenshots` | 26 screenshot baselines, dark + light |
+
+Snapshots are committed so the baselines are always available; CI runs
+`pnpm test:screenshots` **without** `--update-snapshots`, so a visual regression
+fails the job and uploads `tests/screenshot/results` as an artifact.
+
+⚠️ **`pnpm test:a11y` is still not in CI** — it is the one suite that runs only
+on demand.
+
+*Historical note:* until the `test` job was added, **no unit test ran in CI at
+all** — `turbo.json` had no `test` task, so there was nothing to invoke even by
+accident. That is how `apps/api` shipped a suite that could not load its own
+config, asserting a `"Hello World!"` response the Worker has never returned,
+through release 1.5.0 without anyone noticing. A suite nothing runs is not a
+test, it is a comment.
 
 ---
 
