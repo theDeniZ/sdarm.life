@@ -42,16 +42,46 @@ These are the only external data recipients currently named in [Datenschutzerkl�
 |---|---|---|
 | Cloudflare | Hosting, Web Analytics, CDN | section4 |
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
-| YouVersion / Life.Church (US) | Bible text for treasures.sdarm.life/bible | section8 |
+| YouVersion / Life.Church (US) | Bible text for **`yv:` translations only** — `loc:` translations contact nobody | section8 |
 | sbl.sdarm.life (third-party page we host) | The Sabbath Bible Lesson — governed by **its own** Datenschutzerklärung, not ours | section9 |
 
 **To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 
-### Bible feature (treasures.sdarm.life/bible) — YouVersion
+### Bible feature (treasures.sdarm.life/bible) — two sources
 
-Bible text is fetched from the **YouVersion Platform API** (Life.Church, Oklahoma, USA). Nothing is stored in our database; the only persisted state is the operator's list of enabled Bible IDs in KV.
+Bible text now comes from either of two places, and which one a visitor hits is an
+operator setting:
 
-What keeps this defensible:
+- **`loc:` translations are ours.** Verse rows in the `sdarm-bible` D1, served from
+  our Worker. **No third party is contacted at all** — no transfer, no processor, no
+  disclosure obligation beyond hosting itself. The six public-domain texts we host
+  are all in this class.
+- **`yv:` translations are proxied** from the **YouVersion Platform API**
+  (Life.Church, Oklahoma, USA), exactly as before. Nothing is stored; the only
+  persisted state is the allowlist in KV.
+
+**Self-hosting is where the GDPR win comes from — not from where the bytes sit.**
+Bible text carries no personal data. The exposure in this feature has only ever been
+the reader's IP and reading behaviour reaching a US provider, and a `loc:` translation
+removes that transfer outright. `--location=weur` on the database is a *copyright*
+posture (see below), not a data-protection one.
+
+⚠️ **The disclosure is conditional on the allowlist, and the allowlist is a button in
+the admin.** An operator enabling one YouVersion translation re-creates the US transfer
+in a single click. Disclosure must precede the transfer, never follow it — so
+`legal.datenschutz.section8` **stays as long as the YouVersion provider exists at all**,
+even while the allowlist happens to hold only `loc:` ids. Shrink it only when the
+provider is removed from the code, not when it merely happens to be unused.
+
+⚠️ **EU placement makes the copyright exposure worse, not better.** German UrhG plus
+Abmahnung practice is the most convenient venue a rightsholder could ask for. No server
+configuration makes hosting an unlicensed text acceptable — that is what the
+per-translation license record and its gates are for, and why every text in the first
+batch is public domain. What is actually controllable on the free tier: D1
+`--location=weur`, an `eu` jurisdiction R2 bucket for offline bundles. KV is globally
+replicated and cannot be restricted — acceptable, it holds only the allowlist.
+
+What keeps the **YouVersion** half defensible:
 
 - **Every call is server-side.** `apps/api/src/services/bible/youversion.ts` runs inside the Worker. The visitor's IP, user-agent and reading behaviour never reach YouVersion — they only see "our Worker asked for JHN.3". Never call YouVersion from a client component.
 - **The app key never leaves the Worker.** `YOUVERSION_API_KEY` is a Worker secret, not a `NEXT_PUBLIC_` var.
@@ -62,7 +92,20 @@ What keeps this defensible:
 - **Do not add "Sign in with YouVersion".** That would send the user's browser to YouVersion directly and trigger consent-banner requirements.
 - Reader localStorage keys (`bible_last_read`, `bible_font_scale`, `bible_copy_options`) are functional preferences with no identifiers — same category as `sdarm-theme`.
 
-**Which translations are exposed is an operator decision** (Admin → Bible). Each YouVersion Bible carries its own publisher license; enabling a restrictively-licensed translation is a licensing decision, not a technical one.
+**Which translations are exposed is an operator decision** (Admin → Bible). Each Bible carries its own license; enabling a restrictively-licensed translation is a licensing decision, not a technical one.
+
+**Every translation carries a license record** (`bible_translations` in `sdarm-bible`):
+rights holder, basis (`public-domain` / `permission` / `provider`), the verbatim notice
+to render, and the gates `allowDownload` / `allowOffline` / `allowSearchIndex` /
+`allowProjector` plus a verse cap. The first three gates are enforced in the API, so a
+restriction cannot be forgotten in one client; `allowProjector` is enforced in the
+`apps/treasures` UI, because the projector reads the same chapter route as the reader and
+an API check would have to trust a client-supplied "I am a projector" flag — which is not
+enforcement. That deviation is deliberate and is recorded here rather than papered over.
+
+**Copyright notices render on every surface that shows verse text** — reader, parallel
+view, **projector and presenter display**, and the OG metadata. Several licenses require
+the notice on the screen shown to a room. Do not remove any of them.
 
 ### Sabbath Bible Lesson (sbl.sdarm.life) — hosted, not operated
 

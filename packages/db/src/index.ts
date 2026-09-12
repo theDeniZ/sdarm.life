@@ -13,8 +13,13 @@ export const KNOWN_CONFIG_KEYS = [
   'whatsapp_url',
   'instagram_url',
   'youtube_url',
-  // JSON array of enabled YouVersion Bible IDs, e.g. "[51,12]".
-  // Written by Admin → Bible; read by the public /bible/* routes.
+  /**
+   * Ordered JSON array of enabled translation ids, e.g.
+   * `"[\"loc:luther1912\",\"yv:51\"]"`. The prefix names the source, so a
+   * self-hosted text and a YouVersion one can never collide on an id.
+   * Written by Admin → Bible; read by the public /bible/* routes. A bare number
+   * from a pre-self-hosting allowlist is still read as `yv:{n}`.
+   */
   'bible_translations',
   /**
    * Homepage bento grid. Unlike every other key this holds a JSON document

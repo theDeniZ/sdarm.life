@@ -1,73 +1,56 @@
+import type {
+  BibleBookDto,
+  BibleChapterDto,
+  BibleLicenseDto,
+  BibleTranslationDto,
+  BibleVerseDto,
+  ParallelChapterDto,
+  ParallelVerseDto,
+} from '@sdarm/types';
 import { API } from './api';
 
 /**
- * Bible data comes from our own API, which proxies YouVersion server-side.
- * These shapes mirror the DTOs in `@sdarm/types`.
+ * Bible data comes from our own API, which serves locally-hosted public-domain
+ * texts and proxies YouVersion server-side.
+ *
+ * These are aliases of the DTOs in `@sdarm/types` rather than a second set of
+ * interfaces. The app carried its own copies until the license fields landed,
+ * and the copies had already lost `license`, `truncated` and the prefixed
+ * string id — a mirror that is maintained by hand drifts, and a license field
+ * that goes missing in the mirror is a license field that never reaches a page.
  */
-export interface BibleTranslation {
-  /** YouVersion Bible ID. */
-  id: number;
-  /** URL slug used in /bible/{code}/… */
-  code: string;
-  name: string;
-  abbreviation: string;
-  language: string;
-  /** Publisher copyright notice — display wherever the text is shown. */
-  copyright: string | null;
-  /** Best-effort year parsed from the title; 0 when unknown. */
-  year: number;
-  /** Uses Septuagint Psalm numbering (drives parallel-mode chapter remapping). */
-  lxxPsalms: boolean;
-}
+export type BibleTranslation = BibleTranslationDto;
+export type BibleLicense = BibleLicenseDto;
+export type BibleBook = BibleBookDto;
+export type BibleVerse = BibleVerseDto;
+export type BibleChapter = BibleChapterDto;
+export type ParallelVerse = ParallelVerseDto;
+export type ParallelChapter = ParallelChapterDto;
 
-export type BibleTestament = 'OT' | 'NT';
-
-export interface BibleBook {
-  id: number;
-  code: string;
-  number: number;
-  name: string;
-  abbreviation: string;
-  testament: BibleTestament;
-  chapterCount: number;
-}
-
-export interface BibleVerse {
-  verse: number;
-  text: string;
-}
-
-export interface BibleChapter {
-  translation: { code: string; name: string; copyright: string | null };
-  book: BibleBook;
-  chapter: number;
-  verses: BibleVerse[];
-}
-
-export interface ParallelVerse {
-  verse: number;
-  a: string | null;
-  b: string | null;
-}
-
-export interface ParallelChapter {
-  bookCode: string;
-  a: { code: string; name: string; chapter: number; copyright: string | null };
-  b: { code: string; name: string; chapter: number; copyright: string | null };
-  verses: ParallelVerse[];
+/**
+ * The line that must appear wherever this translation's text is displayed.
+ *
+ * `notice` is the rights holder's own wording and is rendered verbatim — never
+ * reformatted, shortened or translated. A public-domain text has no notice and
+ * falls back to `provenance`, so it still says where the text came from: that
+ * is the difference between "we checked" and "we did not think about it".
+ */
+export function licenseNotice(license: BibleLicense): string | null {
+  return license.notice ?? license.provenance;
 }
 
 interface FetchOpts {
   revalidate?: number;
 }
 
-// The API already caches YouVersion responses in KV and at the edge; these are
+// The API already caches upstream responses in KV and at the edge; these are
 // the Next.js-side windows on top of that.
 //
 // Metadata is kept short because the translation list is driven by the admin
 // allowlist — a long window would leave a newly enabled translation invisible
-// on the site long after the operator saved it. Scripture text never changes,
-// so chapters get a long window.
+// on the site long after the operator saved it, and would keep serving one the
+// operator has just taken down. Scripture text never changes, so chapters get
+// a long window.
 const METADATA_REVALIDATE = 300;
 const CHAPTER_REVALIDATE = 86400;
 
@@ -88,11 +71,14 @@ export async function fetchTranslations(opts: FetchOpts = {}): Promise<BibleTran
  * Pick a translation out of a list already fetched for the same render, rather
  * than asking the API for it again. Every avoided call here is one fewer
  * invocation of the API Worker per page view — the chapter page needs the full
- * list anyway for its compare picker. Matches the slug or the raw YouVersion
- * ID, because the API accepts either in the URL.
+ * list anyway for its compare picker.
+ *
+ * Matches the slug or the prefixed id, because the API accepts either in the
+ * URL. A bare number is still accepted too: links minted before the ids were
+ * prefixed carry the raw YouVersion number, and the API still resolves those.
  */
 export function findTranslation(list: BibleTranslation[], code: string): BibleTranslation | null {
-  return list.find((t) => t.code === code || String(t.id) === code) ?? null;
+  return list.find((t) => t.code === code || t.id === code || t.id === `yv:${code}`) ?? null;
 }
 
 export async function fetchTranslation(code: string): Promise<BibleTranslation | null> {

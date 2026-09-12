@@ -22,6 +22,25 @@
 			"database_name": "sdarm-db",
 			"database_id": "8d498e81-689f-45ac-9128-46106dd87e2d",
 			"migrations_dir": "../../packages/db/migrations"
+		},
+		// Self-hosted Bible verses. A SECOND database, created with
+		// `--location=weur` so the rows sit in the EU, with its own migrations
+		// directory (`packages/db/src/bible.ts` -> `migrations-bible`).
+		//
+		// ⚠️ The production database_id below is a PLACEHOLDER. Create the
+		// database and paste its id before the next production tag:
+		//   wrangler d1 create sdarm-bible --location=weur
+		// Until then a production deploy of this Worker will fail on this entry.
+		// Local dev and staging are unaffected — local state is keyed by name,
+		// and staging has its own id.
+		//
+		// The binding is optional at runtime: with no BIBLE_DB the API simply
+		// serves no locally-hosted translations (see services/bible/local.ts).
+		{
+			"binding": "BIBLE_DB",
+			"database_name": "sdarm-bible",
+			"database_id": "REPLACE_BEFORE_PRODUCTION_DEPLOY",
+			"migrations_dir": "../../packages/db/migrations-bible"
 		}
 	],
 	"r2_buckets": [
@@ -44,8 +63,14 @@
 					"binding": "DB",
 					"database_name": "sdarm-db-staging",
 					"database_id": "4e65db11-657d-4e2c-b1fc-d45b2ddb6a65",
-					"migrations_dir": "../../packages/db/migrations"
-				}
+					"migrations_dir": "../../packages/db/migrations",
+				},
+				{
+					"binding": "BIBLE_DB",
+					"database_name": "sdarm-bible-staging",
+					"database_id": "c3087a1c-2f2b-478d-9b31-deaa1457de95",
+					"migrations_dir": "../../packages/db/migrations-bible",
+				},
 			],
 			"r2_buckets": [
 				{

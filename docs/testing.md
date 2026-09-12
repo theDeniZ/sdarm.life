@@ -209,6 +209,7 @@ if (url === '/api/v1/my-endpoint') {
 
 **Rules for mock data:**
 - Set all `*_key` / `coverKey` / `thumbKey` fields to `null` — the mock server has no R2.
+- A Bible fixture must carry a real `license` object. The reader, the parallel view and the projector all render a notice off it, so a translation fixture without one screenshots a page that cannot exist in production. The Bible routes match the translation code by shape rather than by a hardcoded slug, so changing the fixture's `code` does not mean renaming four routes.
 - Set all URLs to `'#'` or `null` to avoid real network calls from the browser.
 - Keep data minimal — just enough for the component to render meaningfully.
 

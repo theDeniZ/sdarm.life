@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import type { BibleChapter, ParallelChapter } from '../../lib/bible';
+import BibleLicenseNotice from './BibleLicenseNotice';
 
 interface Props {
   chapter: BibleChapter;
@@ -189,6 +190,18 @@ export default function BibleProjector({ chapter, parallel, onClose, isDisplay }
           })}
         </ol>
       )}
+
+      <BibleLicenseNotice
+        variant="projector"
+        sources={
+          isParallel
+            ? [
+                { name: parallel!.a.name, license: parallel!.a.license },
+                { name: parallel!.b.name, license: parallel!.b.license },
+              ]
+            : [{ name: chapter.translation.name, license: chapter.translation.license }]
+        }
+      />
     </div>,
     document.body
   );

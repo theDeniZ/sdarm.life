@@ -29,6 +29,24 @@ describe('OpenAPI document', () => {
 		}
 	});
 
+	it('registers the new Bible routes (self-hosted + YouVersion, issue #183)', async () => {
+		const res = await SELF.fetch('https://example.com/api/openapi.json');
+		const doc = (await res.json()) as { paths: Record<string, unknown> };
+		const paths = Object.keys(doc.paths);
+
+		for (const path of [
+			'/api/v1/bible/translations',
+			'/api/v1/bible/search',
+			'/api/v1/bible/translations/{code}/bundle',
+			'/api/v1/admin/bible/translations',
+			'/api/v1/admin/bible/translations/{id}',
+			'/api/v1/admin/bible/allowlist',
+			'/api/v1/admin/bible/takedown',
+		]) {
+			expect(paths).toContain(path);
+		}
+	});
+
 	it('serves the Swagger UI', async () => {
 		const res = await SELF.fetch('https://example.com/api/ui');
 		expect(res.status).toBe(200);
@@ -60,6 +78,17 @@ describe('admin auth', () => {
 		});
 		expect(res.status).toBe(200);
 		expect(await res.json()).toEqual([]);
+	});
+
+	// The new Bible admin routes (issue #183) sit behind the same `admin.use('*', auth)`
+	// gate as every other admin route — no D1 read happens before auth runs.
+	it.each([
+		['GET', '/api/v1/admin/bible/translations'],
+		['PUT', '/api/v1/admin/bible/allowlist'],
+		['POST', '/api/v1/admin/bible/takedown'],
+	])('rejects %s %s with no Authorization header', async (method, path) => {
+		const res = await SELF.fetch(`https://example.com${path}`, { method });
+		expect(res.status).toBe(401);
 	});
 });
 

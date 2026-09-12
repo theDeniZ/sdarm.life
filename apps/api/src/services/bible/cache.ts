@@ -70,3 +70,50 @@ export async function withCache<T>(env: Bindings, key: string, ttl: number, load
   if (fresh !== null) await cachePut(env, key, fresh, ttl);
   return fresh;
 }
+
+/**
+ * Cache generation — the takedown mechanism.
+ *
+ * A license can be revoked on notice, effective immediately, and an allowlist
+ * edit alone does not stop the edge serving that translation's chapters: those
+ * URLs are cached for a day and there are ~1,189 of them per translation, plus
+ * every parallel pairing, so purge-by-URL cannot enumerate them. Instead the
+ * Bible text routes fold this token into their cache key (see
+ * `middleware/cache.ts`); bumping it strands every stored entry at once.
+ *
+ * The token is read from KV, but memoised per isolate so an edge hit does not
+ * pay a KV read. That memo is what bounds the takedown: an isolate already
+ * holding the old token keeps serving the old entries until its memo expires.
+ * **The honest figure to quote a rights holder is therefore one minute, not
+ * instant** — and not the 24 hours it would be without this.
+ */
+const GENERATION_KEY = 'bible:cachegen';
+const GENERATION_MEMO_MS = 60_000;
+
+let generationMemo: { value: string; expires: number } | null = null;
+
+export async function getCacheGeneration(env: Bindings): Promise<string> {
+  const now = Date.now();
+  if (generationMemo && generationMemo.expires > now) return generationMemo.value;
+  // A failed read must not invent a new generation: that would strand the whole
+  // cache on a transient KV blip. Falling back to '0' only risks serving the
+  // pre-bump entries a little longer, which is the same failure the memo has.
+  const value = (await env.KV.get(GENERATION_KEY).catch(() => null)) ?? '0';
+  generationMemo = { value, expires: now + GENERATION_MEMO_MS };
+  return value;
+}
+
+/**
+ * Strand every cached Bible response. Call after any change to what the public
+ * may see: the allowlist, a takedown, or a license record (the license object
+ * is embedded in every chapter response, so editing a notice changes them all).
+ */
+export async function bumpCacheGeneration(env: Bindings): Promise<void> {
+  const next = String(Date.now());
+  try {
+    await env.KV.put(GENERATION_KEY, next);
+    generationMemo = { value: next, expires: Date.now() + GENERATION_MEMO_MS };
+  } catch {
+    // A cache that cannot be stranded is a stale cache, not a broken request.
+  }
+}

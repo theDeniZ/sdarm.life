@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import type { BibleBook, BibleChapter, BibleTranslation, ParallelChapter } from '../../lib/bible';
 import { DEFAULT_FONT_SCALE, FONT_SCALES, type FontScale } from './lastRead';
 import BiblePassagePicker, { type PassageTarget } from './BiblePassagePicker';
+import BibleLicenseNotice from './BibleLicenseNotice';
 
 interface Props {
   chapter: BibleChapter;
@@ -470,6 +471,18 @@ export default function BiblePresenterDashboard({
                   );
                 })}
               </ol>
+
+              <BibleLicenseNotice
+                variant="projector"
+                sources={
+                  isParallel
+                    ? [
+                        { name: parallel!.a.name, license: parallel!.a.license },
+                        { name: parallel!.b.name, license: parallel!.b.license },
+                      ]
+                    : [{ name: chapter.translation.name, license: chapter.translation.license }]
+                }
+              />
 
               {blank && <div className="bible-presenter__mirror-blank" />}
             </div>

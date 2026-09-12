@@ -3589,6 +3589,21 @@ body:has(.bible-parallel) .bible-parallel {
   color: var(--text-strong, var(--text, inherit));
 }
 
+/* `license.maxVersesPerRequest` cut this chapter short — say so rather than
+   letting scripture stop mid-chapter without explanation. */
+.bible-truncated {
+  max-width: 720px;
+  margin: 1.5rem auto 0;
+  padding: 0.6rem 1rem;
+  border: 1px solid rgba(201, 169, 110, 0.25);
+  border-radius: 4px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 0.9rem;
+  color: var(--muted);
+  text-align: center;
+}
+
 .bible-action-bar {
   position: sticky;
   bottom: 1.5rem;
@@ -4364,6 +4379,85 @@ body:has(.bible-parallel) .bible-parallel {
   }
 }
 
+/* License notice on the display / inline-fullscreen projector. It is the third
+   row of the `.bible-projector` grid (`auto 1fr auto`) — a fixed, un-hideable
+   footer, never chrome that could be dismissed. Kept far smaller than verse
+   text so it reads as a footnote, not competing scripture. */
+.bible-projector__notice {
+  margin: 0;
+  padding: 0.6rem 1.5rem 0.9rem;
+  border-top: 1px solid rgba(201, 169, 110, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  align-items: center;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: rgba(201, 169, 110, 0.55);
+}
+.bible-projector__notice-item strong {
+  color: rgba(201, 169, 110, 0.85);
+  font-weight: 500;
+  margin-right: 0.35em;
+}
+@media (max-width: 480px) {
+  .bible-projector__notice {
+    font-size: 0.62rem;
+    padding: 0.5rem 1rem 0.75rem;
+  }
+}
+
+/* Refusal screen — `allowProjector: false`. Same dark surface as the projector
+   itself so a blocked display window still reads as "this screen", not an
+   error page. */
+.bible-projector-blocked {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0c0b09;
+  color: #e8d5b2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+}
+.bible-projector-blocked__title {
+  font-family: 'Fraunces', 'DM Serif Display', serif;
+  font-size: 1.6rem;
+  color: #f0ebe3;
+  margin: 0;
+}
+.bible-projector-blocked__body {
+  max-width: 480px;
+  font-size: 1.05rem;
+  color: rgba(201, 169, 110, 0.75);
+  margin: 0;
+}
+.bible-projector-blocked__close {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  background: transparent;
+  border: 1px solid rgba(201, 169, 110, 0.4);
+  border-radius: 3px;
+  color: rgba(201, 169, 110, 0.9);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.bible-projector-blocked__close:hover {
+  border-color: rgba(201, 169, 110, 0.7);
+  background: rgba(201, 169, 110, 0.1);
+}
+
 .bible-projector__bottombar {
   display: flex;
   align-items: center;
@@ -4878,7 +4972,7 @@ body:has(.bible-parallel) .bible-parallel {
   }
 }
 
-/* Publisher copyright notice — YouVersion per-Bible licenses require the
+/* Publisher copyright notice — several per-Bible licenses require the
    notice to appear wherever the text is displayed. */
 .bible-copyright {
   max-width: 720px;
@@ -4889,6 +4983,106 @@ body:has(.bible-parallel) .bible-parallel {
   line-height: 1.6;
   color: var(--muted);
   text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+}
+.bible-copyright__item {
+  display: block;
+}
+.bible-copyright__source {
+  margin-right: 0.35em;
+  color: var(--text);
+}
+.bible-copyright__link {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.1em;
+  color: rgba(201, 169, 110, 0.85);
+  text-decoration: none;
+}
+.bible-copyright__link:hover {
+  color: rgba(201, 169, 110, 1);
+  text-decoration: underline;
+}
+
+/* Landing page — link to the full public register, below the translation grid. */
+.bible-license-register-cta {
+  margin: 2rem 0 0;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+}
+.bible-license-register-cta a {
+  color: rgba(201, 169, 110, 0.85);
+  text-decoration: none;
+}
+.bible-license-register-cta a:hover {
+  color: rgba(201, 169, 110, 1);
+  text-decoration: underline;
+}
+
+/* ── License register page (/bible/licenses) ── */
+.bible-license-register {
+  max-width: 900px;
+  margin: 1.5rem auto 5rem;
+  padding: 0 1.5rem;
+}
+.bible-license-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.bible-license-entry {
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 4px;
+  padding: 1.5rem 1.75rem;
+  background: linear-gradient(180deg, rgba(201, 169, 110, 0.04), rgba(201, 169, 110, 0));
+}
+.bible-license-entry__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+}
+.bible-license-entry__name {
+  font-family: 'Fraunces', 'DM Serif Display', serif;
+  font-size: 1.35rem;
+  color: var(--text);
+  margin: 0;
+}
+.bible-license-entry__meta {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: var(--muted);
+}
+.bible-license-entry__facts {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+.bible-license-entry__facts dt {
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+.bible-license-entry__facts dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.bible-license-entry__quote {
+  font-style: italic;
 }
 
 /* ─── Sections on the shelf: the Bible and the Sabbath Bible Lesson ──────────

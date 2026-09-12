@@ -87,19 +87,22 @@ function handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
     sendJSON(res, 200, { items: [mockBibleTranslation], total: 1 });
     return;
   }
-  if (url === '/api/v1/bible/translations/delut') {
+  // Matched by shape rather than by a hardcoded slug: the translation code is a
+  // property of the fixture, and pinning it here meant renaming four routes the
+  // day the fixture stopped being a YouVersion translation.
+  if (/^\/api\/v1\/bible\/translations\/[^/]+$/.test(url)) {
     sendJSON(res, 200, mockBibleTranslation);
     return;
   }
-  if (url === '/api/v1/bible/translations/delut/books') {
+  if (/^\/api\/v1\/bible\/translations\/[^/]+\/books$/.test(url)) {
     sendJSON(res, 200, { items: mockBibleBooks, total: mockBibleBooks.length });
     return;
   }
-  if (url === '/api/v1/bible/translations/delut/books/JHN') {
+  if (/^\/api\/v1\/bible\/translations\/[^/]+\/books\/JHN$/.test(url)) {
     sendJSON(res, 200, mockBibleBooks[2]);
     return;
   }
-  if (url === '/api/v1/bible/translations/delut/books/JHN/chapters/3') {
+  if (/^\/api\/v1\/bible\/translations\/[^/]+\/books\/JHN\/chapters\/3$/.test(url)) {
     sendJSON(res, 200, mockBibleChapter);
     return;
   }

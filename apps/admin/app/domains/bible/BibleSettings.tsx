@@ -1,8 +1,31 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { fetchCatalog, fetchEnabledDetails, fetchEnabledIds, fetchLicenses, saveEnabledIds } from './repository';
-import { LANGUAGE_OPTIONS, type BibleCatalogEntry, type BibleLicense, type CatalogPage } from './types';
+import type { BibleAdminTranslationDto } from '@sdarm/types';
+import ConfirmDialog from '../../components/ConfirmDialog';
+import LicenseEditor from './LicenseEditor';
+import {
+  createYouVersionRecord,
+  fetchAllowlist,
+  fetchCatalog,
+  fetchLibrary,
+  fetchLicenses,
+  patchTranslation,
+  saveAllowlist,
+  takedown,
+} from './repository';
+import {
+  BASIS_LABEL,
+  hasRecord,
+  LANGUAGE_OPTIONS,
+  SOURCE_LABEL,
+  SOURCE_NOTE,
+  type BibleCatalogEntry,
+  type BibleLicense,
+  type CatalogPage,
+  type LibraryRow,
+  type TranslationPatch,
+} from './types';
 import {
   DEFAULT_JURISDICTION,
   JURISDICTIONS,
@@ -29,6 +52,154 @@ function PdBadge({ status, title }: { status: PdStatus; title: string }) {
   );
 }
 
+function rowLabel(row: LibraryRow): string {
+  return hasRecord(row) ? row.name : row.id;
+}
+
+type LibraryRowViewProps = {
+  row: LibraryRow;
+  enabled: boolean;
+  rank?: number;
+  rankTotal?: number;
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
+  onEnable?: () => void;
+  onDisable?: () => void;
+  onTakedown?: () => void;
+  expanded: boolean;
+  onToggleExpand: () => void;
+  onSaveLicense?: (patch: TranslationPatch) => Promise<void>;
+};
+
+function LibraryRowView({
+  row,
+  enabled,
+  rank,
+  rankTotal,
+  onMoveUp,
+  onMoveDown,
+  onEnable,
+  onDisable,
+  onTakedown,
+  expanded,
+  onToggleExpand,
+  onSaveLicense,
+}: LibraryRowViewProps) {
+  if (!hasRecord(row)) {
+    return (
+      <li className="bible-enabled-row bible-row-orphan">
+        <div className="bible-library-main">
+          {rank !== undefined && <span className="bible-enabled-rank">{rank}</span>}
+          <span className="bible-enabled-name">
+            {row.id}
+            <span className="bible-enabled-meta">
+              {' '}
+              No library record for this id — it was likely withdrawn, or is a stale numeric id from before self-hosting
+              existed.
+            </span>
+          </span>
+          <span className="bible-enabled-actions">
+            {rank !== undefined && rankTotal !== undefined && (
+              <>
+                <button className="btn-ghost" onClick={onMoveUp} disabled={rank === 1} aria-label="Move up">
+                  ↑
+                </button>
+                <button className="btn-ghost" onClick={onMoveDown} disabled={rank === rankTotal} aria-label="Move down">
+                  ↓
+                </button>
+              </>
+            )}
+            <button className="btn-ghost" onClick={onDisable}>
+              Remove from order
+            </button>
+            {onTakedown && (
+              <button className="btn-danger" onClick={onTakedown}>
+                Remove now
+              </button>
+            )}
+          </span>
+        </div>
+      </li>
+    );
+  }
+
+  const t = row;
+
+  return (
+    <li className={`bible-enabled-row${expanded ? ' is-expanded' : ''}`}>
+      <div className="bible-library-main">
+        {rank !== undefined ? (
+          <span className="bible-enabled-rank">{rank}</span>
+        ) : (
+          <button className="btn-ghost btn-sm" onClick={onEnable}>
+            Enable
+          </button>
+        )}
+        <span className="bible-enabled-name">
+          {t.name}
+          <span className="bible-enabled-meta">
+            {' '}
+            {t.abbreviation} · {languageLabel(t.language)}
+            {t.year ? ` · ${t.year}` : ''}
+          </span>
+          <span className="bible-badge-row">
+            <span
+              className={`pd-badge ${t.source === 'local' ? 'pd-public' : 'pd-warn'}`}
+              title={SOURCE_NOTE[t.source]}
+            >
+              {SOURCE_LABEL[t.source]}
+            </span>
+            <span className="pd-badge pd-info" title={`License basis: ${BASIS_LABEL[t.license.basis]}`}>
+              {BASIS_LABEL[t.license.basis]}
+            </span>
+          </span>
+        </span>
+        <span className="bible-enabled-actions">
+          {enabled && rank !== undefined && rankTotal !== undefined && (
+            <>
+              <button className="btn-ghost" onClick={onMoveUp} disabled={rank === 1} aria-label="Move up">
+                ↑
+              </button>
+              <button className="btn-ghost" onClick={onMoveDown} disabled={rank === rankTotal} aria-label="Move down">
+                ↓
+              </button>
+            </>
+          )}
+          <button className="btn-ghost" onClick={onToggleExpand}>
+            {expanded ? 'Hide license' : 'Edit license'}
+          </button>
+          {enabled && (
+            <button className="btn-ghost" onClick={onDisable}>
+              Disable
+            </button>
+          )}
+          {enabled && onTakedown && (
+            <button className="btn-danger" onClick={onTakedown}>
+              Remove now
+            </button>
+          )}
+        </span>
+      </div>
+
+      {t.source === 'local' && (
+        <div className="bible-status-row">
+          <span className="bible-status-item">{t.status.verseCount.toLocaleString()} verses</span>
+          <span className="bible-status-item">{t.status.bookCount} books</span>
+          <span className="bible-status-item">
+            {t.status.ingestedAt
+              ? `Ingested ${new Date(t.status.ingestedAt).toLocaleDateString()}`
+              : 'Not ingested yet'}
+          </span>
+          <span className="bible-status-item">{t.status.hasBundle ? 'Offline bundle ready' : 'No offline bundle'}</span>
+          {t.lxxPsalms && <span className="bible-status-item">LXX Psalm numbering</span>}
+        </div>
+      )}
+
+      {expanded && onSaveLicense && <LicenseEditor translation={t} onSave={onSaveLicense} />}
+    </li>
+  );
+}
+
 export default function BibleSettings() {
   const [language, setLanguage] = useState('deu');
   const [jurisdiction, setJurisdiction] = useState(DEFAULT_JURISDICTION);
@@ -36,49 +207,52 @@ export default function BibleSettings() {
   const [query, setQuery] = useState('');
   const [page, setPage] = useState<CatalogPage | null>(null);
   const [pageToken, setPageToken] = useState<string | undefined>(undefined);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [catalogLoading, setCatalogLoading] = useState(true);
+  const [catalogError, setCatalogError] = useState<string | null>(null);
 
-  const [enabledIds, setEnabledIds] = useState<number[]>([]);
-  // Metadata for enabled translations, so the "Enabled" list stays readable
-  // even when those bibles are not on the currently browsed catalog page.
-  const [enabledDetails, setEnabledDetails] = useState<Record<number, BibleCatalogEntry>>({});
+  const [library, setLibrary] = useState<BibleAdminTranslationDto[]>([]);
+  const [allowlist, setAllowlist] = useState<string[]>([]);
+  const [libraryLoading, setLibraryLoading] = useState(true);
+  const [libraryError, setLibraryError] = useState<string | null>(null);
+
   const [licenses, setLicenses] = useState<BibleLicense[]>([]);
   const [dirty, setDirty] = useState(false);
   const [saving, setSaving] = useState(false);
   const [flash, setFlash] = useState<Flash>(null);
+  const [creatingId, setCreatingId] = useState<string | null>(null);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [takedownTarget, setTakedownTarget] = useState<LibraryRow | null>(null);
+  const [takingDown, setTakingDown] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    Promise.all([fetchEnabledIds(), fetchEnabledDetails(), fetchLicenses()])
-      .then(([ids, details, lics]) => {
-        if (cancelled) return;
-        setEnabledIds(ids);
-        setEnabledDetails(Object.fromEntries(details.map((d) => [d.id, d])));
-        setLicenses(lics);
+  const reloadLibrary = useCallback(() => {
+    setLibraryLoading(true);
+    Promise.all([fetchLibrary(), fetchAllowlist()])
+      .then(([lib, ids]) => {
+        setLibrary(lib);
+        setAllowlist(ids);
+        setLibraryError(null);
+        setDirty(false);
       })
-      .catch(() => {
-        if (!cancelled) setError('Could not load the saved selection.');
-      });
-    return () => {
-      cancelled = true;
-    };
+      .catch(() => setLibraryError('Could not load the Bible library.'))
+      .finally(() => setLibraryLoading(false));
   }, []);
 
+  useEffect(() => {
+    reloadLibrary();
+    fetchLicenses()
+      .then(setLicenses)
+      .catch(() => {
+        /* the licenses reference panel just stays empty */
+      });
+  }, [reloadLibrary]);
+
   const loadCatalog = useCallback((lang: string, token: string | undefined, all: boolean) => {
-    setLoading(true);
-    setError(null);
+    setCatalogLoading(true);
+    setCatalogError(null);
     fetchCatalog(lang, token, all)
-      .then((data) => {
-        setPage(data);
-        setEnabledDetails((prev) => {
-          const next = { ...prev };
-          for (const item of data.items) next[item.id] = item;
-          return next;
-        });
-      })
-      .catch((e: Error) => setError(e.message))
-      .finally(() => setLoading(false));
+      .then(setPage)
+      .catch((e: Error) => setCatalogError(e.message))
+      .finally(() => setCatalogLoading(false));
   }, []);
 
   useEffect(() => {
@@ -95,19 +269,30 @@ export default function BibleSettings() {
     setPageToken(undefined);
   }
 
-  function toggle(entry: BibleCatalogEntry) {
-    setEnabledDetails((prev) => ({ ...prev, [entry.id]: entry }));
-    setEnabledIds((prev) => (prev.includes(entry.id) ? prev.filter((id) => id !== entry.id) : [...prev, entry.id]));
+  const libraryById = useMemo(() => new Map(library.map((t) => [t.id, t] as const)), [library]);
+
+  const enabledRows: LibraryRow[] = useMemo(
+    () => allowlist.map((id) => libraryById.get(id) ?? { id }),
+    [allowlist, libraryById]
+  );
+
+  const availableRows: BibleAdminTranslationDto[] = useMemo(
+    () => library.filter((t) => !allowlist.includes(t.id)),
+    [library, allowlist]
+  );
+
+  function enable(id: string) {
+    setAllowlist((prev) => (prev.includes(id) ? prev : [...prev, id]));
     setDirty(true);
   }
 
-  function remove(id: number) {
-    setEnabledIds((prev) => prev.filter((x) => x !== id));
+  function disable(id: string) {
+    setAllowlist((prev) => prev.filter((x) => x !== id));
     setDirty(true);
   }
 
-  function move(id: number, direction: -1 | 1) {
-    setEnabledIds((prev) => {
+  function move(id: string, direction: -1 | 1) {
+    setAllowlist((prev) => {
       const idx = prev.indexOf(id);
       const target = idx + direction;
       if (idx < 0 || target < 0 || target >= prev.length) return prev;
@@ -118,10 +303,10 @@ export default function BibleSettings() {
     setDirty(true);
   }
 
-  async function handleSave() {
+  async function handleSaveAllowlist() {
     setSaving(true);
     try {
-      await saveEnabledIds(enabledIds);
+      await saveAllowlist(allowlist);
       setDirty(false);
       setFlash({ kind: 'ok', message: 'Saved. Public pages update within a day, or immediately after a cache purge.' });
     } catch {
@@ -132,7 +317,57 @@ export default function BibleSettings() {
     }
   }
 
-  /** The single license agreement that governs a Bible, if we know of one. */
+  async function toggleCatalogEntry(entry: BibleCatalogEntry) {
+    const id = `yv:${entry.id}`;
+    if (allowlist.includes(id)) {
+      disable(id);
+      return;
+    }
+    if (libraryById.has(id)) {
+      enable(id);
+      return;
+    }
+    setCreatingId(id);
+    try {
+      const created = await createYouVersionRecord(entry);
+      setLibrary((prev) => [...prev, created]);
+      enable(id);
+    } catch (e) {
+      setFlash({
+        kind: 'err',
+        message: e instanceof Error ? e.message : 'Could not add this translation to the library.',
+      });
+      setTimeout(() => setFlash(null), 4000);
+    } finally {
+      setCreatingId(null);
+    }
+  }
+
+  async function handleSaveLicense(row: BibleAdminTranslationDto, patch: TranslationPatch) {
+    await patchTranslation(row.id, patch);
+    reloadLibrary();
+  }
+
+  async function confirmTakedown() {
+    if (!takedownTarget) return;
+    setTakingDown(true);
+    try {
+      await takedown(takedownTarget.id);
+      setFlash({
+        kind: 'ok',
+        message: `Removed “${rowLabel(takedownTarget)}” and purged the edge cache for its URLs.`,
+      });
+      reloadLibrary();
+    } catch (e) {
+      setFlash({ kind: 'err', message: e instanceof Error ? e.message : 'Could not take this translation down.' });
+    } finally {
+      setTakingDown(false);
+      setTakedownTarget(null);
+      setTimeout(() => setFlash(null), 5000);
+    }
+  }
+
+  /** The single license agreement that governs a YouVersion Bible, if we know of one. */
   const licenseFor = useCallback(
     (id: number): BibleLicense | null => licenses.find((l) => l.bibleIds.includes(id)) ?? null,
     [licenses]
@@ -141,7 +376,7 @@ export default function BibleSettings() {
   const jur = getJurisdiction(jurisdiction);
   const curatedForLanguage = useMemo(() => pdTranslationsForLanguage(language), [language]);
 
-  const visible = (page?.items ?? []).filter((item) => {
+  const visibleCatalog = (page?.items ?? []).filter((item) => {
     if (!query.trim()) return true;
     const q = query.toLowerCase();
     return item.name.toLowerCase().includes(q) || item.abbreviation.toLowerCase().includes(q) || String(item.id) === q;
@@ -153,61 +388,82 @@ export default function BibleSettings() {
     <div className="bible-settings">
       <section className="card">
         <header className="config-card-header">
-          <span className="config-label">Enabled translations ({enabledIds.length})</span>
-          <button className="btn-primary" onClick={handleSave} disabled={!dirty || saving}>
-            {saving ? 'Saving…' : 'Save selection'}
+          <span className="config-label">Public now ({allowlist.length})</span>
+          <button className="btn-primary" onClick={handleSaveAllowlist} disabled={!dirty || saving}>
+            {saving ? 'Saving…' : 'Save order'}
           </button>
         </header>
         <p className="muted-note">
-          These are the translations visitors can read on treasures.sdarm.life/bible, in this order. Bible text is
-          fetched from YouVersion on demand — nothing is stored in our database.
+          These are the translations visitors can read on treasures.sdarm.life/bible, in this order. The badge on each
+          row says where the text actually comes from — <strong>{SOURCE_LABEL.local}</strong> rows never leave our
+          infrastructure; <strong>{SOURCE_LABEL.youversion}</strong> rows are fetched from the YouVersion Platform API
+          (Life.Church, USA) on every request. An operator must never be unsure which one a given row is.
         </p>
 
-        {enabledIds.length === 0 ? (
-          <p className="muted-note">Nothing enabled yet — pick translations from the catalog below.</p>
-        ) : (
-          <ol className="bible-enabled-list">
-            {enabledIds.map((id, i) => {
-              const entry = enabledDetails[id];
-              const verdict = entry ? assessPublicDomain(entry, jurisdiction) : null;
-              return (
-                <li key={id} className="bible-enabled-row">
-                  <span className="bible-enabled-rank">{i + 1}</span>
-                  <span className="bible-enabled-name">
-                    {entry ? entry.name : `YouVersion #${id}`}
-                    {entry && (
-                      <span className="bible-enabled-meta">
-                        {' '}
-                        {entry.abbreviation} · {languageLabel(entry.language)}
-                      </span>
-                    )}
-                    <span className="bible-badge-row">
-                      {verdict && <PdBadge status={verdict.status} title={verdict.reason} />}
-                    </span>
-                  </span>
-                  <span className="bible-enabled-actions">
-                    <button className="btn-ghost" onClick={() => move(id, -1)} disabled={i === 0} aria-label="Move up">
-                      ↑
-                    </button>
-                    <button
-                      className="btn-ghost"
-                      onClick={() => move(id, 1)}
-                      disabled={i === enabledIds.length - 1}
-                      aria-label="Move down"
-                    >
-                      ↓
-                    </button>
-                    <button className="btn-ghost btn-danger" onClick={() => remove(id)} aria-label="Remove">
-                      ✕
-                    </button>
-                  </span>
-                </li>
-              );
-            })}
-          </ol>
+        {libraryLoading && <p className="muted-note">Loading the library…</p>}
+        {libraryError && <p className="flash-err">{libraryError}</p>}
+
+        {!libraryLoading && !libraryError && (
+          <>
+            {enabledRows.length === 0 ? (
+              <p className="muted-note">Nothing public yet — enable a translation from the library below.</p>
+            ) : (
+              <ol className="bible-enabled-list">
+                {enabledRows.map((row, i) => (
+                  <LibraryRowView
+                    key={row.id}
+                    row={row}
+                    enabled
+                    rank={i + 1}
+                    rankTotal={enabledRows.length}
+                    onMoveUp={() => move(row.id, -1)}
+                    onMoveDown={() => move(row.id, 1)}
+                    onDisable={() => disable(row.id)}
+                    onTakedown={() => setTakedownTarget(row)}
+                    expanded={expandedId === row.id}
+                    onToggleExpand={() => setExpandedId((cur) => (cur === row.id ? null : row.id))}
+                    onSaveLicense={hasRecord(row) ? (patch) => handleSaveLicense(row, patch) : undefined}
+                  />
+                ))}
+              </ol>
+            )}
+          </>
         )}
 
         {flash && <p className={flash.kind === 'ok' ? 'flash-ok' : 'flash-err'}>{flash.message}</p>}
+      </section>
+
+      <section className="card">
+        <header className="config-card-header">
+          <span className="config-label">In the library, not public ({availableRows.length})</span>
+        </header>
+        <p className="muted-note">
+          Records that exist but are not on the public list — a locally ingested translation waiting to be published, or
+          a YouVersion Bible added earlier and since disabled. Enabling one here adds it to the end of the public order
+          above; nothing goes live until you also click &ldquo;Save order&rdquo;.
+        </p>
+
+        {!libraryLoading && !libraryError && (
+          <>
+            {availableRows.length === 0 ? (
+              <p className="muted-note">Nothing waiting — every library record is public.</p>
+            ) : (
+              <ul className="bible-enabled-list">
+                {availableRows.map((row) => (
+                  <LibraryRowView
+                    key={row.id}
+                    row={row}
+                    enabled={false}
+                    onEnable={() => enable(row.id)}
+                    expanded={expandedId === row.id}
+                    onToggleExpand={() => setExpandedId((cur) => (cur === row.id ? null : row.id))}
+                    onSaveLicense={(patch) => handleSaveLicense(row, patch)}
+                  />
+                ))}
+              </ul>
+            )}
+          </>
+        )}
       </section>
 
       <section className="card">
@@ -302,20 +558,22 @@ export default function BibleSettings() {
         <p className="muted-note">
           The catalog is filtered to one language at a time on purpose. YouVersion&rsquo;s language filter is
           first-match-wins rather than a union — passing several languages at once silently returns only the first one
-          that matches anything, which is a common way for a translation to appear missing.
+          that matches anything, which is a common way for a translation to appear missing. Picking a translation here
+          creates its library record — it still needs a license record and does not go public until saved above.
           {showUnlicensed
             ? ' Unlicensed rows are shown and cannot be enabled until their license is accepted.'
             : ' By default this shows only Bibles our app key is licensed for — switch the toggle above to see the rest of the platform.'}
         </p>
 
-        {error && <p className="flash-err">{error}</p>}
-        {loading && <p className="muted-note">Loading catalog…</p>}
+        {catalogError && <p className="flash-err">{catalogError}</p>}
+        {catalogLoading && <p className="muted-note">Loading catalog…</p>}
 
-        {!loading && !error && (
+        {!catalogLoading && !catalogError && (
           <>
             <ul className="bible-catalog-list">
-              {visible.map((item) => {
-                const checked = enabledIds.includes(item.id);
+              {visibleCatalog.map((item) => {
+                const id = `yv:${item.id}`;
+                const checked = allowlist.includes(id);
                 const verdict = assessPublicDomain(item, jurisdiction);
                 const lic = licenseFor(item.id);
                 return (
@@ -327,12 +585,13 @@ export default function BibleSettings() {
                       <input
                         type="checkbox"
                         checked={checked}
-                        onChange={() => toggle(item)}
-                        disabled={!item.licensed && !checked}
+                        onChange={() => toggleCatalogEntry(item)}
+                        disabled={(!item.licensed && !checked) || creatingId === id}
                       />
                       <span className="bible-catalog-name">{item.name}</span>
                       <span className="bible-catalog-meta">
                         {item.abbreviation} · {languageLabel(item.language)} · #{item.id}
+                        {creatingId === id ? ' · adding…' : ''}
                       </span>
                     </label>
                     <span className="bible-badge-row">
@@ -360,7 +619,7 @@ export default function BibleSettings() {
                 );
               })}
             </ul>
-            {visible.length === 0 && <p className="muted-note">No translations match.</p>}
+            {visibleCatalog.length === 0 && <p className="muted-note">No translations match.</p>}
 
             <div className="bible-catalog-pager">
               <span className="muted-note">
@@ -419,6 +678,30 @@ export default function BibleSettings() {
           </ul>
         )}
       </section>
+
+      {takedownTarget && (
+        <ConfirmDialog
+          title="Remove this translation now?"
+          danger
+          confirmLabel={takingDown ? 'Removing…' : 'Remove & purge cache'}
+          message={
+            <>
+              <p>
+                This removes <strong>{rowLabel(takedownTarget)}</strong> from the public list and strands every cached
+                chapter and parallel response on api.sdarm.life — visitors stop seeing it within about a minute, rather
+                than up to 24 hours later, which is all a plain &ldquo;Disable&rdquo; + save would do.
+              </p>
+              <p>
+                It cannot reach a copy already sitting in apps/treasures&rsquo; own Next Data Cache, or a copy a visitor
+                already saved as an offline bundle. Those clear only when that cache window ends or the device deletes
+                the file.
+              </p>
+            </>
+          }
+          onConfirm={confirmTakedown}
+          onCancel={() => setTakedownTarget(null)}
+        />
+      )}
     </div>
   );
 }

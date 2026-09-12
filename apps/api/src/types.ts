@@ -1,5 +1,12 @@
 export type Bindings = {
 	DB: D1Database;
+	/**
+	 * Self-hosted Bible verses (`sdarm-bible`, weur). Optional on purpose: an
+	 * environment without the binding serves no local translations rather than
+	 * failing, which is what lets local and staging run the feature while
+	 * production still goes through YouVersion.
+	 */
+	BIBLE_DB?: D1Database;
 	IMAGES: R2Bucket;
 	KV: KVNamespace;
 	API_KEY: string;

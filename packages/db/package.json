@@ -6,7 +6,8 @@
   "types": "./src/index.ts",
   "scripts": {
     "build": "echo \"DB Build\"",
-    "generate": "drizzle-kit generate --dialect=sqlite --schema=./src/index.ts --out=./migrations"
+    "generate": "drizzle-kit generate --dialect=sqlite --schema=./src/index.ts --out=./migrations",
+    "generate:bible": "drizzle-kit generate --dialect=sqlite --schema=./src/bible.ts --out=./migrations-bible"
   },
   "keywords": [],
   "author": "",
@@ -18,5 +19,9 @@
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.9"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./bible": "./src/bible.ts"
   }
 }
