@@ -73,12 +73,12 @@ jobs:
 
       # Enable together with the production `sdarm-bible` database id in
       # apps/api/wrangler.jsonc. See scripts/bible/README.md.
-      # - uses: cloudflare/wrangler-action@v4
-      #   with:
-      #     apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      #     accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      #     workingDirectory: apps/api
-      #     command: d1 migrations apply sdarm-bible --remote
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: d1 migrations apply sdarm-bible --remote
 
   sync-secrets:
     needs: [build-api, build-pages, build-sbl, build-admin]
