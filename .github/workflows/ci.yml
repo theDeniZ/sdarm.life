@@ -53,6 +53,14 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm turbo lint
 
+  test:
+    if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'chore(release):')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/setup
+      - run: pnpm turbo test
+
   playwright:
     if: "github.event_name != 'push' || !startsWith(github.event.head_commit.message, 'chore(release):')"
     runs-on: ubuntu-latest
@@ -164,6 +172,18 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: apps/api
           command: d1 migrations apply sdarm-db-staging --remote --env staging
+
+      # Self-hosted Bible verses live in a second database with its own
+      # migrations directory, so they need their own apply step. Wrangler tracks
+      # what it has already run and skips it, which is why this is safe on every
+      # push even though the two migrations were first applied by hand.
+      # See scripts/bible/README.md.
+      - uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: apps/api
+          command: d1 migrations apply sdarm-bible-staging --remote --env staging
 
   sync-secrets-staging:
     if: github.ref == 'refs/heads/develop'

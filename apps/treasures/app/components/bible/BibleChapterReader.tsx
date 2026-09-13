@@ -24,6 +24,7 @@ import {
   type FontScale,
 } from './lastRead';
 import BiblePresenterDashboard from './BiblePresenterDashboard';
+import BibleLicenseNotice from './BibleLicenseNotice';
 import BiblePassagePicker, { type PassageTarget } from './BiblePassagePicker';
 
 interface Props {
@@ -547,7 +548,8 @@ export default function BibleChapterReader({ translation, translations, books, c
             </li>
           ))}
         </ol>
-        {chapter.translation.copyright && <p className="bible-copyright">{chapter.translation.copyright}</p>}
+        {chapter.truncated && <p className="bible-truncated">{t('truncatedNotice')}</p>}
+        <BibleLicenseNotice sources={[{ name: chapter.translation.name, license: chapter.translation.license }]} />
       </article>
 
       <div className="bible-action-bar">
@@ -612,15 +614,21 @@ export default function BibleChapterReader({ translation, translations, books, c
             {t('parallel')}
           </Link>
         )}
-        <button
-          type="button"
-          className="bible-action-btn"
-          onClick={openPresenter}
-          disabled={presenterOpen}
-          title={multiScreen ? undefined : t('presenterSingleScreenHint')}
-        >
-          {t('presenter')}
-        </button>
+        {/* `allowProjector` is the one gate the API cannot hold: the projector
+            reads the same chapter route as this reader, so there is nothing
+            server-side to refuse. Hiding the entry point here — and refusing in
+            BibleProjectorOnly — is the enforcement. */}
+        {translation.license.allowProjector && (
+          <button
+            type="button"
+            className="bible-action-btn"
+            onClick={openPresenter}
+            disabled={presenterOpen}
+            title={multiScreen ? undefined : t('presenterSingleScreenHint')}
+          >
+            {t('presenter')}
+          </button>
+        )}
       </div>
 
       {copyOptionsOpen && (

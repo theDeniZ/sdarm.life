@@ -5,19 +5,23 @@
   "main": "./src/index.ts",
   "types": "./src/index.ts",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "echo \"DB Build\"",
-    "generate": "drizzle-kit generate --dialect=sqlite --schema=./src/index.ts --out=./migrations"
+    "generate": "drizzle-kit generate --dialect=sqlite --schema=./src/index.ts --out=./migrations",
+    "generate:bible": "drizzle-kit generate --dialect=sqlite --schema=./src/bible.ts --out=./migrations-bible"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "packageManager": "pnpm@10.32.0",
   "dependencies": {
-    "@cloudflare/workers-types": "^4.20260605.1",
+    "@cloudflare/workers-types": "^5.20260902.1",
     "drizzle-orm": "^0.45.1"
   },
   "devDependencies": {
     "drizzle-kit": "^0.31.9"
+  },
+  "exports": {
+    ".": "./src/index.ts",
+    "./bible": "./src/bible.ts"
   }
 }

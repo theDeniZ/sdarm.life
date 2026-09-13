@@ -24,6 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = LOCALES.flatMap((l) => [
     { url: `${BASE}/${l}`, lastModified: now, changeFrequency: 'daily' as const, priority: 1.0 },
     { url: `${BASE}/${l}/bible`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.9 },
+    { url: `${BASE}/${l}/bible/licenses`, lastModified: now, changeFrequency: 'monthly' as const, priority: 0.5 },
   ]);
 
   // Book treasure detail pages

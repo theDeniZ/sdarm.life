@@ -97,15 +97,34 @@ export const mockTreasure = {
   updatedAt: '2025-01-01T00:00:00Z',
 };
 
+/**
+ * A locally-hosted translation, which is what the site now serves by default.
+ * The license object is not decoration here: the reader, the parallel view and
+ * the projector all render a notice off it, so a fixture without one would
+ * screenshot a page that cannot exist in production.
+ */
+export const mockBibleLicense = {
+  basis: 'public-domain',
+  rightsHolder: null,
+  notice: null,
+  provenance: 'Public domain. Luther 1912, text prepared from a digital edition.',
+  allowDownload: true,
+  allowOffline: true,
+  allowSearchIndex: true,
+  allowProjector: true,
+  maxVersesPerRequest: null,
+};
+
 export const mockBibleTranslation = {
-  id: 51,
-  code: 'delut',
+  id: 'loc:luther1912',
+  source: 'local',
+  code: 'luther1912',
   name: 'Lutherbibel 1912',
-  abbreviation: 'DELUT',
+  abbreviation: 'LUT1912',
   language: 'de',
-  copyright: null,
   year: 1912,
   lxxPsalms: false,
+  license: mockBibleLicense,
 };
 
 export const mockBibleBooks = [
@@ -115,9 +134,15 @@ export const mockBibleBooks = [
 ];
 
 export const mockBibleChapter = {
-  translation: { code: 'delut', name: 'Lutherbibel 1912', copyright: null },
+  translation: {
+    id: 'loc:luther1912',
+    code: 'luther1912',
+    name: 'Lutherbibel 1912',
+    license: mockBibleLicense,
+  },
   book: mockBibleBooks[2],
   chapter: 3,
+  truncated: false,
   verses: [
     { verse: 16, text: 'Also hat Gott die Welt geliebt, daß er seinen eingeborenen Sohn gab.' },
     { verse: 17, text: 'Denn Gott hat seinen Sohn nicht gesandt in die Welt, daß er die Welt richte.' },

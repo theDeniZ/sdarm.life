@@ -8,6 +8,7 @@ import {
   fetchParallelChapter,
   fetchTranslations,
   findTranslation,
+  licenseNotice,
 } from '../../../../../lib/bible';
 import BibleChapterReader from '../../../../../components/bible/BibleChapterReader';
 import BibleParallelReader from '../../../../../components/bible/BibleParallelReader';
@@ -29,7 +30,8 @@ export async function generateMetadata({
 
   const title = `${ch.book.name} ${ch.chapter} — ${ch.translation.name}`;
   const firstVerse = ch.verses[0]?.text ?? '';
-  const description = firstVerse.slice(0, 200) + (firstVerse.length > 200 ? '…' : '');
+  const notice = licenseNotice(ch.translation.license);
+  const description = firstVerse.slice(0, 200) + (firstVerse.length > 200 ? '…' : '') + (notice ? ` — ${notice}` : '');
   const canonical = `${BASE}/${locale}/bible/${code}/${book}/${chapterNum}`;
 
   return {

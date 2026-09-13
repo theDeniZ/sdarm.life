@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { PageHero } from '@sdarm/ui';
-import { fetchTranslations } from '../../lib/bible';
+import { fetchTranslations, licenseNotice } from '../../lib/bible';
 import ContinueReadingBar from '../../components/bible/ContinueReadingBar';
 
 const LANG_LABEL: Record<string, string> = { ru: 'RU', de: 'DE', en: 'EN' };
@@ -27,18 +27,26 @@ export default async function BibleLandingPage({ params }: { params: Promise<{ l
         <h2 className="bible-section-title">{t('pickTranslation')}</h2>
         {translations.length === 0 && <p className="bible-empty">{t('noTranslations')}</p>}
         <div className="bible-translations-grid">
-          {translations.map((tr) => (
-            <Link key={tr.code} href={`/${locale}/bible/${tr.code}`} className="bible-translation-card">
-              <span className="bible-translation-lang">{LANG_LABEL[tr.language] ?? tr.language.toUpperCase()}</span>
-              <span className="bible-translation-name">{tr.name}</span>
-              <span className="bible-translation-year">
-                {tr.abbreviation}
-                {tr.year > 0 && <> · {tr.year}</>}
-              </span>
-              {tr.copyright && <span className="bible-translation-desc">{tr.copyright}</span>}
-            </Link>
-          ))}
+          {translations.map((tr) => {
+            const notice = licenseNotice(tr.license);
+            return (
+              <Link key={tr.code} href={`/${locale}/bible/${tr.code}`} className="bible-translation-card">
+                <span className="bible-translation-lang">{LANG_LABEL[tr.language] ?? tr.language.toUpperCase()}</span>
+                <span className="bible-translation-name">{tr.name}</span>
+                <span className="bible-translation-year">
+                  {tr.abbreviation}
+                  {tr.year > 0 && <> · {tr.year}</>}
+                </span>
+                {notice && <span className="bible-translation-desc">{notice}</span>}
+              </Link>
+            );
+          })}
         </div>
+        {translations.length > 0 && (
+          <p className="bible-license-register-cta">
+            <Link href={`/${locale}/bible/licenses`}>{t('licenseRegisterLink')}</Link>
+          </p>
+        )}
       </section>
     </>
   );

@@ -120,38 +120,102 @@ export interface TreasureDto {
 
 // ── Bible ─────────────────────────────────────────────────────────────────────
 //
-// Bible content comes from the YouVersion Platform API, proxied server-side by
-// `apps/api` (the API key never reaches the browser). Nothing is stored in D1 —
-// the only persisted state is the admin-curated list of enabled YouVersion
-// Bible IDs in Workers KV (config key `bible_translations`).
+// Bible content comes from two kinds of source, behind one API contract:
+//
+//   `local`       — verse rows we host ourselves in the `sdarm-bible` D1
+//                   (public-domain texts ingested by `scripts/bible/ingest.ts`)
+//   `youversion`  — the YouVersion Platform API, proxied server-side by `apps/api`
+//
+// The operator-curated allowlist lives in Workers KV (config key
+// `bible_translations`) as an ordered array of prefixed ids — `"loc:luther1912"`,
+// `"yv:51"` — so the two sources cannot collide. A bare number is still read as
+// `yv:{n}` for the pre-self-hosting allowlists.
 
+/** Where a translation's verses come from. */
+export type BibleSource = 'local' | 'youversion';
+
+/**
+ * Why we are allowed to serve this text.
+ *
+ * `public-domain` — the text's copyright has lapsed (our six ingested texts)
+ * `permission`    — a rights holder granted us a license in writing
+ * `provider`      — served under the terms of an upstream provider (YouVersion)
+ */
+export type BibleLicenseBasis = 'public-domain' | 'permission' | 'provider';
+
+/**
+ * What we may do with one translation's text, and what we must say about it.
+ *
+ * The gates are enforced in the API, never in the UI. A restriction that lives
+ * in a component is a restriction that a projector, an OG card, a search index
+ * or a mobile bundle will each forget separately.
+ */
+export interface BibleLicenseDto {
+  basis: BibleLicenseBasis;
+  /** Who holds the rights, e.g. 'Deutsche Bibelgesellschaft'. Null for PD texts. */
+  rightsHolder: string | null;
+  /**
+   * The notice to render verbatim wherever this text is shown. Several licenses
+   * require exact wording — do not reformat, truncate or translate it.
+   */
+  notice: string | null;
+  /** Courtesy provenance for PD texts, e.g. 'Public domain. Text prepared from …'. */
+  provenance: string | null;
+  /** Bulk download of the text (offline bundles, export endpoints). */
+  allowDownload: boolean;
+  /** Storing a copy on a device for offline reading. */
+  allowOffline: boolean;
+  /** Inclusion in the full-text search index. */
+  allowSearchIndex: boolean;
+  /** Display on the projector / presenter display window. */
+  allowProjector: boolean;
+  /** Cap on verses returnable in one request; null = uncapped. */
+  maxVersesPerRequest: number | null;
+}
+
+/**
+ * Identity + license of one translation.
+ *
+ * `id` is prefixed and stable; `code` is the URL slug. Both are accepted
+ * wherever a route takes a translation code.
+ */
 export interface BibleTranslationDto {
-  /** YouVersion Bible ID — the identifier used against the Platform API. */
-  id: number;
-  /** URL slug used in /bible/{code}/… — lowercased abbreviation, or `yv-{id}`. */
+  /** Prefixed source id: 'loc:luther1912' or 'yv:51'. */
+  id: string;
+  source: BibleSource;
+  /** URL slug used in /bible/{code}/… — 'luther1912', 'delut'. */
   code: string;
-  /** Localized title, e.g. 'Lutherbibel 1912'. */
+  /** Title in the translation's own language, e.g. 'Lutherbibel 1912'. */
   name: string;
-  /** Localized abbreviation, e.g. 'DELUT'. */
+  /** Abbreviation, e.g. 'LUT1912'. */
   abbreviation: string;
   /** BCP-47 short tag, e.g. 'de'. */
   language: string;
-  /** Publisher copyright notice — render it wherever the text is shown. */
-  copyright: string | null;
-  /** Best-effort publication year parsed from the title; 0 when unknown. */
+  /** Publication year; 0 when unknown. */
   year: number;
   /** True when the translation uses Septuagint Psalm numbering (see psalms.ts). */
   lxxPsalms: boolean;
+  license: BibleLicenseDto;
+}
+
+/** Ingest state of a locally-hosted translation — Admin → Bible only. */
+export interface BibleIngestStatusDto {
+  verseCount: number;
+  bookCount: number;
+  /** ISO string, or null when the translation has never been ingested. */
+  ingestedAt: string | null;
+  /** Whether an offline bundle has been generated for this translation. */
+  hasBundle: boolean;
 }
 
 export type BibleTestament = 'OT' | 'NT';
 
 export interface BibleBookDto {
   id: number;
-  /** USFM code as used by YouVersion: 'GEN', 'JHN', 'REV'. */
+  /** USFM code: 'GEN', 'JHN', 'REV'. */
   code: string;
   number: number; // 1..66
-  name: string; // localized to the translation's language
+  name: string; // in the translation's own language
   abbreviation: string;
   testament: BibleTestament;
   chapterCount: number;
@@ -162,11 +226,32 @@ export interface BibleVerseDto {
   text: string;
 }
 
+/**
+ * The translation identity carried alongside verse text.
+ *
+ * It embeds the whole license object rather than a bare copyright string so
+ * that every surface receiving text also receives the notice it must render
+ * and the gates it must respect — reader, parallel view, projector, OG card.
+ */
+export interface BibleTextTranslationDto {
+  id: string;
+  code: string;
+  name: string;
+  license: BibleLicenseDto;
+}
+
 export interface BibleChapterDto {
-  translation: { code: string; name: string; copyright: string | null };
+  translation: BibleTextTranslationDto;
   book: BibleBookDto;
   chapter: number;
   verses: BibleVerseDto[];
+  /**
+   * True when `license.maxVersesPerRequest` cut the chapter short. Null caps —
+   * every public-domain text we host — never set it. It exists because a cap is
+   * a license condition we must honour, and scripture that stops early without
+   * saying so is worse than scripture that says it stopped.
+   */
+  truncated: boolean;
 }
 
 export interface ParallelVerseDto {
@@ -175,11 +260,43 @@ export interface ParallelVerseDto {
   b: string | null;
 }
 
+export interface ParallelSideDto extends BibleTextTranslationDto {
+  /** The chapter actually read on this side — differs across LXX/Hebrew Psalms. */
+  chapter: number;
+}
+
 export interface ParallelChapterDto {
   bookCode: string;
-  a: { code: string; name: string; chapter: number; copyright: string | null };
-  b: { code: string; name: string; chapter: number; copyright: string | null };
+  a: ParallelSideDto;
+  b: ParallelSideDto;
   verses: ParallelVerseDto[];
+}
+
+/**
+ * A translation as Admin → Bible sees it: the public shape plus the things only
+ * the operator may know — whether it is currently served, how the ingest went,
+ * and the paperwork behind a granted permission.
+ */
+export interface BibleAdminTranslationDto extends BibleTranslationDto {
+  /** Whether the id appears in the KV allowlist, i.e. whether the public sees it. */
+  enabled: boolean;
+  sortOrder: number;
+  /** Email thread, contract number — whatever proves the permission exists. */
+  permissionRef: string | null;
+  permissionDate: string | null;
+  status: BibleIngestStatusDto;
+}
+
+/** One hit from the full-text search over locally-hosted translations. */
+export interface BibleSearchHitDto {
+  translationId: string;
+  translationCode: string;
+  book: string; // USFM code
+  bookName: string;
+  chapter: number;
+  verse: number;
+  /** Verse text with matched terms wrapped in <mark>…</mark>. */
+  snippet: string;
 }
 
 /* ── Homepage bento grid ──────────────────────────────────────────────────

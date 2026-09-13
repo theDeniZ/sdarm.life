@@ -1,7 +1,31 @@
-import type { MiddlewareHandler } from 'hono';
+import type { Context, MiddlewareHandler } from 'hono';
 import type { Bindings } from '../types';
 
-export function cached(ttl: number): MiddlewareHandler<{ Bindings: Bindings }> {
+/** The cache-key URL, carrying the generation token when the route has one. */
+async function versionedKey(c: Context<{ Bindings: Bindings }>, opts: CacheOptions): Promise<string> {
+  if (!opts.version) return c.req.url;
+  const url = new URL(c.req.url);
+  url.searchParams.set('__gen', await opts.version(c));
+  return url.toString();
+}
+
+export interface CacheOptions {
+  /**
+   * Resolves a generation token folded into the cache key.
+   *
+   * Purge-by-URL can only evict URLs it can enumerate, and some route families
+   * cannot be enumerated at all — the Bible tree is ~1,189 chapter URLs per
+   * translation, plus every parallel pairing. Changing the generation instead
+   * makes every previously stored entry for those routes unreachable at once,
+   * without touching them: the old entries simply expire unread.
+   *
+   * The token never reaches the client. It is appended to the synthetic Request
+   * used as the cache key, not to the response or the real request.
+   */
+  version?: (c: Context<{ Bindings: Bindings }>) => Promise<string>;
+}
+
+export function cached(ttl: number, opts: CacheOptions = {}): MiddlewareHandler<{ Bindings: Bindings }> {
   return async (c, next) => {
     if (c.req.method !== 'GET') {
       await next();
@@ -9,7 +33,7 @@ export function cached(ttl: number): MiddlewareHandler<{ Bindings: Bindings }> {
     }
 
     const cache = caches.default;
-    const cacheKey = new Request(c.req.url, { method: 'GET' });
+    const cacheKey = new Request(await versionedKey(c, opts), { method: 'GET' });
 
     const hit = await cache.match(cacheKey);
     if (hit) return new Response(hit.body, hit);

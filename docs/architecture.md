@@ -29,6 +29,8 @@ API response shapes (`PostDto`, `ImageDto`, etc.) are currently redefined in bot
 ```
 packages/
   db/      — @sdarm/db   : Drizzle schema, migrations, KNOWN_CONFIG_KEYS
+             @sdarm/db/bible : schema for the second D1 (sdarm-bible), separate
+             entrypoint so `pnpm generate` cannot emit it into sdarm-db's migrations
   types/   — @sdarm/types: Shared DTO interfaces for API responses
   ui/      — @sdarm/ui   : Navbar, Footer, Pagination + CSS design system
   i18n/    — @sdarm/i18n : Locale config, de/en message files
@@ -174,7 +176,17 @@ export interface TreasureDto {
 
 `@sdarm/types` also exports the Bible DTOs (`BibleTranslationDto`, `BibleBookDto`, `BibleChapterDto`, `ParallelChapterDto`, …) and the shared Psalm-numbering helpers (`src/psalms.ts` — LXX ↔ Hebrew chapter mapping used by both the API service layer and the parallel reader UI).
 
-**Bible content has no repository** — it is not in D1. `services/bible/` fetches from YouVersion and caches in KV; the only persisted state is the `bible_translations` config key. Repositories are for D1 tables only; anything that proxies an external API belongs in `services/`.
+**Bible content comes from two sources behind one contract.** A `loc:` translation is
+verse rows in the `sdarm-bible` D1 and has a repository (`repositories/bible.ts`, taking
+the `BIBLE_DB` drizzle instance); a `yv:` translation is proxied from YouVersion and has a
+service (`services/bible/youversion.ts`) with no D1 behind it. `services/bible/catalog.ts`
+dispatches on the translation's source and stays the only thing the routes call. The
+license record for **both** sources lives in the `bible_translations` table, so gates and
+notices are edited the same way regardless of where the text comes from.
+
+The rule the split follows: a repository owns queries against a D1 table; anything that
+wraps an external system belongs in `services/`. A feature that does both, like this one,
+has one of each and a dispatcher — not a service that quietly runs SQL.
 
 `apps/web` and `apps/admin` import from `@sdarm/types`. `apps/api` uses the same interfaces to type `c.json()` responses — enforcing the contract at the source.
 
@@ -283,6 +295,7 @@ apps/api/src/
       treasures.ts     — GET|POST|POST batch|PATCH|DELETE /admin/treasures
       bible.ts         — GET /admin/bible/catalog (YouVersion browse for the allowlist picker)
   repositories/
+    bible.ts           — all queries against the sdarm-bible D1 (BIBLE_DB)
     posts.ts           — all DB queries for the posts table
     config.ts          — all DB queries for site_config
     images.ts          — all DB queries for the images table
@@ -290,6 +303,7 @@ apps/api/src/
     treasures.ts       — all DB queries for the treasures table
   services/
     bible/
+      local.ts         — self-hosted provider: verses from BIBLE_DB; empty when unbound
       youversion.ts    — YouVersion Platform API client (server-side only)
       cache.ts         — KV read-through cache + TTLs for Bible payloads
       catalog.ts       — resolves the KV-configured enabled Bible IDs into translations/books/chapters
@@ -305,7 +319,7 @@ apps/api/src/
 
 **Binary/OG responders bypass zod-openapi.** `routes/og.ts` (and the local-dev R2 proxy) return image bytes, not a JSON contract, so they mount as plain Hono routes excluded from the OpenAPI spec. `.ttf` fonts are imported as `ArrayBuffer`s — enabled by the `rules: [{ type: "Data", globs: ["**/*.ttf"] }]` entry in `wrangler.jsonc`.
 
-**`services/` vs `repositories/`.** A repository owns queries against a D1 table and takes a `db` as its first argument. A service wraps an external system (currently only YouVersion) and takes `env` so it can reach bindings such as KV. Route handlers call one or the other; they never contain raw Drizzle queries or raw `fetch` to third parties.
+**`services/` vs `repositories/`.** A repository owns queries against a D1 table and takes a `db` as its first argument. A service wraps an external system (YouVersion) and takes `env` so it can reach bindings such as KV. Route handlers call one or the other; they never contain raw Drizzle queries or raw `fetch` to third parties. `services/bible/` holds both a YouVersion client and a `local.ts` provider reading `BIBLE_DB`, because the dispatch between them is itself the service.
 
 **Repository pattern for Workers.** Repositories are plain modules exporting functions that take a `db` (Drizzle instance) as their first argument. No classes, no constructors — Workers have no persistent state between requests.
 

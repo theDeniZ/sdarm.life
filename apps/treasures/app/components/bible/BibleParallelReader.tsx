@@ -15,6 +15,7 @@ import {
   type FontScale,
 } from './lastRead';
 import BiblePresenterDashboard from './BiblePresenterDashboard';
+import BibleLicenseNotice from './BibleLicenseNotice';
 import type { PassageTarget } from './BiblePassagePicker';
 
 interface Props {
@@ -133,7 +134,12 @@ export default function BibleParallelReader({ translationA, translationB, transl
   // breadcrumbs in parallel mode — verse text comes from `parallel`).
   const synthChapter: BibleChapter = useMemo(
     () => ({
-      translation: { code: translationA.code, name: translationA.name, copyright: translationA.copyright },
+      translation: {
+        id: translationA.id,
+        code: translationA.code,
+        name: translationA.name,
+        license: translationA.license,
+      },
       book: currentBook ?? {
         id: 0,
         code: parallel.bookCode,
@@ -145,8 +151,9 @@ export default function BibleParallelReader({ translationA, translationB, transl
       },
       chapter: parallel.a.chapter,
       verses: parallel.verses.map((v) => ({ verse: v.verse, text: v.a ?? v.b ?? '' })),
+      truncated: false,
     }),
-    [translationA.code, translationA.name, translationA.copyright, currentBook, parallel]
+    [translationA, currentBook, parallel]
   );
 
   async function openPresenter() {
@@ -249,6 +256,7 @@ export default function BibleParallelReader({ translationA, translationB, transl
   }
 
   const sameTranslation = translationA.code === translationB.code;
+  const allowProjector = translationA.license.allowProjector && translationB.license.allowProjector;
 
   return (
     <div className="bible-reader bible-parallel" style={{ fontSize: `${fontScale}rem` }}>
@@ -369,9 +377,12 @@ export default function BibleParallelReader({ translationA, translationB, transl
         })}
       </div>
 
-      {(parallel.a.copyright || parallel.b.copyright) && (
-        <p className="bible-copyright">{[parallel.a.copyright, parallel.b.copyright].filter(Boolean).join(' · ')}</p>
-      )}
+      <BibleLicenseNotice
+        sources={[
+          { name: parallel.a.name, license: parallel.a.license },
+          { name: parallel.b.name, license: parallel.b.license },
+        ]}
+      />
 
       <div className="bible-action-bar">
         <button
@@ -395,9 +406,13 @@ export default function BibleParallelReader({ translationA, translationB, transl
         <button type="button" className="bible-action-btn" onClick={handleSwap} aria-label={t('swapColumns')}>
           {t('swapAB')}
         </button>
-        <button type="button" className="bible-action-btn" onClick={openPresenter} disabled={presenterOpen}>
-          {t('presenter')}
-        </button>
+        {/* Both texts land on the same screen, so the stricter of the two
+            decides: one translation that forbids projection forbids the pair. */}
+        {allowProjector && (
+          <button type="button" className="bible-action-btn" onClick={openPresenter} disabled={presenterOpen}>
+            {t('presenter')}
+          </button>
+        )}
         <button type="button" className="bible-action-btn" onClick={handleSingleView}>
           {t('exitParallel')}
         </button>

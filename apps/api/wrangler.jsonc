@@ -12,7 +12,9 @@
 	"rules": [
 		{
 			"type": "Data",
-			"globs": ["**/*.ttf"],
+			"globs": [
+				"**/*.ttf"
+			],
 			"fallthrough": true
 		}
 	],
@@ -21,8 +23,14 @@
 			"binding": "DB",
 			"database_name": "sdarm-db",
 			"database_id": "8d498e81-689f-45ac-9128-46106dd87e2d",
-			"migrations_dir": "../../packages/db/migrations"
-		}
+			"migrations_dir": "../../packages/db/migrations",
+		},
+		{
+			"binding": "BIBLE_DB",
+			"database_name": "sdarm-bible",
+			"database_id": "1b7a5579-9402-4246-beeb-f6710bae679b",
+			"migrations_dir": "../../packages/db/migrations-bible",
+		},
 	],
 	"r2_buckets": [
 		{
@@ -44,8 +52,14 @@
 					"binding": "DB",
 					"database_name": "sdarm-db-staging",
 					"database_id": "4e65db11-657d-4e2c-b1fc-d45b2ddb6a65",
-					"migrations_dir": "../../packages/db/migrations"
-				}
+					"migrations_dir": "../../packages/db/migrations",
+				},
+				{
+					"binding": "BIBLE_DB",
+					"database_name": "sdarm-bible-staging",
+					"database_id": "c3087a1c-2f2b-478d-9b31-deaa1457de95",
+					"migrations_dir": "../../packages/db/migrations-bible",
+				},
 			],
 			"r2_buckets": [
 				{

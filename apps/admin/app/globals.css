@@ -2045,8 +2045,10 @@ input[type="file"]::file-selector-button:hover {
 .card--roadmap .state-empty { padding: 24px 12px; }
 
 /* ── BIBLE SETTINGS (Admin → Bible) ──────────────────────────────────────────
-   Curates which YouVersion translations are public. No DB involved — the
-   selection is one KV config key (`bible_translations`). */
+   Curates which translations — self-hosted (sdarm-bible D1) and YouVersion,
+   side by side — are public. The KV allowlist (`bible_translations`) is the
+   ordered list of ids the public site reads; the library (D1) holds every
+   record whether or not it is on that list. */
 
 .bible-settings {
   display: flex;
@@ -2088,14 +2090,20 @@ input[type="file"]::file-selector-button:hover {
 }
 
 .bible-enabled-row {
-  display: grid;
-  grid-template-columns: 26px 1fr auto;
-  align-items: center;
-  gap: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   padding: 8px 10px;
   border: 1px solid var(--border);
   border-radius: var(--r);
   background: var(--row-hover);
+}
+
+.bible-library-main {
+  display: grid;
+  grid-template-columns: minmax(26px, auto) 1fr auto;
+  align-items: center;
+  gap: 10px;
 }
 
 .bible-enabled-rank {
@@ -2120,12 +2128,141 @@ input[type="file"]::file-selector-button:hover {
 
 .bible-enabled-actions {
   display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   gap: 4px;
 }
 
-.bible-enabled-actions .btn-ghost {
+.bible-enabled-actions .btn-ghost,
+.bible-enabled-actions .btn-danger {
   padding: 4px 9px;
   line-height: 1;
+}
+
+/* Source + basis badges, wrapped under the name/meta text of a library row. */
+.bible-enabled-name .bible-badge-row {
+  display: flex;
+  margin-top: 4px;
+  margin-left: 0;
+}
+
+.bible-row-orphan .bible-enabled-name {
+  color: var(--red-text);
+}
+
+/* An expanded row (license editor open) or one with local ingest stats grows
+   past the compact rank/name/actions grid, so it stacks its extra content
+   below `.bible-library-main` instead of widening the grid. */
+.bible-status-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+}
+
+.bible-status-item {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ── License editor (inline, per translation row) ─────────────────────────── */
+
+.bible-license-editor {
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.bible-editor-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.bible-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--text);
+}
+
+.bible-field > span:first-child {
+  font-weight: 600;
+  color: var(--heading);
+}
+
+.bible-field input,
+.bible-field select,
+.bible-field textarea {
+  padding: 8px 10px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  font-size: 13px;
+  font-family: 'Lexend', sans-serif;
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.bible-field input:focus,
+.bible-field select:focus,
+.bible-field textarea:focus {
+  border-color: var(--gold-dim);
+  outline: none;
+}
+
+.bible-gates {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.bible-gate {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 10px;
+  row-gap: 2px;
+  align-items: start;
+  font-size: 12.5px;
+}
+
+.bible-gate input[type='checkbox'] {
+  margin-top: 3px;
+}
+
+.bible-gate-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  color: var(--text);
+  font-weight: 500;
+}
+
+.bible-gate .muted-note {
+  grid-column: 2;
+}
+
+.bible-cap {
+  max-width: 260px;
+}
+
+.bible-editor-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+@media (max-width: 768px) {
+  .bible-editor-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 /* ── Catalog browser ── */
@@ -2362,12 +2499,13 @@ input[type="file"]::file-selector-button:hover {
 }
 
 @media (max-width: 640px) {
-  .bible-enabled-row {
+  .bible-library-main {
     grid-template-columns: 22px 1fr;
   }
   .bible-enabled-actions {
     grid-column: 1 / -1;
     justify-content: flex-end;
+    flex-wrap: wrap;
   }
   .bible-catalog-meta {
     margin-left: 0;

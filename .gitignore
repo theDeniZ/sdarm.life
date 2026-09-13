@@ -32,3 +32,8 @@ sketches/
 # .claude/skills/ is per-machine tooling. The commands under .claude/commands/
 # are shared and stay tracked; skills are not.
 .claude/skills/
+
+# Generated SQL chunks from scripts/bible/ingest.ts — ~190k INSERTs across six
+# translations, reproducible from bible-data/ at any time. The source JSON in
+# bible-data/ is likewise untracked (it carries its own .gitignore).
+scripts/bible/out/
