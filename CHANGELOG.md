@@ -1,3 +1,10 @@
+# [1.7.0](https://github.com/theDeniZ/sdarm.life/compare/v1.6.0...v1.7.0) (2026-09-14)
+
+
+### Features
+
+* AI support ([5761804](https://github.com/theDeniZ/sdarm.life/commit/5761804b7d3d1db5b1ffa4c4c3a01079c75a0112))
+
 # [1.6.0](https://github.com/theDeniZ/sdarm.life/compare/v1.5.0...v1.6.0) (2026-09-13)
 
 
