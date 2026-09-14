@@ -1,0 +1,26 @@
+# Songbook – Hymnals & Lyrics
+
+> Hymnals in German, Russian, and other languages with complete lyrics.
+
+The SDARM Songbook provides access to multiple hymnals with full lyrics. Languages include German, Russian, and more.
+
+## Usage
+
+Prefer the Markdown API endpoints over crawling HTML pages. One request per songbook or song is sufficient. Responses are cached for a day. API rate limit: ~60 requests/minute per IP; HTTP 429 with `Retry-After` indicates waiting time. Content may be used to answer user questions but not for model training.
+
+## Human Pages
+
+- [Songbook home](https://songs.sdarm.life/de) — Browse songbooks and search lyrics (German interface)
+
+## Songbooks & Lyrics
+
+- [Songbooks list](https://api.sdarm.life/api/v1/llm/songbooks) — All available songbooks with metadata
+- [Songbook by slug](https://api.sdarm.life/api/v1/llm/songbooks/{slug}) — Complete songbook with all songs (chords stripped, copyright per song)
+- [Song by ID](https://api.sdarm.life/api/v1/llm/songs/{id}) — Individual song with full lyrics (chords stripped), author, and copyright
+
+Available languages and songbooks are shown in the songbooks list. Search and filtering available through the human interface.
+
+## Cross-Links
+
+- [Main hub](https://sdarm.life/llms.txt) — All resources and additional sections
+- [Bible & Treasures](https://treasures.sdarm.life/llms.txt) — Scripture and book catalogue

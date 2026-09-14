@@ -74,6 +74,11 @@
 
 - **`suncalc` 2.x has no default export and returns `null`, not an Invalid Date.** v2 is ESM-only with named exports, so `import SunCalc from 'suncalc'` fails type-check with `TS1192: Module ... has no default export` — use `import { getTimes } from 'suncalc'`. It also ships its own `index.d.ts`, so `@types/suncalc` must be removed or the stale v1 stub shadows the real types. The behavioural half matters more: v1 returned an Invalid Date for a sun event that never happens (polar day/night) and v2 returns `null`, so `d.getHours()` went from `NaN` to a thrown `TypeError`. The footer clock lets a visitor pick any location via Nominatim, Tromsø included, so `dateToMsOfDay()` in [Footer.tsx](../packages/ui/src/components/Footer.tsx) takes `Date | null` and maps `null` back to `NaN` — keeping the downstream arithmetic exactly as it behaved under v1.
 
+## Workers bindings (rate limiting)
+
+- **The `ratelimits` binding must be repeated in `env.staging`, same trap as the R2 incremental cache and `BIBLE_DB`.** Named environments in `wrangler.jsonc` do not inherit top-level bindings — `LLM_RATE_LIMITER` needs its own `ratelimits` entry (with its own `namespace_id`) under `env.staging`, or staging serves the `/api/v1/llm/*` routes with no rate limit at all and says nothing about it.
+- **The KV-backed `rateLimit()` in `middleware/rate-limit.ts` is unsuitable for read/crawler traffic.** It writes a KV key on every single request, and the free Cloudflare plan caps writes at 1,000/day account-wide. It is fine for the low-volume mutation endpoints it already guards (`/subscribe`, `/book-request`), but AI crawlers hitting `/api/v1/llm/*` could burn that budget in minutes. Those routes use a separate limiter (`middleware/llm-rate-limit.ts`) backed by the Workers **Rate Limiting binding** instead — it counts inside the Workers runtime and costs no KV write. Do not reuse the KV helper for a route with meaningfully higher traffic than a form submission.
+
 ## Local dev
 
 - **`.dev.vars` vs `wrangler.jsonc`** — local secrets go in `apps/api/.dev.vars` (auto-loaded by `wrangler dev`). The `dev.vars` field inside `wrangler.jsonc` is not valid.

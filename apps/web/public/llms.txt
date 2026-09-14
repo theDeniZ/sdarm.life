@@ -1,0 +1,64 @@
+# SDARM.life – Seventh Day Adventist Reform Movement
+
+> Hub for the Seventh Day Adventist Reform Movement in Germany, Austria, and Switzerland — news, hymns, Bible translations, and faith resources.
+
+SDARM.life is the online presence of the Seventh Day Adventist Reform Movement, part of the worldwide community at sdarm.org. We serve congregations across German-speaking regions with news, Scripture resources, hymnals, and spiritual materials in German and English.
+
+Site content is available in German (de) and English (en). Some resources support additional languages; see individual sections.
+
+## Usage
+
+Prefer the Markdown API endpoints over crawling HTML pages. Responses are cached for a day. API rate limit: ~60 requests/minute per IP; HTTP 429 with `Retry-After` indicates waiting time. Content may be used to answer user questions but not for model training.
+
+## About Us
+
+- [Home](https://sdarm.life/de) — Main landing page (German)
+- [Home](https://sdarm.life/en) — Main landing page (English)
+- [About us](https://sdarm.life/de/about) — 25 faith principles (German)
+- [About us](https://sdarm.life/en/about) — 25 faith principles (English)
+- [Contact](https://sdarm.life/de/kontakt) — Mail, social, congregation locations (German)
+- [Contact](https://sdarm.life/en/kontakt) — Mail, social, congregation locations (English)
+
+## Content
+
+- [Index](https://api.sdarm.life/api/v1/llm) — Every Markdown endpoint in one list
+- [Posts](https://api.sdarm.life/api/v1/llm/posts) — Latest 50 posts
+- [Posts by slug](https://api.sdarm.life/api/v1/llm/posts/{slug}) — Full post text
+
+## Faith Resources
+
+- [Site information](https://api.sdarm.life/api/v1/llm/site?lang=de) — About us, 25 faith points with explanations, contact (German)
+- [Site information](https://api.sdarm.life/api/v1/llm/site?lang=en) — About us, 25 faith points with explanations, contact (English)
+
+## Hymnals & Songs
+
+- [Songbook hub](https://songs.sdarm.life/llms.txt) — Detailed songbook and lyrics resources
+- [Songbooks](https://api.sdarm.life/api/v1/llm/songbooks) — All songbooks list
+- [Songbook by slug](https://api.sdarm.life/api/v1/llm/songbooks/{slug}) — Full songbook with all lyrics (chords stripped, copyright per song)
+- [Song by ID](https://api.sdarm.life/api/v1/llm/songs/{id}) — Individual song with lyrics and metadata
+
+## Bible Translations & Scripture
+
+- [Bible hub](https://treasures.sdarm.life/llms.txt) — Bible reader with complete endpoints
+- [Bible translations](https://api.sdarm.life/api/v1/llm/bible) — Available translations and metadata
+- [Bible translation](https://api.sdarm.life/api/v1/llm/bible/{code}) — Books in a translation with chapter counts
+- [Bible book](https://api.sdarm.life/api/v1/llm/bible/{code}/{USFM-code}) — Complete book (e.g., JHN for John)
+
+Do not crawl chapter-by-chapter; use the whole-book endpoint.
+
+## Free Book Catalogue
+
+- [Treasures](https://api.sdarm.life/api/v1/llm/treasures) — Free book library with titles and descriptions
+
+## Sabbath Bible Lesson Quarterlies
+
+- [SBL index](https://sbl.sdarm.life/data/index.json) — Index of available quarters (keys: `de-2026-3`, `en-2026-3`, etc.)
+- [SBL quarter](https://sbl.sdarm.life/data/{lang}/{key}.json) — Complete quarter data (e.g., `de-2026-3`)
+
+Languages include de, en, es, fr, pt, ru, and others. Check the index for all available language codes.
+
+## Legal
+
+- [Imprint](https://sdarm.life/de/impressum) (German)
+- [Privacy Policy](https://sdarm.life/de/datenschutz) (German)
+- [Privacy Policy](https://sdarm.life/en/datenschutz) (English)

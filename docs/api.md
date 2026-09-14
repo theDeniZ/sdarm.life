@@ -163,6 +163,28 @@ that promises faster. Two things remain out of reach either way: `apps/treasures
 holds its own Next Data Cache window on top, and a copy already on a reader's
 device is gone from our control entirely.
 
+## LLM / agent endpoints
+
+Plain-text Markdown routes for AI answering agents (ChatGPT, Claude, Gemini, Perplexity) to read our public content without crawling the full HTML site. Source: `apps/api/src/routes/llm.ts`, formatting helpers in `apps/api/src/services/llm/markdown.ts`. All responses are `Content-Type: text/markdown; charset=utf-8`. Mounted at `/api/v1/llm` and, deliberately outside `/api/v1`, excluded from the OpenAPI spec — same reasoning as `routes/og.ts`: these return Markdown, not a JSON contract for `@hono/zod-openapi` to validate.
+
+| Method | Route | Description |
+|---|---|---|
+| `GET` | `/api/v1/llm` | Index — a short description of sdarm.life plus a link list to every route below, and a note that the Sabbath Bible Lesson quarterlies are static JSON at `https://sbl.sdarm.life/data/index.json` (keys like `de-2026-3`, quarter file at `.../data/{lang}/{key}.json`). Also served at the Worker root, `GET /llms.txt` — identical content. Does not touch D1. |
+| `GET` | `/api/v1/llm/site` | `?lang=de\|en` (default `de`, invalid → `de`). About text (KV config `about_text_1`/`about_text_2` if set, else the i18n fallback), the 25 points of faith, and contact info (email + social URLs from config). |
+| `GET` | `/api/v1/llm/posts` | Latest 50 active posts — title, date, author, excerpt, site link, link to the Markdown detail. |
+| `GET` | `/api/v1/llm/posts/:slug` | Full post body. 404 text if missing or soft-deleted. |
+| `GET` | `/api/v1/llm/songbooks` | All songbooks — title, language, description, song count, link to the Markdown detail. |
+| `GET` | `/api/v1/llm/songbooks/:slug` | The **whole songbook** in one response — every song ordered by number, with author, copyright (rendered whenever set — all songs are exposed with their copyright, by product decision), and every part's lyrics with chord annotations (`[G]`) stripped. Two queries total (songs of the book, then their parts via a join on `songbookId` — not `inArray` on song ids, which a 700+-song book overflows past D1's bound-variable cap). |
+| `GET` | `/api/v1/llm/songs/:id` | A single song, same format as above. |
+| `GET` | `/api/v1/llm/treasures` | Book catalogue — title, author, language, free/price, description, site link. |
+| `GET` | `/api/v1/llm/bible` | Only locally-hosted (`loc:`) translations that are both enabled in the allowlist and have `license.allowDownload` true — YouVersion (`yv:`) text is never exposed here, by product decision. Name, abbreviation, language, year, license basis, verbatim notice, link to the Markdown book list. |
+| `GET` | `/api/v1/llm/bible/:code` | Book list (canonical order, localized name, USFM code, chapter count) with links. `:code` resolves like the public Bible routes. `yv:`/unknown/not enabled → 404; `loc:` but `allowDownload` false → 403. |
+| `GET` | `/api/v1/llm/bible/:code/:book` | The **whole book** in one response — header with translation name + verbatim license notice, then `## {BookName} {chapter}` per chapter and one `{verse} {text}` line per verse, notice repeated at the end. One query (`repositories/bible.ts#listBookVerses`, ordered by chapter/verse). Honours `license.maxVersesPerRequest`, truncating and saying so. Same gating as the book-list route. |
+
+**Caching:** the index (`/llm` and `/llms.txt`) is cached 1 day; `/llm/site`, `/llm/posts[/:slug]`, `/llm/songbooks[/:slug]`, `/llm/songs/:id`, and `/llm/treasures` are cached 1 hour (`cached(3600)`). `/llm/bible/:code` and `/llm/bible/:code/:book` use the same generation-keyed edge cache as `routes/bible.ts` (1 day, stranded immediately by a takedown or license edit). `/llm/bible` (the translation index) is deliberately left uncached, like `/bible/translations`, since it reflects the admin allowlist and the `allowDownload` gate.
+
+**`robots.txt`** (`GET /robots.txt`, plain text, cached 1 day, source `routes/robots.ts`): the default `*` group sets `Content-Signal: search=yes, ai-input=yes, ai-train=no` and disallows everything (this is where general AI-training crawlers land). A named group for the AI answer-engine user agents (`ChatGPT-User`, `OAI-SearchBot`, `Claude-User`, `Claude-SearchBot`, `Perplexity-User`, `PerplexityBot`, `MistralAI-User`, `DuckAssistBot`) allows only `/llms.txt` and `/api/v1/llm`, disallowing everything else.
+
 ## Rate limiting
 
 IP-based rate limiting is applied on mutation endpoints to prevent spam. Implemented in `middleware/rate-limit.ts` — KV-backed, uses `CF-Connecting-IP` as the key, 1-minute sliding window.
@@ -173,6 +195,8 @@ IP-based rate limiting is applied on mutation endpoints to prevent spam. Impleme
 | `POST /book-request` | 2 requests / IP / minute |
 
 Returns `429` with `{ error: "Too many requests. Please try again later." }` when the limit is exceeded. KV read/write failures fail open (request is allowed through) to avoid breaking the endpoint.
+
+**`/api/v1/llm`, `/api/v1/llm/*`, and `/llms.txt`** use a separate limiter — `middleware/llm-rate-limit.ts`, backed by the Workers **Rate Limiting binding** (`LLM_RATE_LIMITER` in `wrangler.jsonc`, 60 requests/IP/minute), not the KV-backed helper above. AI crawlers are frequent enough that KV writes on every request would burn a meaningful share of the free plan's 1,000 KV writes/day (see docs/gotchas.md) for traffic that is otherwise a plain cached read; the Rate Limiting binding counts inside the Workers runtime and costs no KV write. Applied before the cache middleware, so an over-limit request is never given a cache write either. Returns `429` with a `text/plain` body and `Retry-After: 60`. The binding is optional (`LLM_RATE_LIMITER?: RateLimit`) — an environment without it (e.g. local dev, where the binding is not simulated) serves these routes unrestricted rather than failing. Not applied to the existing `/bible/*` routes — `apps/treasures`' server fetches those from shared Cloudflare IPs and would be rate-limited alongside real visitors.
 
 ## Auth model
 

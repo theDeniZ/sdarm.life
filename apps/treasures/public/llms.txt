@@ -1,0 +1,37 @@
+# Bible & Book Catalogue – SDARM.life Treasures
+
+> Bible translations in German and other languages, plus a curated library of spiritual books and Ellen White collections.
+
+The Treasures section provides access to self-hosted public-domain Bible translations and a free catalogue of spiritual books including works by Ellen G. White.
+
+## Usage
+
+Prefer the Markdown API endpoints over crawling HTML pages. One request per Bible book is sufficient. Responses are cached for a day. API rate limit: ~60 requests/minute per IP; HTTP 429 with `Retry-After` indicates waiting time. Content may be used to answer user questions but not for model training.
+
+Do not crawl chapter-by-chapter; fetch whole books with a single request per book code.
+
+## Human Pages
+
+- [Bible reader](https://treasures.sdarm.life/de/bible) — Browse translations, read chapters, compare parallel texts (German interface)
+- [Treasures catalogue](https://treasures.sdarm.life/de) — Browse and read books from the library (German interface)
+
+## Bible Translations
+
+- [Translations list](https://api.sdarm.life/api/v1/llm/bible) — All available Bible translations with metadata
+- [Translation details](https://api.sdarm.life/api/v1/llm/bible/{code}) — Books in a translation (e.g., `luther1912`)
+- [Whole Bible book](https://api.sdarm.life/api/v1/llm/bible/{code}/{USFM-code}) — Complete book with all verses (e.g., `/luther1912/JHN` for John in Luther 1912)
+
+Which translations are available changes over time — always read the translations list for the current codes. Only public-domain texts hosted by us are offered here.
+
+License notices are included in every response. Respect per-translation restrictions on searching and offline use.
+
+## Free Book Catalogue
+
+- [Books list](https://api.sdarm.life/api/v1/llm/treasures) — Whole catalogue with titles, authors, languages, and descriptions
+
+Books include Ellen G. White collections and other spiritual materials. Languages vary; most are available in German and English.
+
+## Cross-Links
+
+- [Main hub](https://sdarm.life/llms.txt) — All resources and additional sections
+- [Songbook index](https://songs.sdarm.life/llms.txt) — Hymnals and lyrics

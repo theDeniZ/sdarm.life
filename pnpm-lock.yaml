@@ -150,6 +150,9 @@ importers:
       '@sdarm/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@sdarm/i18n':
+        specifier: workspace:*
+        version: link:../../packages/i18n
       '@types/node':
         specifier: ^26.4.1
         version: 26.5.1

@@ -51,6 +51,39 @@ describe('OpenAPI document', () => {
 		const res = await SELF.fetch('https://example.com/api/ui');
 		expect(res.status).toBe(200);
 	});
+
+	it('does not document the llm/agent routes — they return text/markdown, not JSON', async () => {
+		const res = await SELF.fetch('https://example.com/api/openapi.json');
+		const doc = (await res.json()) as { paths: Record<string, unknown> };
+		const paths = Object.keys(doc.paths);
+		for (const path of paths) {
+			expect(path.startsWith('/api/v1/llm')).toBe(false);
+		}
+	});
+});
+
+describe('LLM / agent endpoints', () => {
+	it('serves /robots.txt with the AI training opt-out and llm allowances', async () => {
+		const res = await SELF.fetch('https://example.com/robots.txt');
+		expect(res.status).toBe(200);
+		const body = await res.text();
+		expect(body).toContain('ai-train=no');
+		expect(body).toContain('Allow: /api/v1/llm');
+	});
+
+	it('serves /api/v1/llm as markdown, linking the bible endpoint', async () => {
+		const res = await SELF.fetch('https://example.com/api/v1/llm');
+		expect(res.status).toBe(200);
+		expect(res.headers.get('content-type')).toContain('text/markdown');
+		expect(await res.text()).toContain('/api/v1/llm/bible');
+	});
+
+	it('serves the same index content at /llms.txt', async () => {
+		const res = await SELF.fetch('https://example.com/llms.txt');
+		expect(res.status).toBe(200);
+		expect(res.headers.get('content-type')).toContain('text/markdown');
+		expect(await res.text()).toContain('/api/v1/llm/bible');
+	});
 });
 
 describe('admin auth', () => {
