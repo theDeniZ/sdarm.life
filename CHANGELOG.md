@@ -1,3 +1,10 @@
+# [1.6.0](https://github.com/theDeniZ/sdarm.life/compare/v1.5.0...v1.6.0) (2026-09-13)
+
+
+### Features
+
+* bible hosting added ([3baf77e](https://github.com/theDeniZ/sdarm.life/commit/3baf77ec3e0f8ca119af89e908b06921298dc667))
+
 # [1.5.0](https://github.com/theDeniZ/sdarm.life/compare/v1.4.0...v1.5.0) (2026-09-04)
 
 
