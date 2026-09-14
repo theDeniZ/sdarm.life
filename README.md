@@ -1,6 +1,6 @@
 # sdarm.life
 
-Content-driven website for the SDARM community. Public site, admin panel, and REST API — all hosted on the Cloudflare stack.
+Content-driven website for the SDARM church. Public site, admin panel, and REST API — all hosted on the Cloudflare stack.
 
 ## Architecture
 
