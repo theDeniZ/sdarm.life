@@ -132,6 +132,51 @@ export async function listSongs(
   return { items, total: total ?? 0 };
 }
 
+/**
+ * Every song of a songbook with its parts, in two queries total — never one
+ * query per song. Used by the `/api/v1/llm/songbooks/:slug` agent endpoint,
+ * which renders the whole songbook in a single response.
+ */
+export async function listSongsFull(db: DrizzleD1Database, songbookId: number) {
+  // Filtered by a join on songbookId rather than `inArray(songParts.songId, ids)` —
+  // a songbook can hold 700+ songs, and D1/SQLite caps bound variables per query
+  // well below that, which an IN-list of that size hits immediately.
+  const [bookSongs, parts] = await Promise.all([
+    db
+      .select({ id: songs.id, number: songs.number, title: songs.title, author: songs.author, copyright: songs.copyright })
+      .from(songs)
+      .where(eq(songs.songbookId, songbookId))
+      .orderBy(asc(songs.number)),
+    db
+      .select({
+        id: songParts.id,
+        songId: songParts.songId,
+        type: songParts.type,
+        label: songParts.label,
+        sortOrder: songParts.sortOrder,
+        lyrics: songParts.lyrics,
+      })
+      .from(songParts)
+      .innerJoin(songs, eq(songParts.songId, songs.id))
+      .where(eq(songs.songbookId, songbookId))
+      .orderBy(asc(songParts.sortOrder)),
+  ]);
+
+  if (bookSongs.length === 0) return [];
+
+  const partsBySong = new Map<number, typeof parts>();
+  for (const p of parts) {
+    const list = partsBySong.get(p.songId) ?? [];
+    list.push(p);
+    partsBySong.set(p.songId, list);
+  }
+
+  return bookSongs.map((s) => ({
+    ...s,
+    parts: (partsBySong.get(s.id) ?? []).map(({ songId: _s, ...rest }) => rest),
+  }));
+}
+
 export async function getSongById(db: DrizzleD1Database, id: number) {
   const [row] = await db
     .select({

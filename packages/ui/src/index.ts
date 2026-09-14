@@ -16,3 +16,5 @@ export type { Location, CountryCode } from './data/locations';
 export { LOCATIONS, COUNTRY_NAMES, locationsByCountry, googleMapsUrl } from './data/locations';
 export { useCurrentTheme, withTheme } from './lib/theme-link';
 export type { Theme } from './lib/theme-link';
+export { buildRobotsTxt } from './lib/robots';
+export type { RobotsTxtOptions } from './lib/robots';

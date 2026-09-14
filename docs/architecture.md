@@ -194,6 +194,12 @@ has one of each and a dispatcher — not a service that quietly runs SQL.
 
 ---
 
+### Agent access (llms.txt)
+
+Public apps (`web`, `songbook`, `treasures`, `events`) ship a static `public/llms.txt` (llmstxt.org format) — a static asset, so it costs no Worker invocation. Each points agents at the Markdown endpoints under `https://api.sdarm.life/api/v1/llm/*` (see [api.md](api.md)); `sdarm.life/llms.txt` is the hub. URLs are hardcoded production hosts on purpose, so staging's files point at production. The matching `robots.txt` policy (answering agents yes, training no) is described in [frontend.md](frontend.md).
+
+---
+
 ### Shared UI: `packages/ui`
 
 React components and the dark museum CSS design system used by all public-facing apps (`web`, `songbook`, `treasures`, and any future apps).

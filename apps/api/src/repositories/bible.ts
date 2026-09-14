@@ -70,6 +70,23 @@ export async function listChapterVerses(
     .orderBy(asc(bibleVerses.verse));
 }
 
+/**
+ * Every verse of one book, ordered by chapter then verse, in a single query —
+ * used by the `/api/v1/llm/bible/:code/:book` agent endpoint, which renders
+ * the whole book in one response rather than one chapter at a time.
+ */
+export async function listBookVerses(
+  db: DrizzleD1Database,
+  translationId: string,
+  bookCode: string,
+): Promise<{ chapter: number; verse: number; text: string }[]> {
+  return db
+    .select({ chapter: bibleVerses.chapter, verse: bibleVerses.verse, text: bibleVerses.text })
+    .from(bibleVerses)
+    .where(and(eq(bibleVerses.translationId, translationId), eq(bibleVerses.book, bookCode)))
+    .orderBy(asc(bibleVerses.chapter), asc(bibleVerses.verse));
+}
+
 export interface SearchHitRow {
   translationId: string;
   book: string;

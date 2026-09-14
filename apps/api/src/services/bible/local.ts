@@ -107,6 +107,22 @@ export async function getChapterVerses(
   }
 }
 
+/** Every verse of one book, ordered by chapter/verse — used by the `/llm/bible` agent route. */
+export async function getBookVerses(
+  env: Bindings,
+  translationId: string,
+  bookCode: string,
+): Promise<{ chapter: number; verse: number; text: string }[] | null> {
+  const db = bibleDb(env);
+  if (!db) return null;
+  try {
+    const verses = await repo.listBookVerses(db, translationId, bookCode);
+    return verses.length > 0 ? verses : null;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * Turn a user's query into an FTS5 MATCH expression.
  *

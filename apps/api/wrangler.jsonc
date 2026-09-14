@@ -44,6 +44,16 @@
 			"id": "f5ccbc653cc746898fd1e0be864310da"
 		}
 	],
+	"ratelimits": [
+		{
+			"name": "LLM_RATE_LIMITER",
+			"namespace_id": "1001",
+			"simple": {
+				"limit": 60,
+				"period": 60
+			}
+		}
+	],
 	"env": {
 		"staging": {
 			"name": "sdarm-api-staging",
@@ -71,6 +81,16 @@
 				{
 					"binding": "KV",
 					"id": "fd2bf24c939f47da8104e589d9151024"
+				}
+			],
+			"ratelimits": [
+				{
+					"name": "LLM_RATE_LIMITER",
+					"namespace_id": "1002",
+					"simple": {
+						"limit": 60,
+						"period": 60
+					}
 				}
 			]
 		}

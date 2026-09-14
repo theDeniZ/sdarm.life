@@ -25,6 +25,10 @@ import bibleRouter from './routes/bible';
 import bookRequestRouter from './routes/book-request';
 import geocodeRouter from './routes/geocode';
 import ogRouter from './routes/og';
+import llmRouter from './routes/llm';
+import robotsRouter from './routes/robots';
+import { llmRateLimit } from './middleware/llm-rate-limit';
+import { buildIndexMarkdown } from './services/llm/markdown';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -94,6 +98,13 @@ v1.route('/geocode', geocodeRouter); // KV-cached Nominatim proxy (DSGVO: hides 
 // OG social-card images — binary responder, KV-cached, excluded from OpenAPI (like the R2 proxy)
 v1.route('/og', ogRouter);
 
+// Markdown endpoints for AI agents — excluded from OpenAPI (text/markdown, not JSON).
+// Rate-limited by the Workers Rate Limiting binding (not KV — see middleware/llm-rate-limit.ts),
+// applied before any caching so an over-limit request never gets a cache write either.
+v1.use('/llm', llmRateLimit);
+v1.use('/llm/*', llmRateLimit);
+v1.route('/llm', llmRouter);
+
 // ── Admin routes (auth-gated) ─────────────────────────────────────────────────
 admin.use('*', auth);
 admin.route('/posts', adminPostsRouter);
@@ -107,6 +118,15 @@ admin.route('/bible', adminBibleRouter);
 
 v1.route('/admin', admin);
 app.route('/api/v1', v1);
+
+// ── llms.txt + robots.txt (Worker root, not versioned) ────────────────────────
+app.use('/llms.txt', llmRateLimit);
+app.use('/llms.txt', cached(86400));
+app.get('/llms.txt', (c) => {
+	const r = buildIndexMarkdown(new URL(c.req.url).origin);
+	return c.body(r.body, r.status as 200, r.headers);
+});
+app.route('/robots.txt', robotsRouter);
 
 // ── OpenAPI spec + Swagger UI ─────────────────────────────────────────────────
 app.openAPIRegistry.registerComponent('securitySchemes', 'bearerAuth', {
