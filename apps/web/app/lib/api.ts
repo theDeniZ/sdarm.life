@@ -12,7 +12,14 @@ export const WEB_URL = process.env.WEB_URL ?? 'https://sdarm.life';
 export const TREASURES_URL = process.env.TREASURES_URL ?? 'https://treasures.sdarm.life';
 export const SONGBOOK_URL = process.env.SONGBOOK_URL ?? 'https://songs.sdarm.life';
 export const EVENTS_URL = process.env.EVENTS_URL ?? 'https://events.sdarm.life';
-export const FALLBACK_IMG = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=85&fit=crop';
+
+// There is deliberately no FALLBACK_IMG. It was a hotlinked Unsplash photo, so
+// every page that used it put the visitor's IP on a third-party server before
+// anyone clicked anything — a transfer with no legal basis and no mention in the
+// Datenschutzerklärung (docs/dsgvo.md, gap 2). Callers render no image instead:
+// `r2url()` already returns null for a missing key, so the call site guards on
+// it. If a placeholder is ever wanted, it belongs in R2 or in `public/`, never
+// on someone else's CDN.
 
 export interface ImageTransform {
   w?: number;

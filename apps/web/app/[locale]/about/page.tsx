@@ -30,10 +30,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-function isUnoptimized(url: string) {
-  return url.startsWith('https://upload.wikimedia.org') || url.startsWith('https://images.unsplash.com');
-}
-
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const ChurchDecoration = (
   <svg
@@ -67,9 +63,12 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   const tGlaubens = await getTranslations('web.about.glaubens');
   const articles = tGlaubens.raw('articles') as GlaubensArticle[];
 
-  const imageUrl =
-    (config?.about_image_key ? r2url(config.about_image_key, { w: 800 }) : null) ??
-    'https://images.unsplash.com/photo-1438232992991-995b671e5cdf?w=800&q=85&fit=crop';
+  // No fallback image. This used to hotlink Unsplash, which put the visitor's IP
+  // on a third-party server on page load — a transfer with no legal basis and no
+  // mention in the Datenschutzerklärung (docs/dsgvo.md, gap 2). The cover is now
+  // whatever Admin → Config sets as `about_image_key`, and until one is set the
+  // hero renders as its own dark ground with the title over it.
+  const imageUrl = config?.about_image_key ? r2url(config.about_image_key, { w: 800 }) : null;
   const imageAlt = config?.about_image_alt ?? t('fallbackImageAlt');
 
   return (
@@ -79,15 +78,16 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       <main id="main-content">
         {/* Full-bleed image hero */}
         <section className="about-cover">
-          <Image
-            src={imageUrl}
-            alt={imageAlt}
-            fill
-            style={{ objectFit: 'cover', objectPosition: 'center' }}
-            sizes="100vw"
-            priority
-            unoptimized={isUnoptimized(imageUrl)}
-          />
+          {imageUrl && (
+            <Image
+              src={imageUrl}
+              alt={imageAlt}
+              fill
+              style={{ objectFit: 'cover', objectPosition: 'center' }}
+              sizes="100vw"
+              priority
+            />
+          )}
           <div className="about-cover__overlay" />
           <div className="about-cover__content">
             <h1 className="about-cover__title">{t.rich('heroTitle', { em: (chunks) => <em>{chunks}</em> })}</h1>
