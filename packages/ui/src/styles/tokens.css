@@ -1,6 +1,8 @@
 /* Self-hosted fonts — no third-party requests, no Google tracking */
 @import '@fontsource/lexend/300.css';
 @import '@fontsource/lexend/400.css';
+/* Cyrillic for Lexend, which ships none — see font-noto-sans.css (issue #177) */
+@import './font-noto-sans.css';
 @import '@fontsource/playfair-display/400.css';
 @import '@fontsource/playfair-display/400-italic.css';
 @import '@fontsource/playfair-display/500.css';

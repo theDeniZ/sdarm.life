@@ -58,6 +58,9 @@ importers:
       '@fontsource/lexend':
         specifier: ^5.3.0
         version: 5.3.0
+      '@fontsource/noto-sans':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/oswald':
         specifier: ^5.3.0
         version: 5.3.0
@@ -179,7 +182,7 @@ importers:
         version: 16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       next-intl:
         specifier: ^4.14.2
-        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@playwright/test@1.63.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -246,7 +249,7 @@ importers:
         version: 16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       next-intl:
         specifier: ^4.14.2
-        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@playwright/test@1.63.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -316,7 +319,7 @@ importers:
         version: 16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       next-intl:
         specifier: ^4.14.2
-        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@playwright/test@1.63.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -398,7 +401,7 @@ importers:
         version: 16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       next-intl:
         specifier: ^4.14.2
-        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@playwright/test@1.63.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -520,7 +523,7 @@ importers:
         version: 19.2.3(@types/react@19.2.16)
       next-intl:
         specifier: ^4.14.2
-        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@playwright/test@1.63.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+        version: 4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       typescript:
         specifier: ^6
         version: 6.0.3
@@ -9912,7 +9915,7 @@ snapshots:
 
   next-intl-swc-plugin-extractor@4.14.4: {}
 
-  next-intl@4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@playwright/test@1.63.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8):
+  next-intl@4.14.4(@swc/helpers@0.5.23)(next@16.3.4(@babel/core@7.29.0)(@playwright/test@1.63.0)(@types/node@26.5.1)(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8):
     dependencies:
       '@eloqnt/config': 0.1.0
       '@eloqnt/format-json': 0.1.0

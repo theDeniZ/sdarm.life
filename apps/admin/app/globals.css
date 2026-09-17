@@ -3,6 +3,8 @@
 @import '@fontsource/lexend/400.css';
 @import '@fontsource/lexend/500.css';
 @import '@fontsource/lexend/600.css';
+/* Cyrillic for Lexend, which ships none — see font-cyrillic.css (issue #177) */
+@import './font-cyrillic.css';
 @import '@fontsource/oswald/200.css';
 @import '@fontsource/oswald/300.css';
 @import '@fontsource/oswald/400.css';
@@ -1103,6 +1105,12 @@ input[type="file"]::file-selector-button:hover {
   font-family: 'Lexend', sans-serif;
   font-weight: 500;
   font-size: 14.5px;
+  /* Explicit, so no typeface's own metrics can decide the line box. Without it
+     the Cyrillic fallback drew a taller line than Lexend and "Псалмы Сиона"
+     touched the song count 6px beneath it, while the Latin titles in the same
+     grid did not (issue #177). The webfont fixes today's case; this stops the
+     next face from reopening it. */
+  line-height: 1.35;
   color: var(--heading);
   overflow: hidden;
   text-overflow: ellipsis;
