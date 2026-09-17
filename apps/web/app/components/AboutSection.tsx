@@ -5,7 +5,11 @@ const STATIC = {
     'sdarm.life ist der lokale Onlineauftritt der Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland — Teil der weltweiten Gemeinschaft unter sdarm.org.',
   text2:
     'Unsere Gemeinde entstand als Ort der geistlichen Erneuerung — für Menschen, die biblische Wahrheit, den Sabbat und die Botschaft der Reformation ernst nehmen.',
-  imageUrl: 'https://images.unsplash.com/photo-1438232992991-995b671e5cdf?w=800&q=85&fit=crop',
+  // Empty on purpose: these were hotlinked Unsplash photos, which put the
+  // visitor's IP on a third-party CDN on page view (docs/dsgvo.md, gap 2).
+  // Drop a real image in as an R2 key or a file under `public/` — the render
+  // is guarded, so an empty string simply shows no picture.
+  imageUrl: '',
   imageAlt: 'Gemeinde betet',
   linkUrl: 'https://sdarm.org/about-us/',
 };
@@ -35,14 +39,15 @@ export default function AboutSection({ config }: AboutSectionProps) {
       <div>
         <div className="about-grid">
           <a className="img16" href="https://sdarm.life" style={{ position: 'relative' }}>
-            <Image
-              src={imageUrl}
-              alt={imageAlt}
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="(max-width: 768px) 100vw, 50vw"
-              unoptimized={imageUrl.includes('unsplash.com')}
-            />
+            {imageUrl && (
+              <Image
+                src={imageUrl}
+                alt={imageAlt}
+                fill
+                style={{ objectFit: 'cover' }}
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
+            )}
           </a>
           <div className="about-text" style={{ alignSelf: 'center' }}>
             <p>{text1}</p>

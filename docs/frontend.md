@@ -527,7 +527,7 @@ R2 images are served through Cloudflare Image Transformations in production. `r2
 
 **Kill switch:** Set `R2_TRANSFORMS=false` env var to disable transforms and serve raw R2 URLs. Only needed if Image Transformations is disabled at the Cloudflare account level (which would cause `/cdn-cgi/image/` to return 403).
 
-**Do not transform external URLs.** `FALLBACK_IMG` (Unsplash) and other external URLs are never passed through `r2url()` with transforms — they use their own query-string sizing.
+**There are no external image URLs left to transform.** `FALLBACK_IMG` and the hotlinked Unsplash/Wikimedia fallbacks were removed (see [dsgvo.md](dsgvo.md)), and `next.config.ts` no longer allowlists those hosts. Every image goes through `r2url()`, which returns `null` for a missing key — call sites guard on that and render no image rather than substituting someone else's.
 
 After upload, use `URL.createObjectURL(file)` for preview. Do not switch to the R2 URL — wrangler local state is not served at `images.sdarm.life`. The R2 key is stored correctly regardless.
 

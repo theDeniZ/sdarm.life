@@ -478,11 +478,11 @@ Cross-cutting concerns (env constants, auth headers, formatters, API types) must
 
 ```
 apps/web/app/lib/
-  api.ts       — API + R2 URL constants, r2url(), fetchPosts(), fetchConfig(), FALLBACK_IMG
+  api.ts       — API + R2 URL constants, r2url(), fetchPosts(), fetchConfig()
   format.ts    — formatDate()
 
 apps/admin/app/lib/
-  api.ts       — API + R2 URL constants, adminHeaders(), r2url(), FALLBACK_IMG
+  api.ts       — API + R2 URL constants, adminHeaders(), r2url()
   format.ts    — fmtDate(), fmtSize(), toLocalDatetime()
   hooks.ts     — usePaginatedList()
 ```
@@ -516,7 +516,8 @@ Do not create `utils/` at the monorepo root for app-specific code — it breaks 
 // apps/web/app/lib/api.ts
 export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 export const R2  = process.env.R2_URL  ?? 'https://images.sdarm.life';
-export const FALLBACK_IMG = 'https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=800&q=85&fit=crop';
+// No FALLBACK_IMG — it was a hotlinked Unsplash photo (see docs/dsgvo.md).
+// A missing image renders as no image; r2url() already returns null for a null key.
 
 export interface ImageTransform {
   w?: number;
