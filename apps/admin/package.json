@@ -15,6 +15,7 @@
     "@fontsource/cormorant-garamond": "^5.3.0",
     "@fontsource/dm-serif-display": "^5.3.0",
     "@fontsource/lexend": "^5.3.0",
+    "@fontsource/noto-sans": "^5.3.0",
     "@fontsource/oswald": "^5.3.0",
     "@fontsource/playfair-display": "^5.3.0",
     "@fontsource/raleway": "^5.3.0",
@@ -26,8 +27,8 @@
     "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@opennextjs/cloudflare": "^1",
     "@eslint/js": "^10.0.1",
+    "@opennextjs/cloudflare": "^1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^26",
     "@types/react": "^19",
