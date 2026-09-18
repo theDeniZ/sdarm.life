@@ -280,6 +280,20 @@ The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html
 
 `SongbookList` renders a responsive card grid (3/2/1 columns) instead of a table — `SongbookCard` shows the cover image (or a book-icon placeholder via `.book-cover-icon` when `coverKey` is null), language chip, song count, and always-visible Edit/Songs/Delete actions. A toolbar above the grid combines a title/slug search input with language filter chips (`.chip-filter`) and the "+ New songbook" action. Delete goes through `ConfirmDialog` instead of the browser `confirm()`.
 
+**The whole card is the Songs link.** The `Songs` anchor carries `book-card-link`, whose `::after` stretches over the positioned `.book-card` — cover, title and song count included. It is a real `<Link>`, not an `onClick` on the card, so keyboard, screen readers and middle-click all work without extra code. `Songs` is the stretched action rather than `Edit` because a songbook is its songs, and that is the frequent destination (issue #172).
+
+⚠️ **The `z-index` arrangement here is load-bearing and easy to break.** Three rules have to hold at once:
+
+| Rule | Why |
+|---|---|
+| `.book-card-link::after` → `z-index: 1` | must clear `.book-cover`, which is positioned for its `<Image fill>` and would otherwise swallow every click on the largest part of the card |
+| `.book-actions > *:not(.book-card-link)` → `z-index: 2` | Edit and Delete are siblings of the stretched anchor and must stay above its hit area — **`Delete` must never fire a navigation** |
+| `.book-actions` → **no `z-index`, no `position`** | a stacking context on that 26px-tall row traps the `::after` inside it, and the stretched area then covers the buttons instead of the card |
+
+The anchor itself must also carry no `z-index`, for the same reason: it would open a context and trap its own pseudo-element. Each of these was observed failing in turn while building it.
+
+Admin has no screenshot coverage, so verify by clicking: cover, title and empty space all open `/songbooks/{id}/songs`; `Edit` opens `/songbooks/{id}`; `Delete` opens the dialog and does not navigate.
+
 ### Pagination pattern
 
 - `LIMIT` constant per component (20 for posts/subscribers, 24 for images)

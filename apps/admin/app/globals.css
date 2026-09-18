@@ -1017,6 +1017,8 @@ input[type="file"]::file-selector-button:hover {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 14px;
+  /* containing block for .book-card-link::after */
+  position: relative;
   transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
 }
 
@@ -1025,6 +1027,47 @@ input[type="file"]::file-selector-button:hover {
   transform: translateY(-3px);
   border-color: var(--gold-dim);
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* The card lifts on hover, so it already promises a target; before this it had
+   none and the only way in was the 40px Songs button. This ::after stretches
+   that same link over the whole card — cover, title and count included — so
+   the promise is kept. The pseudo-element carries the hit area, which is why
+   the anchor itself needs no layout change. */
+.book-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Must clear .book-cover, which is positioned for its <Image fill> and would
+     otherwise paint over this layer and swallow every click on the cover — the
+     largest part of the card. The anchor itself gets no z-index: that would
+     open a stacking context and trap this pseudo-element inside it. */
+  z-index: 1;
+}
+
+/* Edit and Delete are siblings of the stretched anchor inside .book-actions,
+   so they share its stacking context and must outrank the layer above, or the
+   stretched hit area swallows them — Delete especially must never fire a
+   navigation from a background click. */
+.book-actions > *:not(.book-card-link) {
+  position: relative;
+  z-index: 2;
+}
+
+/* The pointer must say the card is clickable, not just look like it. */
+.book-card:hover {
+  cursor: pointer;
+}
+
+/* The stretched anchor's own outline would draw around the 40px button, not
+   the card that is actually focused, so the card draws the focus ring. */
+.book-card-link:focus-visible {
+  outline: none;
+}
+.book-card:has(.book-card-link:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .book-cover {
@@ -1072,6 +1115,10 @@ input[type="file"]::file-selector-button:hover {
   display: flex;
   gap: 8px;
   margin-top: 8px;
+  /* Deliberately no z-index here. A stacking context on this 26px-tall row
+     would trap .book-card-link::after inside it, and the stretched hit area
+     would cover the buttons instead of the card. The siblings are raised
+     individually below. */
 }
 
 .filter-bar {
