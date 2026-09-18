@@ -251,6 +251,18 @@ Unlike the public apps, the admin app has no `ThemeScript`/FOUC-prevention pass 
 
 The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html` and unlike the public site's warm black museum theme): dark = `#020617` page / `#0b1120` cards, light = `#f8fafc` page / white cards, hairline borders (`rgba(255,255,255,0.07)` dark / `rgba(2,6,23,0.08)` light), UI font Lexend, base radius `--r: 10px` (cards 12px). Accent tokens: `--accent` (`#c9a96e` dark / `#927223` light — deeper gold for contrast on white), `--accent-hover`, `--accent-soft`, `--on-accent`; `--gold` is kept as an alias of `--accent` so pre-existing rules follow it. `--brand-gold` (`#c9a96e`, theme-independent) exists only for the logo. Semantic tokens: `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--red`/`--red-text`/`--danger-soft`, plus `--heading`, `--muted`, `--row-hover`, `--overlay`. Never hardcode colors in admin CSS — every rule goes through these tokens so both themes stay in sync.
 
+### Email screen
+
+`EmailComposer` at `/email` — recipient/subject/template form on the left, live `srcDoc` iframe preview on the right, same `grid` shape as `HomeGridEditor`. Styles live in `globals.css` under the `.email-*` prefix.
+
+**The preview sheet is white in both themes, on purpose.** What is being previewed is a white HTML email; a recipient never sees it on a dark ground, so the frame keeps `#ffffff` and takes the card treatment (`--border`, `var(--r)`, a hairline shadow) around it. The `PREVIEW_PLACEHOLDER` empty state is also light — and its two colours are literals by necessity, because an iframe is a separate document and cannot read the admin's custom properties. That is the **only** place in this app where a hardcoded colour is correct.
+
+**Two-class specificity is required for the form controls.** `.form-row select` and `.form-row textarea` set `width: 100%` and the UI font. The template-row selects and the HTML body field need `.form-row .email-*` to win — a single class loses, and the symptom is not subtle: both selects take the full row and push the `Load` button outside the card. These rules were inline `style={{}}` before, which is why they used to win without anyone noticing the cascade.
+
+**The layout stacks at 1100px.** Above it, form and preview sit side by side. Below, the preview was a sliver — measured 192px at 1024 and **2px at 834**, still 700px tall — because the form was pinned at `flex: 0 0 480px` and there was no breakpoint anywhere on the screen. Stacked, the frame switches to `60vh` with a 420px floor.
+
+⚠️ This was the one admin screen built outside the design system: every colour and dimension was an inline literal in the component, including a `#0f0e0c` preview with `#3a3830` text that rendered as the same black slab in **both** themes and could not follow the toggle at all (issue #175). Keep new work here in `globals.css` and on tokens.
+
 ### Songbooks card grid
 
 `SongbookList` renders a responsive card grid (3/2/1 columns) instead of a table — `SongbookCard` shows the cover image (or a book-icon placeholder via `.book-cover-icon` when `coverKey` is null), language chip, song count, and always-visible Edit/Songs/Delete actions. A toolbar above the grid combines a title/slug search input with language filter chips (`.chip-filter`) and the "+ New songbook" action. Delete goes through `ConfirmDialog` instead of the browser `confirm()`.
