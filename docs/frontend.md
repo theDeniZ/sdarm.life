@@ -8,7 +8,7 @@
 | `[locale]/layout.tsx` | Server (async) | Locale layout — validates locale, wraps in `<NextIntlClientProvider>`, renders `<html lang={locale}><body>` |
 | `[locale]/page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
 | `[locale]/posts/[slug]/page.tsx` | Server (async) | Post detail page |
-| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and a sun/moon theme toggle that dispatches `sdarm:toggle-theme`. |
+| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and a sun/moon theme toggle that dispatches `sdarm:toggle-theme`. Control colours come from two tiers on `.site-nav` — see [Navbar contrast tiers](#navbar-contrast-tiers). |
 | `HeroWelcome` | **Server** (async) | 3D Earth landing hero — renders `<PlanetEarth />` with grain overlay, badge, title, subtitle, and CTA link to `/{locale}/about`. Uses `web.heroWelcome` i18n namespace. |
 | `PlanetEarth` | **Client** | Three.js WebGL globe with day/night textures, atmosphere shader, cloud layer. Self-hosted textures in `/public/textures/` (MIT, no CDN, DSGVO clean). |
 | `StatsGrid` | **Client** | Bento grid of five blocks — the homepage's main section. Reads `HomeGridConfig` from the `home_grid` KV key, falls back to the built-in defaults. Fits every headline to its card. |
@@ -150,6 +150,31 @@ The input under the clock searches via `GET /api/v1/geocode?q=…&limit=N` — a
 **Responsive:** tablet (≤900px) — clock spans `grid-column: 1 / 3`, row layout with clock left + text right; mobile (≤600px) — all columns stack, clock column-spans full width.
 
 **Fallback:** API fetch failure is silently swallowed; clock stays at `'–:––'` / `'…'` placeholder.
+
+### Navbar contrast tiers
+
+Navbar control colours are **two tiers declared as custom properties on `.site-nav`**, not per-element values:
+
+| Tier | Controls |
+|---|---|
+| `--nav-fg-primary` / `--nav-fg-primary-hover` | logo, nav links |
+| `--nav-fg-secondary` / `--nav-fg-secondary-hover` | language switcher, theme toggle, burger lines |
+
+There are three states — dark (the base rule), `[data-theme='light']`, and `[data-theme='light'] .over-dark` (the nav floating over the cosmic hero, set by `data-nav-overlay="dark"` on `HeroWelcome`). **Each state re-sets only the four variables**; no control carries a colour of its own.
+
+**Every tier value must clear 3:1 against its own background** — the WCAG minimum for UI components. Current measurements:
+
+| State | primary | secondary |
+|---|---|---|
+| dark `#0c0b09` | 14.00:1 | 5.46:1 |
+| light `#fcfbf8` | 13.76:1 | 4.12:1 |
+| over-dark `#090806` | 14.23:1 | 5.48:1 |
+
+This replaced fifteen independently hand-tuned alpha values. The language switcher had ended up at 0.28 in dark (**1.97:1**) and 0.44 in light (**2.10:1**) — both failing — while the theme toggle beside it sat at 0.55/0.65 and the nav link next to it at 10:1, so the switcher read as a disabled control (issue #128).
+
+⚠️ **Do not give a navbar control its own colour.** A one-off value is how the tiers drifted apart the first time. If a control genuinely needs to sit outside both tiers, add a third tier rather than a local override. The one legitimate exception is `.nav-links a.active`, which uses `--gold` — a state colour, not a tier.
+
+⚠️ **The screenshot suite will not catch a regression here.** `maxDiffPixelRatio` is 0.005 and these controls are far smaller than that, so the baselines pass either way. Verify contrast by computing it, not by looking at a diff.
 
 ### ThemeScript + ThemeProvider
 
