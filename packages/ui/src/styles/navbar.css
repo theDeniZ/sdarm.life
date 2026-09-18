@@ -26,7 +26,25 @@
 }
 
 /* ═══ NAV ═══ */
+/* Two contrast tiers, set once per state and consumed by every control.
+   `primary` is the logo and the nav links; `secondary` is the language
+   switcher, the theme toggle and the burger lines — controls that sit quieter
+   than navigation but must still be findable.
+
+   They exist because the tiers were previously re-guessed per element per
+   state: fifteen hand-tuned alpha values across three states, in which the
+   language switcher ended up at 0.28 in dark (1.97:1) and 0.44 in light
+   (2.10:1) while the theme toggle beside it sat at 0.55 and 0.65. Both
+   switcher values failed the 3:1 WCAG minimum for UI components, and the
+   switcher read as a disabled control next to a nav link at 10:1.
+
+   Every value below clears 3:1 against its own background. Changing a tier
+   means changing one line, not nine. */
 nav.site-nav {
+  --nav-fg-primary: rgba(240, 235, 225, 0.92);
+  --nav-fg-primary-hover: rgba(235, 226, 210, 1);
+  --nav-fg-secondary: rgba(210, 200, 185, 0.65);
+  --nav-fg-secondary-hover: rgba(228, 218, 200, 0.95);
   position: fixed;
   top: 0;
   left: 0;
@@ -56,7 +74,7 @@ nav.site-nav.scrolled {
   font-weight: 700;
   font-size: 1.35rem;
   letter-spacing: 0.04em;
-  color: rgba(240, 235, 225, 0.92);
+  color: var(--nav-fg-primary);
   text-decoration: none;
   transition: color 0.5s ease;
   flex-shrink: 0; /* never let logo squeeze under content pressure */
@@ -70,7 +88,7 @@ nav.site-nav.scrolled {
   letter-spacing: 0;
 }
 .nav-logo:hover {
-  color: rgba(235, 226, 210, 1);
+  color: var(--nav-fg-primary-hover);
 }
 
 /* ── Nav links ── */
@@ -85,13 +103,13 @@ nav.site-nav.scrolled {
   font-size: 0.86rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.88);
+  color: var(--nav-fg-primary);
   text-decoration: none;
   white-space: nowrap;
   transition: color 0.45s ease;
 }
 .nav-links a:hover {
-  color: #fff;
+  color: var(--nav-fg-primary-hover);
 }
 .nav-links a.active {
   color: var(--gold);
@@ -105,14 +123,14 @@ nav.site-nav.scrolled {
   flex-shrink: 0; /* never collapse — the burger button must always be reachable */
 }
 
-/* Language — same type style as nav links, just lower contrast */
+/* Language — same type style as nav links, one tier quieter */
 .nav-lang {
   font-family: 'Lexend', sans-serif;
   font-weight: 500;
   font-size: 0.86rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: rgba(210, 200, 185, 0.28);
+  color: var(--nav-fg-secondary);
   text-decoration: none;
   transition: color 0.5s ease;
   /* enlarge touch target without changing visual size */
@@ -121,7 +139,7 @@ nav.site-nav.scrolled {
   flex-shrink: 0;
 }
 .nav-lang:hover {
-  color: rgba(201, 169, 110, 0.65);
+  color: var(--gold);
 }
 
 /* Theme toggle (sun in dark, moon in light) */
@@ -134,7 +152,7 @@ nav.site-nav.scrolled {
   height: 44px;
   margin: -10px -2px; /* keep visual size unchanged */
   padding: 0;
-  color: rgba(210, 200, 185, 0.55);
+  color: var(--nav-fg-secondary);
   transition: color 0.5s ease;
   display: flex;
   align-items: center;
@@ -143,7 +161,7 @@ nav.site-nav.scrolled {
   position: relative;
 }
 .nav-theme:hover {
-  color: rgba(228, 218, 200, 0.95);
+  color: var(--nav-fg-secondary-hover);
 }
 .nav-theme__icon {
   width: 16px;
@@ -181,7 +199,7 @@ nav.site-nav.scrolled {
   display: block;
   width: 20px;
   height: 1px;
-  background: rgba(210, 200, 185, 0.65);
+  background: var(--nav-fg-secondary);
   border-radius: 1px;
   transform-origin: center;
   transition:
@@ -339,29 +357,14 @@ nav.site-nav.scrolled {
 }
 
 /* ── Light theme ── */
-[data-theme='light'] .nav-logo {
-  color: rgba(14, 14, 20, 0.88);
-}
-[data-theme='light'] .nav-logo:hover {
-  color: rgba(14, 14, 20, 1);
-}
-[data-theme='light'] .nav-links a {
-  color: rgba(28, 28, 38, 0.75);
-}
-[data-theme='light'] .nav-links a:hover {
-  color: rgba(14, 14, 20, 1);
-}
-[data-theme='light'] .nav-lang {
-  color: rgba(80, 78, 96, 0.44);
-}
-[data-theme='light'] .nav-theme {
-  color: rgba(80, 78, 96, 0.65);
-}
-[data-theme='light'] .nav-theme:hover {
-  color: rgba(28, 28, 38, 0.95);
-}
-[data-theme='light'] .nav-burger__line {
-  background: rgba(28, 28, 38, 0.62);
+/* Only the two tiers are re-set; every control follows them.
+   secondary at 0.75 measures 4.12:1 on --dark (#fcfbf8) — the old 0.44 on the
+   language switcher was 2.10:1. */
+[data-theme='light'] nav.site-nav {
+  --nav-fg-primary: rgba(14, 14, 20, 0.88);
+  --nav-fg-primary-hover: rgba(14, 14, 20, 1);
+  --nav-fg-secondary: rgba(80, 78, 96, 0.75);
+  --nav-fg-secondary-hover: rgba(28, 28, 38, 0.95);
 }
 [data-theme='light'] .nav-mobile__links a {
   color: rgba(14, 14, 20, 0.85);
@@ -370,35 +373,17 @@ nav.site-nav.scrolled {
 /* ── Adaptive contrast: navbar over a [data-nav-overlay="dark"] section ──
    Forces the dark-style (white) palette regardless of the active theme so
    the nav stays legible while it floats over the cosmic hero. */
-[data-theme='light'] nav.site-nav.over-dark .nav-logo {
-  color: rgba(240, 235, 225, 0.92);
-}
-[data-theme='light'] nav.site-nav.over-dark .nav-logo:hover {
-  color: rgba(235, 226, 210, 1);
-}
-[data-theme='light'] nav.site-nav.over-dark .nav-links a {
-  color: rgba(255, 255, 255, 0.88);
-}
-[data-theme='light'] nav.site-nav.over-dark .nav-links a:hover {
-  color: #fff;
+/* Re-setting the two tiers to their dark-state values is the whole override —
+   the controls themselves need no `over-dark` rules at all. `.active` still
+   needs one, because the gold is a state colour rather than a tier. */
+[data-theme='light'] nav.site-nav.over-dark {
+  --nav-fg-primary: rgba(240, 235, 225, 0.92);
+  --nav-fg-primary-hover: rgba(235, 226, 210, 1);
+  --nav-fg-secondary: rgba(210, 200, 185, 0.65);
+  --nav-fg-secondary-hover: rgba(228, 218, 200, 0.95);
 }
 [data-theme='light'] nav.site-nav.over-dark .nav-links a.active {
   color: var(--gold);
-}
-[data-theme='light'] nav.site-nav.over-dark .nav-lang {
-  color: rgba(210, 200, 185, 0.28);
-}
-[data-theme='light'] nav.site-nav.over-dark .nav-lang:hover {
-  color: rgba(201, 169, 110, 0.65);
-}
-[data-theme='light'] nav.site-nav.over-dark .nav-theme {
-  color: rgba(210, 200, 185, 0.55);
-}
-[data-theme='light'] nav.site-nav.over-dark .nav-theme:hover {
-  color: rgba(228, 218, 200, 0.95);
-}
-[data-theme='light'] nav.site-nav.over-dark .nav-burger__line {
-  background: rgba(210, 200, 185, 0.65);
 }
 [data-theme='light'] nav.site-nav.over-dark.scrolled {
   background: rgba(9, 8, 6, 0.62);
