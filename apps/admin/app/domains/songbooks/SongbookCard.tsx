@@ -50,9 +50,15 @@ export default function SongbookCard({ book, onDelete }: Props) {
           <Link href={`/songbooks/${book.id}`} className="btn-ghost btn-sm" aria-label={`Edit ${book.title}`}>
             Edit
           </Link>
+          {/* `book-card-link` stretches this anchor's ::after over the whole card,
+              making the cover, title and song count part of the same link rather
+              than dead space around a 40px button. Songs is the stretched one, not
+              Edit: a songbook is its songs, and that is the frequent destination.
+              A real <Link> rather than an onClick on the card — keyboard, screen
+              readers and middle-click all keep working for free. */}
           <Link
             href={`/songbooks/${book.id}/songs`}
-            className="btn-ghost btn-sm"
+            className="btn-ghost btn-sm book-card-link"
             aria-label={`Manage songs in ${book.title}`}
           >
             Songs
