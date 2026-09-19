@@ -1,3 +1,22 @@
+# [1.8.0](https://github.com/theDeniZ/sdarm.life/compare/v1.7.0...v1.8.0) (2026-09-19)
+
+
+### Bug Fixes
+
+* **admin:** make the whole songbook card clickable ([8c54452](https://github.com/theDeniZ/sdarm.life/commit/8c54452dd7e2ce4dc260d7a59e5d96010fb89173)), closes [#172](https://github.com/theDeniZ/sdarm.life/issues/172)
+* **admin:** rebuild the Email screen on the design system ([0ee174a](https://github.com/theDeniZ/sdarm.life/commit/0ee174a0a61388e33bc35548e1815b0b8f6889e6)), closes [#0f0e0c](https://github.com/theDeniZ/sdarm.life/issues/0f0e0c) [#3a3830](https://github.com/theDeniZ/sdarm.life/issues/3a3830) [#175](https://github.com/theDeniZ/sdarm.life/issues/175)
+* **admin:** show the whole cover in the image picker preview ([a4f1159](https://github.com/theDeniZ/sdarm.life/commit/a4f115938b90c85eecc1412e866d4f8036a46f88)), closes [#173](https://github.com/theDeniZ/sdarm.life/issues/173)
+* **songbook:** stop the reading screen competing with the song ([90c4972](https://github.com/theDeniZ/sdarm.life/commit/90c49722287d3ddb03e848043a424ce55eb109fb)), closes [#170](https://github.com/theDeniZ/sdarm.life/issues/170)
+* **treasures:** the reader's theme is the book's, not the site's ([f5d800e](https://github.com/theDeniZ/sdarm.life/commit/f5d800ed422fcc5391bbc030c9b97bca83960b5a)), closes [#174](https://github.com/theDeniZ/sdarm.life/issues/174)
+* **ui:** give Lexend a Cyrillic face ([782e0d7](https://github.com/theDeniZ/sdarm.life/commit/782e0d7e82a7d813f6e2e37534c67729bd703c03)), closes [#177](https://github.com/theDeniZ/sdarm.life/issues/177)
+* **ui:** give navbar controls one contrast scale ([eb630fd](https://github.com/theDeniZ/sdarm.life/commit/eb630fd0c81c7adbb98d502495866ca44bca78ac)), closes [#0c0b09](https://github.com/theDeniZ/sdarm.life/issues/0c0b09) [#fcfbf8](https://github.com/theDeniZ/sdarm.life/issues/fcfbf8) [#090806](https://github.com/theDeniZ/sdarm.life/issues/090806) [#128](https://github.com/theDeniZ/sdarm.life/issues/128)
+* **web:** drop the hotlinked Unsplash and Wikimedia images ([5397323](https://github.com/theDeniZ/sdarm.life/commit/5397323ab4a72fa43901346ae7dfee97cca89089))
+
+
+### Features
+
+* newest sbl subrepo ([2363870](https://github.com/theDeniZ/sdarm.life/commit/23638704c9ded7dff9740fc8ad4c353440b32d9e))
+
 # [1.7.0](https://github.com/theDeniZ/sdarm.life/compare/v1.6.0...v1.7.0) (2026-09-14)
 
 
