@@ -16,10 +16,6 @@ export interface Product {
   href?: string;
 }
 
-function isUnoptimized(url: string) {
-  return url.startsWith('https://upload.wikimedia.org') || url.startsWith('https://images.unsplash.com');
-}
-
 export default function ProductsSection({ products: productsProp }: { products?: Product[] }) {
   const t = useTranslations('web.products');
   const tItems = useTranslations('web.products.items');
@@ -27,7 +23,11 @@ export default function ProductsSection({ products: productsProp }: { products?:
   const staticProducts: Product[] = [
     {
       id: '1',
-      imageUrl: 'https://images.unsplash.com/photo-1580418827493-f2b22c0a76cb?w=800&q=85&fit=crop',
+      // Empty on purpose: these were hotlinked Unsplash photos, which put the
+      // visitor's IP on a third-party CDN on page view (docs/dsgvo.md, gap 2).
+      // Drop a real image in as an R2 key or a file under `public/` — the render
+      // is guarded, so an empty string simply shows no picture.
+      imageUrl: '',
       imageAlt: tItems('1.imageAlt'),
       category: tItems('1.category'),
       tag: tItems('1.tag'),
@@ -37,7 +37,7 @@ export default function ProductsSection({ products: productsProp }: { products?:
     },
     {
       id: '2',
-      imageUrl: 'https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=85&fit=crop',
+      imageUrl: '',
       imageAlt: tItems('2.imageAlt'),
       category: tItems('2.category'),
       tag: tItems('2.tag'),
@@ -80,13 +80,7 @@ export default function ProductsSection({ products: productsProp }: { products?:
         {/* Center: image */}
         <div className="prod-img-wrap">
           <div className="prod-img-bg">
-            <Image
-              src={p.imageUrl}
-              alt={p.imageAlt}
-              fill
-              style={{ objectFit: 'cover' }}
-              unoptimized={isUnoptimized(p.imageUrl)}
-            />
+            {p.imageUrl && <Image src={p.imageUrl} alt={p.imageAlt} fill style={{ objectFit: 'cover' }} />}
           </div>
           <div className="prod-img-num">/{String(idx + 1).padStart(2, '0')}</div>
         </div>

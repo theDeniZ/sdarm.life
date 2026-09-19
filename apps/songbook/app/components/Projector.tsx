@@ -14,6 +14,14 @@ interface Props {
   isDisplay?: boolean;
 }
 
+// One place for the bounds: the A−/A+ buttons and the pinch gesture must agree,
+// or a pinch could take the scale somewhere the buttons cannot bring it back from.
+const MIN_SCALE = 0.5;
+const MAX_SCALE = 2;
+const clampScale = (v: number) => Math.max(MIN_SCALE, Math.min(MAX_SCALE, Number(v.toFixed(2))));
+
+const pinchDistance = (t: TouchList) => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+
 export default function Projector({ song, onClose, isDisplay }: Props) {
   const t = useTranslations('songbook.projector');
   const parts = expandParts(song.parts);
@@ -21,6 +29,12 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   const total = parts.length + 2;
   const [index, setIndex] = useState(0);
   const [fontScale, setFontScale] = useState(1);
+  // The pinch handler cannot read fontScale from the closure — it would need to
+  // be a dependency, and re-registering listeners mid-gesture drops the pinch.
+  const fontScaleRef = useRef(fontScale);
+  useEffect(() => {
+    fontScaleRef.current = fontScale;
+  }, [fontScale]);
   const [slideTheme, setSlideTheme] = useState<'dark' | 'light'>(getSiteTheme);
   const [mounted, setMounted] = useState(false);
   const [display, setDisplay] = useState(isDisplay);
@@ -137,13 +151,42 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     };
   }, [display, resetIdle]);
 
-  // Touch swipe (≥50px navigates); a short tap (<10px) reveals the chrome
+  // Touch. One finger swipes between slides (≥50px navigates, <10px is a tap that
+  // reveals the chrome); two fingers pinch the lyrics larger or smaller, so on a
+  // tablet nobody has to find the A−/A+ buttons.
+  //
+  // Both gestures live in one effect because they overlap: when a pinch ends the
+  // fingers lift one at a time, and the swipe test would read that last movement
+  // as a page turn. `pinching` is what keeps a resize from also changing slide.
   useEffect(() => {
     let startX = 0;
+    let pinchStart = 0;
+    let pinchScale = 1;
+    let pinching = false;
+
     const onTouchStart = (e: TouchEvent) => {
-      startX = e.touches[0].clientX;
+      if (e.touches.length === 2) {
+        pinching = true;
+        pinchStart = pinchDistance(e.touches);
+        pinchScale = fontScaleRef.current;
+      } else if (e.touches.length === 1) {
+        startX = e.touches[0].clientX;
+      }
     };
+
+    const onTouchMove = (e: TouchEvent) => {
+      if (!pinching || e.touches.length !== 2 || pinchStart === 0) return;
+      // Registered with passive: false so this is allowed — without it the
+      // browser zooms its own page instead and the slide never changes size.
+      e.preventDefault();
+      setFontScale(clampScale(pinchScale * (pinchDistance(e.touches) / pinchStart)));
+    };
+
     const onTouchEnd = (e: TouchEvent) => {
+      if (pinching) {
+        if (e.touches.length === 0) pinching = false;
+        return;
+      }
       const dx = e.changedTouches[0].clientX - startX;
       if (Math.abs(dx) > 50) {
         if (dx < 0) next();
@@ -152,10 +195,13 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
         resetIdle();
       }
     };
+
     window.addEventListener('touchstart', onTouchStart);
+    window.addEventListener('touchmove', onTouchMove, { passive: false });
     window.addEventListener('touchend', onTouchEnd);
     return () => {
       window.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('touchend', onTouchEnd);
     };
   }, [next, prev, resetIdle]);
@@ -182,6 +228,9 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     return vn !== null ? String(vn) : null;
   })();
 
+  // "Припев" / "Amen" are words; a verse mark and the song number are numerals.
+  const isWordSymbol = isAmenSlide || part?.type === 'chorus';
+
   const counterLabel = isPartSlide ? `${index} / ${parts.length}` : '—';
 
   if (!mounted) return null;
@@ -203,10 +252,18 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
         </button>
       )}
 
-      {/* Decorative background symbol — position:absolute, pointer-events:none */}
+      {/* Decorative background symbol — position:absolute, pointer-events:none.
+          Numerals sit on the golden section, words centre: see the CSS. */}
       {bgSymbol && (
         <div
-          className={`projector__bg-symbol${isTitleSlide || isAmenSlide ? ' projector__bg-symbol--center' : ''}${part?.type === 'chorus' ? ' projector__bg-symbol--word projector__bg-symbol--ref' : ''}${isAmenSlide ? ' projector__bg-symbol--word' : ''}`}
+          className={[
+            'projector__bg-symbol',
+            isWordSymbol || isTitleSlide ? 'projector__bg-symbol--center' : '',
+            isWordSymbol ? 'projector__bg-symbol--word' : '',
+            part?.type === 'chorus' ? 'projector__bg-symbol--ref' : '',
+          ]
+            .filter(Boolean)
+            .join(' ')}
           aria-hidden="true"
         >
           {bgSymbol}
@@ -282,14 +339,14 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
             </button>
             <button
               className="projector__ctrl-btn"
-              onClick={() => setFontScale((s) => Math.max(0.5, +(s - 0.15).toFixed(2)))}
+              onClick={() => setFontScale((s) => clampScale(s - 0.15))}
               title={t('decreaseFont')}
             >
               A−
             </button>
             <button
               className="projector__ctrl-btn"
-              onClick={() => setFontScale((s) => Math.min(2, +(s + 0.15).toFixed(2)))}
+              onClick={() => setFontScale((s) => clampScale(s + 0.15))}
               title={t('increaseFont')}
             >
               A+

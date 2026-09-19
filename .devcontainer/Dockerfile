@@ -39,6 +39,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install pnpm globally
 RUN npm install -g pnpm@10.32.0
 
+# Install Claude Code CLI globally
+RUN npm install -g @anthropic-ai/claude-code
+
 # Git credential helper and LFS
 RUN git config --system credential.helper store && \
     git lfs install --system

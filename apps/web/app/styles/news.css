@@ -1,3 +1,12 @@
+/* The six .nc-*  .nc-bg rules below carried a hotlinked Unsplash photo as their
+   last background layer. Removed: the file loads on page view, so it put the
+   visitor's IP on a third-party CDN before any interaction (docs/dsgvo.md,
+   gap 2). The gradients are kept and stand on their own; drop a photo back in
+   as a `url('/…')` from `public/` or an R2 key when there is one to use.
+
+   Note this stylesheet is not imported anywhere — NewsSection is no longer
+   rendered. It is cleaned here so the hotlink does not come back with it. */
+
 /* This file owns every rule for this section, including its @media
    breakpoints and its [data-theme="light"] overrides. Imported from
    app/layout.tsx. */
@@ -240,38 +249,32 @@
 .nc--book .nc-bg {
   background:
     linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
-    radial-gradient(ellipse 70% 40% at 70% 10%, rgba(201, 169, 110, 0.18) 0%, transparent 65%),
-    url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&q=80&fit=crop') center/cover no-repeat;
+    radial-gradient(ellipse 70% 40% at 70% 10%, rgba(201, 169, 110, 0.18) 0%, transparent 65%);
 }
 .nc--faith .nc-bg {
   background:
     linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
-    radial-gradient(ellipse 60% 40% at 80% 10%, rgba(201, 169, 110, 0.18) 0%, transparent 60%),
-    url('https://images.unsplash.com/photo-1444703686981-a3abbc4d4fe3?w=800&q=80&fit=crop') center/cover no-repeat;
+    radial-gradient(ellipse 60% 40% at 80% 10%, rgba(201, 169, 110, 0.18) 0%, transparent 60%);
 }
 .nc--quote .nc-bg {
   background:
     linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.7) 75%, rgba(0, 0, 0, 0.95) 100%),
-    radial-gradient(ellipse 55% 50% at 0% 30%, rgba(201, 169, 110, 0.14) 0%, transparent 60%),
-    url('https://images.unsplash.com/photo-1507692049790-de58290a4334?w=800&q=80&fit=crop') center/cover no-repeat;
+    radial-gradient(ellipse 55% 50% at 0% 30%, rgba(201, 169, 110, 0.14) 0%, transparent 60%);
 }
 .nc--song .nc-bg {
   background:
     linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
-    radial-gradient(ellipse 60% 40% at 50% 5%, rgba(201, 169, 110, 0.16) 0%, transparent 60%),
-    url('https://images.unsplash.com/photo-1507838153414-b4b713384a76?w=800&q=80&fit=crop') center/cover no-repeat;
+    radial-gradient(ellipse 60% 40% at 50% 5%, rgba(201, 169, 110, 0.16) 0%, transparent 60%);
 }
 .nc--youversion .nc-bg {
   background:
     linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
-    radial-gradient(ellipse 70% 40% at 25% 10%, rgba(201, 169, 110, 0.16) 0%, transparent 60%),
-    url('https://images.unsplash.com/photo-1504052434569-70ad5836ab65?w=800&q=80&fit=crop') center/cover no-repeat;
+    radial-gradient(ellipse 70% 40% at 25% 10%, rgba(201, 169, 110, 0.16) 0%, transparent 60%);
 }
 .nc--event .nc-bg {
   background:
     linear-gradient(180deg, transparent 0%, transparent 38%, rgba(0, 0, 0, 0.65) 75%, rgba(0, 0, 0, 0.92) 100%),
-    radial-gradient(ellipse 80% 40% at 50% 5%, rgba(201, 169, 110, 0.16) 0%, transparent 55%),
-    url('https://images.unsplash.com/photo-1438232992991-995b7058bbb3?w=800&q=80&fit=crop') center/cover no-repeat;
+    radial-gradient(ellipse 80% 40% at 50% 5%, rgba(201, 169, 110, 0.16) 0%, transparent 55%);
 }
 
 

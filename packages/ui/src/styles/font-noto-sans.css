@@ -1,22 +1,131 @@
-/* Noto Sans — Google Fonts open-source typeface */
-/* Full package installed via @fontsource/noto-sans + @fontsource-variable/noto-sans */
-/* Ready to use — import this file in tokens.css when needed */
+/**
+ * Cyrillic for the UI face.
+ *
+ * Lexend ships latin, latin-ext and vietnamese — no Cyrillic (issue #177). Every
+ * Russian and Ukrainian string therefore fell through to whatever the device
+ * happened to have: SF Pro on iOS, Segoe UI on Windows, Roboto on Android, set
+ * beside German and English in Lexend. The songbook shows both in one list, so
+ * the mismatch is visible in a single glance.
+ *
+ * ⚠️ These faces are declared as `Lexend`, not as `Noto Sans`, and that is the
+ * whole point. The stack is ~100 `font-family: 'Lexend'` declarations across
+ * four apps and `@sdarm/ui`; appending a fallback to each is ~100 edits that the
+ * next new rule silently forgets. A `@font-face` under the same family name with
+ * a Cyrillic `unicode-range` is one declaration the browser applies per glyph —
+ * Lexend renders the Latin, this renders the Cyrillic, and every existing rule
+ * keeps working untouched.
+ *
+ * ⚠️ `unicode-range` is mandatory here and must stay. `@fontsource`'s own
+ * `cyrillic-*.css` files carry none — they are meant to be selected by family
+ * name, not by codepoint. Importing them under the name `Lexend` would hand Noto
+ * Sans the Latin glyphs too, replacing the UI face everywhere. The ranges below
+ * are the ones Google Fonts uses for its `cyrillic` and `cyrillic-ext` subsets.
+ *
+ * Weights cover both consumers: `tokens.css` loads Lexend 300/400, and
+ * `apps/admin/app/globals.css` loads 300/400/500/600. A weight present in Latin
+ * but missing here would be synthesised — a fake bold beside a real one.
+ *
+ * ⚠️ The `url()`s are relative paths into `node_modules`, not `~@fontsource/…`.
+ * The `~` prefix resolves under webpack — which is what `next build --webpack`
+ * uses, so a production build succeeds — but Turbopack does not honour it, and
+ * `next dev` is Turbopack. The tilde form therefore passed CI and broke every
+ * developer's dev server with `Can't resolve '~@fontsource/…'`. A relative path
+ * is understood by both.
+ *
+ * Self-hosted via `@fontsource`, so this adds no third-party request
+ * (see docs/dsgvo.md).
+ */
 
-/* Option A: Static weights (pick only weights you need) */
-/* @import '@fontsource/noto-sans/300.css';    Light */
-/* @import '@fontsource/noto-sans/400.css';    Regular */
-/* @import '@fontsource/noto-sans/500.css';    Medium */
-/* @import '@fontsource/noto-sans/600.css';    SemiBold */
-/* @import '@fontsource/noto-sans/700.css';    Bold */
-/* @import '@fontsource/noto-sans/900.css';    Black */
-/* @import '@fontsource/noto-sans/400-italic.css'; */
-/* @import '@fontsource/noto-sans/700-italic.css'; */
+/* ── Cyrillic (U+0400–04FF) ─────────────────────────────────────────────── */
 
-/* Option B: Variable font — all weights in one file (recommended) */
-/* @import '@fontsource-variable/noto-sans'; */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-300-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
 
-/* Cyrillic subset (for Russian content) */
-/* @import '@fontsource/noto-sans/cyrillic-400.css'; */
-/* @import '@fontsource/noto-sans/cyrillic-700.css'; */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-400-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
 
-/* Usage: font-family: 'Noto Sans', sans-serif; */
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-500-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-600-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-700-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* ── Cyrillic Extended (U+0460–052F, historic + minority languages) ──────── */
+
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 300;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-ext-300-normal.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-ext-400-normal.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-ext-500-normal.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 600;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-ext-600-normal.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+
+@font-face {
+  font-family: 'Lexend';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 700;
+  src: url('../../node_modules/@fontsource/noto-sans/files/noto-sans-cyrillic-ext-700-normal.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}

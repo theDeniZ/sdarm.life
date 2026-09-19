@@ -8,7 +8,7 @@
 | `[locale]/layout.tsx` | Server (async) | Locale layout — validates locale, wraps in `<NextIntlClientProvider>`, renders `<html lang={locale}><body>` |
 | `[locale]/page.tsx` | Server (async) | Home page — fetches all data in parallel, maps to component types, passes as props |
 | `[locale]/posts/[slug]/page.tsx` | Server (async) | Post detail page |
-| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and a sun/moon theme toggle that dispatches `sdarm:toggle-theme`. |
+| `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and a sun/moon theme toggle that dispatches `sdarm:toggle-theme`. Control colours come from two tiers on `.site-nav` — see [Navbar contrast tiers](#navbar-contrast-tiers). |
 | `HeroWelcome` | **Server** (async) | 3D Earth landing hero — renders `<PlanetEarth />` with grain overlay, badge, title, subtitle, and CTA link to `/{locale}/about`. Uses `web.heroWelcome` i18n namespace. |
 | `PlanetEarth` | **Client** | Three.js WebGL globe with day/night textures, atmosphere shader, cloud layer. Self-hosted textures in `/public/textures/` (MIT, no CDN, DSGVO clean). |
 | `StatsGrid` | **Client** | Bento grid of five blocks — the homepage's main section. Reads `HomeGridConfig` from the `home_grid` KV key, falls back to the built-in defaults. Fits every headline to its card. |
@@ -151,6 +151,31 @@ The input under the clock searches via `GET /api/v1/geocode?q=…&limit=N` — a
 
 **Fallback:** API fetch failure is silently swallowed; clock stays at `'–:––'` / `'…'` placeholder.
 
+### Navbar contrast tiers
+
+Navbar control colours are **two tiers declared as custom properties on `.site-nav`**, not per-element values:
+
+| Tier | Controls |
+|---|---|
+| `--nav-fg-primary` / `--nav-fg-primary-hover` | logo, nav links |
+| `--nav-fg-secondary` / `--nav-fg-secondary-hover` | language switcher, theme toggle, burger lines |
+
+There are three states — dark (the base rule), `[data-theme='light']`, and `[data-theme='light'] .over-dark` (the nav floating over the cosmic hero, set by `data-nav-overlay="dark"` on `HeroWelcome`). **Each state re-sets only the four variables**; no control carries a colour of its own.
+
+**Every tier value must clear 3:1 against its own background** — the WCAG minimum for UI components. Current measurements:
+
+| State | primary | secondary |
+|---|---|---|
+| dark `#0c0b09` | 14.00:1 | 5.46:1 |
+| light `#fcfbf8` | 13.76:1 | 4.12:1 |
+| over-dark `#090806` | 14.23:1 | 5.48:1 |
+
+This replaced fifteen independently hand-tuned alpha values. The language switcher had ended up at 0.28 in dark (**1.97:1**) and 0.44 in light (**2.10:1**) — both failing — while the theme toggle beside it sat at 0.55/0.65 and the nav link next to it at 10:1, so the switcher read as a disabled control (issue #128).
+
+⚠️ **Do not give a navbar control its own colour.** A one-off value is how the tiers drifted apart the first time. If a control genuinely needs to sit outside both tiers, add a third tier rather than a local override. The one legitimate exception is `.nav-links a.active`, which uses `--gold` — a state colour, not a tier.
+
+⚠️ **The screenshot suite will not catch a regression here.** `maxDiffPixelRatio` is 0.005 and these controls are far smaller than that, so the baselines pass either way. Verify contrast by computing it, not by looking at a diff.
+
 ### ThemeScript + ThemeProvider
 
 Theme handling is split across two components. Both must be present in every `[locale]/layout.tsx`.
@@ -251,9 +276,35 @@ Unlike the public apps, the admin app has no `ThemeScript`/FOUC-prevention pass 
 
 The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html` and unlike the public site's warm black museum theme): dark = `#020617` page / `#0b1120` cards, light = `#f8fafc` page / white cards, hairline borders (`rgba(255,255,255,0.07)` dark / `rgba(2,6,23,0.08)` light), UI font Lexend, base radius `--r: 10px` (cards 12px). Accent tokens: `--accent` (`#c9a96e` dark / `#927223` light — deeper gold for contrast on white), `--accent-hover`, `--accent-soft`, `--on-accent`; `--gold` is kept as an alias of `--accent` so pre-existing rules follow it. `--brand-gold` (`#c9a96e`, theme-independent) exists only for the logo. Semantic tokens: `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--red`/`--red-text`/`--danger-soft`, plus `--heading`, `--muted`, `--row-hover`, `--overlay`. Never hardcode colors in admin CSS — every rule goes through these tokens so both themes stay in sync.
 
+### Email screen
+
+`EmailComposer` at `/email` — recipient/subject/template form on the left, live `srcDoc` iframe preview on the right, same `grid` shape as `HomeGridEditor`. Styles live in `globals.css` under the `.email-*` prefix.
+
+**The preview sheet is white in both themes, on purpose.** What is being previewed is a white HTML email; a recipient never sees it on a dark ground, so the frame keeps `#ffffff` and takes the card treatment (`--border`, `var(--r)`, a hairline shadow) around it. The `PREVIEW_PLACEHOLDER` empty state is also light — and its two colours are literals by necessity, because an iframe is a separate document and cannot read the admin's custom properties. That is the **only** place in this app where a hardcoded colour is correct.
+
+**Two-class specificity is required for the form controls.** `.form-row select` and `.form-row textarea` set `width: 100%` and the UI font. The template-row selects and the HTML body field need `.form-row .email-*` to win — a single class loses, and the symptom is not subtle: both selects take the full row and push the `Load` button outside the card. These rules were inline `style={{}}` before, which is why they used to win without anyone noticing the cascade.
+
+**The layout stacks at 1100px.** Above it, form and preview sit side by side. Below, the preview was a sliver — measured 192px at 1024 and **2px at 834**, still 700px tall — because the form was pinned at `flex: 0 0 480px` and there was no breakpoint anywhere on the screen. Stacked, the frame switches to `60vh` with a 420px floor.
+
+⚠️ This was the one admin screen built outside the design system: every colour and dimension was an inline literal in the component, including a `#0f0e0c` preview with `#3a3830` text that rendered as the same black slab in **both** themes and could not follow the toggle at all (issue #175). Keep new work here in `globals.css` and on tokens.
+
 ### Songbooks card grid
 
 `SongbookList` renders a responsive card grid (3/2/1 columns) instead of a table — `SongbookCard` shows the cover image (or a book-icon placeholder via `.book-cover-icon` when `coverKey` is null), language chip, song count, and always-visible Edit/Songs/Delete actions. A toolbar above the grid combines a title/slug search input with language filter chips (`.chip-filter`) and the "+ New songbook" action. Delete goes through `ConfirmDialog` instead of the browser `confirm()`.
+
+**The whole card is the Songs link.** The `Songs` anchor carries `book-card-link`, whose `::after` stretches over the positioned `.book-card` — cover, title and song count included. It is a real `<Link>`, not an `onClick` on the card, so keyboard, screen readers and middle-click all work without extra code. `Songs` is the stretched action rather than `Edit` because a songbook is its songs, and that is the frequent destination (issue #172).
+
+⚠️ **The `z-index` arrangement here is load-bearing and easy to break.** Three rules have to hold at once:
+
+| Rule | Why |
+|---|---|
+| `.book-card-link::after` → `z-index: 1` | must clear `.book-cover`, which is positioned for its `<Image fill>` and would otherwise swallow every click on the largest part of the card |
+| `.book-actions > *:not(.book-card-link)` → `z-index: 2` | Edit and Delete are siblings of the stretched anchor and must stay above its hit area — **`Delete` must never fire a navigation** |
+| `.book-actions` → **no `z-index`, no `position`** | a stacking context on that 26px-tall row traps the `::after` inside it, and the stretched area then covers the buttons instead of the card |
+
+The anchor itself must also carry no `z-index`, for the same reason: it would open a context and trap its own pseudo-element. Each of these was observed failing in turn while building it.
+
+Admin has no screenshot coverage, so verify by clicking: cover, title and empty space all open `/songbooks/{id}/songs`; `Edit` opens `/songbooks/{id}`; `Delete` opens the dialog and does not navigate.
 
 ### Pagination pattern
 
@@ -269,6 +320,7 @@ The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html
 - Always shows drag-drop zone for uploading new images
 - "⊞ Pick from library" toggle opens a scrollable grid of existing images
 - Shows current image preview with "✕ Remove" overlay when a value is set
+- **The preview is a fixed 3:2 box and uses `object-fit: contain`, never `cover`.** It exists to show the editor the file they just picked, so cropping it defeats its only purpose — a `max-height` plus `cover` showed a horizontal band of every portrait cover. The box is fixed rather than sized by the image so the form does not jump on each pick. The library thumbnail grid (`.image-picker-item img`) keeps `cover` on purpose: a 72px tile in a picker grid should crop to a uniform square.
 - On upload: `POST /admin/images/upload` → R2 + D1 → `onChange(key)`
 - On library pick: `onChange(key)` + close library
 - On remove: `onChange(null)`
@@ -315,6 +367,45 @@ Image fields render `<ImagePicker>`. Text-area fields render `<textarea>`. URL a
 | `sheets` | `SheetViewer` | "Sheet music" button (only shown when `song.sheets.length > 0`) |
 
 Closing presenter also closes the display window via the stored `displayWinRef`.
+
+**There is no "Reader" button in the mode bar, and adding one back would be a regression.** `reader`
+is the initial mode, so the button was permanently `.active` — filled solid `--gold`, the loudest
+element on the page — while its click was a no-op. `fullscreen` and `presenter` render through
+`createPortal` and cover the bar, so it was unreachable from them. The single case where it did
+something, returning from `sheets`, is now `SheetViewer`'s own `onClose` back control, which is
+where a way out belongs. `SheetViewer` therefore takes a required `onClose` prop.
+
+### Part labels and the transpose control
+
+**Part labels come from the part's `type`, localised in `SongReader`, never from `song_parts.label`.**
+The stored label is whatever the bulk importer typed — "Куплет 1" in a Russian book — so a site
+running in `de` and `en` produced "Куплет 1" over one part and "CHORUS" (the capitalised enum name,
+via a `partLabel()` helper that no longer exists) over the next. Verses are numbered in render order,
+because `expandParts()` repeats the chorus between them and the stored ordinal cannot be trusted.
+Keys live under `songbook.parts.*`.
+
+**Every part type is labelled in the same place.** Verses used to hang their label in a 1.6rem column
+carved out of `.reader-content`'s left padding — sized for a numeral, given an eight-character phrase,
+so it wrapped and spilled into the margin — and that column was hidden below 700px, leaving verses
+unlabelled on a phone while choruses were not. `.song-part--verse` is gone.
+
+**The transpose control is one capsule, not four boxes.** `.transpose-group` is a single pill of the
+same shape as `.mode-btn` above it, divided by hairlines; `.transpose-reset` sits outside it, so
+picking a key never changes the capsule's width. Hover washes use `color-mix(in srgb, var(--gold) …)`
+so one rule serves both themes instead of a duplicated `[data-theme='light']` block.
+
+### ReaderLayout sidebar
+
+The song list is a docked column **only above 1100px**. At or below that it is an off-canvas overlay
+with a scrim, closed by default, and picking a song closes it again. Below 1100px there is not room
+for both: at 834px (iPad Pro 11 portrait) the docked list took 270px and left the song 468px — a
+third of the screen spent on a list the reader had already finished with. It is now 0 and 700px.
+
+`sidebarOpen` is `boolean | null`, not `boolean`, and the distinction matters. `null` means the
+reader has not touched the toggle, and **no class is emitted** — the breakpoint decides, in CSS.
+A boolean default cannot: deriving it from `window` breaks SSR, `true` flashes the list open on a
+tablet, and `false` flashes it closed on a desktop. `.reader-sidebar.is-open` / `.is-closed` are
+applied only once there is an explicit choice.
 
 ### Projector / PresenterDashboard — multi-window architecture
 
@@ -527,7 +618,7 @@ R2 images are served through Cloudflare Image Transformations in production. `r2
 
 **Kill switch:** Set `R2_TRANSFORMS=false` env var to disable transforms and serve raw R2 URLs. Only needed if Image Transformations is disabled at the Cloudflare account level (which would cause `/cdn-cgi/image/` to return 403).
 
-**Do not transform external URLs.** `FALLBACK_IMG` (Unsplash) and other external URLs are never passed through `r2url()` with transforms — they use their own query-string sizing.
+**There are no external image URLs left to transform.** `FALLBACK_IMG` and the hotlinked Unsplash/Wikimedia fallbacks were removed (see [dsgvo.md](dsgvo.md)), and `next.config.ts` no longer allowlists those hosts. Every image goes through `r2url()`, which returns `null` for a missing key — call sites guard on that and render no image rather than substituting someone else's.
 
 After upload, use `URL.createObjectURL(file)` for preview. Do not switch to the R2 URL — wrangler local state is not served at `images.sdarm.life`. The R2 key is stored correctly regardless.
 

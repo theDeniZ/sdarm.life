@@ -697,7 +697,6 @@
       "songs": "Songs",
       "searchPlaceholder": "Search…",
       "songListAria": "Song list",
-      "songbook": "Songbook",
       "title": "Title",
       "author": "Author",
       "searchByNumberOrTitle": "Search by number, title, or lyrics…"
@@ -706,14 +705,22 @@
       "lyricsMatch": "Lyrics"
     },
     "view": {
-      "reader": "Reader",
       "chords": "Chords",
       "projector": "Projector",
       "presenter": "Presenter",
       "fullscreen": "Fullscreen",
       "sheetMusic": "Sheet music"
     },
+    "parts": {
+      "verse": "Verse",
+      "chorus": "Chorus",
+      "bridge": "Bridge",
+      "intro": "Intro",
+      "outro": "Outro",
+      "coda": "Coda"
+    },
     "sheets": {
+      "backToLyrics": "Back to lyrics",
       "noSheets": "No sheet music available for this song.",
       "sheetTab": "Sheet {n}",
       "sheetAlt": "Sheet music {id}",

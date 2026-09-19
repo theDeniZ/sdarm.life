@@ -167,9 +167,21 @@ These are currently in code but not fully DSGVO-clean:
 | # | Item | Status |
 |---|---|---|
 | 1 | **Resend** (email sender) — not named in Datenschutz | Needs disclosure (Art. 28) |
-| 2 | **Unsplash FALLBACK_IMG** | Move to R2 |
-| 3 | **Wikimedia HeroSection fallback** | Move to R2 |
+| 2 | ~~**Unsplash FALLBACK_IMG**~~ | ✅ **Closed** — removed, not moved (see below) |
+| 3 | ~~**Wikimedia HeroSection fallback**~~ | ✅ **Closed** — removed with it |
 | 4 | **Double opt-in wording** in Datenschutz | Expand section2Body |
+
+**How 2 and 3 were closed.** The images were deleted rather than re-hosted. Every
+hotlink was a *fallback* — a stock photo standing in where an editor had not yet set
+one — so there was nothing worth copying into R2; the call sites now render no image
+at all, and the surrounding gradient or frame carries the layout. `FALLBACK_IMG` is
+gone from `apps/web/app/lib/api.ts` and `r2url()`'s existing `null` return is what
+call sites guard on.
+
+⚠️ **`next.config.ts` no longer allowlists either host, and that is load-bearing.**
+Leaving `images.unsplash.com` in `remotePatterns` would let the next
+`<Image src="https://…">` reintroduce the leak silently, with no code review signal.
+Adding a remote host back to that list is a DSGVO decision, not a convenience.
 
 Do not ADD to this list. Close items, do not open new ones.
 

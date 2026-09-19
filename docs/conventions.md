@@ -46,6 +46,12 @@ Styles for a component that exists but is not rendered anywhere stay in `styles/
 
 **Typography stack (web):** Cormorant Garamond (body), DM Serif Display (headings, italic), Playfair Display (logo, footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Self-hosted via `@fontsource/*` in `packages/ui/src/styles/tokens.css`.
 
+**Cyrillic rides on the Latin family name, not on a fallback stack.** Lexend — the UI face — ships latin, latin-ext and vietnamese and no Cyrillic, so every Russian string fell through to the device's own font and sat beside German set in Lexend (issue #177). The remedy is `packages/ui/src/styles/font-noto-sans.css` (and its admin twin `apps/admin/app/font-cyrillic.css`, because the admin does not import the package's design system): Noto Sans faces declared **under the name `Lexend`** with a Cyrillic `unicode-range`, so the browser picks per glyph and all ~100 existing `font-family: 'Lexend'` rules keep working untouched. Appending `'Noto Sans'` to each of them instead would be ~100 edits that the next new rule silently forgets.
+
+Two rules follow from that. **Never import `@fontsource/noto-sans/cyrillic-*.css` directly** — those files carry no `unicode-range`, so under the name `Lexend` they would take the Latin glyphs too and replace the UI face everywhere. And **keep the weight lists in step**: a weight present in Latin but missing in Cyrillic is synthesised, a fake bold beside a real one.
+
+Font `url()`s in these files are relative paths into `node_modules`, never `~@fontsource/…`. The tilde resolves under webpack (`next build --webpack`) but not under Turbopack (`next dev`), so it passes CI and breaks every developer's dev server.
+
 **Full-width layout.** All sections are full-width (no `.page` wrapper, no grid margins). Section backgrounds span the viewport.
 
 ---

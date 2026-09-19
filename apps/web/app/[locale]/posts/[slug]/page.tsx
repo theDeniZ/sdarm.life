@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchPost, fetchPosts, r2url, FALLBACK_IMG, WEB_URL, API } from '../../../lib/api';
+import { fetchPost, fetchPosts, r2url, WEB_URL, API } from '../../../lib/api';
 import { formatDate } from '../../../lib/format';
 
 export const dynamic = 'force-dynamic';
@@ -48,10 +48,6 @@ export async function generateMetadata({
   };
 }
 
-function isUnoptimized(url: string) {
-  return url.startsWith('https://upload.wikimedia.org') || url.startsWith('https://images.unsplash.com');
-}
-
 export default async function PostDetailPage({ params }: { params: Promise<{ locale: string; slug: string }> }) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
@@ -62,7 +58,11 @@ export default async function PostDetailPage({ params }: { params: Promise<{ loc
 
   if (!post) notFound();
 
-  const coverUrl = r2url(post.coverKey, { w: 1200, q: 85 }) ?? FALLBACK_IMG;
+  // Null when the post has no cover. It used to fall back to a hotlinked
+  // Unsplash photo, which sent the visitor's IP to a third party on page load
+  // (docs/dsgvo.md, gap 2). A post without a cover now simply renders without
+  // one — the hero keeps its gradient and the card keeps its frame.
+  const coverUrl = r2url(post.coverKey, { w: 1200, q: 85 });
   const meta = [formatDate(post.publishedAt), post.author].filter(Boolean).join(' · ');
   const others = (allPosts ?? []).filter((p) => p.slug !== slug).slice(0, 4);
 
@@ -77,15 +77,16 @@ export default async function PostDetailPage({ params }: { params: Promise<{ loc
             {ct('back')}
           </Link>
           <div className="post-hero-bg">
-            <Image
-              src={coverUrl}
-              alt={post.coverAlt ?? post.title}
-              fill
-              style={{ objectFit: 'cover' }}
-              sizes="100vw"
-              priority
-              unoptimized={isUnoptimized(coverUrl)}
-            />
+            {coverUrl && (
+              <Image
+                src={coverUrl}
+                alt={post.coverAlt ?? post.title}
+                fill
+                style={{ objectFit: 'cover' }}
+                sizes="100vw"
+                priority
+              />
+            )}
           </div>
           <div className="post-hero-overlay" />
           {meta && <div className="post-meta">{meta}</div>}
@@ -106,14 +107,15 @@ export default async function PostDetailPage({ params }: { params: Promise<{ loc
             <div className="post-section-label">{t('video')}</div>
             <div className="post-video">
               <a className="post-video-card" href={post.videoUrl} target="_blank" rel="noopener noreferrer">
-                <Image
-                  src={coverUrl}
-                  alt={post.coverAlt ?? post.title}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  unoptimized={isUnoptimized(coverUrl)}
-                />
+                {coverUrl && (
+                  <Image
+                    src={coverUrl}
+                    alt={post.coverAlt ?? post.title}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                )}
                 <div className="post-video-play">
                   <svg viewBox="0 0 48 48" fill="none">
                     <circle cx="24" cy="24" r="23" stroke="rgba(201,169,110,.6)" strokeWidth="1" />
@@ -131,19 +133,20 @@ export default async function PostDetailPage({ params }: { params: Promise<{ loc
             <div className="post-more-title">{t('morePosts')}</div>
             <div className="post-grid">
               {others.map((p) => {
-                const imgUrl = r2url(p.coverKey, { w: 400, h: 300 }) ?? FALLBACK_IMG;
+                const imgUrl = r2url(p.coverKey, { w: 400, h: 300 });
                 const pMeta = [formatDate(p.publishedAt), p.author].filter(Boolean).join(' · ');
                 return (
                   <Link key={p.id} href={`/${locale}/posts/${p.slug}`} className="post-card">
                     <div className="post-card-img">
-                      <Image
-                        src={imgUrl}
-                        alt={p.coverAlt ?? p.title}
-                        fill
-                        style={{ objectFit: 'cover' }}
-                        sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 25vw"
-                        unoptimized={isUnoptimized(imgUrl)}
-                      />
+                      {imgUrl && (
+                        <Image
+                          src={imgUrl}
+                          alt={p.coverAlt ?? p.title}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                          sizes="(max-width: 600px) 100vw, (max-width: 900px) 50vw, 25vw"
+                        />
+                      )}
                     </div>
                     <div className="post-card-body">
                       <h3 className="post-card-title">{p.title}</h3>

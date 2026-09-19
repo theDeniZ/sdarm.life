@@ -82,3 +82,8 @@
 ## Local dev
 
 - **`.dev.vars` vs `wrangler.jsonc`** — local secrets go in `apps/api/.dev.vars` (auto-loaded by `wrangler dev`). The `dev.vars` field inside `wrangler.jsonc` is not valid.
+
+## Fonts
+
+- **`~@fontsource/…` in a CSS `url()` builds in CI and breaks `next dev`.** The `~` package-resolution prefix is a webpack convention, and `next build --webpack` honours it — so a production build and CI both go green. Turbopack, which `next dev` uses, does not, and every dev server then dies with `Module not found: Can't resolve '~@fontsource/…'`. Use a relative path into `node_modules` instead (`../../node_modules/@fontsource/…` from `packages/ui/src/styles/`, `../node_modules/…` from `apps/admin/app/`); both bundlers understand it. Found while fixing #177 — the tilde form passed `pnpm turbo build` cleanly before it was caught.
+- **`@fontsource`'s subset files carry no `unicode-range`.** `@fontsource/noto-sans/cyrillic-400.css` declares a face for the whole family — the subsetting is in the *file*, not in a codepoint guard, because it is meant to be selected by family name. Importing one under a different family name (to add Cyrillic to a Latin-only face, say) hands it every glyph in that family, replacing the face everywhere. Write the `@font-face` by hand with an explicit `unicode-range` — see `packages/ui/src/styles/font-noto-sans.css`.

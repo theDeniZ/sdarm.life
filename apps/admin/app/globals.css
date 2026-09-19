@@ -3,6 +3,8 @@
 @import '@fontsource/lexend/400.css';
 @import '@fontsource/lexend/500.css';
 @import '@fontsource/lexend/600.css';
+/* Cyrillic for Lexend, which ships none — see font-cyrillic.css (issue #177) */
+@import './font-cyrillic.css';
 @import '@fontsource/oswald/200.css';
 @import '@fontsource/oswald/300.css';
 @import '@fontsource/oswald/400.css';
@@ -552,8 +554,14 @@ tbody tr:hover td { background: var(--row-hover); }
 
 .image-picker { display: flex; flex-direction: column; gap: 8px; }
 
+/* A fixed box, not a max-height. The preview exists to show the editor the file
+   they just picked, so it must not crop (object-fit: contain, never cover), and
+   its height must not depend on the file, or the form jumps on every pick.
+   3:2 is the compromise across what this picker is used for — landscape post
+   covers and hero backgrounds, portrait book covers. */
 .image-picker-preview {
   position: relative;
+  aspect-ratio: 3 / 2;
   border-radius: var(--r);
   overflow: hidden;
   background: var(--surface-2);
@@ -561,8 +569,8 @@ tbody tr:hover td { background: var(--row-hover); }
 
 .image-picker-preview img {
   width: 100%;
-  max-height: 160px;
-  object-fit: cover;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
 
@@ -1011,6 +1019,8 @@ input[type="file"]::file-selector-button:hover {
   border: 1px solid var(--border);
   border-radius: 12px;
   padding: 14px;
+  /* containing block for .book-card-link::after */
+  position: relative;
   transition: transform 0.18s, border-color 0.18s, box-shadow 0.18s;
 }
 
@@ -1019,6 +1029,47 @@ input[type="file"]::file-selector-button:hover {
   transform: translateY(-3px);
   border-color: var(--gold-dim);
   box-shadow: 0 14px 32px rgba(0, 0, 0, 0.25);
+}
+
+/* The card lifts on hover, so it already promises a target; before this it had
+   none and the only way in was the 40px Songs button. This ::after stretches
+   that same link over the whole card — cover, title and count included — so
+   the promise is kept. The pseudo-element carries the hit area, which is why
+   the anchor itself needs no layout change. */
+.book-card-link::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  /* Must clear .book-cover, which is positioned for its <Image fill> and would
+     otherwise paint over this layer and swallow every click on the cover — the
+     largest part of the card. The anchor itself gets no z-index: that would
+     open a stacking context and trap this pseudo-element inside it. */
+  z-index: 1;
+}
+
+/* Edit and Delete are siblings of the stretched anchor inside .book-actions,
+   so they share its stacking context and must outrank the layer above, or the
+   stretched hit area swallows them — Delete especially must never fire a
+   navigation from a background click. */
+.book-actions > *:not(.book-card-link) {
+  position: relative;
+  z-index: 2;
+}
+
+/* The pointer must say the card is clickable, not just look like it. */
+.book-card:hover {
+  cursor: pointer;
+}
+
+/* The stretched anchor's own outline would draw around the 40px button, not
+   the card that is actually focused, so the card draws the focus ring. */
+.book-card-link:focus-visible {
+  outline: none;
+}
+.book-card:has(.book-card-link:focus-visible) {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .book-cover {
@@ -1054,6 +1105,12 @@ input[type="file"]::file-selector-button:hover {
   font-family: 'Lexend', sans-serif;
   font-weight: 500;
   font-size: 14.5px;
+  /* Explicit, so no typeface's own metrics can decide the line box. Without it
+     the Cyrillic fallback drew a taller line than Lexend and "Псалмы Сиона"
+     touched the song count 6px beneath it, while the Latin titles in the same
+     grid did not (issue #177). The webfont fixes today's case; this stops the
+     next face from reopening it. */
+  line-height: 1.35;
   color: var(--heading);
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1066,6 +1123,10 @@ input[type="file"]::file-selector-button:hover {
   display: flex;
   gap: 8px;
   margin-top: 8px;
+  /* Deliberately no z-index here. A stacking context on this 26px-tall row
+     would trap .book-card-link::after inside it, and the stretched hit area
+     would cover the buttons instead of the card. The siblings are raised
+     individually below. */
 }
 
 .filter-bar {
@@ -2761,5 +2822,97 @@ input[type="file"]::file-selector-button:hover {
   }
   .grid-editor__preview {
     position: static;
+  }
+}
+
+/* ═══ EMAIL SCREEN ═══
+   Every rule here used to be an inline style={{}} literal in
+   EmailComposer.tsx, which is why this was the one admin screen that ignored
+   the design system: the preview was #0f0e0c with #3a3830 text, so it rendered
+   as the same black slab in both themes and could not follow the toggle at
+   all. Same grid shape as .grid-editor — settings left, live preview right. */
+
+.email-layout {
+  display: grid;
+  grid-template-columns: minmax(340px, 480px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.email-template-row {
+  display: flex;
+  gap: 8px;
+}
+/* `.form-row select` sets width:100%, which an inline style used to override.
+   These need the same two-class specificity to win, or both selects take the
+   full row and push the Load button out of the card. */
+.form-row .email-template-locale {
+  width: 80px;
+  flex: 0 0 auto;
+}
+.form-row .email-template-select {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+
+.email-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Two classes, for the same reason as the selects above: `.form-row textarea`
+   sets the UI font, and this field holds HTML source. */
+.form-row .email-body {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+}
+
+.email-status {
+  padding: 8px 0;
+}
+
+.email-preview {
+  min-width: 0;
+  position: sticky;
+  top: 24px;
+}
+
+/* Matches `thead th`, which does the same job through the same token. */
+.email-preview__label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+/* A white sheet, not a dark panel: the thing being previewed is a white HTML
+   email, and a recipient never sees it on a dark ground. The frame around it
+   is the card treatment every other surface in the admin uses. */
+.email-preview__frame {
+  display: block;
+  width: 100%;
+  height: 700px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.04);
+}
+
+/* Below this width the 480px form left the preview a sliver — 192px at
+   1024, and 2px at 834, while still 700px tall. Stack instead, and let the
+   preview take a height it can actually be read at. */
+@media (max-width: 1100px) {
+  .email-layout {
+    grid-template-columns: 1fr;
+  }
+  .email-preview {
+    position: static;
+  }
+  .email-preview__frame {
+    height: 60vh;
+    min-height: 420px;
   }
 }

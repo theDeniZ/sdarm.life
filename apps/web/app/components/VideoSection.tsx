@@ -14,7 +14,11 @@ const STATIC_VIDEOS: VideoPost[] = [
     id: '1',
     title: 'Reformationsbewegung: Zeugnis aus Deutschland — Gemeindebericht 2024',
     meta: 'sdarm.life · 2024',
-    imageUrl: 'https://images.unsplash.com/photo-1529070538774-1843cb3265df?w=800&q=85&fit=crop',
+    // Empty on purpose: these were hotlinked Unsplash photos, which put the
+    // visitor's IP on a third-party CDN on page view (docs/dsgvo.md, gap 2).
+    // Drop a real image in as an R2 key or a file under `public/` — the render
+    // is guarded, so an empty string simply shows no picture.
+    imageUrl: '',
     imageAlt: 'Predigt',
     href: '#',
   },
@@ -22,7 +26,7 @@ const STATIC_VIDEOS: VideoPost[] = [
     id: '2',
     title: 'Der Sabbat — Zeichen des ewigen Bundes zwischen Gott und seinem Volk',
     meta: 'Gemeinde sdarm.life',
-    imageUrl: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=85&fit=crop',
+    imageUrl: '',
     imageAlt: 'Sonnenaufgang Landschaft',
     href: '#',
   },
@@ -47,13 +51,15 @@ export default function VideoSection({ videos = STATIC_VIDEOS }: VideoSectionPro
                 rel="noopener noreferrer"
                 style={{ position: 'relative' }}
               >
-                <Image
-                  src={v.imageUrl}
-                  alt={v.imageAlt}
-                  fill
-                  style={{ objectFit: 'cover' }}
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                />
+                {v.imageUrl && (
+                  <Image
+                    src={v.imageUrl}
+                    alt={v.imageAlt}
+                    fill
+                    style={{ objectFit: 'cover' }}
+                    sizes="(max-width: 768px) 100vw, 50vw"
+                  />
+                )}
                 <div className="play-over">
                   <div className="play-circle" />
                 </div>

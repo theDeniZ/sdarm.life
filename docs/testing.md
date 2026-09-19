@@ -20,6 +20,12 @@ into a plain `defineConfig({ plugins: [...] })` instead. If you ever see
 has reintroduced the old import — that error is **not** a version mismatch and
 bumping versions will not fix it.
 
+**`apps/api` sets `testTimeout: 30_000`, and it should stay.** The first request
+to reach a simulated binding pays miniflare's cold start. Locally that takes
+milliseconds, but on a GitHub runner `serves /api/v1/llm` (the suite's first
+call through `LLM_RATE_LIMITER`) went past vitest's 5 s default and failed the
+`test` job intermittently.
+
 The suite binds its own `API_KEY` through `miniflare.bindings` so the auth
 middleware can be exercised from both sides. Do not make it depend on
 `.dev.vars` — that file is gitignored and absent in CI.
