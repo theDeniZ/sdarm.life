@@ -129,6 +129,7 @@ must therefore cover:**
 | Call | To | Why it is a transfer |
 |---|---|---|
 | Bible editions, and any quarter not in its own mirror | `app.sdarm.org` | Reader IP to a third party on page load |
+| Quarter list + unpublished quarters — **only** once the reader turns on the *Alpha-Kanal* in the settings (off by default) | `sbl.thedeniz.dev` | Reader IP to a third party; disclosed in the page's § 4 |
 
 A subdomain of `sdarm.life` reads as our service to a German visitor, so if that
 page's own policy does not cover the call, the exposure lands here. **Re-check it

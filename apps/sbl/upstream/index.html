@@ -546,6 +546,18 @@ body.setopen .setpop{opacity:1;pointer-events:auto;transform:none}
   box-shadow:0 1px 3px rgba(0,0,0,.28);transition:transform .22s cubic-bezier(.3,1.3,.4,1),background .2s}
 .sw2.on{background:var(--on)}
 .sw2.on i{transform:translateX(17px);background:var(--on-t)}
+/* ——— the alpha mark ———
+   An outline in the colour of the text around it, so it sits on every paper and in
+   both themes without a hue of its own; a small capital word reads as a label and
+   not as part of the title beside it. */
+.atag{display:inline-block;flex:none;margin-left:6px;padding:1px 5px 0;border:1px solid currentColor;
+  border-radius:var(--r-pill);font-size:8.5px;font-weight:700;font-style:normal;line-height:1.4;
+  letter-spacing:.1em;text-transform:uppercase;vertical-align:1px;opacity:.75}
+.lbl .atag{margin-left:0}
+/* held down, the switch lets the alpha copy win — and its knob carries the α */
+.sw2.first i::after{content:"α";position:absolute;inset:0;display:flex;align-items:center;
+  justify-content:center;font:700 12px/1 var(--serif);color:var(--on)}
+#alpha{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none;touch-action:manipulation}
 /* ——— one pattern per kind of question ———
    A choice between a few is a segmented control, a yes-or-no is a switch, a choice
    among many is a list. Nothing else is invented, and no two rows answer the same
@@ -2433,6 +2445,8 @@ html.dark .mtoast b:hover{color:#fff}
     <div class="srow" id="para-row" hidden><span class="slab" id="lab-second"></span><select class="ssel" id="para-sel"></select></div>
     <div class="srow"><span class="slab" id="lab-mark"></span>
       <div class="sctl"><div class="sw2" id="mk-rail"><i></i></div></div></div>
+    <div class="srow"><span class="slab" id="lab-alpha"></span>
+      <div class="sctl"><div class="sw2" id="alpha"><i></i></div></div></div>
     </div>
 
     <div class="sgrp" id="grp-look"></div>
@@ -2557,6 +2571,33 @@ function linkRead(){
 }
 (function(){ const w=linkRead(); if(w){ lang=w.lang; current=w.at; linkWant=w; } })();
 const quarters={};
+/* ——— the alpha channel ———
+   Quarters that are not out yet are published ahead of time on a server of their
+   own. It is asked for nothing until the reader turns it on in the settings, and
+   then only for lessons — the Bibles still come from app.sdarm.org. On, it fills
+   in whatever the main source does not have; held down, the switch reverses the
+   order and the alpha copy wins wherever it has one. `quarterAlpha` records which
+   quarters came from it, so the calendar and the contents can say so. */
+const ALPHA_BASE="https://sbl.thedeniz.dev/sbl/data/";
+let alphaOn=localStorage.getItem("sbl.alpha")==="1";
+let alphaFirst=alphaOn&&localStorage.getItem("sbl.alphafirst")==="1";
+const quarterAlpha={};
+let alphaList=null;
+/* the list is one request for every language; if it cannot be had, each quarter
+   is simply asked for and a miss is a miss */
+function alphaIds(){
+  if(!alphaList) alphaList=fetch(ALPHA_BASE).then(function(r){ return r.ok?r.json():null; })
+    .then(function(j){ const a=Array.isArray(j)?j:(j&&(j.items||j.files))||null;
+      return a?new Set(a.map(function(f){ return f.id||(f.lang+"-"+f.year+"-"+f.quarter); })):null; })
+    .catch(function(){ alphaList=null; return null; });
+  return alphaList;
+}
+function isAlpha(l,y,q){ return !!quarterAlpha[l+"-"+y+"-"+q]; }
+/* a week may be found in the quarter either side of today's, so the lesson is
+   asked which file it came out of */
+function lesAlpha(les){ for(const k in quarters){ const d=quarters[k];
+  if(d&&d.lessons&&d.lessons.indexOf(les)>=0) return !!quarterAlpha[k]; } return false; }
+function alphaTag(){ return '<i class="atag" title="'+esc(T("alphahint"))+'">Alpha</i>'; }
 /* ——— which Bible the lesson quotes ———
    This is only where a language starts: the edition the booklet itself is set
    against. It is not a limit. Most of the twenty-two editions of the lesson have
@@ -2975,11 +3016,27 @@ async function loadQuarter(l,y,q){
      mark takes the mark with it. The publisher is asked only for what we have
      not got — a quarter that has just appeared, or one nobody froze. */
   const name=l+"/"+l+"-"+y+"-"+q+".json";
-  try{
+  async function main(){
     let r=await fetch("data/"+name);
     if(!r.ok) r=await fetch("https://app.sdarm.org/sbl/data/"+name);
-    if(!r.ok) throw 0;
-    return quarters[key]=fsoFix(await r.json());
+    return r.ok?r:null;
+  }
+  async function alpha(){
+    if(!alphaOn) return null;
+    const ids=await alphaIds();
+    if(ids&&!ids.has(key)) return null;
+    const r=await fetch(ALPHA_BASE+name);
+    return r.ok?r:null;
+  }
+  const order=alphaFirst?[alpha,main]:[main,alpha];
+  try{
+    for(const src of order){
+      let r=null; try{ r=await src(); }catch(e){}
+      if(!r) continue;
+      quarterAlpha[key]=src===alpha;
+      return quarters[key]=fsoFix(await r.json());
+    }
+    return quarters[key]=null;
   }
   catch(e){return quarters[key]=null;}
   finally{ busy(false); }
@@ -3614,7 +3671,7 @@ async function render(){
       if(!lessons.length) return {html:sheet('<div class="msg">No lessons for this quarter.</div>'),title:"",name:""};
       return {html:quarterFront(data,lessons,lg)+lessons.map(function(les){
           return (les.fso?fsoSheet(les,lg):"")+sheet(renderLesson(les,tasks,lg),les.date,lg); }).join(""),
-        title:strip(data.title||""),
+        title:strip(data.title||""), alpha:isAlpha(lg,current.getFullYear(),qOf(current)),
         name:fileName(["SBL "+String(lg||lang).toUpperCase()+" "+current.getFullYear()+"Q"+qOf(current),
           "00",strip(data.title||"")])};
     }
@@ -3623,12 +3680,12 @@ async function render(){
     /* the letter was asked for by name and gets the sheet to itself */
     if(fsoOpen&&les.fso&&String(les.date)===String(fsoOpen))
       return {html:fsoSheet(les,lg),
-        title:strip(les.fso.title||""),
+        title:strip(les.fso.title||""), alpha:lesAlpha(les),
         /* the letter stands on the Sabbath of its lesson and its name says so:
            `01-0` keeps it beside the first lesson instead of at the end of the folder */
         name:fileName([fileMark(lg,les.date),fileNo(les.no)+"-0",strip(les.fso.title||"")])};
     return {html:sheet(renderLesson(les,tasks,lg),les.date,lg),
-      title:strip(les.header||""),
+      title:strip(les.header||""), alpha:lesAlpha(les),
       /* the number comes from `no`, not from the heading: the publisher writes the
          heading in his own tongue, and Chinese spells the number out — 第十课 carries
          no figure at all to sort by */
@@ -3642,7 +3699,7 @@ async function render(){
     sheets.innerHTML=side.html;
     wk.innerHTML=""; mkDaysBuild(); mkLastLes=null; window.scrollTo(0,0); return; }
   /* the lesson number alone — the date is on the sheet and in the calendar */
-  wk.innerHTML='<b>'+esc(side.title)+'</b>';
+  wk.innerHTML='<b>'+esc(side.title)+'</b>'+(side.alpha?alphaTag():"");
   docName=side.name;
   sheets.innerHTML=side.html;
 
@@ -3800,10 +3857,10 @@ const calpop=document.getElementById("calpop");
 let calMonth=null;
 async function buildCal(){
   const y=calMonth.getFullYear(), m=calMonth.getMonth();
-  const byDate={};
+  const byDate={}, alphaDate={};
   for(const [yy,qq] of neigh(y,Math.floor(m/3)+1)){
     const d=await loadQuarter(lang,yy,qq);
-    if(d&&d.lessons) for(const l of d.lessons) byDate[l.date]=l;
+    if(d&&d.lessons) for(const l of d.lessons){ byDate[l.date]=l; alphaDate[l.date]=isAlpha(lang,yy,qq); }
   }
   const first=new Date(y,m,1);
   const cur=new Date(first.getTime()); cur.setDate(1-first.getDay());     /* back to Sunday */
@@ -3830,7 +3887,7 @@ async function buildCal(){
     }
     h+='<div class="calrow'+(les?" pick":"")+(inWeek&&les?" on":"")+'"'+(les?' data-d="'+les.date+'"':'')+'>'
       +'<div class="dcells">'+days+'</div><div class="les">'
-      +(les?'<b>'+esc(strip(les.header||""))+'</b><span>'+esc(strip(les.title||""))+'</span>':'')
+      +(les?'<b>'+esc(strip(les.header||""))+(alphaDate[les.date]?alphaTag():"")+'</b><span>'+esc(strip(les.title||""))+'</span>':'')
       +'</div></div>';
     cur.setDate(cur.getDate()+7);
   }
@@ -4099,6 +4156,13 @@ const PDFWORD={de:["Woche","Quartal"],en:["Week","Quarter"],ru:["Неделя","
    round. The reader came for the lesson, and a label invented for him is worse
    than one in a language he can at least recognise as not his. */
 const UI={
+  alpha:{de:"Alpha-Kanal",en:"Alpha channel",ru:"Альфа-канал",hr:"Alfa kanal",it:"Canale alfa",ro:"Canal alfa",es:"Canal alfa",fr:"Canal alpha",pt:"Canal alfa",cs:"Alfa kanál",uk:"Альфа-канал",bg:"Алфа канал",mk:"Алфа канал",sr:"Алфа канал",hu:"Alfa csatorna",id:"Kanal alfa",ja:"アルファ版",zh:"Alpha 频道",th:"ช่องอัลฟา",tl:"Alpha channel",rw:"Umuyoboro wa alfa",zu:"Isiteshi se-alpha"},
+  alphahint:{de:"Nur im Alpha-Kanal verfügbar",en:"Only available in the alpha channel",ru:"Доступно только в альфа-канале",hr:"Dostupno samo u alfa kanalu",it:"Disponibile solo nel canale alfa",ro:"Disponibil doar în canalul alfa",es:"Solo disponible en el canal alfa",fr:"Disponible uniquement dans le canal alpha",pt:"Disponível apenas no canal alfa",cs:"Dostupné jen v alfa kanálu",uk:"Доступно лише в альфа-каналі",bg:"Достъпно само в алфа канала",mk:"Достапно само во алфа каналот",sr:"Доступно само у алфа каналу",hu:"Csak az alfa csatornában érhető el",id:"Hanya tersedia di kanal alfa",ja:"アルファ版でのみ公開",zh:"仅在 Alpha 频道提供",th:"มีเฉพาะในช่องอัลฟา",tl:"Sa alpha channel lamang makukuha",rw:"Iboneka gusa ku muyoboro wa alfa",zu:"Kutholakala kuphela esiteshini se-alpha"},
+  alphahelp:{de:"Lädt Quartale, die noch nicht erschienen sind (gedrückt halten: Alpha zuerst)",en:"Loads quarters that are not out yet (hold: alpha first)",ru:"Загружает ещё не вышедшие кварталы (удерживать: сначала альфа)",hr:"Učitava tromjesečja koja još nisu izašla (držite: najprije alfa)",it:"Carica i trimestri non ancora usciti (tieni premuto: prima l’alfa)",ro:"Încarcă trimestrele care nu au apărut încă (ține apăsat: întâi alfa)",es:"Carga trimestres que aún no han salido (mantén pulsado: primero alfa)",fr:"Charge les trimestres pas encore parus (maintenir : alpha d’abord)",pt:"Carrega trimestres ainda não publicados (manter premido: alfa primeiro)",cs:"Načte čtvrtletí, která ještě nevyšla (podržet: nejdřív alfa)",uk:"Завантажує ще не видані квартали (утримувати: спершу альфа)",bg:"Зарежда тримесечия, които още не са излезли (задръжте: първо алфа)",mk:"Вчитува тромесечја што уште не се објавени (држете: прво алфа)",sr:"Учитава тромесечја која још нису изашла (држите: прво алфа)",hu:"Még meg nem jelent negyedéveket tölt be (nyomva tartva: előbb az alfa)",id:"Memuat triwulan yang belum terbit (tahan: alfa dulu)",ja:"未刊行の四半期を読み込みます(長押し:アルファ優先)",zh:"加载尚未发布的季度(长按:优先 Alpha)",th:"โหลดไตรมาสที่ยังไม่ออก (กดค้าง: อัลฟาก่อน)",tl:"Nilo-load ang mga quarter na hindi pa labas (pindutin nang matagal: alpha muna)",rw:"Ipakurura ibihembwe bitarasohoka (kanda igihe kirekire: alfa mbere)",zu:"Ilayisha izikhathi ezingakaphumi (bamba: i-alpha kuqala)"},
+  alphaon:{de:"Alpha-Kanal an",en:"Alpha channel on",ru:"Альфа-канал включён",hr:"Alfa kanal uključen",it:"Canale alfa attivo",ro:"Canal alfa pornit",es:"Canal alfa activado",fr:"Canal alpha activé",pt:"Canal alfa ligado",cs:"Alfa kanál zapnut",uk:"Альфа-канал увімкнено",bg:"Алфа каналът е включен",mk:"Алфа каналот е вклучен",sr:"Алфа канал укључен",hu:"Alfa csatorna bekapcsolva",id:"Kanal alfa aktif",ja:"アルファ版をオンにしました",zh:"Alpha 频道已开启",th:"เปิดช่องอัลฟา",tl:"Nakabukas ang alpha channel",rw:"Umuyoboro wa alfa watangiye",zu:"Isiteshi se-alpha sivuliwe"},
+  alphaoff:{de:"Alpha-Kanal aus",en:"Alpha channel off",ru:"Альфа-канал выключен",hr:"Alfa kanal isključen",it:"Canale alfa spento",ro:"Canal alfa oprit",es:"Canal alfa desactivado",fr:"Canal alpha désactivé",pt:"Canal alfa desligado",cs:"Alfa kanál vypnut",uk:"Альфа-канал вимкнено",bg:"Алфа каналът е изключен",mk:"Алфа каналот е исклучен",sr:"Алфа канал искључен",hu:"Alfa csatorna kikapcsolva",id:"Kanal alfa mati",ja:"アルファ版をオフにしました",zh:"Alpha 频道已关闭",th:"ปิดช่องอัลฟา",tl:"Nakasara ang alpha channel",rw:"Umuyoboro wa alfa wahagaze",zu:"Isiteshi se-alpha sivaliwe"},
+  alphafirst:{de:"Alpha zuerst",en:"Alpha first",ru:"Сначала альфа",hr:"Najprije alfa",it:"Prima l’alfa",ro:"Întâi alfa",es:"Primero alfa",fr:"Alpha d’abord",pt:"Alfa primeiro",cs:"Nejdřív alfa",uk:"Спершу альфа",bg:"Първо алфа",mk:"Прво алфа",sr:"Прво алфа",hu:"Előbb az alfa",id:"Alfa dulu",ja:"アルファ優先",zh:"优先 Alpha",th:"อัลฟาก่อน",tl:"Alpha muna",rw:"Alfa mbere",zu:"I-alpha kuqala"},
+  alphamain:{de:"Hauptquelle zuerst",en:"Main source first",ru:"Сначала основной источник",hr:"Najprije glavni izvor",it:"Prima la fonte principale",ro:"Întâi sursa principală",es:"Primero la fuente principal",fr:"Source principale d’abord",pt:"Fonte principal primeiro",cs:"Nejdřív hlavní zdroj",uk:"Спершу основне джерело",bg:"Първо основният източник",mk:"Прво главниот извор",sr:"Прво главни извор",hu:"Előbb a fő forrás",id:"Sumber utama dulu",ja:"メインを優先",zh:"优先主来源",th:"แหล่งหลักก่อน",tl:"Pangunahing source muna",rw:"Isoko nyamukuru mbere",zu:"Umthombo omkhulu kuqala"},
   settings:{de:"Einstellungen",en:"Settings",ru:"Настройки",bg:"Настройки",cs:"Nastavení",es:"Ajustes",fr:"Réglages",hu:"Beállítások",id:"Pengaturan",ja:"設定",mk:"Поставки",pt:"Ajustes",sr:"Подешавања",th:"การตั้งค่า",uk:"Налаштування",zh:"设置",hr:"Postavke",it:"Impostazioni",ro:"Setări",tl:"Mga setting",rw:"Igenamiterere",zu:"Izilungiselelo"},
   lesson:  {de:"Lektion wählen",en:"Pick a lesson",ru:"Выбрать урок",bg:"Избор на урок",cs:"Vybrat lekci",es:"Elegir lección",fr:"Choisir la leçon",hu:"Lecke választása",id:"Pilih pelajaran",ja:"課を選ぶ",mk:"Избери лекција",pt:"Escolher a lição",sr:"Изабери лекцију",th:"เลือกบทเรียน",uk:"Обрати урок",zh:"选择课程",hr:"Odaberi lekciju",it:"Scegli una lezione",ro:"Alege o lecție",tl:"Pumili ng aralin",rw:"Hitamo isomo",zu:"Khetha isifundo"},
   lang:    {de:"Sprache",en:"Language",ru:"Язык",bg:"Език",cs:"Jazyk",es:"Idioma",fr:"Langue",hu:"Nyelv",id:"Bahasa",ja:"言語",mk:"Јазик",pt:"Idioma",sr:"Језик",th:"ภาษา",uk:"Мова",zh:"语言",hr:"Jezik",it:"Lingua",ro:"Limbă",tl:"Wika",rw:"Ururimi",zu:"Ulimi"},
@@ -4196,6 +4260,8 @@ function paintUI(){
   document.getElementById("grp-look").textContent=T("grplook");
   document.getElementById("grp-about").textContent=T("grpabout");
   document.getElementById("mk-rail").classList.toggle("on",mkRailOn);
+  document.getElementById("lab-alpha").textContent=T("alpha");
+  alphaPaint();
   mkPaintMode(); mkChipPaint();
 }
 
@@ -6330,6 +6396,36 @@ keysBack.onclick=mkKeysClose;
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") mkKeysClose(); },true);
 
 document.getElementById("mk-rail").onclick=function(){ mkSetRail(!mkRailOn); };
+/* A press turns the channel on or off. Held for half a second it turns the order
+   round instead — the alpha copy first — which is not a setting a reader needs to
+   find, so it has no row of its own; the α on the knob is all it shows. Every
+   quarter is asked for again, because which copy answers may have changed. */
+const alphaSw=document.getElementById("alpha");
+function alphaPaint(){
+  alphaSw.classList.toggle("on",alphaOn); alphaSw.classList.toggle("first",alphaFirst);
+  alphaSw.title=T("alphahelp");
+}
+function alphaSet(on,first){
+  alphaOn=on; alphaFirst=on&&first;
+  try{ localStorage.setItem("sbl.alpha",alphaOn?"1":"0");
+    localStorage.setItem("sbl.alphafirst",alphaFirst?"1":"0"); }catch(e){}
+  for(const k in quarters) delete quarters[k];
+  for(const k in quarterAlpha) delete quarterAlpha[k];
+  alphaPaint(); outQ=null; render();
+}
+let alphaHold=0, alphaHeld=false;
+alphaSw.addEventListener("pointerdown",function(){
+  alphaHeld=false; clearTimeout(alphaHold);
+  alphaHold=setTimeout(function(){ alphaHeld=true;
+    alphaSet(true,!alphaFirst); mkToast(T(alphaFirst?"alphafirst":"alphamain")); },550);
+});
+["pointerup","pointerleave","pointercancel"].forEach(function(ev){
+  alphaSw.addEventListener(ev,function(){ clearTimeout(alphaHold); }); });
+alphaSw.addEventListener("contextmenu",function(e){ e.preventDefault(); });
+alphaSw.onclick=function(){
+  if(alphaHeld){ alphaHeld=false; return; }
+  alphaSet(!alphaOn,false); mkToast(T(alphaOn?"alphaon":"alphaoff"));
+};
 document.getElementById("lab-mark").onclick=mkStoreCard;
 document.getElementById("paper-seg").onclick=function(e){
   const b=e.target.closest("b[data-v]"); if(b) setPaper(b.dataset.v); };
@@ -6370,7 +6466,8 @@ async function outBuild(){
   const list=document.getElementById("outlist");
   const data=await loadQuarter(lang,outQ[0],outQ[1]);
   document.getElementById("outtitle").textContent=strip((data&&data.title)||"—");
-  document.getElementById("outsub").textContent=strip((data&&data.publicationDateLong)||"");
+  document.getElementById("outsub").innerHTML=esc(strip((data&&data.publicationDateLong)||""))
+    +(data&&isAlpha(lang,outQ[0],outQ[1])?alphaTag():"");
   const les=(data&&data.lessons)||[];
   if(!les.length){ list.innerHTML='<div class="outmsg">—</div>'; return; }
   const heart='<svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor"><path d="M12 21.35 4.2 14.1a4.6 4.6 0 0 1 6.5-6.5l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.5 6.5Zm0-1.9 6.5-6.1a2.9 2.9 0 0 0-4.1-4.1L12 11.65 9.6 9.25a2.9 2.9 0 0 0-4.1 4.1Z"/></svg>';
