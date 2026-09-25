@@ -19,6 +19,19 @@ if [ -f "$CLAUDE_BACKUP" ]; then
 	fi
 fi
 
+# Keep Claude Code's login inside the volume. CLAUDE_CONFIG_DIR (devcontainer.json)
+# moves .claude.json — the account/onboarding state — from $HOME into the volume
+# next to .credentials.json. Migrate a copy left in $HOME by an older container.
+if [ ! -f "$HOME/.claude/.claude.json" ] && [ -f "$HOME/.claude.json" ]; then
+	cp "$HOME/.claude.json" "$HOME/.claude/.claude.json"
+	echo "✅ Moved Claude Code account state into the volume"
+fi
+
+# Install the latest Claude Code on every container create. User-owned, so the
+# built-in auto-updater keeps it current between rebuilds.
+echo "🤖 Installing Claude Code..."
+curl -fsSL https://claude.ai/install.sh | bash || echo "⚠️  Claude Code install failed — rerun: curl -fsSL https://claude.ai/install.sh | bash"
+
 # Initialize Git LFS
 echo "🗄️  Initializing Git LFS..."
 git lfs install

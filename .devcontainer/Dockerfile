@@ -39,9 +39,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install pnpm globally
 RUN npm install -g pnpm@10.32.0
 
-# Install Claude Code CLI globally
-RUN npm install -g @anthropic-ai/claude-code
-
 # Git credential helper and LFS
 RUN git config --system credential.helper store && \
     git lfs install --system
@@ -55,5 +52,11 @@ RUN mkdir -p /home/node/.npm && chown -R node:node /home/node/.npm
 RUN mkdir -p /home/node/.claude && chown -R node:node /home/node/.claude
 
 USER node
+
+# Claude Code is installed per-user by post-create.sh (native installer) into
+# ~/.local/bin, so its auto-updater can write to its own install. A root-owned
+# `npm install -g` here could never self-update, and Docker's layer cache kept
+# rebuilds pinned to whatever version the layer was first built with.
+ENV PATH="/home/node/.local/bin:${PATH}"
 
 WORKDIR /workspaces/sdarm.life

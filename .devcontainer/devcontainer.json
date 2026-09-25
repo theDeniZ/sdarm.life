@@ -5,6 +5,9 @@
     "context": "."
   },
   "mounts": ["source=sdarm-claude-data,target=/home/node/.claude,type=volume"],
+  "containerEnv": {
+    "CLAUDE_CONFIG_DIR": "/home/node/.claude"
+  },
   "features": {
     "ghcr.io/devcontainers/features/git:1": {},
     "ghcr.io/devcontainers/features/git-lfs:1": {},
