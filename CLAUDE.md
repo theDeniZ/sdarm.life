@@ -22,7 +22,7 @@ Content-driven web app for an SDA Reform church. Monorepo hosted entirely on Clo
 | `@sdarm/events` | `events.sdarm.life` | Next.js 16 events landing page |
 | `@sdarm/treasures` | `treasures.sdarm.life` | Next.js 16 analog treasures site — book catalogue, Bible reader |
 | `@sdarm/songbook` | `songs.sdarm.life` | Next.js 16 songbook site |
-| `@sdarm/sbl` | `sbl.sdarm.life` | Sabbath Bible Lesson — **hosting only.** No code of ours; serves a pinned submodule of [TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl) verbatim |
+| `@sdarm/sbl` | `sbl.sdarm.life` | Sabbath Bible Lesson — zero-build static page, vendored from [TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl) into `apps/sbl/upstream/` and maintained here |
 | `@sdarm/db` | — | Drizzle schema + migrations (shared) |
 | `@sdarm/types` | — | Shared API response DTO interfaces |
 | `@sdarm/ui` | — | Shared React components + dark museum CSS design system |
@@ -59,7 +59,7 @@ Worker bindings (`apps/api/wrangler.jsonc`): `DB` (D1), `BIBLE_DB` (D1, optional
 | `events.sdarm.life` | `apps/events` | Public |
 | `treasures.sdarm.life` | `apps/treasures` | Public |
 | `songs.sdarm.life` | `apps/songbook` | Public |
-| `sbl.sdarm.life` | `apps/sbl` | Public — third-party page, own Datenschutz/Impressum |
+| `sbl.sdarm.life` | `apps/sbl` | Public — own Datenschutz/Impressum pages |
 
 ⚠️ **Reference for manual git work:** @docs/gitflow.md — guidelines for how you work with git. Claude does not automatically commit or push.
 

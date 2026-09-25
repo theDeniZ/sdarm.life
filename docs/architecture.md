@@ -36,34 +36,30 @@ packages/
   i18n/    — @sdarm/i18n : Locale config, de/en message files
 ```
 
-### `apps/sbl` is hosting, not an app
+### `apps/sbl` is a static site, not a Next app
 
-`sbl.sdarm.life` serves the **SBL Edition** — an independent typesetting of the
-Sabbath Bible Lesson maintained at [TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl)
-— and contains no application code of ours. Upstream is a zero-build static site
-(one `index.html` with its CSS and JS inline, a service worker, its own web
-fonts, its own `datenschutz.html` / `impressum.html`, a mirror of the quarters);
-it is pinned here as a git submodule and served verbatim by an assets-only
-Worker.
+`sbl.sdarm.life` serves the **SBL Edition** — a typesetting of the Sabbath Bible
+Lesson. It is a zero-build static site (one `index.html` with its CSS and JS
+inline, a service worker, its own web fonts, its own `datenschutz.html` /
+`impressum.html`, a mirror of the quarters), served by an assets-only Worker.
 
 ```
 apps/sbl/
-  upstream/          submodule, pinned to a commit   ← the whole contract
+  upstream/          the page itself — plain tracked files, edited here
   scripts/stage.mjs  copies the served subset into dist/
   wrangler.jsonc     assets-only Worker: no `main`, no bindings, no vars
 ```
 
-Every principle above — package boundaries, repositories, DTOs — is about code
-we write, and none of it applies here. The one rule that does: **nothing in
-`apps/sbl` may be edited except `stage.mjs`, `wrangler.jsonc` and the submodule
-pointer.** A fix belongs upstream; a change made here would be silently
-overwritten by the next sync.
+The page was developed at [TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl)
+and pinned here as a git submodule until it was vendored into this repository;
+`upstream/` keeps its old directory name only so `stage.mjs` did not have to
+change. It is now ordinary code of ours and is changed here, on a `feat/` or
+`bugfix/` branch like anything else. The package-boundary rules above still
+apply in one direction: nothing outside `apps/sbl` imports from it.
 
-v1.4.0 shipped the opposite arrangement — the page hand-transliterated into a
-4,700-line module inside `apps/treasures` — and it was a week stale on arrival:
-upstream went from 3 lesson languages to 18, added 19 Bible editions, a dark
-sheet and an audio player in the six days after the port landed. A pin costs one
-commit to move; a transliteration costs a rewrite.
+v1.4.0 shipped the page hand-transliterated into a 4,700-line module inside
+`apps/treasures`. Vendoring it verbatim instead keeps it a self-contained static
+site that none of the Next apps depend on.
 
 ```ts
 // packages/types/src/index.ts

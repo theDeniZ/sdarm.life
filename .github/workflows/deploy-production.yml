@@ -39,15 +39,14 @@ jobs:
       artifact-name: ${{ matrix.artifact }}
       dist-path: ${{ matrix.path }}
 
-  # Not in the matrix above: sbl builds from a pinned upstream submodule and
-  # stages static files rather than compiling a Next app.
+  # Not in the matrix above: sbl stages static files rather than compiling a
+  # Next app.
   build-sbl:
     uses: ./.github/workflows/_build-pages.yml
     with:
       filter: '@sdarm/sbl'
       artifact-name: sbl-dist
       dist-path: apps/sbl/dist
-      submodules: true
 
   build-admin:
     uses: ./.github/workflows/_build-pages.yml

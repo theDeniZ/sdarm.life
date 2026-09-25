@@ -1,0 +1,29 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+
+# Windows
+Thumbs.db
+Desktop.ini
+
+# python оставляет свои крошки рядом с инструментами
+__pycache__/
+*.pyc
+
+# редакторы
+.idea/
+*.swp
+*~
+
+# то, что кладут рядом на время работы
+/Lektion */
+*.local.html
+
+# записи живут на своём сервере, не в коде — см. AUD_BASE в index.html
+audio/
+*.mp3
+
+# личные настройки Claude Code для этой машины — не для репозитория
+.claude/settings.local.json

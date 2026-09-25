@@ -65,13 +65,12 @@ Every page is captured in both dark and light theme via the `forEachTheme`
 helper (see [Themes](#themes) below). All run on Chromium, 1280×800, `de-DE`
 locale.
 
-**`sbl.sdarm.life` is not covered here, deliberately.** `apps/sbl` serves a
-pinned copy of a third-party page verbatim (see
-[architecture.md](architecture.md#appssbl-is-hosting-not-an-app)). A baseline
-over it would assert nothing about our code — it would fail on every upstream
-design change and pass on every one of our own, since we have none there. What
-is worth checking when the pin moves is that `pnpm --filter @sdarm/sbl build`
-stages without warning about unknown upstream entries, and that the page loads.
+**`sbl.sdarm.life` is not covered here yet.** `apps/sbl` is a static page (see
+[architecture.md](architecture.md#appssbl-is-a-static-site-not-a-next-app)) that
+was vendored from a separate repository; it has no baselines and no mock-server
+routes. Until it does, check a change to it by running
+`pnpm --filter @sdarm/sbl build` — it must stage without warning about unknown
+entries — and loading the page.
 
 ## Running tests
 
