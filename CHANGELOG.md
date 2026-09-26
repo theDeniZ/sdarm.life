@@ -1,3 +1,11 @@
+# [1.9.0](https://github.com/theDeniZ/sdarm.life/compare/v1.8.0...v1.9.0) (2026-09-26)
+
+
+### Features
+
+* move sbl upstream to our repo ([418988b](https://github.com/theDeniZ/sdarm.life/commit/418988b1f127a90877ae15a23078bfed5e943f36))
+* **sbl:** alpha channel added ([a07b293](https://github.com/theDeniZ/sdarm.life/commit/a07b293fbf4c2e957415728889823c2c0441e0dc))
+
 # [1.8.0](https://github.com/theDeniZ/sdarm.life/compare/v1.7.0...v1.8.0) (2026-09-19)
 
 
