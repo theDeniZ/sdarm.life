@@ -43,7 +43,7 @@ These are the only external data recipients currently named in [Datenschutzerkl�
 | Cloudflare | Hosting, Web Analytics, CDN | section4 |
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
 | YouVersion / Life.Church (US) | Bible text for **`yv:` translations only** — `loc:` translations contact nobody | section8 |
-| sbl.sdarm.life (third-party page we host) | The Sabbath Bible Lesson — governed by **its own** Datenschutzerklärung, not ours | section9 |
+| sbl.sdarm.life (`apps/sbl`) | The Sabbath Bible Lesson — carries **its own** Datenschutzerklärung | section9 |
 
 **To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 
@@ -107,52 +107,46 @@ enforcement. That deviation is deliberate and is recorded here rather than paper
 view, **projector and presenter display**, and the OG metadata. Several licenses require
 the notice on the screen shown to a room. Do not remove any of them.
 
-### Sabbath Bible Lesson (sbl.sdarm.life) — hosted, not operated
+### Sabbath Bible Lesson (sbl.sdarm.life)
 
-`sbl.sdarm.life` serves the **SBL Edition**, an independent page maintained at
-[TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl) by its author. We host it
-on a subdomain; we do not write it, patch it or proxy it. It is served byte for
-byte as published (`apps/sbl`).
+`sbl.sdarm.life` serves the **SBL Edition**, a static page originally developed
+at [TheMaestr-o/sbl](https://github.com/TheMaestr-o/sbl) and now vendored into
+this repository (`apps/sbl/upstream/`). It is served as-is by `apps/sbl`.
 
-**It therefore carries its own Datenschutzerklärung and Impressum**, maintained
-upstream and reachable from the page itself. `legal.datenschutz.section9` says
-exactly that and nothing more: it names the address, says the offering is
-separate and independently maintained, and states that this policy does not
-apply there. It deliberately no longer describes *how* the lesson is retrieved —
-we would be describing someone else's code, and any description we wrote would
-go stale the next time upstream changed.
+**It carries its own Datenschutzerklärung and Impressum** (`datenschutz.html`,
+`impressum.html` in the same directory), reachable from the page itself.
+`legal.datenschutz.section9` names the address, says the offering is separate
+and independently maintained, and states that this policy does not apply there.
 
-⚠️ **What that page does from the reader's browser, and what upstream's policy
+⚠️ **Since the page is now maintained in this repository, section9's "independently
+maintained" wording needs a legal re-check** — it was written when the page was
+somebody else's code. Until that is decided, keep the page's own policy pages
+accurate for everything below.
+
+⚠️ **What that page does from the reader's browser, and what its own policy
 must therefore cover:**
 
 | Call | To | Why it is a transfer |
 |---|---|---|
 | Bible editions, and any quarter not in its own mirror | `app.sdarm.org` | Reader IP to a third party on page load |
+| Quarter list + unpublished quarters — **only** once the reader turns on the *Alpha-Kanal* in the settings (off by default) | `sbl.thedeniz.dev` | Reader IP to a third party; disclosed in the page's § 4 |
 
-That is a disclosure obligation which **moved upstream — it did not disappear.**
 A subdomain of `sdarm.life` reads as our service to a German visitor, so if that
-page's own policy does not cover the call, the exposure lands here. That is the
-standing condition of hosting it, and it is the thing to re-check when the
-submodule pointer is moved.
+page's own policy does not cover the call, the exposure lands here. **Re-check it
+whenever `index.html` gains a new external request.**
 
-Checked at the `37a2f1d` pin: that page's § 3 names Cloudflare (and the
+Checked at the `37a2f1d` upstream commit: that page's § 3 names Cloudflare (and the
 `__cf_bm` cookie) in both languages, § 4 names `app.sdarm.org`, and the
 Impressum names the Verein. It covers what the page does.
 
-**Google Fonts left this table at the `10788f5e` pin.** Until then the page
-pulled its faces from `fonts.googleapis.com` / `fonts.gstatic.com` on load — the
-LG München I 3 O 17493/20 fact pattern, and the highest-risk item on it.
-Upstream now ships all 32 woff2 files in `fonts/` and has dropped the
-preconnects; `scripts/stage.mjs` serves that directory, so the faces come from
-`sbl.sdarm.life` and nothing is asked of Google. **When the pin moves, grep the
-staged `index.html` for `fonts.googleapis` before deploying** — a page that
-starts asking a CDN for its type again is a fine letter, and it would arrive
-here without a line of our code changing.
-
-**Do not "fix" this in `apps/sbl`.** Rewriting the page's fetches or its font
-tags would fork it, which is the exact coupling the split exists to remove. If
-the arrangement has to change, the answer is upstream, or a transform in
-`scripts/stage.mjs` agreed with upstream — not a local edit.
+**Google Fonts left this table at upstream commit `10788f5e`.** Until then the
+page pulled its faces from `fonts.googleapis.com` / `fonts.gstatic.com` on load —
+the LG München I 3 O 17493/20 fact pattern, and the highest-risk item on it. The
+page ships all 32 woff2 files in `fonts/`; `scripts/stage.mjs` serves that
+directory, so the faces come from `sbl.sdarm.life` and nothing is asked of
+Google. **Rules 2 and 1 of the forbidden list apply to `apps/sbl/upstream/` like
+any other code of ours** — no CDN fonts, no new client-side third-party fetches
+without disclosure.
 
 *Historical note:* v1.4.0 shipped the lesson as a route of `apps/treasures`, with
 `apps/api/src/routes/sbl.ts` proxying `app.sdarm.org` server-side and the fonts

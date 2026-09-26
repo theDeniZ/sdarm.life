@@ -121,9 +121,8 @@ jobs:
       dist-path: ${{ matrix.path }}
       upload-artifact: ${{ github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' }}
 
-  # Not in the matrix above: sbl builds from a pinned upstream submodule and
-  # stages static files rather than compiling a Next app, so it is the one build
-  # that needs `submodules` and a `dist` path.
+  # Not in the matrix above: sbl stages static files rather than compiling a
+  # Next app, so it is the one build with a `dist` path.
   build-sbl:
     needs: lint
     uses: ./.github/workflows/_build-pages.yml
@@ -131,7 +130,6 @@ jobs:
       filter: '@sdarm/sbl'
       artifact-name: sbl-dist
       dist-path: apps/sbl/dist
-      submodules: true
       upload-artifact: ${{ github.ref == 'refs/heads/develop' || github.ref == 'refs/heads/main' }}
 
   build-admin:

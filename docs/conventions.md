@@ -132,9 +132,8 @@ Server-only (no `NEXT_PUBLIC_` prefix). `R2_TRANSFORMS` — same kill switch as 
 ### `apps/sbl`
 
 None. The app has no environment variables, no bindings and no build inputs — it
-stages a pinned submodule into `dist/` and serves it. See
-[architecture.md](architecture.md#appssbl-is-hosting-not-an-app) for the one rule
-that governs it.
+stages `apps/sbl/upstream/` into `dist/` and serves it. See
+[architecture.md](architecture.md#appssbl-is-a-static-site-not-a-next-app).
 
 ### `apps/api` (local dev only)
 

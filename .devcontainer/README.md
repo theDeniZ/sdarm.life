@@ -200,6 +200,14 @@ If ports 3000, 3001, or 8787 are in use:
 
 First-time setup installs Node modules for the monorepo. This usually takes 1-2 minutes depending on internet speed.
 
+## Claude Code
+
+The CLI is installed by `post-create.sh` with the native installer (`~/.local/bin/claude`), so every
+rebuild gets the latest version and the built-in auto-updater works in between. Login and settings
+live in the `sdarm-claude-data` volume: `CLAUDE_CONFIG_DIR=/home/node/.claude` puts `.claude.json`
+(account state) there alongside `.credentials.json`, so a rebuild keeps you signed in. Deleting the
+volume signs you out.
+
 ## Persistent SSH Keys
 
 SSH keys from your host machine (`~/.ssh`) are mounted read-only into the container, enabling Git operations to use your existing SSH configuration.
