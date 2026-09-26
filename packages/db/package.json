@@ -14,11 +14,11 @@
   "license": "ISC",
   "packageManager": "pnpm@10.32.0",
   "dependencies": {
-    "@cloudflare/workers-types": "^5.20260902.1",
-    "drizzle-orm": "^0.45.1"
+    "@cloudflare/workers-types": "^5.20260923.1",
+    "drizzle-orm": "^0.45.3"
   },
   "devDependencies": {
-    "drizzle-kit": "^0.31.9"
+    "drizzle-kit": "^0.31.11"
   },
   "exports": {
     ".": "./src/index.ts",
