@@ -3201,10 +3201,6 @@ function typo(t){
     return (b&&!/[\s(\[{«„“—–-]/.test(b))?pair[1]:pair[0];
   });
 }
-/* what a paragraph that has finished ends on. A closing bracket or quote is in
-   the set on purpose: "(Lukas 2, 48. 49.)" and "[Lukas 15, 18-20 zitiert.]" are
-   how the booklet ends a paragraph, and neither is a sentence cut in half. */
-const NOTE_END=/[.!?…:;»”″"'’)\]]\s*$/;
 function dropPageNo(t){
   const s=String(t||"");
   /* the number either stands off on a space, or sits glued to the punctuation
@@ -3330,30 +3326,13 @@ function renderLesson(les,tasks,lg){
             g+='<div class="vitem" data-os="'+esc(it.sOsis||"")+'">'+head+box+'</div>'; }
           blocks.push(g+'</div>'); }
       }
-      /* ——— a paragraph broken over the booklet's page turn ———
-         The publisher's file ends a note where the printed page ended and opens
-         another on the far side of the turn, so a quotation arrives as two
-         notes with the break falling mid-sentence — and the sheet sets it as
-         two paragraphs with air between them: "…Согрешив, сыны человеческие" /
-         "стали подданными сатаны."
-         Two notes are one note when the first does not end where a sentence
-         ends. A note carrying its source is never joined forward: the source is
-         the end of the quotation, whatever follows it.
-         The key of the first fragment is kept and the second's text is added to
-         its end — a mark laid inside the first is laid inside it still, because
-         offsets are counted from the start of the block. */
+      /* Each note object is its own paragraph: the editors separate them on
+         purpose, so the sheet never joins two into one. */
       let ni=0;
-      const notes=[];
       for(const n of sub.note||[]) if(n&&n.text&&!isJunk(n.text)){
-        const t=typo(dropPageNo(strip(n.text)));
-        const prev=notes[notes.length-1];
-        if(prev&&!prev.sop&&!NOTE_END.test(prev.text)){
-          prev.text=(prev.text+" "+t).trim(); prev.sop=n.sop; prev.raw=n.text;
-        } else notes.push({text:t,sop:n.sop,raw:n.text,k:kk+"n"+ni});
+        blocks.push('<div class="note" data-k="'+kk+"n"+ni+'">'+mkGlue(inlineSource(esc(typo(dropPageNo(strip(n.text))))))+sopHtml(n.sop,n.text)+'</div>');
         ni++;
       }
-      for(const r of notes)
-        blocks.push('<div class="note" data-k="'+r.k+'">'+mkGlue(inlineSource(esc(r.text)))+sopHtml(r.sop,r.raw)+'</div>');
     }
     /* the heading of the day, the question it opens with and the beginning of
        the text that answers it are one block: a day heading left at the foot of
