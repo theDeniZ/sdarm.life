@@ -2573,13 +2573,13 @@ function linkRead(){
 const quarters={};
 /* ——— the alpha channel ———
    Quarters that are not out yet are published ahead of time on a server of their
-   own. It is asked for nothing until the reader turns it on in the settings, and
-   then only for lessons — the Bibles still come from app.sdarm.org. On, it fills
+   own. It is on unless the reader has turned it off in the settings, and even on
+   it is asked only for lessons — the Bibles still come from app.sdarm.org. On, it fills
    in whatever the main source does not have; held down, the switch reverses the
    order and the alpha copy wins wherever it has one. `quarterAlpha` records which
    quarters came from it, so the calendar and the contents can say so. */
 const ALPHA_BASE="https://sbl.thedeniz.dev/sbl/data/";
-let alphaOn=localStorage.getItem("sbl.alpha")==="1";
+let alphaOn=localStorage.getItem("sbl.alpha")!=="0";
 let alphaFirst=alphaOn&&localStorage.getItem("sbl.alphafirst")==="1";
 const quarterAlpha={};
 let alphaList=null;
