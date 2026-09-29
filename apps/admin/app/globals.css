@@ -2150,6 +2150,16 @@ input[type="file"]::file-selector-button:hover {
   white-space: nowrap;
 }
 
+/* Second line under the label — which songbook a top song belongs to. */
+.hbar-chart__sub {
+  display: block;
+  margin-top: 1px;
+  font-size: 10.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .hbar-chart__track {
   height: 10px;
   background: var(--surface-2);

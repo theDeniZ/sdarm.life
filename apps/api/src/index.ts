@@ -28,6 +28,7 @@ import ogRouter from './routes/og';
 import llmRouter from './routes/llm';
 import robotsRouter from './routes/robots';
 import { llmRateLimit } from './middleware/llm-rate-limit';
+import { countSongOpen } from './middleware/song-opens';
 import { buildIndexMarkdown } from './services/llm/markdown';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -75,6 +76,9 @@ v1.route('/songbooks', songbooksRouter);
 v1.use('/songs/search', cached(300)); // 5 min — search results vary by query, shorter TTL
 v1.route('/songs/search', songSearchRouter); // literal path — must be mounted before /songs/{id}
 
+// Open counter for the admin Statistics page (issue #197). Registered BEFORE
+// cached() so it sees cache hits too — see middleware/song-opens.ts.
+v1.use('/songs/:id{[0-9]+}', countSongOpen);
 v1.use('/songs/*', cached(3600));    // 1 hour — individual songs
 v1.route('/songs', songsRouter);
 

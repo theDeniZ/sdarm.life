@@ -12,6 +12,7 @@ import {
   SongSchema,
   SongSheetSchema,
   SongSheetTypeSchema,
+  TopSongSchema,
 } from '../../schemas';
 import * as repo from '../../repositories/songs';
 import { purgeCache } from '../../middleware/cache';
@@ -111,6 +112,31 @@ const SongBody = z.object({
   author: z.string().nullable().optional(),
   copyright: z.string().nullable().optional(),
 });
+
+// Registered before GET /songs/{id}: the first matching route wins, and `top`
+// would otherwise reach the {id} route and fail its number coercion.
+router.openapi(
+  createRoute({
+    method: 'get',
+    path: '/songs/top',
+    tags: ['Admin / Songbooks'],
+    security: [{ bearerAuth: [] }],
+    description:
+      'Most-opened songs, from the per-song open counter (issue #197). Admin-only on purpose: a public popularity list is a product decision nobody has made. `total` is the number of songs opened at least once.',
+    request: {
+      query: z.object({
+        limit: z.coerce.number().int().min(1).max(100).default(10).openapi({ example: 10 }),
+      }),
+    },
+    responses: {
+      200: { content: { 'application/json': { schema: listOf(TopSongSchema) } }, description: 'Top songs by opens' },
+    },
+  }),
+  async (c) => {
+    const db = drizzle(c.env.DB);
+    return c.json(await repo.listTopSongs(db, c.req.valid('query').limit), 200);
+  },
+);
 
 router.openapi(
   createRoute({

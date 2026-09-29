@@ -47,6 +47,15 @@ describe('OpenAPI document', () => {
 		}
 	});
 
+	it('registers the admin top-songs route (issue #197)', async () => {
+		const res = await SELF.fetch('https://example.com/api/openapi.json');
+		const doc = (await res.json()) as { paths: Record<string, unknown> };
+		// Routers mounted at admin.route('', …) document as `/admin//…`; compare with
+		// the doubled slash collapsed so this test does not pin that quirk.
+		const paths = Object.keys(doc.paths).map((p) => p.replace(/\/{2,}/g, '/'));
+		expect(paths).toContain('/api/v1/admin/songs/top');
+	});
+
 	it('serves the Swagger UI', async () => {
 		const res = await SELF.fetch('https://example.com/api/ui');
 		expect(res.status).toBe(200);
@@ -119,6 +128,7 @@ describe('admin auth', () => {
 		['GET', '/api/v1/admin/bible/translations'],
 		['PUT', '/api/v1/admin/bible/allowlist'],
 		['POST', '/api/v1/admin/bible/takedown'],
+		['GET', '/api/v1/admin/songs/top'],
 	])('rejects %s %s with no Authorization header', async (method, path) => {
 		const res = await SELF.fetch(`https://example.com${path}`, { method });
 		expect(res.status).toBe(401);

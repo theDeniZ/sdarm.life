@@ -38,6 +38,12 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 - Stored in the same R2 bucket (`IMAGES` binding) as post cover images
 - Deleted from R2 on `DELETE /admin/songs/:id/sheets/:sheetId`
 
+**`song_opens`**
+`song_id` (PK, FK → `songs.id`, `ON DELETE CASCADE`), `opens` (default 0), `last_opened`
+- One counter row per song, created on the first open and incremented in place by a single upsert (`INSERT … ON CONFLICT(song_id) DO UPDATE SET opens = opens + 1`) — no event log, nothing that grows per visit (issue #197). Written by `recordSongOpen()`, read by `GET /admin/songs/top`; see [api.md](api.md#song-open-counter).
+- `last_opened` is a property of the song ("still in use?"), not of a visitor. No IP, user agent, session or per-event timestamp is stored anywhere — see [dsgvo.md](dsgvo.md#song-open-counter--not-personal-data). Adding any per-request column turns this into behavioural analytics and needs its own DSGVO pass.
+- `ON DELETE CASCADE` relies on D1 enforcing foreign keys, which it does by default: deleting a song (or a songbook, which deletes its songs) removes the counter with it. Verified locally.
+
 **`treasures`**
 `id`, `title`, `author`, `description`, `type` (`book`), `language`, `cover_gradient`, `cover_accent_color`, `cover_key`, `is_free` (boolean), `price`, `sort_order`, `epub_url`, `epub_key`, `created_at`, `updated_at`
 - `type` is an enum; only `'book'` for now — new types with additional metadata can be added later

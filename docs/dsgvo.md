@@ -154,6 +154,12 @@ self-hosted via `@fontsource`. That is why this file used to describe a
 server-side retrieval. All of it — route, proxy, section9 wording — was removed
 when the lesson moved to its own host.
 
+### Song open counter — not personal data
+
+`song_opens` (issue #197) stores one integer per song and the time of the most recent open **of that song**. Nothing about the person or the request is written: no IP, no user agent, no session, no per-event row. The user agent is read only to skip crawlers and is discarded. Against the five questions below: no browser call (server-side increment on a request the page already makes), no processor (own D1), no personal data, nothing written client-side, no email. So it adds no processor, needs no Datenschutz entry and no consent, and is not a row in the table below.
+
+⚠️ **The boundary:** the moment this grows a per-event row carrying a timestamp and any request attribute, it is behavioural analytics and this assessment no longer holds. That is a new issue with its own DSGVO pass, not an extension of this one.
+
 ## ⚠️ Known gaps to close
 
 These are currently in code but not fully DSGVO-clean:

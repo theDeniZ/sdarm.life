@@ -127,6 +127,17 @@ export const SongSchema = z
 	})
 	.openapi('Song');
 
+export const TopSongSchema = z
+	.object({
+		id: z.number(),
+		number: z.number(),
+		title: z.string(),
+		songbook: z.object({ title: z.string(), slug: z.string() }),
+		opens: z.number().openapi({ description: 'Times the song was opened (automated user agents excluded)' }),
+		lastOpened: z.string().nullable().openapi({ description: 'ISO timestamp of the most recent open' }),
+	})
+	.openapi('TopSong');
+
 // ── Treasures ─────────────────────────────────────────────────────────────────
 
 export const TreasureTypeSchema = z.enum(['book']);

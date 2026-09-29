@@ -120,12 +120,21 @@ export default function Statistics() {
           <BarChart values={data.media.monthly} labels={data.monthLabels} />
         </div>
 
-        <div className="card card--roadmap">
+        <div className="card">
           <div className="card-h">
-            <h3>Top 10 songs</h3>
-            <RoadmapBadge />
+            <h3>Top 10 songs — by opens</h3>
           </div>
-          <div className="state-empty">Requires usage tracking — planned, not yet collected.</div>
+          {data.topSongs.length === 0 ? (
+            <div className="state-empty">No song has been opened since counting started.</div>
+          ) : (
+            <HBarChart
+              rows={data.topSongs.map((s) => ({
+                label: `${s.number} · ${s.title}`,
+                value: s.opens,
+                sub: s.songbook.title,
+              }))}
+            />
+          )}
         </div>
 
         <div className="card card--roadmap">

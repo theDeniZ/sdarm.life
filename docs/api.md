@@ -21,7 +21,7 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/songbooks/:slug` | Songbook metadata + `songCount`. 404 if not found. |
 | `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number, title, and `song_parts.lyrics`. `?limit=N&offset=N`. Returns `{ items, total }`. When `?q=` is set, each item includes `matchType: 'title' \| 'number' \| 'lyrics'` indicating which field caused the match (used by the songbook UI to highlight title hits with `<mark>` and label lyrics-only hits with a small pill). |
 | `GET` | `/api/v1/songs/search` | Global search across all songbooks. `?q=` (required, max 100 chars), `?limit=N&offset=N`. Returns `{ items, total }` of `SongSearchResultDto` (id, number, title, author, songbook). |
-| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays; `songbook` includes `language` (drives the projector's chorus/Amen slide labels). 404 if not found. |
+| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays; `songbook` includes `language` (drives the projector's chorus/Amen slide labels). 404 if not found. Every 200 counts one open (see [Song open counter](#song-open-counter)). |
 | `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |
 | `GET` | `/api/v1/bible/translations` | Translations the operator enabled in Admin → Bible, in the configured order. Empty array when none are configured. Each item's `id` is a prefixed string (`loc:luther1912`, `yv:51`) and carries a `license` object (see below). |
@@ -58,6 +58,7 @@ Require `Authorization: Bearer <key>` on every request.
 | `POST` | `/api/v1/admin/songbooks` | Create songbook. |
 | `PATCH` | `/api/v1/admin/songbooks/:id` | Partial update. |
 | `DELETE` | `/api/v1/admin/songbooks/:id` | Hard-delete songbook. |
+| `GET` | `/api/v1/admin/songs/top` | Most-opened songs from the open counter. `?limit=N` (1–100, default 10). Returns `{ items, total }` of `TopSongDto` (`id`, `number`, `title`, `songbook { title, slug }`, `opens`, `lastOpened`), ordered by `opens` desc; `total` is the number of songs opened at least once. Registered before `/songs/:id` so `top` is not read as an id. |
 | `GET` | `/api/v1/admin/songs/:id` | Song for edit (includes parts + sheets). |
 | `POST` | `/api/v1/admin/songs` | Create song. Body: `{ songbookId, number, title, author?, copyright? }`. |
 | `PATCH` | `/api/v1/admin/songs/:id` | Partial update (title, number, author, copyright). |
@@ -184,6 +185,19 @@ Plain-text Markdown routes for AI answering agents (ChatGPT, Claude, Gemini, Per
 **Caching:** the index (`/llm` and `/llms.txt`) is cached 1 day; `/llm/site`, `/llm/posts[/:slug]`, `/llm/songbooks[/:slug]`, `/llm/songs/:id`, and `/llm/treasures` are cached 1 hour (`cached(3600)`). `/llm/bible/:code` and `/llm/bible/:code/:book` use the same generation-keyed edge cache as `routes/bible.ts` (1 day, stranded immediately by a takedown or license edit). `/llm/bible` (the translation index) is deliberately left uncached, like `/bible/translations`, since it reflects the admin allowlist and the `allowDownload` gate.
 
 **`robots.txt`** (`GET /robots.txt`, plain text, cached 1 day, source `routes/robots.ts`): the default `*` group sets `Content-Signal: search=yes, ai-input=yes, ai-train=no` and disallows everything (this is where general AI-training crawlers land). A named group for the AI answer-engine user agents (`ChatGPT-User`, `OAI-SearchBot`, `Claude-User`, `Claude-SearchBot`, `Perplexity-User`, `PerplexityBot`, `MistralAI-User`, `DuckAssistBot`) allows only `/llms.txt` and `/api/v1/llm`, disallowing everything else.
+
+## Song open counter
+
+`song_opens` holds one integer per song (issue #197): how many times `GET /api/v1/songs/:id` answered 200. It feeds the "Top 10 songs" card on the admin Statistics page. Admin-only on purpose — a public "most popular" list would turn a pastoral signal into a leaderboard, and nobody has decided that.
+
+- **It is a middleware, not a line in the handler.** `countSongOpen` (`middleware/song-opens.ts`) is mounted in `index.ts` on `/songs/:id{[0-9]+}` **before** `cached(3600)`. `/songs/*` is edge-cached for an hour and a cache hit returns before the handler runs, so a handler-level counter would record at most one open per song per hour per colo. The middleware sees hits and misses alike; since only 200s are cached and 200 means the song exists, a 404 is never counted. It reads the `id` param **before** `next()` — afterwards `c.req.param()` resolves against `cached()`'s `/songs/*`, which has no `id`, and every hit silently went uncounted.
+- **The write never touches the response.** `recordSongOpen()` (`repositories/songs.ts`) runs under `executionCtx.waitUntil`; a failed write is logged and swallowed.
+- **Automated user agents are skipped** (`/bot|crawler|spider|headless/i`). The UA is read and discarded, never stored.
+- **The songbook site must keep fetching this route with `cache: 'no-store'`** (`apps/songbook/app/lib/api.ts`). A client-side cache there would under-count. Next.js memoizes the two `fetchSong()` calls of one page render (`generateMetadata` + page) into one request, so one page view is one open — verified locally.
+
+⚠️ **Known limitation — crawlers reach the counter through the songbook server.** A song page on `songs.sdarm.life` is rendered server-side, so the request to this route comes from the songbook Worker, not from the visitor: the API sees the server's user agent (`node` in local dev), never the crawler's. The bot filter therefore only works for opens the browser fetches directly (song-to-song navigation inside the reader) and for direct API callers. Measured locally: a page view with a `SemrushBot` user agent was counted. Closing it needs `apps/songbook` to forward the visitor's user agent on that one fetch (the API would still read and discard it) — a decision left open in issue #197.
+
+The upsert's create-then-increment behaviour is SQLite's and cannot be unit-tested under the rules in [testing.md](testing.md) (the test D1 has no migrations). `src/middleware/song-opens.test.ts` pins what can be: one in-place upsert per counted open, cache hits counted, nothing for a 404 or a crawler, and a failed write never failing the response. The rest was verified end to end against the local D1.
 
 ## Rate limiting
 
