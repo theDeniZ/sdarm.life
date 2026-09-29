@@ -49,6 +49,10 @@ const getSongRoute = createRoute({
   },
 });
 
+// Every successful response here is counted as a song open by `countSongOpen`
+// (middleware/song-opens.ts), mounted in index.ts in front of the edge cache.
+// It relies on the songbook site fetching this route with `cache: 'no-store'`
+// (apps/songbook/app/lib/api.ts) — a client-side cache there would under-count.
 router.openapi(getSongRoute, async (c) => {
   const db = drizzle(c.env.DB);
   const song = await repo.getSongById(db, c.req.valid('param').id);

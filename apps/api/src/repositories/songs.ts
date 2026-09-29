@@ -1,6 +1,6 @@
-import { and, asc, eq, like, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, like, or, sql } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import { songbooks, songParts, songSheets, songs } from '@sdarm/db';
+import { songbooks, songOpens, songParts, songSheets, songs } from '@sdarm/db';
 
 // ── Songbooks ─────────────────────────────────────────────────────────────────
 
@@ -285,6 +285,54 @@ export async function deleteSong(db: DrizzleD1Database, id: number) {
   await db.delete(songParts).where(eq(songParts.songId, id));
   await db.delete(songs).where(eq(songs.id, id));
   return sheets.map((s) => s.key);
+}
+
+// ── Song opens ────────────────────────────────────────────────────────────────
+// A counter, not analytics: one row per song, incremented in place. Nothing
+// about the request is written — see docs/dsgvo.md before adding a column here.
+
+/** Count one open of an existing song. Creates the row on the first open. */
+export async function recordSongOpen(db: DrizzleD1Database, songId: number, now: Date = new Date()) {
+  await db
+    .insert(songOpens)
+    .values({ songId, opens: 1, lastOpened: now })
+    .onConflictDoUpdate({
+      target: songOpens.songId,
+      // In-place increment in the same statement — no read-modify-write, so two
+      // concurrent opens cannot overwrite each other's count.
+      set: { opens: sql`${songOpens.opens} + 1`, lastOpened: sql`excluded.last_opened` },
+    });
+}
+
+/** Most-opened songs first; `total` is how many songs have been opened at all. */
+export async function listTopSongs(db: DrizzleD1Database, limit: number) {
+  const [rows, [{ total }]] = await Promise.all([
+    db
+      .select({
+        id: songs.id,
+        number: songs.number,
+        title: songs.title,
+        sbTitle: songbooks.title,
+        sbSlug: songbooks.slug,
+        opens: songOpens.opens,
+        lastOpened: songOpens.lastOpened,
+      })
+      .from(songOpens)
+      .innerJoin(songs, eq(songOpens.songId, songs.id))
+      .innerJoin(songbooks, eq(songs.songbookId, songbooks.id))
+      .orderBy(desc(songOpens.opens), asc(songs.id))
+      .limit(limit),
+    db.select({ total: sql<number>`count(*)` }).from(songOpens),
+  ]);
+
+  return {
+    items: rows.map(({ sbTitle, sbSlug, lastOpened, ...r }) => ({
+      ...r,
+      songbook: { title: sbTitle, slug: sbSlug },
+      lastOpened: lastOpened ? lastOpened.toISOString() : null,
+    })),
+    total: total ?? 0,
+  };
 }
 
 // ── Song Parts ────────────────────────────────────────────────────────────────

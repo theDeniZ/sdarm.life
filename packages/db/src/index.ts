@@ -129,6 +129,15 @@ export const songSheets = sqliteTable('song_sheets', {
   index('song_sheets_song_id_idx').on(t.songId),
 ]);
 
+// One counter row per song, incremented in place by GET /api/v1/songs/{id}
+// (issue #197). Deliberately no event log and no request attribute of any kind —
+// see docs/dsgvo.md. `lastOpened` belongs to the song, not to a visitor.
+export const songOpens = sqliteTable('song_opens', {
+  songId:     integer('song_id').primaryKey().references(() => songs.id, { onDelete: 'cascade' }),
+  opens:      integer('opens').notNull().default(0),
+  lastOpened: integer('last_opened', { mode: 'timestamp' }),
+});
+
 export const treasures = sqliteTable('treasures', {
   id:               integer('id').primaryKey({ autoIncrement: true }),
   title:            text('title').notNull(),

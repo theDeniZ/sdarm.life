@@ -1,7 +1,8 @@
 import { fetchAll } from '../../lib/api';
 import { bucketByMonth, lastMonthKeys, monthLabel } from '../../lib/format';
 import { fetchSongbooks } from '../songbooks/repository';
-import type { SubscriberDto, ImageDto, PostDto } from '@sdarm/types';
+import { API, adminHeaders } from '../../lib/api';
+import type { SubscriberDto, ImageDto, PostDto, TopSongDto, ListResponse } from '@sdarm/types';
 
 export interface StatisticsData {
   monthLabels: string[];
@@ -20,6 +21,7 @@ export interface StatisticsData {
     withVideo: number;
   };
   songbooks: { title: string; count: number }[];
+  topSongs: TopSongDto[];
   media: {
     monthly: number[];
     total: number;
@@ -28,11 +30,12 @@ export interface StatisticsData {
 }
 
 export async function fetchStatisticsData(): Promise<StatisticsData> {
-  const [subsRes, postsRes, songbooks, imagesRes] = await Promise.all([
+  const [subsRes, postsRes, songbooks, imagesRes, topSongs] = await Promise.all([
     fetchAll<SubscriberDto>('/api/v1/admin/subscribers'),
     fetchAll<PostDto>('/api/v1/posts'),
     fetchSongbooks(),
     fetchAll<ImageDto>('/api/v1/admin/images'),
+    fetchTopSongs(10),
   ]);
 
   const months = lastMonthKeys(12);
@@ -69,6 +72,7 @@ export async function fetchStatisticsData(): Promise<StatisticsData> {
       withVideo: postsRes.items.filter((p) => p.videoUrl).length,
     },
     songbooks: songbooks.map((b) => ({ title: b.title, count: b.songCount })).sort((a, b) => b.count - a.count),
+    topSongs: topSongs.items,
     media: {
       monthly: bucketByMonth(
         imagesRes.items.map((i) => i.uploaded),
@@ -78,4 +82,11 @@ export async function fetchStatisticsData(): Promise<StatisticsData> {
       totalBytes: imagesRes.items.reduce((sum, i) => sum + i.size, 0),
     },
   };
+}
+
+// Most-opened songs from the per-song counter (GET /admin/songs/top, issue #197).
+async function fetchTopSongs(limit: number): Promise<ListResponse<TopSongDto>> {
+  const res = await fetch(`${API}/api/v1/admin/songs/top?limit=${limit}&_t=${Date.now()}`, { headers: adminHeaders() });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return (await res.json()) as ListResponse<TopSongDto>;
 }

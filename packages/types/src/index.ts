@@ -97,6 +97,16 @@ export interface SongSearchResultDto {
   songbook: { id: number; title: string; slug: string };
 }
 
+/** GET /admin/songs/top — one row of the per-song open counter (issue #197). */
+export interface TopSongDto {
+  id: number;
+  number: number;
+  title: string;
+  songbook: { title: string; slug: string };
+  opens: number;
+  lastOpened: string | null;
+}
+
 export type TreasureType = 'book';
 
 export interface TreasureDto {
