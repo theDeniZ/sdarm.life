@@ -2,7 +2,9 @@ import { expect } from '@playwright/test';
 import { forEachTheme } from './helpers/themes';
 
 const BASE = 'http://localhost:3000';
-const SCREENSHOT_PARAMS = '?screenshot=1&screenshotLocation=Pforzheim&screenshotTime=14:30';
+// screenshotVerse pins pickVerse() (StatsGrid card + "Wort der Stunde") to one
+// index; without it both rotate with the hour the suite runs in (#198).
+const SCREENSHOT_PARAMS = '?screenshot=1&screenshotLocation=Pforzheim&screenshotTime=14:30&screenshotVerse=1';
 
 forEachTheme('web / home', async (page, theme) => {
   await page.goto(`${BASE}/de${SCREENSHOT_PARAMS}`);

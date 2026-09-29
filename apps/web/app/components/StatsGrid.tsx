@@ -8,7 +8,7 @@ import { useCurrentTheme, withTheme } from '@sdarm/ui';
 import { parseGridConfig, pick, resolveTextColor } from '@sdarm/types';
 import type { GridBlockConfig, HomeGridConfig } from '@sdarm/types';
 import QuoteShareModal from './QuoteShareModal';
-import { pickVerse, splitVerse, type Verse } from '../lib/verses';
+import { parseScreenshotVerse, pickVerse, splitVerse, type Verse } from '../lib/verses';
 import { r2url, type NewsData } from '../lib/api';
 
 // SDARM Germany on YouVersion. External link — nothing leaves the browser
@@ -101,8 +101,11 @@ export default function StatsGrid({ newsData, grid }: { newsData?: NewsData; gri
   const [verse, setVerse] = useState<Verse>({ text: '', ref: '' });
 
   useEffect(() => {
+    // ?screenshotVerse=<index> pins the pick for screenshot tests (like the
+    // Footer's ?screenshotTime=); absent, the verse rotates with the hour.
+    const override = parseScreenshotVerse(new URLSearchParams(window.location.search).get('screenshotVerse'));
     function refresh() {
-      setVerse(pickVerse(locale));
+      setVerse(pickVerse(locale, override));
     }
     refresh();
     const now = new Date();

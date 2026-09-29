@@ -4,6 +4,7 @@ import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import HeroWelcome from '../components/HeroWelcome';
 import StatsGrid from '../components/StatsGrid';
 import ScriptureVerseSection from '../components/ScriptureVerseSection';
+import { parseScreenshotVerse } from '../lib/verses';
 import {
   fetchTreasures,
   fetchSongbooks,
@@ -35,8 +36,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   };
 }
 
-export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function HomePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ screenshotVerse?: string | string[] }>;
+}) {
   const { locale } = await params;
+  const verseOverride = parseScreenshotVerse((await searchParams).screenshotVerse);
   setRequestLocale(locale);
 
   const [bookRaw, songbooksRaw, config] = await Promise.all([
@@ -67,7 +75,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <main id="main-content">
         <HeroWelcome locale={locale} />
         <StatsGrid newsData={newsData} grid={grid} />
-        <ScriptureVerseSection href={`${TREASURES_URL}/${locale}/bible`} locale={locale} />
+        <ScriptureVerseSection href={`${TREASURES_URL}/${locale}/bible`} locale={locale} hourOfWeek={verseOverride} />
       </main>
       <ConnectedFooter locale={locale} />
     </>
