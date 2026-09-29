@@ -545,6 +545,26 @@ apps/admin/app/styles/
 
 **Import order is the cascade order**, and it is the order the sections had in the single file they came from. Three small sections moved to join their domain — checkbox and file input into `forms.css`, the image library into `images.css`, the unused coming-soon stub into `states.css` — each only past sections with no selector in common. A before/after check — screenshots of every admin page at 1280 and 834 in both themes, and the computed style of every element on those pages — found no difference. A new file goes where nothing after it can override it by accident.
 
+`apps/treasures/app/styles/` follows the same rule for the site-wide files — imported one by one from `apps/treasures/app/layout.tsx`, no `globals.css` — with one addition: the EPUB reader's stylesheet is **layout-scoped**. `styles/reader/index.css` is imported only by `app/[locale]/books/[id]/layout.tsx`, so a route that does not render the reader (the catalogue above all) never loads it. The rules that come with that are in [frontend.md](frontend.md#stylesheets-appstyles).
+
+```
+apps/treasures/app/styles/
+  base.css             — fonts, reset, tokens, navbar overrides
+  catalog-hero.css     — photo hero behind PageHero
+  catalog.css          — filter bar, shop grid, bibles shelf, pagination, spinner
+  card.css             — item card: visual, badge, body
+  tome.css             — 3-D book cover
+  sections.css         — Bible / lesson cards on the shelf
+  quote.css            — scripture quote band
+  book-detail.css      — book page without an EPUB
+  book-request.css     — book-request hero button and modal
+  bible.css            — Bible reader: landing, index, picker, chapter, parallel view
+  bible-presenter.css  — Bible projector and presenter dashboard
+  bible-license.css    — copyright notice, license register
+  reduced-motion.css   — prefers-reduced-motion, global, last of the site-wide files
+  reader/              — EPUB reader; index.css is imported by books/[id]/layout.tsx only
+```
+
 Do not create `utils/` at the monorepo root for app-specific code — it breaks isolation. Only framework-free, truly cross-app logic belongs in a shared package.
 
 ### Constants

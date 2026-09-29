@@ -1,0 +1,54 @@
+/* ─── Sections on the shelf: the Bible and the Sabbath Bible Lesson ──────────
+   They are cards like the books, pinned ahead of them, and they carry a tint of
+   paper so the eye separates "a room to enter" from "a book to receive" without
+   being told. The tint is deliberately faint — a shelf that shouts in two
+   places is no longer a shelf. Both themes are set: on the dark ground the
+   colour is a wash, on white it is the paper itself. */
+
+.item-card--section .section-visual svg {
+  width: 62px;
+  height: 74px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.55;
+  transition: opacity 0.4s var(--ease);
+}
+.item-card--section:hover .section-visual svg {
+  opacity: 0.8;
+}
+
+/* the Bible: warm parchment */
+.item-card--bible {
+  background: rgba(201, 169, 110, 0.07);
+  border-color: rgba(201, 169, 110, 0.22);
+}
+.item-card--bible .section-visual {
+  color: var(--gold);
+}
+
+/* the lesson: the navy of the quarterly's own cover */
+.item-card--sbl {
+  background: rgba(122, 152, 196, 0.08);
+  border-color: rgba(122, 152, 196, 0.24);
+}
+.item-card--sbl .section-visual {
+  color: #9db4d4;
+}
+
+[data-theme='light'] .item-card--bible {
+  background: #faf6ee;
+  border-color: rgba(146, 114, 35, 0.18);
+}
+[data-theme='light'] .item-card--bible .section-visual {
+  color: #927223;
+}
+[data-theme='light'] .item-card--sbl {
+  background: #f2f5fa;
+  border-color: rgba(36, 66, 110, 0.16);
+}
+[data-theme='light'] .item-card--sbl .section-visual {
+  color: #24426e;
+}

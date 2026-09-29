@@ -1,0 +1,198 @@
+/* ── Settings panel ──────────────────────────────────────── */
+.epub-settings-wrap {
+  position: relative;
+}
+
+.epub-settings {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--reader-toolbar);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.1rem 1.1rem 1.2rem;
+  width: 280px;
+  z-index: 300;
+  /* A panel that hovers over a page needs to say "above", not cast weather.
+     32px of blur at 18% put a cloud over the text; the border already carries
+     the edge, so the shadow only has to lift it. */
+  box-shadow: 0 5px 16px rgba(0, 0, 0, 0.22);
+}
+
+/* Sepia was sharing the light theme's panel and came out grey-white on a warm
+   page. Each theme now keeps its own paper, and the shadow is tinted with it —
+   a neutral black shadow on a warm ground reads as dirt. */
+[data-reader-theme='sepia'] .epub-settings {
+  background: #fdf9f4;
+  border-color: rgba(100, 70, 30, 0.16);
+  box-shadow: 0 4px 14px rgba(90, 62, 28, 0.1);
+}
+[data-reader-theme='light'] .epub-settings {
+  background: #f5f4f2;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.07);
+}
+
+.epub-settings__label {
+  display: block;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 0.9rem;
+  margin-bottom: 0.55rem;
+}
+
+.epub-settings__label:first-child {
+  margin-top: 0;
+}
+
+/* Theme picker — dots only */
+.epub-theme-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.epub-theme-dot {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15);
+  transition:
+    border-color 0.15s,
+    transform 0.15s;
+}
+
+.epub-theme-dot:hover {
+  transform: scale(1.15);
+}
+
+.epub-theme-dot--active {
+  border-width: 2px;
+}
+
+/* Font size */
+.epub-font-size-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.epub-size-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(201, 169, 110, 0.06);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  color: var(--text);
+  font-family: 'Inter', sans-serif;
+  font-size: 0.85rem;
+  transition:
+    background 0.2s,
+    color 0.2s;
+  flex-shrink: 0;
+}
+
+.epub-size-btn:hover:not(:disabled) {
+  background: rgba(201, 169, 110, 0.14);
+  color: var(--gold);
+}
+
+.epub-size-btn:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.epub-font-size-val {
+  flex: 1;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem;
+  color: var(--text);
+}
+
+.epub-size-slider {
+  width: 100%;
+  margin-top: 0.5rem;
+  height: 2px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.epub-size-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--gold);
+  cursor: pointer;
+}
+
+/* Font family */
+.epub-font-row {
+  display: flex;
+  gap: 0.4rem;
+  flex-wrap: wrap;
+}
+
+.epub-font-btn {
+  padding: 0.36rem 0.75rem;
+  border-radius: 100px;
+  cursor: pointer;
+  font-size: 0.78rem;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+
+.epub-font-btn--active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.07);
+}
+
+/* Line height */
+.epub-lh-row {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.epub-lh-btn {
+  flex: 1;
+  padding: 0.42rem;
+  border-radius: 100px;
+  cursor: pointer;
+  font-size: 0.72rem;
+  border: 1px solid var(--border);
+  background: none;
+  color: var(--text);
+  letter-spacing: 0.04em;
+  font-family: 'Inter', sans-serif;
+  transition:
+    border-color 0.2s,
+    background 0.2s,
+    color 0.2s;
+}
+
+.epub-lh-btn--active {
+  border-color: var(--gold);
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.07);
+}

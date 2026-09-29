@@ -1,0 +1,128 @@
+/* ── TOME (3D book cover for treasures) ──
+   Layered stack: the printed face, the closed paper edge to the right,
+   the rear binding behind. Image keeps its natural aspect ratio so the
+   book reads as a real object rather than a stretched rectangle.
+   --tome-depth is per-instance (set inline by Book3DCover, range 11–22px). */
+.tome {
+  --tome-depth: 28px;
+  --tome-spine: #1a1108;
+  --tome-skin: linear-gradient(140deg, #1a1108, #0e0a06);
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 158px;
+  perspective: 1000px;
+  margin: 0 auto;
+}
+
+.tome-stack {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: rotateY(-8deg);
+  transition: transform 0.6s ease;
+}
+
+.tome:hover .tome-stack {
+  transform: translateY(-14px) rotateY(-28deg);
+}
+
+.tome:hover .tome-face {
+  box-shadow: -15px 8px 20px 0px rgba(0, 0, 0, 0.16);
+}
+
+.tome-edge {
+  position: absolute;
+  left: 100%;
+  top: 1%;
+  width: calc(var(--tome-depth) * 2);
+  height: 98%;
+  transform: translate(-55%, 0) rotateY(90deg);
+  background: linear-gradient(
+    90deg,
+    #fff 0%,
+    hsl(0, 0%, 94%) 5%,
+    #fff 10%,
+    hsl(0, 0%, 94%) 15%,
+    #fff 20%,
+    hsl(0, 0%, 94%) 25%,
+    #fff 30%,
+    hsl(0, 0%, 94%) 35%,
+    #fff 40%,
+    hsl(0, 0%, 94%) 45%,
+    #fff 50%,
+    hsl(0, 0%, 94%) 55%,
+    #fff 60%,
+    hsl(0, 0%, 94%) 65%,
+    #fff 70%,
+    hsl(0, 0%, 94%) 75%,
+    #fff 80%,
+    hsl(0, 0%, 94%) 85%,
+    #fff 90%,
+    hsl(0, 0%, 94%) 95%,
+    #fff 100%
+  );
+}
+
+.tome-bind {
+  position: absolute;
+  top: 0;
+  left: 1%;
+  width: 100%;
+  height: 100%;
+  transform: translateZ(calc(var(--tome-depth) * -1));
+  background-color: var(--tome-spine);
+  border-radius: 0 2px 2px 0;
+  box-shadow: none;
+  opacity: 0;
+  transition:
+    box-shadow 0.6s ease,
+    opacity 0.6s ease;
+}
+
+.tome:hover .tome-bind {
+  opacity: 1;
+}
+
+.tome-face {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 4;
+  object-fit: cover;
+  border-radius: 0 3px 3px 0;
+  transform: translateZ(var(--tome-depth));
+  box-shadow: 13px 8px 12px 0px rgba(0, 0, 0, 0.14);
+  transition: box-shadow 0.6s ease;
+  background: var(--tome-spine);
+}
+
+.tome-face--blank {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 14% 10%;
+  text-align: center;
+  background: var(--tome-skin);
+  border: 1px solid rgba(201, 169, 110, 0.2);
+  gap: 0.4rem;
+}
+
+.tome-mark {
+  color: rgba(201, 169, 110, 0.55);
+  font-size: 0.95rem;
+  letter-spacing: 0.1em;
+}
+
+.tome-name {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
+  color: rgba(225, 198, 148, 0.95);
+  overflow-wrap: break-word;
+  hyphens: auto;
+  margin-top: 0.45rem;
+}

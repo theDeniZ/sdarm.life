@@ -1,0 +1,267 @@
+/* ── Search highlight in content ──────────────────────────── */
+.epub-search-mark {
+  background: rgba(201, 169, 110, 0.35);
+  color: inherit;
+  padding: 0.05em 0.1em;
+  border-radius: 2px;
+}
+
+[data-reader-theme='sepia'] .epub-search-mark {
+  background: rgba(160, 105, 42, 0.25);
+}
+
+[data-reader-theme='light'] .epub-search-mark {
+  background: rgba(255, 213, 79, 0.45);
+}
+
+.epub-sidebar__toc-label {
+  padding: 0.8rem 1.4rem 0.35rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.52);
+  flex-shrink: 0;
+}
+
+.epub-sidebar__toc {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 1rem;
+}
+
+.epub-sidebar__toc::-webkit-scrollbar {
+  width: 3px;
+}
+
+.epub-sidebar__toc::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 110, 0.15);
+  border-radius: 2px;
+}
+
+/* ── TEXT HIGHLIGHT SYSTEM ───────────────────────────────── */
+
+.epub-chapter__body ::selection {
+  background: rgba(255, 214, 0, 0.45);
+  color: inherit;
+}
+
+.epub-chapter__body .hl {
+  border-radius: 3px 6px 3px 5px;
+  cursor: pointer;
+}
+.epub-chapter__body .hl-preview {
+  background-color: rgba(160, 160, 160, 0.3);
+  border-radius: 3px;
+  cursor: default;
+}
+
+/* Pastel highlight colors — simple background-color, works on all themes */
+.epub-chapter__body .hl-cream {
+  background-color: rgba(238, 225, 183, 0.75);
+}
+.epub-chapter__body .hl-honey {
+  background-color: rgba(230, 203, 138, 0.75);
+}
+.epub-chapter__body .hl-sage {
+  background-color: rgba(189, 210, 153, 0.75);
+}
+.epub-chapter__body .hl-mint {
+  background-color: rgba(225, 233, 183, 0.75);
+}
+.epub-chapter__body .hl-sky {
+  background-color: rgba(168, 199, 214, 0.75);
+}
+.epub-chapter__body .hl-rose {
+  background-color: rgba(238, 186, 183, 0.75);
+}
+.epub-chapter__body .hl-peach {
+  background-color: rgba(238, 211, 183, 0.75);
+}
+.epub-chapter__body .hl-periwinkle {
+  background-color: rgba(168, 175, 214, 0.75);
+}
+.epub-chapter__body .hl-lilac {
+  background-color: rgba(212, 168, 214, 0.75);
+}
+.epub-chapter__body .hl-lavender {
+  background-color: rgba(186, 168, 214, 0.75);
+}
+
+/* On dark theme — screen blend mode + higher opacity for visibility on dark #1a1918 background */
+[data-reader-theme='dark'] .epub-chapter__body .hl {
+  mix-blend-mode: screen;
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-cream {
+  background-color: rgba(238, 225, 183, 0.6);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-honey {
+  background-color: rgba(230, 203, 138, 0.6);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-sage {
+  background-color: rgba(189, 210, 153, 0.6);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-mint {
+  background-color: rgba(225, 233, 183, 0.6);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-sky {
+  background-color: rgba(168, 199, 214, 0.65);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-rose {
+  background-color: rgba(238, 186, 183, 0.6);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-peach {
+  background-color: rgba(238, 211, 183, 0.6);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-periwinkle {
+  background-color: rgba(168, 175, 214, 0.65);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-lilac {
+  background-color: rgba(212, 168, 214, 0.6);
+}
+[data-reader-theme='dark'] .epub-chapter__body .hl-lavender {
+  background-color: rgba(186, 168, 214, 0.6);
+}
+
+.hl-toolbar {
+  position: fixed;
+  z-index: 9999;
+  background: var(--reader-toolbar);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  box-shadow:
+    0 8px 32px rgba(0, 0, 0, 0.22),
+    0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: translateX(-50%);
+  pointer-events: all;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 0.15s,
+    visibility 0.15s;
+}
+.hl-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 22px);
+  gap: 6px;
+}
+.hl-toolbar.show {
+  opacity: 1;
+  visibility: visible;
+}
+[data-reader-theme='sepia'] .hl-toolbar,
+[data-reader-theme='light'] .hl-toolbar {
+  background: #f5f4f2;
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 4px 20px rgba(0, 0, 0, 0.12),
+    0 1px 4px rgba(0, 0, 0, 0.06);
+}
+
+.hl-color {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition:
+    transform 0.15s,
+    border-color 0.15s;
+}
+.hl-color:hover {
+  transform: scale(1.2);
+  border-color: rgba(0, 0, 0, 0.18);
+}
+
+.hl-c-cream {
+  background: #eee1b7;
+  box-shadow: 0 0 0 1px rgba(238, 225, 183, 0.6);
+}
+.hl-c-honey {
+  background: #e6cb8a;
+  box-shadow: 0 0 0 1px rgba(230, 203, 138, 0.6);
+}
+.hl-c-sage {
+  background: #bdd299;
+  box-shadow: 0 0 0 1px rgba(189, 210, 153, 0.6);
+}
+.hl-c-mint {
+  background: #e1e9b7;
+  box-shadow: 0 0 0 1px rgba(225, 233, 183, 0.6);
+}
+.hl-c-sky {
+  background: #a8c7d6;
+  box-shadow: 0 0 0 1px rgba(168, 199, 214, 0.6);
+}
+.hl-c-rose {
+  background: #eebab7;
+  box-shadow: 0 0 0 1px rgba(238, 186, 183, 0.6);
+}
+.hl-c-peach {
+  background: #eed3b7;
+  box-shadow: 0 0 0 1px rgba(238, 211, 183, 0.6);
+}
+.hl-c-periwinkle {
+  background: #a8afd6;
+  box-shadow: 0 0 0 1px rgba(168, 175, 214, 0.6);
+}
+.hl-c-lilac {
+  background: #d4a8d6;
+  box-shadow: 0 0 0 1px rgba(212, 168, 214, 0.6);
+}
+.hl-c-lavender {
+  background: #baa8d6;
+  box-shadow: 0 0 0 1px rgba(186, 168, 214, 0.6);
+}
+
+.hl-remove {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--border);
+  background: none;
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition:
+    border-color 0.15s,
+    color 0.15s;
+}
+.hl-remove:hover {
+  border-color: #ff3b30;
+  color: #ff3b30;
+}
+
+/* Cross-block selection shake feedback */
+@keyframes epub-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-4px);
+  }
+  40% {
+    transform: translateX(4px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(2px);
+  }
+}
+.epub-content--shake {
+  animation: epub-shake 0.5s ease;
+}

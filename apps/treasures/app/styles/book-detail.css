@@ -1,0 +1,87 @@
+/* ── BOOK DETAIL (renders when treasure has no epubUrl) ─────────────────── */
+
+.book-detail {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 6rem 2rem 5rem;
+  position: relative;
+}
+
+.book-detail__back {
+  position: absolute;
+  top: 5rem;
+  left: 2rem;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: var(--text);
+  text-decoration: none;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.book-detail__back:hover {
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.08);
+}
+[data-theme='light'] .book-detail__back {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+.book-detail__layout {
+  display: grid;
+  grid-template-columns: minmax(220px, 320px) 1fr;
+  gap: 4rem;
+  align-items: start;
+}
+
+.book-detail__cover {
+  position: sticky;
+  top: 6rem;
+}
+
+.book-detail__title {
+  font-family: 'DM Serif Display', 'Cormorant Garamond', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  line-height: 1.1;
+  margin: 0 0 0.5rem;
+  color: var(--text-strong, var(--text));
+}
+
+.book-detail__author {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--muted);
+  margin: 0 0 1.6rem;
+}
+
+.book-detail__desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05rem;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 0 0 2.4rem;
+}
+
+@media (max-width: 720px) {
+  .book-detail__layout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+  .book-detail__cover {
+    position: static;
+    max-width: 220px;
+    margin: 0 auto;
+  }
+  .book-detail__back {
+    top: 4.2rem;
+  }
+}

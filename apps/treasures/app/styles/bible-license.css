@@ -1,0 +1,112 @@
+/* Publisher copyright notice — several per-Bible licenses require the
+   notice to appear wherever the text is displayed. */
+.bible-copyright {
+  max-width: 720px;
+  margin: 2.5rem auto 0;
+  padding-top: 1.2rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.62em;
+  line-height: 1.6;
+  color: var(--muted);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  align-items: center;
+}
+.bible-copyright__item {
+  display: block;
+}
+.bible-copyright__source {
+  margin-right: 0.35em;
+  color: var(--text);
+}
+.bible-copyright__link {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 1.1em;
+  color: rgba(201, 169, 110, 0.85);
+  text-decoration: none;
+}
+.bible-copyright__link:hover {
+  color: rgba(201, 169, 110, 1);
+  text-decoration: underline;
+}
+
+/* Landing page — link to the full public register, below the translation grid. */
+.bible-license-register-cta {
+  margin: 2rem 0 0;
+  text-align: center;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+}
+.bible-license-register-cta a {
+  color: rgba(201, 169, 110, 0.85);
+  text-decoration: none;
+}
+.bible-license-register-cta a:hover {
+  color: rgba(201, 169, 110, 1);
+  text-decoration: underline;
+}
+
+/* ── License register page (/bible/licenses) ── */
+.bible-license-register {
+  max-width: 900px;
+  margin: 1.5rem auto 5rem;
+  padding: 0 1.5rem;
+}
+.bible-license-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+.bible-license-entry {
+  border: 1px solid rgba(201, 169, 110, 0.18);
+  border-radius: 4px;
+  padding: 1.5rem 1.75rem;
+  background: linear-gradient(180deg, rgba(201, 169, 110, 0.04), rgba(201, 169, 110, 0));
+}
+.bible-license-entry__head {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem 0.9rem;
+  margin-bottom: 1rem;
+}
+.bible-license-entry__name {
+  font-family: 'Fraunces', 'DM Serif Display', serif;
+  font-size: 1.35rem;
+  color: var(--text);
+  margin: 0;
+}
+.bible-license-entry__meta {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  color: var(--muted);
+}
+.bible-license-entry__facts {
+  display: grid;
+  gap: 0.75rem;
+  margin: 0;
+}
+.bible-license-entry__facts dt {
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.15rem;
+}
+.bible-license-entry__facts dd {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+.bible-license-entry__quote {
+  font-style: italic;
+}

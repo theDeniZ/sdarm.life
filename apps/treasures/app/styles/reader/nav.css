@@ -1,0 +1,39 @@
+/* ── Floating prev / next arrows ─────────────────────────── */
+.epub-float-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 10;
+  width: 36px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: rgba(201, 169, 110, 0.3);
+  transition: color 0.2s;
+}
+
+.epub-float-btn:hover {
+  color: var(--gold);
+}
+
+.epub-float-btn:disabled {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.epub-float-btn svg {
+  width: 10px;
+  height: 16px;
+}
+
+.epub-float-btn--prev {
+  left: 4px;
+}
+
+.epub-float-btn--next {
+  right: 4px;
+}
