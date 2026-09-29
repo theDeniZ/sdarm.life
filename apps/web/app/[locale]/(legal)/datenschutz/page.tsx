@@ -1,9 +1,11 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { localeAlternates } from '@sdarm/ui';
+import { WEB_URL } from '../../../lib/api';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'web.legal.datenschutz' });
-  return { title: t('metaTitle') };
+  return { title: t('metaTitle'), alternates: localeAlternates(WEB_URL, locale, '/datenschutz') };
 }
 
 export default async function DatenschutzPage({ params }: { params: Promise<{ locale: string }> }) {

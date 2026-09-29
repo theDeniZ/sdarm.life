@@ -1,11 +1,12 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
+import { ConnectedNavbar, ConnectedFooter, siteHomeMetadata } from '@sdarm/ui';
 import HeroWelcome from '../components/HeroWelcome';
 import StatsGrid from '../components/StatsGrid';
 import ScriptureVerseSection from '../components/ScriptureVerseSection';
 import { parseScreenshotVerse } from '../lib/verses';
 import {
+  API,
   fetchTreasures,
   fetchSongbooks,
   fetchConfig,
@@ -24,16 +25,16 @@ const BASE = WEB_URL;
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'web.metadata' });
-  const canonical = `${BASE}/${locale}`;
-  return {
+  return siteHomeMetadata({
+    app: 'web',
+    base: BASE,
+    api: API,
+    locale,
     title: t('title'),
     description: t('description'),
-    alternates: {
-      canonical,
-      languages: { de: `${BASE}/de`, en: `${BASE}/en`, 'x-default': `${BASE}/de` },
-    },
-    openGraph: { type: 'website', url: canonical, title: t('title'), description: t('description') },
-  };
+    ogTitle: t('ogTitle'),
+    ogDescription: t('ogDescription'),
+  });
 }
 
 export default async function HomePage({
