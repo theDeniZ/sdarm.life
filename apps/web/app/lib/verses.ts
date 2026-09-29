@@ -125,12 +125,32 @@ export const EN_VERSES: Verse[] = [
  * Pick a verse for the current hour.
  * Uses hour-of-week (0–167) so the verse changes every hour and
  * doesn't repeat at the same time across consecutive weeks.
+ *
+ * `hourOfWeek` overrides the clock. Screenshot tests pass it via
+ * `?screenshotVerse=<index>` (see parseScreenshotVerse) so the pick does not
+ * depend on the hour the suite runs in. Since the pick is `hour % length`,
+ * a value below the list length is simply the verse index.
  */
-export function pickVerse(locale: string): Verse {
+export function pickVerse(locale: string, hourOfWeek?: number): Verse {
   const verses = locale === 'en' ? EN_VERSES : DE_VERSES;
-  const now = new Date();
-  const hourOfWeek = now.getDay() * 24 + now.getHours(); // 0–167
-  return verses[hourOfWeek % verses.length];
+  const h =
+    hourOfWeek ??
+    (() => {
+      const now = new Date();
+      return now.getDay() * 24 + now.getHours(); // 0–167
+    })();
+  return verses[h % verses.length];
+}
+
+/**
+ * Parse the `?screenshotVerse=` query value into a pickVerse override.
+ * Returns undefined for a missing or malformed value, so real visitors keep
+ * the hourly rotation.
+ */
+export function parseScreenshotVerse(value: string | string[] | null | undefined): number | undefined {
+  const raw = Array.isArray(value) ? value[0] : value;
+  if (!raw || !/^\d+$/.test(raw)) return undefined;
+  return Number(raw);
 }
 
 /**

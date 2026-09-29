@@ -4,6 +4,7 @@ import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { fetchConfig, r2url, WEB_URL } from '../../lib/api';
 import ScriptureVerseSection from '../../components/ScriptureVerseSection';
+import { parseScreenshotVerse } from '../../lib/verses';
 import GlaubensLongRead, { type GlaubensArticle } from '../../components/GlaubensLongRead';
 
 export const dynamic = 'force-dynamic';
@@ -53,8 +54,15 @@ const ChurchDecoration = (
   </svg>
 );
 
-export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function AboutPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ screenshotVerse?: string | string[] }>;
+}) {
   const { locale } = await params;
+  const verseOverride = parseScreenshotVerse((await searchParams).screenshotVerse);
   setRequestLocale(locale);
   const t = await getTranslations('web.about');
 
@@ -101,7 +109,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
           ariaClose={tGlaubens('closeAria')}
         />
 
-        <ScriptureVerseSection locale={locale} />
+        <ScriptureVerseSection locale={locale} hourOfWeek={verseOverride} />
       </main>
 
       <ConnectedFooter locale={locale} />
