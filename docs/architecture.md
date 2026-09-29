@@ -44,6 +44,9 @@ packages/
 Lesson. It is a zero-build static site (one `index.html` with its CSS and JS
 inline, a service worker, its own web fonts, its own `datenschutz.html` /
 `impressum.html`, a mirror of the quarters), served by an assets-only Worker.
+It carries a static copy of the shared site navigation (`Navbar` from
+`@sdarm/ui`) inline — see [apps/sbl/README.md](../apps/sbl/README.md#the-site-navigation-is-a-copy);
+a change to the shared Navbar has to be repeated there.
 
 ```
 apps/sbl/
