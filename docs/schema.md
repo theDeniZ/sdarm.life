@@ -126,11 +126,15 @@ allowlist is still read as `yv:{n}`. Verse text for `loc:` translations lives in
 **nothing is stored** — see [api.md](api.md#bible-content).
 
 **`home_grid` is the one key that holds a document, not a scalar.** Its value is
-`JSON.stringify(HomeGridConfig)` — the six homepage bento blocks with roughly a
-dozen settings each in two languages, about a hundred values. Flat keys cannot
-carry that. Read it with `parseGridConfig()` from `@sdarm/types`, which merges
-whatever is stored onto the defaults and tolerates missing or malformed fields
-rather than throwing: a bad value in KV must not be able to blank the homepage.
+`JSON.stringify(HomeGridConfig)` — `slots` (which of the eight homepage bento
+blocks fills each of the four smaller slots) and `blocks` (roughly a dozen
+settings per block in two languages, well over a hundred values). Flat keys
+cannot carry that. Read it with `parseGridConfig()` from `@sdarm/types`, which
+merges whatever is stored onto the defaults and tolerates missing or malformed
+fields rather than throwing: a bad value in KV must not be able to blank the
+homepage. A value stored before `slots` existed is migrated on read — default
+layout, default visibility, every other stored setting kept; see
+[frontend.md](frontend.md#statsgrid-bento-grid).
 The generic admin Config page excludes this key; it is edited at `/home-grid`.
 
 **`email_digest` is a separate KV key, not a config key.** The subscriber digest

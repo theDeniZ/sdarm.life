@@ -24,6 +24,18 @@
   margin: 0 0 0.75rem;
 }
 
+.grid-editor__layout {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+.grid-editor__layout .grid-editor__sub {
+  margin: 0;
+}
+.grid-editor__layout .grid-editor__hint {
+  margin: 0;
+}
+
 .grid-editor__block.is-hidden {
   opacity: 0.55;
 }

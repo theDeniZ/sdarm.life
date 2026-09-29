@@ -51,6 +51,8 @@ export default defineConfig({
         SONGBOOK_URL: 'http://localhost:3002',
         EVENTS_URL: 'http://localhost:3003',
         TREASURES_URL: 'http://localhost:3004',
+        // The lesson card reads its quarter from the mock (see mockSblQuarters).
+        SBL_URL: `http://localhost:${MOCK_PORT}/sbl`,
       },
     },
     {

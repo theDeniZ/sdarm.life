@@ -2,9 +2,12 @@ import { expect } from '@playwright/test';
 import { forEachTheme } from './helpers/themes';
 
 const BASE = 'http://localhost:3000';
-// screenshotVerse pins pickVerse() (StatsGrid card + "Wort der Stunde") to one
-// index; without it both rotate with the hour the suite runs in (#198).
-const SCREENSHOT_PARAMS = '?screenshot=1&screenshotLocation=Pforzheim&screenshotTime=14:30&screenshotVerse=1';
+// screenshotVerse pins pickVerse() (the StatsGrid verse card when placed, and
+// "Wort der Stunde" on /about) to one index; without it both rotate with the
+// hour the suite runs in (#198). screenshotDate pins "today" for the home grid's
+// live cards — lesson of the week, Psalm of the day, song of the week.
+const SCREENSHOT_PARAMS =
+  '?screenshot=1&screenshotLocation=Pforzheim&screenshotTime=14:30&screenshotVerse=1&screenshotDate=2026-09-16';
 
 forEachTheme('web / home', async (page, theme) => {
   await page.goto(`${BASE}/de${SCREENSHOT_PARAMS}`);
@@ -13,16 +16,16 @@ forEachTheme('web / home', async (page, theme) => {
   // PlanetEarth WebGL canvas (Suspense fallback is null, so canvas == mounted).
   await page.waitForSelector('.hero-welcome canvas', { timeout: 30_000 });
   // StatsGrid replaced the masonry section on the home page. Two things happen
-  // after hydration and both change what the cards look like: the verse card is
-  // filled by an effect (the hour-based pick is kept out of SSR to avoid a
-  // hydration mismatch, so it is empty in the server HTML), and every
-  // [data-fit] headline is then stepped down a size ladder until it fits its
-  // card. Screenshotting before both have run captures a blank quote card and
-  // unfitted type.
+  // after hydration and both change what the cards look like: a verse card, if
+  // one is placed (the default layout has none), is filled by an effect (the
+  // hour-based pick is kept out of SSR to avoid a hydration mismatch, so it is
+  // empty in the server HTML), and every [data-fit] headline is then stepped
+  // down a size ladder until it fits its card. Screenshotting before both have
+  // run captures a blank quote card and unfitted type.
   await page.waitForFunction(
     () => {
       const ref = document.querySelector('.stats__card--quote .stats__card-sub');
-      if (!ref?.textContent?.trim()) return false;
+      if (document.querySelector('.stats__card--quote') && !ref?.textContent?.trim()) return false;
       const headlines = Array.from(document.querySelectorAll<HTMLElement>('.stats [data-fit]'));
       return headlines.length > 0 && headlines.every((el) => el.style.fontSize !== '');
     },

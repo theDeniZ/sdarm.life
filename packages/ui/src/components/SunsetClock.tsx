@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useRef } from 'react';
 import { useTranslations } from 'next-intl';
 import { getTimes } from 'suncalc';
 import { useSunsetLocation } from '../lib/sunset-location';
@@ -17,13 +17,29 @@ interface SunData {
   tomorrowSunset: number;
 }
 
+/** Which span the outer ring measures: daylight, the night, or the Sabbath. */
+type ClockPeriod = 'day' | 'night' | 'sabbath';
+
 interface ClockState {
   label: string;
   sublabel: string;
   timeVal: string;
   progress: number;
+  /** ms left in the current period — the tooltip spells it out per locale. */
+  remainingMs: number;
+  period: ClockPeriod;
   sunDay?: string;
 }
+
+type RingId = 'outer' | 'inner';
+
+/* A hover near a ring should count, not just a hit on the 16-unit stroke: each
+   ring gets an invisible 24-unit hit stroke, which meets the other ring's in
+   the gap between them (outer 66–90, inner 42–66). */
+const RING_HIT_WIDTH = 24;
+
+/** The tooltip waits this long, so a pointer passing over the rings does not flash it. */
+const TIP_DELAY_MS = 150;
 
 /* Sunset clock — "ring in ring". Geometry from the owner's reference mark, in its
    own units: a 172-unit box (the rings' outer extent), both strokes 16, the outer
@@ -132,6 +148,8 @@ function computeClock(sun: SunData, now: number, dow: number, clockT: (key: stri
       sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(todaySunset),
       progress: calcProgress(remaining, total),
+      remainingMs: remaining,
+      period: 'day',
       sunDay,
     };
   }
@@ -158,6 +176,8 @@ function computeClock(sun: SunData, now: number, dow: number, clockT: (key: stri
       sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(endTimeVal),
       progress: calcProgress(remaining, total),
+      remainingMs: remaining,
+      period: 'sabbath',
       sunDay,
     };
   }
@@ -170,6 +190,8 @@ function computeClock(sun: SunData, now: number, dow: number, clockT: (key: stri
       sublabel: fmtRemaining(remaining),
       timeVal: msToHHMM(todaySunset),
       progress: calcProgress(remaining, total),
+      remainingMs: remaining,
+      period: 'day',
       sunDay,
     };
   }
@@ -182,6 +204,8 @@ function computeClock(sun: SunData, now: number, dow: number, clockT: (key: stri
     sublabel: fmtRemaining(remaining),
     timeVal: msToHHMM(tomorrowSunrise),
     progress: calcProgress(remaining, total),
+    remainingMs: remaining,
+    period: 'night',
     sunDay,
   };
 }
@@ -247,6 +271,148 @@ function RingArc({ className, r, value }: { className: string; r: number; value:
   );
 }
 
+type RingProps = ReturnType<ReturnType<typeof useRingTips>>;
+
+/**
+ * Pointer, keyboard and touch handling for the ring tooltips. A mouse shows a
+ * ring's tip after TIP_DELAY_MS and hides it on leave; focus shows it at once;
+ * a tap shows it and keeps it until a tap anywhere outside the rings.
+ */
+function useRingTips(setTip: (ring: RingId | null) => void) {
+  const timer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const pinned = useRef<RingId | null>(null);
+
+  useEffect(() => {
+    function onDown(e: PointerEvent) {
+      if (!pinned.current) return;
+      if ((e.target as Element | null)?.closest?.('[data-sunset-ring]')) return;
+      pinned.current = null;
+      setTip(null);
+    }
+    document.addEventListener('pointerdown', onDown);
+    return () => {
+      document.removeEventListener('pointerdown', onDown);
+      clearTimeout(timer.current);
+    };
+  }, [setTip]);
+
+  return (ring: RingId) => ({
+    onPointerEnter: (e: React.PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      clearTimeout(timer.current);
+      timer.current = setTimeout(() => setTip(ring), TIP_DELAY_MS);
+    },
+    onPointerLeave: (e: React.PointerEvent) => {
+      if (e.pointerType !== 'mouse') return;
+      clearTimeout(timer.current);
+      if (!pinned.current) setTip(null);
+    },
+    onPointerDown: (e: React.PointerEvent) => {
+      if (e.pointerType === 'mouse') return;
+      pinned.current = pinned.current === ring ? null : ring;
+      setTip(pinned.current);
+    },
+    onFocus: () => setTip(ring),
+    onBlur: () => {
+      if (!pinned.current) setTip(null);
+    },
+    onKeyDown: (e: React.KeyboardEvent) => {
+      if (e.key !== 'Escape') return;
+      pinned.current = null;
+      setTip(null);
+    },
+  });
+}
+
+/**
+ * One ring: its track, its arc, an invisible wider stroke that takes the
+ * pointer, and a hairline just outside it that shows only on keyboard focus.
+ * Nothing here paints anything new at rest, so the clock looks the same until
+ * someone points at it.
+ */
+function RingGroup({
+  ring,
+  r,
+  value,
+  text,
+  tips,
+}: {
+  ring: RingId;
+  r: number;
+  value: number | null;
+  text: string | undefined;
+  tips: (ring: RingId) => RingProps;
+}) {
+  return (
+    <g
+      className={`sunset-ring sunset-ring--${ring}`}
+      data-sunset-ring={ring}
+      role={text ? 'img' : undefined}
+      aria-label={text}
+      tabIndex={text ? 0 : undefined}
+      {...(text ? tips(ring) : {})}
+    >
+      <circle className="sunset-ring-track" cx={RING_C} cy={RING_C} r={r} />
+      <RingArc className={`sunset-ring-${ring}`} r={r} value={value} />
+      <circle className="sunset-ring-hit" cx={RING_C} cy={RING_C} r={r} strokeWidth={RING_HIT_WIDTH} />
+      <circle className="sunset-ring-focus" cx={RING_C} cy={RING_C} r={r + 11} />
+    </g>
+  );
+}
+
+/**
+ * The tooltip for the ring in focus. Placed above the rings, centred; where
+ * that would leave the clock's host (the card) or the viewport it goes below
+ * them, and failing both it sits over them. It is decoration for sighted
+ * users — the ring itself carries the same text as its accessible name.
+ */
+function RingTip({ ring, text }: { ring: RingId | null; text: string | undefined }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const [pos, setPos] = useState<{ left: number; top: number } | null>(null);
+
+  useLayoutEffect(() => {
+    const el = ref.current;
+    const wrap = el?.parentElement;
+    if (!el || !wrap || !ring || !text) {
+      setPos(null);
+      return;
+    }
+    const w = wrap.getBoundingClientRect();
+    const tipW = el.offsetWidth;
+    const tipH = el.offsetHeight;
+    const host = wrap.closest('.sunset-clock')?.parentElement?.getBoundingClientRect();
+    let minX = Math.max(host?.left ?? 0, 8);
+    let maxX = Math.min(host?.right ?? window.innerWidth, window.innerWidth - 8);
+    // A half-width phone card is narrower than the tip: then the viewport is the bound.
+    if (maxX - minX < tipW) {
+      minX = 8;
+      maxX = window.innerWidth - 8;
+    }
+    const minY = Math.max(host?.top ?? 0, 8);
+    const maxY = Math.min(host?.bottom ?? window.innerHeight, window.innerHeight - 8);
+    const gap = 10;
+
+    let left = (w.width - tipW) / 2;
+    left = Math.min(Math.max(left, minX - w.left), maxX - w.left - tipW);
+    let top = -tipH - gap;
+    if (w.top + top < minY) top = w.height + gap;
+    if (w.top + top + tipH > maxY) top = (w.height - tipH) / 2;
+    setPos({ left, top });
+  }, [ring, text]);
+
+  if (!ring || !text) return null;
+  return (
+    <div
+      ref={ref}
+      className="sunset-tip"
+      aria-hidden="true"
+      style={pos ? { left: pos.left, top: pos.top } : { visibility: 'hidden' }}
+    >
+      {text}
+    </div>
+  );
+}
+
 export default function SunsetClock({ apiUrl = 'https://api.sdarm.life/api/v1' }: SunsetClockProps) {
   const clockT = useTranslations('common.clock');
 
@@ -259,7 +425,10 @@ export default function SunsetClock({ apiUrl = 'https://api.sdarm.life/api/v1' }
     sublabel: '…',
     timeVal: '–:––',
     progress: 0,
+    remainingMs: 0,
+    period: 'day',
   });
+  const [tip, setTip] = useState<RingId | null>(null);
   // null until the first tick, so the server render draws no week arc
   const [week, setWeek] = useState<number | null>(null);
 
@@ -349,28 +518,39 @@ export default function SunsetClock({ apiUrl = 'https://api.sdarm.life/api/v1' }
   const dayElapsed = week === null ? null : 1 - clock.progress;
   // Floored, so the label never says 100 % before the period is actually over.
   const pct = (v: number) => Math.floor(v * 100);
-  const ringsLabel =
+  const remainingText = (() => {
+    const totalMin = Math.floor(clock.remainingMs / 60000);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+    return h > 0 ? clockT('durationHM', { h, m }) : clockT('durationM', { m });
+  })();
+  // One text per ring, used for its tooltip and as its accessible name.
+  const ringText: Record<RingId, string | undefined> =
     dayElapsed === null || week === null
-      ? undefined
-      : `${clockT('ringDay', { label: clock.label, remaining: clock.sublabel, percent: pct(dayElapsed) })} ${
-          week >= 1 ? clockT('ringWeekSabbath') : clockT('ringWeek', { percent: pct(week) })
-        }`;
+      ? { outer: undefined, inner: undefined }
+      : {
+          outer: clockT('ringDay', {
+            label: clock.label,
+            remaining: remainingText,
+            percent: pct(dayElapsed),
+            period: clock.period,
+          }),
+          inner: week >= 1 ? clockT('ringWeekSabbath') : clockT('ringWeek', { percent: pct(week) }),
+        };
+
+  const tips = useRingTips(setTip);
 
   return (
     <div className="sunset-clock">
-      <div className="sunset-clock-wrap">
-        <svg
-          className="sunset-svg"
-          viewBox={`0 0 ${RING_BOX} ${RING_BOX}`}
-          role="img"
-          aria-label={ringsLabel}
-          aria-hidden={ringsLabel ? undefined : true}
-        >
-          <circle className="sunset-ring-track" cx={RING_C} cy={RING_C} r={RING_OUTER_R} />
-          <circle className="sunset-ring-track" cx={RING_C} cy={RING_C} r={RING_INNER_R} />
-          <RingArc className="sunset-ring-outer" r={RING_OUTER_R} value={dayElapsed} />
-          <RingArc className="sunset-ring-inner" r={RING_INNER_R} value={week} />
+      <div className={`sunset-clock-wrap${tip ? ` is-tip-${tip}` : ''}`}>
+        {/* Each ring is its own focusable image with its own name, so the
+            tooltip that explains it is reachable by pointer, keyboard and touch
+            alike. The ring under the pointer is the one that highlights. */}
+        <svg className="sunset-svg" viewBox={`0 0 ${RING_BOX} ${RING_BOX}`} aria-hidden={ringText.outer ? undefined : true}>
+          <RingGroup ring="outer" r={RING_OUTER_R} value={dayElapsed} text={ringText.outer} tips={tips} />
+          <RingGroup ring="inner" r={RING_INNER_R} value={week} text={ringText.inner} tips={tips} />
         </svg>
+        <RingTip ring={tip} text={tip ? ringText[tip] : undefined} />
         <div className="sunset-clock-inner">
           <div className="sunset-time-value">
             {clock.timeVal === '–:––' ? (

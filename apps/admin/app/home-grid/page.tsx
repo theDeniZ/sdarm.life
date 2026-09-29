@@ -9,9 +9,9 @@ export default function HomeGridPage() {
         <h1>Homepage grid</h1>
       </div>
       <p className="muted page-lead">
-        The six blocks of the bento section on the homepage, each in a fixed slot. There is no way to add or move one —
-        the column heights (724 = 350 + 350 = 420 + 280 = 350 + 350) are what keep the three columns ending on the same
-        line.
+        The bento section on the homepage: five slots of fixed size, eight blocks to fill them. The reading plan always
+        takes column 1; the four smaller slots take any of the other seven. The slot sizes never change — the column
+        heights (724 = 420 + 280 = 350 + 350) are what keep the three columns ending on the same line.
       </p>
       <HomeGridEditor />
     </>
