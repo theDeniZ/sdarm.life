@@ -47,7 +47,18 @@ interface ClockState {
   sunDay?: string;
 }
 
-const CIRC = 2 * Math.PI * 76;
+/* Sunset clock — "ring in ring". Geometry from the owner's reference mark, in its
+   own units: a 172-unit box (the rings' outer extent), both strokes 16, the outer
+   centre-line at r 78 and the inner at r 54, which leaves an 8-unit gap. */
+const RING_BOX = 172;
+const RING_C = RING_BOX / 2;
+const RING_OUTER_R = 78;
+const RING_INNER_R = 54;
+
+/* Screenshot mode pins the weekday as well as the time, so neither the labels
+   ("Bis Sabbat" on a Friday) nor the week ring depend on the day the suite runs.
+   Wednesday by default; ?screenshotDay=0–6 selects another (0 = Sunday). */
+const SCREENSHOT_DOW = 3;
 
 interface NominatimResult {
   lat: string;
@@ -197,6 +208,35 @@ function computeClock(sun: SunData, now: number, dow: number, clockT: (key: stri
   };
 }
 
+/**
+ * Progress through the week toward the next Sabbath: 0 when the last Sabbath
+ * ended (Saturday sunset), 1 when the next one begins (Friday sunset), and 1 for
+ * the whole Sabbath.
+ *
+ * Times are ms relative to today's midnight. Only today's and tomorrow's sunsets
+ * are known exactly; a boundary further away uses today's sunset instead. Sunset
+ * moves by at most ~3 min a day, so over a ~6-day span the error stays under 0.3%
+ * of the ring — invisible — and the two boundaries that matter most (the Sabbath
+ * starting today or tomorrow, ending today) are exact.
+ */
+function computeWeekProgress(sun: SunData, now: number, dow: number): number {
+  const DAY_MS = 86400000;
+  const { todaySunset, tomorrowSunset } = sun;
+  const afterSunset = now >= todaySunset;
+
+  if ((dow === 5 && afterSunset) || (dow === 6 && !afterSunset)) return 1;
+
+  // Days from today back to the Saturday whose sunset ended the last Sabbath
+  // (0 on Saturday evening), and forward to the Friday whose sunset starts the next.
+  const daysSinceSat = (dow + 1) % 7;
+  const daysToFri = dow === 6 ? 6 : 5 - dow;
+  const sunsetOn = (days: number) => days * DAY_MS + (days === 1 ? tomorrowSunset : todaySunset);
+
+  const start = sunsetOn(-daysSinceSat);
+  const end = sunsetOn(daysToFri);
+  return Math.min(1, Math.max(0, (now - start) / (end - start)));
+}
+
 function fetchSunData(lat: number, lng: number): SunData {
   const today = new Date();
   const tomorrow = new Date(today.getTime() + 86400000);
@@ -208,6 +248,25 @@ function fetchSunData(lat: number, lng: number): SunData {
     tomorrowSunrise: dateToMsOfDay(t2.sunrise),
     tomorrowSunset: dateToMsOfDay(t2.sunset),
   };
+}
+
+/**
+ * One progress arc. `pathLength` normalises the circumference to 1, so the dash
+ * is the value itself. Nothing is drawn at 0 — a zero-length dash with a round
+ * cap would still paint a dot at 12 o'clock — and 1 draws the whole circle.
+ */
+function RingArc({ className, r, value }: { className: string; r: number; value: number | null }) {
+  if (value === null || value <= 0) return null;
+  return (
+    <circle
+      className={className}
+      cx={RING_C}
+      cy={RING_C}
+      r={r}
+      pathLength={1}
+      strokeDasharray={value >= 1 ? undefined : `${value} 1`}
+    />
+  );
 }
 
 export default function Footer({
@@ -244,6 +303,8 @@ export default function Footer({
     timeVal: '–:––',
     progress: 0,
   });
+  // null until the first tick, so the server render draws no week arc
+  const [week, setWeek] = useState<number | null>(null);
 
   // Restore from localStorage on mount (client-only — server has no localStorage).
   // Allow overriding via query params for screenshot tests: ?screenshotLocation=Pforzheim&screenshotTime=14:30
@@ -280,7 +341,9 @@ export default function Footer({
         now = nowMs();
       }
 
-      const dow = new Date().getDay();
+      const dayParam = params.get('screenshotDay');
+      const pinnedDay = dayParam !== null && /^[0-6]$/.test(dayParam) ? Number(dayParam) : SCREENSHOT_DOW;
+      const dow = screenshotTime ? pinnedDay : new Date().getDay();
       const state = computeClock(sunData, now, dow, clockT);
 
       // Override display time directly when in screenshot mode
@@ -289,6 +352,7 @@ export default function Footer({
       }
 
       setClock(state);
+      setWeek(computeWeekProgress(sunData, now, dow));
     }
     tick();
     const id = setInterval(tick, 1000);
@@ -366,16 +430,19 @@ export default function Footer({
     } catch {}
   }
 
-  // Ring shows ELAPSED progress: fills up as time passes (empty at start, full when period ends)
-  const elapsed = 1 - clock.progress;
-  const dashOffset = CIRC * (1 - elapsed); // = CIRC * clock.progress
-  // Dot at the leading edge of the fill, going clockwise from 12 o'clock
-  const R = 76;
-  const CX = 90;
-  const CY = 90;
-  const angle = elapsed * 2 * Math.PI;
-  const dotX = CX + R * Math.cos(angle);
-  const dotY = CY + R * Math.sin(angle);
+  // Both rings show ELAPSED progress, clockwise from 12 o'clock: empty at the
+  // start of the period, full at its end. Outer — the current period (day, night,
+  // Sabbath), exactly what the single ring used to show. Inner — the week.
+  // `week` is set by the same tick as `clock`, so null means "not computed yet".
+  const dayElapsed = week === null ? null : 1 - clock.progress;
+  // Floored, so the label never says 100 % before the period is actually over.
+  const pct = (v: number) => Math.floor(v * 100);
+  const ringsLabel =
+    dayElapsed === null || week === null
+      ? undefined
+      : `${clockT('ringDay', { label: clock.label, remaining: clock.sublabel, percent: pct(dayElapsed) })} ${
+          week >= 1 ? clockT('ringWeekSabbath') : clockT('ringWeek', { percent: pct(week) })
+        }`;
 
   return (
     <footer className="site-footer">
@@ -475,22 +542,17 @@ export default function Footer({
         {/* Column 3: sunset clock */}
         <div className="footer-sunset">
           <div className="sunset-clock-wrap">
-            <svg className="sunset-svg" viewBox="0 0 180 180">
-              <circle className="sunset-ring-track" cx="90" cy="90" r="76" />
-              <circle
-                className="sunset-ring-fill"
-                cx="90"
-                cy="90"
-                r="76"
-                strokeDasharray={CIRC}
-                strokeDashoffset={dashOffset}
-              />
-              {clock.progress > 0 && clock.progress < 1 && (
-                <>
-                  <circle className="sunset-ring-dot" cx={dotX} cy={dotY} r="5" />
-                  <circle className="sunset-ring-dot-glow" cx={dotX} cy={dotY} r="9" />
-                </>
-              )}
+            <svg
+              className="sunset-svg"
+              viewBox={`0 0 ${RING_BOX} ${RING_BOX}`}
+              role="img"
+              aria-label={ringsLabel}
+              aria-hidden={ringsLabel ? undefined : true}
+            >
+              <circle className="sunset-ring-track" cx={RING_C} cy={RING_C} r={RING_OUTER_R} />
+              <circle className="sunset-ring-track" cx={RING_C} cy={RING_C} r={RING_INNER_R} />
+              <RingArc className="sunset-ring-outer" r={RING_OUTER_R} value={dayElapsed} />
+              <RingArc className="sunset-ring-inner" r={RING_INNER_R} value={week} />
             </svg>
             <div className="sunset-clock-inner">
               <div className="sunset-time-value">

@@ -282,8 +282,10 @@
 }
 .sunset-clock-wrap {
   position: relative;
-  width: 160px;
-  height: 160px;
+  /* Sized so "14:30" clears the inner ring: its inner edge sits at 46/172 of the
+     box (see RING_* in Footer.tsx), ~48px from the centre at 180px. */
+  width: 180px;
+  height: 180px;
   margin-bottom: 1rem;
   flex-shrink: 0;
   animation: clock-breathe 5s ease-in-out infinite;
@@ -292,35 +294,41 @@
   0%, 100% { filter: drop-shadow(0 0 8px rgba(201, 169, 110, 0.08)); }
   50%       { filter: drop-shadow(0 0 18px rgba(201, 169, 110, 0.2)); }
 }
+/* Ring in ring. The footer is dark in both themes and pins --gold to its
+   dark-theme value (tokens.css), so one palette serves both: the inner (week)
+   ring in the full accent, the outer (day) ring a paler gold — lighter outside,
+   stronger inside, as in the reference mark — over a dim warm-white track, mixed
+   into the footer colour rather than translucent so the map does not show
+   through it. */
 .sunset-svg {
+  --ring-track: color-mix(in srgb, var(--text) 12%, var(--footer-bg));
+  --ring-outer: color-mix(in srgb, var(--gold) 55%, #fff);
+  --ring-inner: var(--gold);
+  display: block;
   width: 100%;
   height: 100%;
+  /* Circles start at 3 o'clock; a quarter turn back makes every arc start at 12
+     and run clockwise. */
   transform: rotate(-90deg);
 }
+.sunset-ring-track,
+.sunset-ring-outer,
+.sunset-ring-inner {
+  fill: none;
+  stroke-width: 16;
+}
 .sunset-ring-track {
-  fill: none;
-  stroke: #3a3025;
-  stroke-width: 6;
+  stroke: var(--ring-track);
 }
-.sunset-ring-fill {
-  fill: none;
-  stroke: var(--gold);
-  stroke-width: 6;
+.sunset-ring-outer,
+.sunset-ring-inner {
   stroke-linecap: round;
-  transition: stroke-dashoffset 0.9s cubic-bezier(0.76, 0, 0.24, 1);
 }
-.sunset-ring-dot {
-  fill: var(--gold);
-  transition: cx 0.9s cubic-bezier(0.76, 0, 0.24, 1), cy 0.9s cubic-bezier(0.76, 0, 0.24, 1);
+.sunset-ring-outer {
+  stroke: var(--ring-outer);
 }
-.sunset-ring-dot-glow {
-  fill: rgba(201, 169, 110, 0.22);
-  transition: cx 0.9s cubic-bezier(0.76, 0, 0.24, 1), cy 0.9s cubic-bezier(0.76, 0, 0.24, 1);
-  animation: dot-pulse 2s ease-in-out infinite;
-}
-@keyframes dot-pulse {
-  0%, 100% { opacity: 0.22; }
-  50%       { opacity: 0.6; }
+.sunset-ring-inner {
+  stroke: var(--ring-inner);
 }
 .sunset-clock-inner {
   position: absolute;
@@ -568,8 +576,8 @@
     padding: 2.5rem;
   }
   .sunset-clock-wrap {
-    width: 130px;
-    height: 130px;
+    width: 150px;
+    height: 150px;
     margin-bottom: 0;
   }
   .sunset-time-value {
@@ -616,8 +624,8 @@
     border-top: 1px solid rgba(201, 169, 110, 0.07);
   }
   .sunset-clock-wrap {
-    width: 110px;
-    height: 110px;
+    width: 132px;
+    height: 132px;
     margin-bottom: 0;
     flex-shrink: 0;
   }

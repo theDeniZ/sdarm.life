@@ -40,7 +40,10 @@
       "untilSunset": "Bis Sonnenuntergang",
       "untilSunrise": "Bis Sonnenaufgang",
       "defaultLocation": "Pforzheim, Baden-Württemberg",
-      "sunset": "Untergang"
+      "sunset": "Untergang",
+      "ringDay": "{label}: noch {remaining}, {percent} % vergangen.",
+      "ringWeek": "Woche bis zum Sabbat: {percent} %.",
+      "ringWeekSabbath": "Es ist Sabbat."
     },
     "comingSoon": "Demnächst",
     "back": "← Zurück",

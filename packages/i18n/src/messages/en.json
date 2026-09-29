@@ -40,7 +40,10 @@
       "untilSunset": "Until sunset",
       "untilSunrise": "Until sunrise",
       "defaultLocation": "Pforzheim, Baden-Württemberg",
-      "sunset": "Sunset"
+      "sunset": "Sunset",
+      "ringDay": "{label}: {remaining} left, {percent}% elapsed.",
+      "ringWeek": "Week until Sabbath: {percent}%.",
+      "ringWeekSabbath": "It is the Sabbath."
     },
     "comingSoon": "Coming soon",
     "back": "← Back",
