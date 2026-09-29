@@ -44,6 +44,8 @@
   display: block;
   width: 100%;
   height: 100%;
+  /* The hit strokes and the focus hairline reach a few units past the box. */
+  overflow: visible;
   /* Circles start at 3 o'clock; a quarter turn back makes every arc start at 12
      and run clockwise. */
   transform: rotate(-90deg);
@@ -68,12 +70,81 @@
   stroke: var(--ring-inner);
 }
 
+/* ── Ring tooltips ──
+   Each ring is a focusable group. The invisible hit stroke takes the pointer;
+   the hairline outside the ring is the keyboard focus indicator. While a tip
+   is open its ring steps up a little and the other one steps back — the
+   change is small on purpose, the tooltip is what explains. */
+.sunset-ring {
+  cursor: default;
+  outline: none;
+  transition: opacity 0.3s ease;
+}
+.sunset-ring-track,
+.sunset-ring-outer,
+.sunset-ring-inner {
+  transition: stroke-width 0.3s ease;
+}
+.sunset-ring-hit {
+  fill: none;
+  stroke: transparent;
+  pointer-events: stroke;
+}
+.sunset-ring-focus {
+  fill: none;
+  stroke: var(--sunset-text);
+  stroke-width: 1.5;
+  opacity: 0;
+  pointer-events: none;
+}
+.sunset-ring:focus-visible .sunset-ring-focus {
+  opacity: 0.7;
+}
+.sunset-clock-wrap.is-tip-outer .sunset-ring--inner,
+.sunset-clock-wrap.is-tip-inner .sunset-ring--outer {
+  opacity: 0.4;
+}
+.sunset-clock-wrap.is-tip-outer .sunset-ring--outer :is(.sunset-ring-track, .sunset-ring-outer),
+.sunset-clock-wrap.is-tip-inner .sunset-ring--inner :is(.sunset-ring-track, .sunset-ring-inner) {
+  stroke-width: 18;
+}
+
+.sunset-tip {
+  position: absolute;
+  z-index: 5;
+  width: max-content;
+  max-width: min(240px, calc(100vw - 16px));
+  padding: 8px 12px;
+  background: var(--sunset-surface);
+  border: 1px solid var(--sunset-line);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.45;
+  color: var(--sunset-text);
+  text-align: left;
+  pointer-events: none;
+  animation: sunset-tip-in 0.18s ease-out;
+}
+@keyframes sunset-tip-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
 .sunset-clock-inner {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
+  /* Lies over the rings; the pointer has to reach them through it. */
+  pointer-events: none;
 }
 .sunset-time-value {
   font-family: 'DM Serif Display', serif;
@@ -233,9 +304,14 @@
 
 @media (prefers-reduced-motion: reduce) {
   .sunset-colon,
-  .sunset-suggestions {
+  .sunset-suggestions,
+  .sunset-tip {
     animation: none;
   }
+  .sunset-ring,
+  .sunset-ring-track,
+  .sunset-ring-outer,
+  .sunset-ring-inner,
   .sunset-location-form,
   .sunset-location-btn,
   .sunset-suggestion-item {

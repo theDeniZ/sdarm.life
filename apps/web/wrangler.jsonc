@@ -14,7 +14,8 @@
     "WEB_URL": "https://sdarm.life",
     "SONGBOOK_URL": "https://songs.sdarm.life",
     "EVENTS_URL": "https://events.sdarm.life",
-    "TREASURES_URL": "https://treasures.sdarm.life"
+    "TREASURES_URL": "https://treasures.sdarm.life",
+    "SBL_URL": "https://sbl.sdarm.life"
   },
   "env": {
     "staging": {
@@ -25,7 +26,8 @@
         "WEB_URL": "https://sdarm-web-staging.mine-a8f.workers.dev",
         "SONGBOOK_URL": "https://sdarm-songbook-staging.mine-a8f.workers.dev",
         "EVENTS_URL": "https://sdarm-events-staging.mine-a8f.workers.dev",
-        "TREASURES_URL": "https://sdarm-treasures-staging.mine-a8f.workers.dev"
+        "TREASURES_URL": "https://sdarm-treasures-staging.mine-a8f.workers.dev",
+        "SBL_URL": "https://sdarm-sbl-staging.mine-a8f.workers.dev"
       }
     }
   }

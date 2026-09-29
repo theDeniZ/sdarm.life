@@ -40,9 +40,11 @@
       "untilSunrise": "Until sunrise",
       "defaultLocation": "Pforzheim, Baden-Württemberg",
       "sunset": "Sunset",
-      "ringDay": "{label}: {remaining} left, {percent}% elapsed.",
-      "ringWeek": "Week until Sabbath: {percent}%.",
-      "ringWeekSabbath": "It is the Sabbath.",
+      "ringDay": "{label}: {remaining} left · {percent}% of the {period, select, night {night} sabbath {Sabbath} other {day}} gone",
+      "ringWeek": "Week until Sabbath: {percent}%",
+      "ringWeekSabbath": "Sabbath — the week is complete",
+      "durationHM": "{h} h {m} min",
+      "durationM": "{m} min",
       "locationPlaceholder": "City or ZIP",
       "locationInputAria": "Enter city or postal code",
       "locationUpdateAria": "Update location"
@@ -113,8 +115,21 @@
         "cta": "Open",
         "phoneAlt": "Reading plan in the YouVersion app"
       },
-      "sunset": {
-        "label": "Sabbath · Sunset"
+      "bible": {
+        "label": "Bible",
+        "title": "Read the <em>Bible</em>",
+        "kicker": "Today",
+        "psalm": "Psalm <em>{n}</em>",
+        "translations": "{count, plural, one {# translation} other {# translations, side by side}}",
+        "cta": "Read"
+      },
+      "sbl": {
+        "label": "Sabbath School",
+        "title": "This week's<br></br><em>lesson</em>",
+        "sub": "In the printed booklet's layout — mark it, write on it, save it as PDF.",
+        "kicker": "Lesson {no}",
+        "quarter": "Quarter: “{title}”",
+        "cta": "Open"
       },
       "invite": {
         "title": "Come<br></br><em>as you are</em>",
@@ -126,7 +141,10 @@
       },
       "songs": {
         "label": "Hymnal",
-        "title": "Songs of <em>faith</em>"
+        "title": "Songs of <em>faith</em>",
+        "weekly": "Song of the week",
+        "number": "No. {number}",
+        "count": "{songs, plural, one {# song} other {# songs}} in {books, plural, one {# songbook} other {# songbooks}}"
       },
       "faith": {
         "title": "Foundations<br></br>of our faith"

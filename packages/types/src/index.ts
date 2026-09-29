@@ -355,16 +355,33 @@ export interface BibleSearchHitDto {
 }
 
 /* ── Homepage bento grid ──────────────────────────────────────────────────
-   The grid has a fixed set of six blocks in fixed slots, and no way to add or
-   move one: the column arithmetic (350+24+350 = 420+24+280 = 350+24+350 = 724)
-   is what keeps the three columns ending on the same line, and a block in
-   another slot would break it. So the config configures the six that exist
-   rather than describing an arbitrary list. */
+   Five slots of fixed size: column 1 is the reading plan alone (724), column 2
+   holds 420 + 280, column 3 holds 350 + 350. The column arithmetic
+   (724 = 420+24+280 = 350+24+350) is what keeps the three columns ending on the
+   same line, so the slots never change size and there is no way to add one.
+   What an editor can change is which block sits in each of the four smaller
+   slots: eight blocks exist, five are on the page. */
 
-export type GridBlockId = 'plan' | 'sunset' | 'verse' | 'invite' | 'book' | 'faith';
+export type GridBlockId = 'plan' | 'sunset' | 'bible' | 'sbl' | 'book' | 'verse' | 'invite' | 'faith';
 
-/** Fixed slots, in render order. Each block occupies exactly one. */
-export const GRID_BLOCK_IDS: GridBlockId[] = ['plan', 'sunset', 'verse', 'invite', 'book', 'faith'];
+/** Every block the config carries, placed or not. */
+export const GRID_BLOCK_IDS: GridBlockId[] = ['plan', 'sunset', 'bible', 'sbl', 'book', 'verse', 'invite', 'faith'];
+
+/** The four smaller slots, in render order: column 2 top and bottom, column 3 top and bottom. */
+export type GridSlotId = 'col2Top' | 'col2Bottom' | 'col3Top' | 'col3Bottom';
+
+export const GRID_SLOT_IDS: GridSlotId[] = ['col2Top', 'col2Bottom', 'col3Top', 'col3Bottom'];
+
+/** Height of each slot on desktop — the numbers the column arithmetic is made of. */
+export const GRID_SLOT_HEIGHTS: Record<GridSlotId, number> = {
+  col2Top: 420,
+  col2Bottom: 280,
+  col3Top: 350,
+  col3Bottom: 350,
+};
+
+/** Blocks that can go into a slot. The reading plan always fills column 1. */
+export const GRID_SLOT_BLOCK_IDS: GridBlockId[] = GRID_BLOCK_IDS.filter((id) => id !== 'plan');
 
 export type GridScrim = 'none' | 'light' | 'medium' | 'strong';
 export type GridTextColor = 'auto' | 'light' | 'dark';
@@ -406,6 +423,12 @@ export interface GridBlockConfig {
 }
 
 export interface HomeGridConfig {
+  /**
+   * Which block fills each of the four smaller slots; null leaves the slot
+   * empty. A block that is in no slot is not rendered, whatever its `visible`
+   * says — `visible` hides a placed block without giving up its slot.
+   */
+  slots: Record<GridSlotId, GridBlockId | null>;
   blocks: Record<GridBlockId, GridBlockConfig>;
 }
 
@@ -453,12 +476,28 @@ export function defaultGridConfig(): HomeGridConfig {
   blocks.faith.showLabel = false;
   blocks.book.showButton = false;
   // The sunset card is the clock and its location field — nothing to follow and
-  // no button. A stored config from before it existed has no entry for it, so
-  // parseGridConfig() fills these in and the card appears without an edit.
+  // no button.
   blocks.sunset.clickable = false;
   blocks.sunset.showButton = false;
+  // Out of the default layout; an editor can put them back into a slot.
+  blocks.verse.visible = false;
+  blocks.invite.visible = false;
+  blocks.faith.visible = false;
 
-  return { blocks };
+  return { slots: defaultGridSlots(), blocks };
+}
+
+/**
+ * The default layout: the clock takes the tallest small slot, the lesson the
+ * shortest, the Bible and the songbook share column 3.
+ */
+export function defaultGridSlots(): Record<GridSlotId, GridBlockId | null> {
+  return { col2Top: 'sunset', col2Bottom: 'sbl', col3Top: 'bible', col3Bottom: 'book' };
+}
+
+/** The slot a block sits in, or null when it is not on the page. */
+export function slotOf(config: HomeGridConfig, id: GridBlockId): GridSlotId | null {
+  return GRID_SLOT_IDS.find((slot) => config.slots[slot] === id) ?? null;
 }
 
 const SCRIMS: GridScrim[] = ['none', 'light', 'medium', 'strong'];
@@ -505,9 +544,38 @@ function mergeBlock(raw: unknown, base: GridBlockConfig): GridBlockConfig {
 }
 
 /**
+ * Read the stored slot map. Each slot takes a known, slottable block that no
+ * earlier slot already holds; anything else leaves the slot empty. `null` is a
+ * valid stored value (an empty slot).
+ */
+function mergeSlots(raw: Record<string, unknown>): Record<GridSlotId, GridBlockId | null> {
+  const slots = {} as Record<GridSlotId, GridBlockId | null>;
+  const used = new Set<GridBlockId>();
+  for (const slot of GRID_SLOT_IDS) {
+    const v = raw[slot];
+    if (typeof v === 'string' && GRID_SLOT_BLOCK_IDS.includes(v as GridBlockId) && !used.has(v as GridBlockId)) {
+      slots[slot] = v as GridBlockId;
+      used.add(v as GridBlockId);
+    } else {
+      slots[slot] = null;
+    }
+  }
+  return slots;
+}
+
+/**
  * Merge a stored config onto the defaults. Anything missing, malformed or of
  * the wrong type falls back rather than throwing — a bad value in KV must not
  * be able to take the homepage down.
+ *
+ * Migration rule for configs stored before the slots existed (no `slots` key —
+ * every config the editor saved while the blocks had fixed places): the layout becomes the default
+ * one (plan · sunset · lesson · Bible · songbook) and every block's `visible`
+ * is reset to its default, so exactly those five show even where the stored
+ * config had the verse, invitation or points-of-faith card switched on.
+ * Everything else a block stored — texts, images, links, toggles — is kept.
+ * The first save from the admin writes `slots`, and from then on the stored
+ * config is read as it is.
  */
 export function parseGridConfig(raw: string | null | undefined): HomeGridConfig {
   const base = defaultGridConfig();
@@ -527,7 +595,13 @@ export function parseGridConfig(raw: string | null | undefined): HomeGridConfig 
   const merged = {} as Record<GridBlockId, GridBlockConfig>;
   for (const id of GRID_BLOCK_IDS) merged[id] = mergeBlock(blocks[id], base.blocks[id]);
 
-  return { blocks: merged };
+  const hasSlots = !!o.slots && typeof o.slots === 'object';
+  if (!hasSlots) {
+    for (const id of GRID_BLOCK_IDS) merged[id].visible = base.blocks[id].visible;
+    return { slots: base.slots, blocks: merged };
+  }
+
+  return { slots: mergeSlots(o.slots as Record<string, unknown>), blocks: merged };
 }
 
 /** Config text wins when set; otherwise the translation does. */

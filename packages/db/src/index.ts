@@ -23,9 +23,9 @@ export const KNOWN_CONFIG_KEYS = [
   'bible_translations',
   /**
    * Homepage bento grid. Unlike every other key this holds a JSON document
-   * (HomeGridConfig from @sdarm/types) rather than a scalar: the grid has five
-   * blocks with roughly a dozen settings each in two languages, which is about
-   * a hundred values — far past what flat keys can carry sanely.
+   * (HomeGridConfig from @sdarm/types) rather than a scalar: the grid has eight
+   * blocks with roughly a dozen settings each in two languages plus the slot
+   * map, well over a hundred values — far past what flat keys can carry sanely.
    */
   'home_grid',
 ] as const;
