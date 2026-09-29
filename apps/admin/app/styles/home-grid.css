@@ -109,27 +109,6 @@
   border-top: 1px solid var(--border);
 }
 
-.grid-editor__upload {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 0.8rem;
-  border: 1px dashed var(--border-2);
-  border-radius: var(--r);
-  cursor: pointer;
-  font-size: 0.86rem;
-}
-.grid-editor__upload input {
-  max-width: 200px;
-  font-size: 0.78rem;
-}
-
-.grid-editor__error {
-  margin: 0;
-  color: var(--red-text);
-  font-size: 0.82rem;
-}
-
 /* 3×3 crop picker — which part of the photo must survive the crop */
 .grid-editor__positions {
   display: grid;

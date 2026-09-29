@@ -26,3 +26,24 @@
   font-weight: 600;
   color: var(--heading);
 }
+
+/* Several header buttons stay together on the right; as bare flex children
+   the space-between spread them across the row. */
+.page-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* Intro paragraph under a page title (Homepage grid). */
+.page-lead {
+  max-width: 760px;
+  margin: -16px 0 24px;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+/* Secondary text. The home-grid editor came over from the public site, where
+   `.muted` is a utility class; the admin never defined it, so every hint on
+   that page rendered at full text colour. */
+.muted { color: var(--muted); }

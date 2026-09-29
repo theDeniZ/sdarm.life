@@ -38,7 +38,7 @@
 /* Two classes, for the same reason as the selects above: `.form-row textarea`
    sets the UI font, and this field holds HTML source. */
 .form-row .email-body {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--font-mono);
   font-size: 12px;
 }
 
@@ -78,8 +78,10 @@
    1024, and 2px at 834, while still 700px tall. Stack instead, and let the
    preview take a height it can actually be read at. */
 @media (max-width: 1100px) {
+  /* minmax(0, …): a bare 1fr keeps the form's min-content width as a floor,
+     which pushed the card 40px past a 375px screen. */
   .email-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .email-preview {
     position: static;
