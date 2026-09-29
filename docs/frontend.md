@@ -173,6 +173,19 @@ The reading-plan card stays as it was: its config has only label, headline and b
 
 **Fallback.** Until the first tick (and in the server HTML) the time shows `'–:––'` and no arcs are drawn; a failed geocode request is silently ignored.
 
+### SDARM.life wordmark
+
+One mark everywhere: `SDARM` in Cormorant Garamond Bold with 0.04em tracking, in the surface's primary text colour; `.life` in Cormorant Garamond Bold Italic, untracked, in the brand gold (`--gold`: `#c9a96e` dark, `#866a1f` light). Size scales, nothing else changes. The one approved exception is the treasures Bible projector, whose `.life` takes the projector theme's accent.
+
+| Output | Implementation |
+|---|---|
+| React (Navbar, Footer bottom row, admin sidebar, songbook presenter and projector) | `<Wordmark />` from `@sdarm/ui` + `packages/ui/src/styles/wordmark.css` (the admin imports that one stylesheet only). The container sets `font-size` and `color`; a surface with its own gold passes it as `--wordmark-accent` (the EPUB reader's paper tones, the songbook projector's slide theme). |
+| Email layout, OG card | `wordmarkHtml()` in `apps/api/src/brand/wordmark.ts` — inline styles, tracking in px. Emails fall back to Georgia / Times New Roman in the same weight and italic; the OG renderer embeds Cormorant Garamond 700 and 700 italic subset to the ten glyphs (`apps/api/src/og/fonts/`). |
+| Quote share image | drawn on the canvas in `QuoteShareModal.tsx`, letter by letter for the tracking. |
+| SBL page | hand copy in `apps/sbl/upstream/index.html` (`.nav-logo`, `.fmark`), which cannot import anything. |
+
+Plain domain mentions in running text ("auf sdarm.life", the copyright line, `<title>`) are text, not the mark.
+
 ### Navbar contrast tiers
 
 Navbar control colours are **two tiers declared as custom properties on `.site-nav`**, not per-element values:
@@ -299,7 +312,7 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 
 Unlike the public apps, the admin app has no `ThemeScript`/FOUC-prevention pass yet — `Sidebar` reads `localStorage.sdarm-admin-theme` in a `useEffect` and sets `data-theme` on `<html>` after mount (default `'dark'`).
 
-The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html` and unlike the public site's warm black museum theme): dark = `#020617` page / `#0b1120` cards, light = `#f8fafc` page / white cards, hairline borders (`rgba(255,255,255,0.07)` dark / `rgba(2,6,23,0.08)` light), UI font Lexend, base radius `--r: 10px` (cards 12px). Accent tokens: `--accent` (`#c9a96e` dark / `#927223` light — deeper gold for contrast on white), `--accent-hover`, `--accent-soft`, `--on-accent`, and `--on-solid` (`#ffffff` in both themes — text on a solid dark or danger fill such as the image/sheet delete overlays; not `--on-accent`, which is dark on the dark theme); `--gold` is kept as an alias of `--accent` so pre-existing rules follow it. `--brand-gold` (`#c9a96e`, theme-independent) exists only for the logo. Semantic tokens: `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--red`/`--red-text`/`--danger-soft`, plus `--heading`, `--muted`, `--row-hover`, `--overlay`, `--track` (the unfilled part of a chart bar — `--surface-2` on dark, a 8 % ink tint on light, where `--surface-2` vanished against the white card) and `--font-mono` (code-ish text; a bare `monospace` falls back to Courier on macOS). Form controls inherit the UI font (`button, input, select, textarea { font-family: inherit }` in `theme.css`) — browsers otherwise give them their own system face. Lexend is loaded at 300–600 only, so `font-cyrillic.css` must not declare a Cyrillic face above 600 either: a 700 face without a Latin partner turned every bold Latin word into the system sans-serif. Never hardcode colors in admin CSS — every rule goes through these tokens so both themes stay in sync.
+The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html` and unlike the public site's warm black museum theme): dark = `#020617` page / `#0b1120` cards, light = `#f8fafc` page / white cards, hairline borders (`rgba(255,255,255,0.07)` dark / `rgba(2,6,23,0.08)` light), UI font Lexend, base radius `--r: 10px` (cards 12px). Accent tokens: `--accent` (`#c9a96e` dark / `#927223` light — deeper gold for contrast on white), `--accent-hover`, `--accent-soft`, `--on-accent`, and `--on-solid` (`#ffffff` in both themes — text on a solid dark or danger fill such as the image/sheet delete overlays; not `--on-accent`, which is dark on the dark theme); `--gold` is kept as an alias of `--accent` so pre-existing rules follow it. The sidebar wordmark's `.life` follows `--gold` like every other surface (see [SDARM.life wordmark](#sdarmlife-wordmark)). Semantic tokens: `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--red`/`--red-text`/`--danger-soft`, plus `--heading`, `--muted`, `--row-hover`, `--overlay`, `--track` (the unfilled part of a chart bar — `--surface-2` on dark, a 8 % ink tint on light, where `--surface-2` vanished against the white card) and `--font-mono` (code-ish text; a bare `monospace` falls back to Courier on macOS). Form controls inherit the UI font (`button, input, select, textarea { font-family: inherit }` in `theme.css`) — browsers otherwise give them their own system face. Lexend is loaded at 300–600 only, so `font-cyrillic.css` must not declare a Cyrillic face above 600 either: a 700 face without a Latin partner turned every bold Latin word into the system sans-serif. Never hardcode colors in admin CSS — every rule goes through these tokens so both themes stay in sync.
 
 ### Collapsible sidebar
 
@@ -307,7 +320,7 @@ Above 768px the sidebar folds to a 65px icon rail (`--sidebar-w-collapsed`, besi
 
 - **State lives on `<html data-sidebar="collapsed">`**, persisted to `localStorage.sdarm-admin-sidebar` (`'collapsed'` | `'expanded'`, next to `sdarm-admin-theme`). An inline script in `app/layout.tsx`'s `<head>` applies it before first paint, so a collapsed rail never paints at full width and snaps shut after hydration; `<html>` carries `suppressHydrationWarning` for that reason. `Sidebar` mirrors the attribute into state on mount for `aria-expanded` and the tooltips. The theme still has no such script — that is a separate issue.
 - **Every rule for the rail sits inside `@media (min-width: 769px)`.** Below that the off-canvas panel is untouched even if the rail was left collapsed, and the toggle is hidden.
-- **Collapsed, the icons do not move.** 14px sidebar padding + 10px item padding puts them at the same x in both states; only the labels go. Labels are visually hidden rather than `display: none`, so they remain each link's accessible name, and each link gets a `title` tooltip. The wordmark swaps for a one-letter mark.
+- **Collapsed, the icons do not move.** 14px sidebar padding + 10px item padding puts them at the same x in both states; only the labels go. Labels are visually hidden rather than `display: none`, so they remain each link's accessible name, and each link gets a `title` tooltip. The wordmark swaps for a one-letter mark cut from it: the Cormorant Bold S and the gold italic point.
 - **The settings menu opens beside the rail**, as `position: fixed`, because the rail is too narrow for it and `.sidebar` clips horizontally. The sticky sidebar is its own stacking context, so it takes `z-index: 10` while collapsed or positioned content in `.admin-main` would paint over the menu.
 
 ### Email screen

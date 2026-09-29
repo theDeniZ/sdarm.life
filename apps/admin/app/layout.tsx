@@ -9,6 +9,9 @@ import type { Metadata } from 'next';
    it is the order the sections had in the old single file, so keep new files
    in a place where no later file overrides them by accident. */
 import './styles/theme.css';
+/* The site's wordmark, shared with every public app (the admin takes only this
+   file from @sdarm/ui's design system). */
+import '@sdarm/ui/src/styles/wordmark.css';
 import './styles/sidebar.css';
 import './styles/shell.css';
 import './styles/buttons.css';

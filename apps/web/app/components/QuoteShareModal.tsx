@@ -13,7 +13,8 @@ interface Theme {
   lr: string;
   tc: string;
   rc: string;
-  lc: string;
+  /** The wordmark's .life: brand gold for a dark card (#c9a96e), the light-theme gold on a light one. */
+  lg: string;
   sc: string;
 }
 
@@ -31,7 +32,7 @@ const THEMES: Record<ThemeId, Theme> = {
     lr: '201,169,110',
     tc: 'rgba(232,220,205,.95)',
     rc: 'rgba(201,169,110,.7)',
-    lc: 'rgba(201,169,110,.28)',
+    lg: '#c9a96e',
     sc: 'rgba(201,169,110,.35)',
   },
   vanilla: {
@@ -41,7 +42,7 @@ const THEMES: Record<ThemeId, Theme> = {
     lr: '88,71,56',
     tc: 'rgba(52,33,18,.9)',
     rc: 'rgba(88,71,56,.8)',
-    lc: 'rgba(88,71,56,.32)',
+    lg: '#866a1f',
     sc: 'rgba(88,71,56,.28)',
   },
   sand: {
@@ -51,7 +52,7 @@ const THEMES: Record<ThemeId, Theme> = {
     lr: '88,71,56',
     tc: 'rgba(42,26,10,.88)',
     rc: 'rgba(70,52,28,.82)',
-    lc: 'rgba(70,52,28,.3)',
+    lg: '#866a1f',
     sc: 'rgba(70,52,28,.3)',
   },
   mahog: {
@@ -61,7 +62,7 @@ const THEMES: Record<ThemeId, Theme> = {
     lr: '206,193,168',
     tc: 'rgba(241,234,218,.95)',
     rc: 'rgba(206,193,168,.8)',
-    lc: 'rgba(206,193,168,.3)',
+    lg: '#c9a96e',
     sc: 'rgba(206,193,168,.35)',
   },
 };
@@ -232,21 +233,30 @@ function renderCanvas(canvas: HTMLCanvasElement, text: string, ref: string, fmt:
   ctx.textAlign = 'center';
   ctx.fillText(ref, cx, refY);
 
-  // 7 — SDARM.life watermark
+  // 7 — SDARM.life wordmark, set as the site sets it (@sdarm/ui styles/wordmark.css):
+  // Cormorant Garamond Bold, 0.04em between the letters of "SDARM" in the card's
+  // text colour, ".life" in Bold Italic, untracked, in gold.
   const ly = story ? h * 0.815 : wide ? h * 0.865 : h * 0.875;
   const lsz = Math.round(w * (wide ? 0.019 : 0.025));
-  ctx.font = `400 ${lsz}px "Playfair Display",Georgia,serif`;
-  const sw = ctx.measureText('SDARM').width;
-  ctx.font = `italic 400 ${lsz}px "Playfair Display",Georgia,serif`;
-  const lw2 = ctx.measureText('.life').width;
-  const lsx = cx - (sw + lw2) / 2;
-  ctx.fillStyle = T.lc;
-  ctx.font = `400 ${lsz}px "Playfair Display",Georgia,serif`;
+  const face = '"Cormorant Garamond",Georgia,"Times New Roman",serif';
+  const track = lsz * 0.04;
   ctx.textAlign = 'left';
-  ctx.fillText('SDARM', lsx, ly);
-  ctx.font = `italic 400 ${lsz}px "Playfair Display",Georgia,serif`;
-  ctx.fillStyle = T.lc.replace(/[\d.]+\)$/, (m: string) => (parseFloat(m) * 0.65).toFixed(2) + ')');
-  ctx.fillText('.life', lsx + sw, ly);
+  ctx.font = `700 ${lsz}px ${face}`;
+  const letters = [...'SDARM'];
+  const sw = letters.reduce((sum, ch) => sum + ctx.measureText(ch).width + track, 0);
+  ctx.font = `italic 700 ${lsz}px ${face}`;
+  const lw2 = ctx.measureText('.life').width;
+  // Letter by letter: canvas letterSpacing is not in every browser the modal runs in.
+  let lx = cx - (sw + lw2) / 2;
+  ctx.font = `700 ${lsz}px ${face}`;
+  ctx.fillStyle = T.tc;
+  for (const ch of letters) {
+    ctx.fillText(ch, lx, ly);
+    lx += ctx.measureText(ch).width + track;
+  }
+  ctx.font = `italic 700 ${lsz}px ${face}`;
+  ctx.fillStyle = T.lg;
+  ctx.fillText('.life', lx, ly);
 }
 
 interface Props {

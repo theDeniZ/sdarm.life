@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef, type TouchEvent } from 'react
 import { createPortal } from 'react-dom';
 import { useLocale, useTranslations } from 'next-intl';
 import type { SongDto, SongPartDto } from '@sdarm/types';
+import { Wordmark } from '@sdarm/ui';
 import { getSiteTheme } from '@/app/lib/format';
 import type { LinePart, LineStep } from '@/app/lib/line-mode';
 import { TRANSITION_SPEEDS, useLineMode, type LineMessage } from '@/app/lib/use-line-mode';
@@ -291,9 +292,7 @@ export default function PresenterDashboard({ song, onClose }: Props) {
     <div className="presenter">
       {/* Header */}
       <div className="presenter__header">
-        <div className="presenter__logo">
-          SDARM<span className="presenter__logo-accent">.life</span>
-        </div>
+        <Wordmark className="presenter__logo" />
         <div className="presenter__song-info">
           <span className="presenter__song-num">{song.number}.</span>
           {song.title}

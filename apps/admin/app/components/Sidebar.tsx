@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Wordmark } from '@sdarm/ui';
 
 const ICONS: Record<string, React.ReactNode> = {
   homeGrid: (
@@ -247,7 +248,7 @@ export default function Sidebar({ open, onClose }: Props) {
       <aside id="admin-sidebar" className={`sidebar${open ? ' open' : ''}`}>
         <div className="sidebar-logo">
           <span className="sidebar-logo-full">
-            SDARM<span className="accent">.life</span>
+            <Wordmark />
             <span className="sidebar-badge">Admin</span>
           </span>
           <span className="sidebar-logo-mark" aria-hidden="true">

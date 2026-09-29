@@ -26,6 +26,7 @@
  */
 import de from '@sdarm/i18n/messages/de';
 import en from '@sdarm/i18n/messages/en';
+import { wordmarkHtml } from '../brand/wordmark';
 
 export type EmailLocale = 'de' | 'en';
 
@@ -90,7 +91,6 @@ const L = {
 } as const;
 
 export const SERIF = "'Playfair Display',Georgia,'Times New Roman',Times,serif";
-export const WORDMARK = "'Cormorant Garamond',Garamond,Georgia,'Times New Roman',serif";
 export const SANS = "Lexend,-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif";
 
 /** Content inset inside the card. Phones get 24px through `.e-pad`. */
@@ -344,7 +344,7 @@ ${preheader}
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="max-width:600px;">
         <tr>
           <td class="e-pad" style="padding:0 ${PAD}px 22px;">
-            <a href="${esc(home)}" style="text-decoration:none;font-family:${WORDMARK};font-size:23px;line-height:28px;letter-spacing:0.5px;"><span class="e-strong" style="color:${C.strong};">SDARM</span><span class="e-gold" style="color:${C.gold};font-style:italic;letter-spacing:0;">.life</span></a>
+            <a href="${esc(home)}" style="text-decoration:none;font-size:23px;line-height:28px;">${wordmarkHtml({ size: 23, strong: C.strong, gold: C.gold, strongClass: 'e-strong', goldClass: 'e-gold' })}</a>
           </td>
         </tr>
         <tr>

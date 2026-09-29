@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import CommunityMap from './CommunityMap';
 import { useSunsetLocation } from '../lib/sunset-location';
 import { useCurrentTheme, withTheme } from '../lib/theme-link';
+import Wordmark from './Wordmark';
 
 export interface FooterConfig {
   donation_url?: string | null;
@@ -172,9 +173,7 @@ export default function Footer({
       </div>
 
       <div className="footer-bottom">
-        <span className="footer-bottom-logo">
-          SDARM<span>.life</span>
-        </span>
+        <Wordmark className="footer-bottom-logo" />
         <span className="footer-copy">{t('copyright', { year: new Date().getFullYear() })}</span>
         <div className="footer-legal">
           <Link href={withTheme(`${webUrl}/impressum`, theme)}>{navT('imprint')}</Link>

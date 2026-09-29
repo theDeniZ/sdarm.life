@@ -44,7 +44,7 @@ Styles for a component that exists but is not rendered anywhere stay in `styles/
   --sidebar-w: 220px --admin-bg: #f4f2ef;
 ```
 
-**Typography stack (web):** Cormorant Garamond (body), DM Serif Display (headings, italic), Playfair Display (logo, footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Self-hosted via `@fontsource/*` in `packages/ui/src/styles/tokens.css`.
+**Typography stack (web):** Cormorant Garamond (body; Bold and Bold Italic for the SDARM.life wordmark, see [frontend.md](frontend.md#sdarmlife-wordmark)), DM Serif Display (headings, italic), Playfair Display (footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Self-hosted via `@fontsource/*` in `packages/ui/src/styles/tokens.css`.
 
 **Cyrillic rides on the Latin family name, not on a fallback stack.** Lexend — the UI face — ships latin, latin-ext and vietnamese and no Cyrillic, so every Russian string fell through to the device's own font and sat beside German set in Lexend (issue #177). The remedy is `packages/ui/src/styles/font-noto-sans.css` (and its admin twin `apps/admin/app/font-cyrillic.css`, because the admin does not import the package's design system): Noto Sans faces declared **under the name `Lexend`** with a Cyrillic `unicode-range`, so the browser picks per glyph and all ~100 existing `font-family: 'Lexend'` rules keep working untouched. Appending `'Noto Sans'` to each of them instead would be ~100 edits that the next new rule silently forgets.
 

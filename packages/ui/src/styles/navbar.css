@@ -69,11 +69,9 @@ nav.site-nav.scrolled {
 }
 
 /* ── Logo ── */
+/* Face, weight and tracking come from wordmark.css; the bar sets size and colour. */
 .nav-logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
   font-size: 1.35rem;
-  letter-spacing: 0.04em;
   color: var(--nav-fg-primary);
   text-decoration: none;
   transition: color 0.5s ease;
@@ -82,13 +80,6 @@ nav.site-nav.scrolled {
   /* 44px tall hit area without changing the bar's height */
   padding: 9px 0;
   margin: -9px 0;
-}
-.nav-logo span {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
-  font-style: italic;
-  color: var(--gold);
-  letter-spacing: 0;
 }
 .nav-logo:hover {
   color: var(--nav-fg-primary-hover);

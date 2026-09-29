@@ -70,10 +70,8 @@ a {
 }
 
 .top-nav__brand {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 400;
+  /* face, weight and tracking: @sdarm/ui wordmark.css */
   font-size: 1.05rem;
-  letter-spacing: 0.06em;
   color: #fff;
   display: flex;
   align-items: center;
@@ -82,10 +80,6 @@ a {
   border-right: 1px solid rgba(201, 169, 110, 0.15);
   white-space: nowrap;
   flex-shrink: 0;
-}
-.top-nav__brand-accent {
-  color: var(--gold);
-  font-style: italic;
 }
 
 .top-nav__link {
