@@ -502,6 +502,21 @@ apps/web/app/styles/
   uber-uns.css       — NOT imported; UberUnsSection.tsx is not rendered
 ```
 
+`apps/songbook/app/styles/` follows the same rule. The files are imported one by one from `apps/songbook/app/layout.tsx`, in cascade order — the app has no `globals.css`. There is no trailing responsive or light-theme block; `reduced-motion.css` is the one global block, because its universal rule reaches into every section, and it is imported last.
+
+```
+apps/songbook/app/styles/
+  base.css           — fonts, reset, songbook tokens, page shell, top nav
+  songbooks.css      — songbook landing grid
+  song-list.css      — song table, search, pagination, lyric-match pill
+  song-view.css      — song header, mode bar, transpose capsule, parts, chord line
+  projector.css      — inline fullscreen and the display window (?projector=1)
+  presenter.css      — presenter dashboard, display-window fullscreen overlay
+  sheets.css         — sheet music viewer
+  reader.css         — reader layout: toolbar, song-list sidebar, reading area
+  reduced-motion.css — prefers-reduced-motion, global, imported last
+```
+
 Mirrors `packages/ui/src/styles/index.css`. See [conventions.md](conventions.md) for the rule.
 
 **`apps/admin` has no `globals.css`.** Its stylesheets live in `apps/admin/app/styles/` and are imported one by one from `apps/admin/app/layout.tsx` — not through a CSS `@import` index, because Turbopack does not invalidate its CSS cache through an `@import` (see the comment in `apps/web/app/layout.tsx`). The files are named after the folders in `app/domains/`, and each carries its own `@media` blocks; the admin has no trailing light-theme block — `[data-theme='light']` in `theme.css` redefines tokens only (issue #178).
