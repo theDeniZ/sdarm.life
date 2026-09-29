@@ -48,6 +48,7 @@
   --overlay:      rgba(2, 6, 23, 0.55);
   --r:            10px;
   --sidebar-w:    240px;
+  --sidebar-w-collapsed: 65px;
 }
 
 /* Light theme — toggled from the Sidebar profile menu, persisted to
@@ -120,6 +121,8 @@ a { text-decoration: none; color: inherit; }
   border-right: 1px solid var(--border);
   padding: 20px 14px;
   overflow-y: auto;
+  /* nothing overflows sideways when expanded; while the rail animates it would */
+  overflow-x: hidden;
 }
 
 .sidebar-logo {
@@ -134,6 +137,11 @@ a { text-decoration: none; color: inherit; }
   padding: 6px 10px 18px;
   white-space: nowrap;
 }
+
+/* Wordmark when expanded, a one-letter mark on the collapsed rail. `contents`
+   keeps the wordmark's parts as flex items of .sidebar-logo, as before. */
+.sidebar-logo-full { display: contents; }
+.sidebar-logo-mark { display: none; }
 
 .sidebar-logo .accent {
   font-family: 'Cormorant Garamond', serif;
@@ -175,6 +183,7 @@ a { text-decoration: none; color: inherit; }
   font-weight: 500;
   color: var(--muted);
   cursor: pointer;
+  white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
 
@@ -200,7 +209,8 @@ a { text-decoration: none; color: inherit; }
   margin-top: 10px;
 }
 
-.profile-trigger {
+.profile-trigger,
+.sidebar-collapse {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -210,14 +220,21 @@ a { text-decoration: none; color: inherit; }
   background: none;
   border-radius: var(--r);
   color: var(--muted);
+  /* buttons do not inherit the page font; these rendered in Arial before */
+  font-family: inherit;
   font-size: 12.5px;
   cursor: pointer;
+  white-space: nowrap;
   transition: background 0.15s, color 0.15s;
 }
 
-.profile-trigger svg { width: 16px; height: 16px; flex-shrink: 0; }
+.profile-trigger svg,
+.sidebar-collapse svg { width: 16px; height: 16px; flex-shrink: 0; }
 
-.profile-trigger:hover { color: var(--text); background: var(--row-hover); }
+.profile-trigger:hover,
+.sidebar-collapse:hover { color: var(--text); background: var(--row-hover); }
+
+.sidebar-collapse svg { transition: transform 0.2s; }
 
 .profile-menu {
   position: absolute;
@@ -246,6 +263,7 @@ a { text-decoration: none; color: inherit; }
   background: none;
   border-radius: 3px;
   color: var(--text);
+  font-family: inherit;
   font-size: 12.5px;
   cursor: pointer;
   transition: background 0.15s;
@@ -303,6 +321,56 @@ a { text-decoration: none; color: inherit; }
   }
 
   .sidebar-overlay.open { display: block; }
+
+  /* The off-canvas panel is all-or-nothing; the rail is a desktop feature. */
+  .sidebar-collapse { display: none; }
+}
+
+/* Collapsed rail (issue #176) — above the mobile breakpoint only, so the
+   off-canvas panel below it is untouched even if the rail was left collapsed.
+   State: <html data-sidebar="collapsed">, set before first paint by the script
+   in app/layout.tsx and toggled from the Sidebar footer. Icons keep their exact
+   x position (14px padding + 10px item padding), so only the labels go. */
+@media (min-width: 769px) {
+  .admin-shell { transition: grid-template-columns 0.2s ease; }
+
+  [data-sidebar='collapsed'] .admin-shell {
+    grid-template-columns: var(--sidebar-w-collapsed) 1fr;
+  }
+
+  [data-sidebar='collapsed'] .sidebar-logo-full { display: none; }
+  [data-sidebar='collapsed'] .sidebar-logo-mark { display: inline; }
+
+  /* Visually hidden, not display:none — the label stays the link's accessible
+     name; the title attribute set by Sidebar gives sighted users a tooltip. */
+  [data-sidebar='collapsed'] .nav-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+
+  [data-sidebar='collapsed'] .sidebar-collapse svg { transform: rotate(180deg); }
+
+  /* The rail is too narrow for the menu, and .sidebar clips horizontally, so the
+     menu opens beside the rail instead of above the trigger. */
+  /* A sticky .sidebar is its own stacking context, so the fixed menu below can
+     only outrank positioned content in .admin-main (book cards, pickers) if the
+     sidebar does. Still under the modal backdrop (100). */
+  [data-sidebar='collapsed'] .sidebar { z-index: 10; }
+
+  [data-sidebar='collapsed'] .profile-menu {
+    position: fixed;
+    left: calc(var(--sidebar-w-collapsed) + 8px);
+    right: auto;
+    bottom: 20px;
+    min-width: 180px;
+  }
+}
+
+@media (min-width: 769px) and (prefers-reduced-motion: reduce) {
+  .admin-shell { transition: none; }
 }
 
 /* ── Shell ───────────────────────────────────── */
