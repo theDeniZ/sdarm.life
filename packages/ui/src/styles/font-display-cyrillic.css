@@ -1,0 +1,101 @@
+/**
+ * Cyrillic for the display faces.
+ *
+ * DM Serif Display, Fraunces and Instrument Serif ship latin and latin-ext only
+ * (issue #199). Every Russian or Ukrainian heading set in them — the `PageHero`
+ * title on every landing page, the treasures shelf and book page, the songbook
+ * projector — fell through to the device's own serif (Times on macOS) beside
+ * German headings in the intended face. `Fraunces` is used in treasures as
+ * `'Fraunces', 'DM Serif Display', serif`, so both members of that stack fell
+ * through together.
+ *
+ * The glyphs come from Playfair Display, already loaded for the logo and the
+ * footer heading: the same didone genre as DM Serif Display (high contrast, fine
+ * horizontal serifs), and it ships both styles needed, roman and italic. It is
+ * not a metric twin — slightly wider, more contrast — so a German and a Russian
+ * word side by side are not indistinguishable to a careful eye. That is a
+ * deliberate trade against the system font, which is unambiguously foreign.
+ *
+ * Same mechanism as `font-noto-sans.css` (issue #177), and the same three rules:
+ *
+ * - The faces are declared under the existing family names, so none of the ~40
+ *   `font-family` declarations change. The browser picks per glyph: the
+ *   original face renders Latin, this renders Cyrillic.
+ * - `unicode-range` is mandatory. `@fontsource`'s own `cyrillic-*.css` files
+ *   carry none; imported under these names they would hand Playfair the Latin
+ *   glyphs too. The range is the `cyrillic` one from `font-noto-sans.css`,
+ *   verbatim — it covers Russian and Ukrainian (ї Є ґ і). None of it overlaps
+ *   the Latin faces' own ranges. There is no `cyrillic-ext` block because
+ *   Playfair Display ships no such subset.
+ * - The `url()`s are relative paths into `node_modules`, never `~@fontsource/…`
+ *   (the tilde resolves under webpack but not under Turbopack — see
+ *   docs/gotchas.md).
+ *
+ * Styles and weights mirror exactly what `tokens.css` loads for Latin — DM Serif
+ * Display 400 roman + italic, Fraunces 400 + 500 roman, Instrument Serif 400
+ * roman + italic. A style present in Latin but missing here would be
+ * synthesised: a slanted roman beside a real italic.
+ *
+ * Self-hosted via `@fontsource`, so this adds no third-party request
+ * (see docs/dsgvo.md).
+ */
+
+/* ── DM Serif Display ───────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'DM Serif Display';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/playfair-display/files/playfair-display-cyrillic-400-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'DM Serif Display';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/playfair-display/files/playfair-display-cyrillic-400-italic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* ── Fraunces ───────────────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/playfair-display/files/playfair-display-cyrillic-400-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Fraunces';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 500;
+  src: url('../../node_modules/@fontsource/playfair-display/files/playfair-display-cyrillic-500-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+/* ── Instrument Serif ───────────────────────────────────────────────────── */
+
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/playfair-display/files/playfair-display-cyrillic-400-normal.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Instrument Serif';
+  font-style: italic;
+  font-display: swap;
+  font-weight: 400;
+  src: url('../../node_modules/@fontsource/playfair-display/files/playfair-display-cyrillic-400-italic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
