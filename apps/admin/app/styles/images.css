@@ -1,0 +1,199 @@
+/* ── Image picker ────────────────────────────── */
+
+.image-picker { display: flex; flex-direction: column; gap: 8px; }
+
+/* A fixed box, not a max-height. The preview exists to show the editor the file
+   they just picked, so it must not crop (object-fit: contain, never cover), and
+   its height must not depend on the file, or the form jumps on every pick.
+   3:2 is the compromise across what this picker is used for — landscape post
+   covers and hero backgrounds, portrait book covers. */
+.image-picker-preview {
+  position: relative;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--r);
+  overflow: hidden;
+  background: var(--surface-2);
+}
+
+.image-picker-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+.image-picker-clear {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  background: rgba(0,0,0,.6);
+  color: var(--on-solid);
+  border: none;
+  border-radius: 3px;
+  font-size: 11px;
+  padding: 3px 7px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.image-picker-clear:hover { background: var(--red); }
+
+.image-picker-tab {
+  padding: 7px 14px;
+  font-size: 12px;
+  font-family: 'Lexend', sans-serif;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  background: transparent;
+  cursor: pointer;
+  color: var(--muted);
+  transition: border-color 0.15s, color 0.15s;
+}
+.image-picker-tab:hover   { border-color: var(--gold-dim); color: var(--text); }
+.image-picker-tab.active  { border-color: var(--gold); color: var(--heading); background: var(--accent-soft); }
+
+.image-picker-library {
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  max-height: 260px;
+  overflow-y: auto;
+  background: var(--surface-2);
+}
+
+.image-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(72px, 1fr));
+  gap: 4px;
+  padding: 6px;
+}
+
+.image-picker-item {
+  aspect-ratio: 1;
+  border: 2px solid transparent;
+  border-radius: 3px;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  overflow: hidden;
+  transition: border-color 0.15s;
+}
+.image-picker-item img   { width: 100%; height: 100%; object-fit: cover; display: block; }
+.image-picker-item:hover { border-color: var(--gold-dim); }
+.image-picker-item.selected { border-color: var(--gold); }
+
+/* ── Image upload ────────────────────────────── */
+
+.image-drop {
+  border: 2px dashed var(--border-2);
+  border-radius: var(--r);
+  padding: 24px;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+  position: relative;
+}
+
+.image-drop.drag-over {
+  border-color: var(--gold-dim);
+  background: var(--row-hover);
+}
+
+.image-drop-label {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+
+.image-preview {
+  width: 100%;
+  max-height: 160px;
+  object-fit: cover;
+  border-radius: var(--r);
+  margin-bottom: 8px;
+  display: block;
+}
+
+.upload-status { font-size: 11.5px; margin-top: 6px; }
+.upload-status.ok  { color: var(--ok); }
+.upload-status.err { color: var(--red-text); }
+
+/* ── Image library ───────────────────────────── */
+
+.image-library {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+  max-width: 960px;
+}
+
+.image-library-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.image-library-thumb {
+  aspect-ratio: 4 / 3;
+  background: var(--surface-2);
+  overflow: hidden;
+}
+
+.image-library-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.image-library-meta {
+  padding: 10px 12px 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+}
+
+.image-library-key {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.image-library-info {
+  font-size: 11px;
+  color: var(--muted);
+}
+
+.image-library-card .btn-danger {
+  margin: 0 12px 12px;
+  align-self: flex-start;
+}
+
+.image-usage-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 4px;
+}
+
+.image-usage-item {
+  font-size: 10px;
+  color: var(--ok);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.image-usage-unused {
+  font-size: 10px;
+  color: var(--muted);
+  font-style: italic;
+  margin-top: 4px;
+  display: block;
+}

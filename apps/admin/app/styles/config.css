@@ -1,0 +1,84 @@
+/* ── Config ──────────────────────────────────── */
+
+.config-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+  max-width: 960px;
+}
+
+.config-section-title {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  color: var(--muted);
+  margin: 0 0 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.config-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  padding: 18px 20px;
+}
+
+.config-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.config-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .4px;
+}
+
+.config-clear-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 11px;
+  color: var(--muted);
+  padding: 0 2px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+
+.config-clear-btn:hover { color: var(--red-text); }
+
+.config-input,
+.config-textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  font-size: 13px;
+  font-family: 'Lexend', sans-serif;
+  color: var(--text);
+  background: var(--surface-2);
+  resize: vertical;
+  transition: border-color 0.18s;
+}
+
+.config-input:focus,
+.config-textarea:focus { border-color: var(--gold-dim); }
+
+.save-flash {
+  font-size: 11px;
+  color: var(--ok);
+  margin-top: 5px;
+  height: 14px;
+}
