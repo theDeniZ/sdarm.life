@@ -750,7 +750,9 @@
       "decreaseFont": "Decrease font size",
       "increaseFont": "Increase font size",
       "lightMode": "Light mode",
-      "darkMode": "Dark mode"
+      "darkMode": "Dark mode",
+      "lineMode": "Line by line",
+      "swapLanguages": "Swap languages"
     },
     "presenter": {
       "close": "Close presenter",
@@ -764,7 +766,21 @@
       "titleSlide": "Title",
       "endOfSong": "End of song",
       "lightMode": "Light mode",
-      "darkMode": "Dark mode"
+      "darkMode": "Dark mode",
+      "lineMode": "Line by line",
+      "linesPerSlide": "Lines",
+      "line": "line {from} / {total}",
+      "lines": "lines {from}–{to} / {total}",
+      "transition": "Transition",
+      "transitionSlide": "Slide",
+      "transitionFade": "Fade",
+      "transitionSpeed": "Transition speed",
+      "primaryLanguage": "Primary",
+      "translation": "Translation",
+      "translationOff": "Off",
+      "swapLanguages": "Swap languages",
+      "blank": "Blank",
+      "blankTitle": "Blank the screen (B)"
     },
     "partTypes": {
       "verse": "Verse",

@@ -367,3 +367,101 @@
   background: var(--proj-bg);
   color: var(--proj-text);
 }
+
+/* ── LINE-BY-LINE MODE (issue #61) ──
+   Three rows: the line just sung above, the current line in the middle, the
+   next one below. 1fr / auto / 1fr keeps the current line on the optical
+   centre whether or not it has neighbours, so the text never jumps when a part
+   starts or ends. Sizes are em of the projector's own clamp(), so A−/A+ and
+   the pinch scale all three layers together. */
+.line-stage {
+  align-self: stretch;
+  width: 100%;
+  min-height: 100%;
+  display: grid;
+  grid-template-rows: 1fr auto 1fr;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 400;
+  line-height: var(--proj-leading);
+  letter-spacing: 0.02em;
+  font-optical-sizing: auto;
+  --line-from: 0.6em;
+  animation: line-stage-slide var(--line-duration, 400ms) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.line-stage[data-direction='back'] {
+  --line-from: -0.6em;
+}
+.line-stage--fade {
+  animation-name: line-stage-fade;
+}
+/* The neighbours sit a clear gap away from the current line and quieter than
+   a reference gloss, so the gloss reads as belonging to the line it follows. */
+.line-stage__prev,
+.line-stage__next {
+  font-size: 0.45em;
+  color: var(--proj-text);
+}
+.line-stage__prev {
+  align-self: end;
+  padding-bottom: 1.6em;
+  opacity: 0.22;
+}
+.line-stage__next {
+  align-self: start;
+  padding-top: 2em;
+  opacity: 0.12;
+}
+.line-stage__current {
+  font-size: 1.15em;
+}
+.line-stage__line + .line-stage__line {
+  margin-top: 0.3em;
+}
+/* Singable: a second text for the same melody — same size, one step quieter
+   so the eye can still tell which language leads. */
+.line-stage__sub--singable {
+  opacity: 0.72;
+}
+/* Reference: a gloss for comprehension, not for singing. */
+.line-stage__sub--reference {
+  font-size: 0.5em;
+  margin-top: 0.4em;
+  color: var(--proj-muted);
+}
+
+@keyframes line-stage-slide {
+  from {
+    opacity: 0;
+    transform: translateY(var(--line-from));
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes line-stage-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Active state for the line-mode control in the bottom bar */
+.projector__ctrl-btn--active {
+  border-color: var(--gold);
+  background: rgba(201, 169, 110, 0.12);
+  font-family: 'Lexend', sans-serif;
+}
+
+/* Blank (B): the words and the mark go, the surface stays — a black or white
+   screen in the slide theme, never the page behind it. */
+.projector__content,
+.projector__bg-symbol {
+  transition: opacity 0.3s ease;
+}
+.projector--blank .projector__content,
+.projector--blank .projector__bg-symbol {
+  opacity: 0;
+}

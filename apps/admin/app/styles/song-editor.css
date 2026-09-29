@@ -520,3 +520,43 @@
   line-height: 1.1;
   margin: 0;
 }
+
+/* ── Per-part language tag (issue #61) ── */
+.preview-part-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 0.7rem;
+}
+
+.preview-part-head .preview-part-label {
+  margin-bottom: 0;
+}
+
+.part-tags {
+  display: flex;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.part-tag {
+  height: 26px;
+  padding: 0 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  color: var(--text);
+  font-family: 'Lexend', sans-serif;
+  font-size: 11px;
+  transition: border-color 0.18s;
+}
+
+.part-tag:focus {
+  border-color: var(--gold-dim);
+}
+
+.part-tag--lang {
+  width: 4.5em;
+  text-transform: lowercase;
+}

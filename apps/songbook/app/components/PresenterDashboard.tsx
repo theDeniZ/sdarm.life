@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState, useEffect, useCallback, useRef, type TouchEvent } from 'react';
 import { createPortal } from 'react-dom';
-import { useTranslations } from 'next-intl';
+import { useLocale, useTranslations } from 'next-intl';
 import type { SongDto, SongPartDto } from '@sdarm/types';
-import { expandParts, getSiteTheme } from '@/app/lib/format';
+import { getSiteTheme } from '@/app/lib/format';
+import type { LinePart, LineStep } from '@/app/lib/line-mode';
+import { TRANSITION_SPEEDS, useLineMode, type LineMessage } from '@/app/lib/use-line-mode';
 import ChordLine from './ChordLine';
+import { LineText } from './LineStage';
 import { amenLabel, chorusLabel } from './slide-labels';
 
 interface Props {
@@ -20,9 +23,12 @@ interface SlideViewProps {
   verseNumbers: (number | null)[];
   variant: 'current' | 'next';
   slideTheme: 'dark' | 'light';
+  /** Line mode: the lines of this step instead of the whole part. */
+  lineSlide?: { part: LinePart; step: LineStep } | null;
+  blank?: boolean;
 }
 
-function SlideView({ song, index, parts, verseNumbers, variant, slideTheme }: SlideViewProps) {
+function SlideView({ song, index, parts, verseNumbers, variant, slideTheme, lineSlide, blank }: SlideViewProps) {
   const total = parts.length + 2;
   const isTitleSlide = index === 0;
   const isAmenSlide = index === total - 1;
@@ -40,7 +46,10 @@ function SlideView({ song, index, parts, verseNumbers, variant, slideTheme }: Sl
   })();
 
   return (
-    <div className={`pres-slide pres-slide--${variant}`} data-slide-theme={slideTheme}>
+    <div
+      className={`pres-slide pres-slide--${variant}${blank ? ' pres-slide--blank' : ''}`}
+      data-slide-theme={slideTheme}
+    >
       {bgSymbol && (
         <div
           className={`pres-slide__bg${isTitleSlide || isAmenSlide ? ' pres-slide__bg--center' : ''}${part?.type === 'chorus' ? ' pres-slide__bg--word pres-slide__bg--ref' : ''}${isAmenSlide ? ' pres-slide__bg--word' : ''}`}
@@ -52,6 +61,16 @@ function SlideView({ song, index, parts, verseNumbers, variant, slideTheme }: Sl
       <div className="pres-slide__body">
         {isTitleSlide ? (
           <div className="pres-slide__title">{song.title}</div>
+        ) : lineSlide ? (
+          <div className="pres-slide__lyrics">
+            <LineText
+              lines={lineSlide.part.lines.slice(
+                lineSlide.step.lineIndex,
+                lineSlide.step.lineIndex + lineSlide.step.count
+              )}
+              subStyle={lineSlide.part.subStyle}
+            />
+          </div>
         ) : isPartSlide ? (
           <div className="pres-slide__lyrics">
             {lines.map((line, i) => (
@@ -66,11 +85,34 @@ function SlideView({ song, index, parts, verseNumbers, variant, slideTheme }: Sl
 
 export default function PresenterDashboard({ song, onClose }: Props) {
   const t = useTranslations('songbook.presenter');
+  const locale = useLocale();
   const partT = useTranslations('songbook.partTypes');
-  const parts = expandParts(song.parts);
-  const total = parts.length + 2;
-
   const [index, setIndex] = useState(0);
+  const indexRef = useRef(0);
+  useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
+  const channelRef = useRef<BroadcastChannel | null>(null);
+  const isSlideRemote = useRef(false);
+  const post = useCallback((message: LineMessage) => channelRef.current?.postMessage(message), []);
+  // See Projector: only a slide that actually changes may set the remote flag.
+  const setIndexFromRemote = useCallback((i: number) => {
+    if (indexRef.current === i) return false;
+    indexRef.current = i;
+    isSlideRemote.current = true;
+    setIndex(i);
+    return true;
+  }, []);
+  const line = useLineMode({ song, index, setIndex, setIndexFromRemote, post });
+  const { resetLine, receive: receiveLine, blank, setBlank, setLineMode } = line;
+  const lineSnapshot = useRef(line.snapshot);
+  useEffect(() => {
+    lineSnapshot.current = line.snapshot;
+  }, [line.snapshot]);
+
+  const parts = line.parts;
+  const total = parts.length + 2;
   const [fontScale, setFontScale] = useState(1);
   const [slideTheme, setSlideTheme] = useState<'dark' | 'light'>(getSiteTheme);
   const [mounted, setMounted] = useState(false);
@@ -78,16 +120,20 @@ export default function PresenterDashboard({ song, onClose }: Props) {
 
   useEffect(() => setMounted(true), []);
 
-  const prev = useCallback(() => setIndex((i) => Math.max(0, i - 1)), []);
-  const next = useCallback(() => setIndex((i) => Math.min(total - 1, i + 1)), [total]);
+  const prevPart = useCallback(() => {
+    setIndex((i) => Math.max(0, i - 1));
+    resetLine();
+  }, [resetLine]);
+  const nextPart = useCallback(() => {
+    setIndex((i) => Math.min(total - 1, i + 1));
+    resetLine();
+  }, [total, resetLine]);
+  const prev = line.active ? line.prevStep : prevPart;
+  const next = line.active ? line.nextStep : nextPart;
 
   // Refs so the channel message handler always sees the latest values
-  const indexRef = useRef(0);
   const fontScaleRef = useRef(1);
   const slideThemeRef = useRef<'dark' | 'light'>('dark');
-  useEffect(() => {
-    indexRef.current = index;
-  }, [index]);
   useEffect(() => {
     fontScaleRef.current = fontScale;
   }, [fontScale]);
@@ -96,8 +142,6 @@ export default function PresenterDashboard({ song, onClose }: Props) {
   }, [slideTheme]);
 
   // BroadcastChannel — keep in sync with the display window
-  const channelRef = useRef<BroadcastChannel | null>(null);
-  const isSlideRemote = useRef(false);
   const isFontRemote = useRef(false);
   const isSlideThemeRemote = useRef(false);
 
@@ -112,9 +156,11 @@ export default function PresenterDashboard({ song, onClose }: Props) {
         ch.postMessage({ type: 'slide', index: indexRef.current });
         ch.postMessage({ type: 'fontScale', value: fontScaleRef.current });
         ch.postMessage({ type: 'slideTheme', value: slideThemeRef.current });
+        for (const message of lineSnapshot.current()) ch.postMessage(message);
       } else if (e.data.type === 'slide') {
-        isSlideRemote.current = true;
-        setIndex(e.data.index);
+        if (setIndexFromRemote(e.data.index)) resetLine();
+      } else if (receiveLine(e.data)) {
+        // line-by-line message, applied by useLineMode
       } else if (e.data.type === 'fontScale') {
         isFontRemote.current = true;
         setFontScale(e.data.value);
@@ -125,7 +171,7 @@ export default function PresenterDashboard({ song, onClose }: Props) {
     };
     channelRef.current = ch;
     return () => ch.close();
-  }, []);
+  }, [setIndexFromRemote, resetLine, receiveLine]);
 
   useEffect(() => {
     if (isSlideRemote.current) {
@@ -169,11 +215,32 @@ export default function PresenterDashboard({ song, onClose }: Props) {
         prev();
       } else if (e.key === 'Escape') {
         onClose();
+      } else if (e.key === 'b' || e.key === 'B') {
+        setBlank(!blank);
+      } else if (e.key === 'f' || e.key === 'F') {
+        channelRef.current?.postMessage({ type: 'requestFullscreen' });
+      } else if (e.key === '1' || e.key === '2') {
+        setLineMode(true, e.key === '1' ? 1 : 2);
       }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [next, prev, onClose]);
+  }, [next, prev, onClose, blank, setBlank, setLineMode]);
+
+  // One-finger swipe on the slides advances on a tablet, as on the projector.
+  const swipeStart = useRef<number | null>(null);
+  const onTouchStart = (e: TouchEvent) => {
+    swipeStart.current = e.touches.length === 1 ? e.touches[0].clientX : null;
+  };
+  const onTouchEnd = (e: TouchEvent) => {
+    if (swipeStart.current === null) return;
+    const dx = e.changedTouches[0].clientX - swipeStart.current;
+    swipeStart.current = null;
+    if (Math.abs(dx) > 50) {
+      if (dx < 0) next();
+      else prev();
+    }
+  };
 
   // Precompute verse numbers for the expanded parts list
   let verseCount = 0;
@@ -197,8 +264,26 @@ export default function PresenterDashboard({ song, onClose }: Props) {
     return partT(currentPart.type as Parameters<typeof partT>[0]);
   })();
 
+  // Line mode: "Verse 2 · line 3 / 5". The step decides the lines; the part's
+  // own line count is the total.
+  const step = line.steps[line.stepIndex];
+  const linePart = line.active && isPartSlide ? line.lineParts[index - 1] : null;
+  const lineLabel =
+    linePart && step.count > 0
+      ? step.count > 1
+        ? t('lines', { from: step.lineIndex + 1, to: step.lineIndex + step.count, total: linePart.lines.length })
+        : t('line', { from: step.lineIndex + 1, total: linePart.lines.length })
+      : null;
+
   const nextIndex = index + 1;
-  const hasNext = nextIndex < total;
+  const hasNext = line.active ? line.stepIndex < line.steps.length - 1 : nextIndex < total;
+  const nextStep = line.active ? line.steps[line.stepIndex + 1] : null;
+  const nextSlideIndex = nextStep ? nextStep.partIndex : nextIndex;
+  const nextLinePart = nextStep ? (line.lineParts[nextStep.partIndex - 1] ?? null) : null;
+  const atStart = line.active ? line.stepIndex === 0 : index === 0;
+  const atEnd = !hasNext;
+  const counter = line.active ? `${line.stepIndex + 1} / ${line.steps.length}` : `${index + 1} / ${total}`;
+  const langs = line.languages;
 
   if (!mounted) return null;
 
@@ -255,10 +340,13 @@ export default function PresenterDashboard({ song, onClose }: Props) {
       </div>
 
       {/* Slides area */}
-      <div className="presenter__slides">
+      <div className="presenter__slides" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd}>
         {/* Current slide */}
         <div className="presenter__panel presenter__panel--current">
-          <div className="presenter__panel-label">{t('currentSlide')}</div>
+          <div className="presenter__panel-label">
+            {t('currentSlide')}
+            {blank && <span className="presenter__panel-flag">{t('blank')}</span>}
+          </div>
           <SlideView
             song={song}
             index={index}
@@ -266,8 +354,13 @@ export default function PresenterDashboard({ song, onClose }: Props) {
             verseNumbers={verseNumbers}
             variant="current"
             slideTheme={slideTheme}
+            lineSlide={linePart ? { part: linePart, step } : null}
+            blank={blank}
           />
-          <div className="presenter__slide-meta">{slideLabel}</div>
+          <div className="presenter__slide-meta">
+            {slideLabel}
+            {lineLabel && ` · ${lineLabel}`}
+          </div>
         </div>
 
         {/* Next slide */}
@@ -276,11 +369,12 @@ export default function PresenterDashboard({ song, onClose }: Props) {
           {hasNext ? (
             <SlideView
               song={song}
-              index={nextIndex}
+              index={nextSlideIndex}
               parts={parts}
               verseNumbers={verseNumbers}
               variant="next"
               slideTheme={slideTheme}
+              lineSlide={nextStep && nextLinePart ? { part: nextLinePart, step: nextStep } : null}
             />
           ) : (
             <div className="pres-slide pres-slide--next pres-slide--end" data-slide-theme={slideTheme}>
@@ -304,16 +398,110 @@ export default function PresenterDashboard({ song, onClose }: Props) {
         </div>
       )}
 
+      {/* Line-by-line controls. Everything here is also on the keyboard:
+          1 / 2 lines, B blank, F fullscreen on the display. */}
+      <div className="presenter__toolbar">
+        <div className="presenter__group">
+          <button
+            className={`presenter__pill${line.active ? ' is-active' : ''}`}
+            onClick={() => setLineMode(!line.active)}
+            aria-pressed={line.active}
+          >
+            {t('lineMode')}
+          </button>
+          <span className="presenter__group-label">{t('linesPerSlide')}</span>
+          {([1, 2] as const).map((n) => (
+            <button
+              key={n}
+              className={`presenter__pill presenter__pill--square${line.active && line.linesPerSlide === n ? ' is-active' : ''}`}
+              onClick={() => setLineMode(true, n)}
+              aria-pressed={line.active && line.linesPerSlide === n}
+            >
+              {n}
+            </button>
+          ))}
+        </div>
+
+        <div className="presenter__group">
+          <span className="presenter__group-label">{t('transition')}</span>
+          {(['slide', 'fade'] as const).map((style) => (
+            <button
+              key={style}
+              className={`presenter__pill${line.transition.style === style ? ' is-active' : ''}`}
+              onClick={() => line.setTransition({ ...line.transition, style })}
+              aria-pressed={line.transition.style === style}
+            >
+              {t(style === 'slide' ? 'transitionSlide' : 'transitionFade')}
+            </button>
+          ))}
+          {TRANSITION_SPEEDS.map((ms) => (
+            <button
+              key={ms}
+              className={`presenter__pill${line.transition.durationMs === ms ? ' is-active' : ''}`}
+              onClick={() => line.setTransition({ ...line.transition, durationMs: ms })}
+              aria-pressed={line.transition.durationMs === ms}
+              title={t('transitionSpeed')}
+            >
+              {(ms / 1000).toLocaleString(locale)} s
+            </button>
+          ))}
+        </div>
+
+        {langs.length > 1 && (
+          <div className="presenter__group">
+            <span className="presenter__group-label">{t('primaryLanguage')}</span>
+            {langs.map((lang) => (
+              <button
+                key={lang}
+                className={`presenter__pill${line.primaryLang === lang ? ' is-active' : ''}`}
+                onClick={() =>
+                  line.setLanguages(lang, line.secondaryLang === lang ? line.primaryLang : line.secondaryLang)
+                }
+                aria-pressed={line.primaryLang === lang}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+            <button
+              className="presenter__pill presenter__pill--square"
+              onClick={line.swapLanguages}
+              disabled={!line.secondaryLang}
+              title={t('swapLanguages')}
+              aria-label={t('swapLanguages')}
+            >
+              ⇄
+            </button>
+            <span className="presenter__group-label">{t('translation')}</span>
+            {[null, ...langs.filter((l) => l !== line.primaryLang)].map((lang) => (
+              <button
+                key={lang ?? 'none'}
+                className={`presenter__pill${line.secondaryLang === lang ? ' is-active' : ''}`}
+                onClick={() => line.setLanguages(line.primaryLang, lang)}
+                aria-pressed={line.secondaryLang === lang}
+              >
+                {lang ? lang.toUpperCase() : t('translationOff')}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
       {/* Footer: navigation */}
       <div className="presenter__footer">
-        <button className="presenter__nav-btn" onClick={prev} disabled={index === 0} aria-label={t('previous')}>
+        <button className="presenter__nav-btn" onClick={prev} disabled={atStart} aria-label={t('previous')}>
           ‹
         </button>
-        <span className="presenter__counter">
-          {index + 1} / {total}
-        </span>
-        <button className="presenter__nav-btn" onClick={next} disabled={index === total - 1} aria-label={t('next')}>
+        <span className="presenter__counter">{counter}</span>
+        <button className="presenter__nav-btn" onClick={next} disabled={atEnd} aria-label={t('next')}>
           ›
+        </button>
+        <button
+          className={`presenter__pill presenter__blank${blank ? ' is-active' : ''}`}
+          onClick={() => setBlank(!blank)}
+          aria-pressed={blank}
+          title={t('blankTitle')}
+        >
+          {t('blank')}
         </button>
       </div>
     </div>,

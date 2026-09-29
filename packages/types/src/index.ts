@@ -60,6 +60,8 @@ export interface SongListItemDto {
 
 export type SongPartType = 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda';
 export type SongSheetType = 'pdf' | 'image';
+/** How a part relates to the song's melody (issue #61). */
+export type SongTranslationType = 'original' | 'singable' | 'reference';
 
 export interface SongPartDto {
   id: number;
@@ -67,6 +69,9 @@ export interface SongPartDto {
   label: string;
   sortOrder: number;
   lyrics: string;
+  /** ISO code such as `en` or `de`; `null` means the songbook's language. */
+  language: string | null;
+  translationType: SongTranslationType;
 }
 
 export interface SongSheetDto {

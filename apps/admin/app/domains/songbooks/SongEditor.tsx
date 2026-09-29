@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useLayoutEffect, useMemo } from 'react';
 import { updateSong, createPart, updatePart, deletePart, uploadSheet, deleteSheet, fetchSong } from './repository';
 import { r2url } from '../../lib/api';
-import type { SongDto, SongPartDto, SongSheetDto, SongPartType } from '@sdarm/types';
+import type { SongDto, SongPartDto, SongSheetDto, SongPartType, SongTranslationType } from '@sdarm/types';
 
 const PART_TYPES: SongPartType[] = ['verse', 'chorus', 'bridge', 'intro', 'outro', 'coda'];
 const MAJOR_CHORDS = ['C', 'D', 'E', 'F', 'G', 'A', 'H'];
@@ -18,6 +18,22 @@ const SAVE_DEBOUNCE = 800;
 type FieldStatus = 'idle' | 'saving' | 'saved' | 'error';
 
 type ParsedPart = { label: string; type: SongPartType; lyrics: string };
+
+/** Per-part language tag (issue #61). `language: ''` means the songbook's language. */
+type PartTag = { language: string; translationType: SongTranslationType };
+const DEFAULT_TAG: PartTag = { language: '', translationType: 'original' };
+const TRANSLATION_TYPES: { value: SongTranslationType; label: string }[] = [
+  { value: 'original', label: 'Original' },
+  { value: 'singable', label: 'Singable translation' },
+  { value: 'reference', label: 'Reference translation' },
+];
+
+// Tags follow the blocks by position, exactly like the part ids in handleSave.
+function initTags(parts: SongPartDto[]): PartTag[] {
+  return [...parts]
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((p) => ({ language: p.language ?? '', translationType: p.translationType ?? 'original' }));
+}
 
 type MetaState = {
   number: number;
@@ -136,6 +152,7 @@ export default function SongEditor({ song }: Props) {
 
   const [text, setText] = useState(() => initText(song.parts));
   const [savedParts, setSavedParts] = useState<SongPartDto[]>(song.parts);
+  const [tags, setTags] = useState<PartTag[]>(() => initTags(song.parts));
 
   const [sheets, setSheets] = useState<SongSheetDto[]>(song.sheets);
   const [uploading, setUploading] = useState(false);
@@ -147,6 +164,15 @@ export default function SongEditor({ song }: Props) {
   const [saveDone, setSaveDone] = useState(false);
 
   const parsed = useMemo(() => parseText(text), [text]);
+  const tagAt = (i: number) => tags[i] ?? DEFAULT_TAG;
+  function setTag(i: number, patch: Partial<PartTag>) {
+    setTags((ts) => {
+      const next = parsed.map((_, j) => ts[j] ?? DEFAULT_TAG);
+      next[i] = { ...next[i], ...patch };
+      return next;
+    });
+    setSaveDone(false);
+  }
 
   // ── Autogrow textarea ──────────────────────────────────────────────────────
   useLayoutEffect(() => {
@@ -272,15 +298,26 @@ export default function SongEditor({ song }: Props) {
 
       for (let i = 0; i < parsed.length; i++) {
         const p = parsed[i];
+        const tag = tagAt(i);
+        const language = tag.language.trim().toLowerCase() || null;
         if (i < existing.length) {
           await updatePart(song.id, existing[i].id, {
             type: p.type,
             label: p.label,
             sortOrder: i,
             lyrics: p.lyrics,
+            language,
+            translationType: tag.translationType,
           });
         } else {
-          await createPart(song.id, { type: p.type, label: p.label, sortOrder: i, lyrics: p.lyrics });
+          await createPart(song.id, {
+            type: p.type,
+            label: p.label,
+            sortOrder: i,
+            lyrics: p.lyrics,
+            language,
+            translationType: tag.translationType,
+          });
         }
       }
       for (let i = parsed.length; i < existing.length; i++) {
@@ -289,6 +326,7 @@ export default function SongEditor({ song }: Props) {
       const fresh = await fetchSong(song.id);
       setSavedParts(fresh.parts);
       setText(initText(fresh.parts));
+      setTags(initTags(fresh.parts));
       setSaveDone(true);
     } catch (e) {
       setSaveError(String(e));
@@ -451,7 +489,8 @@ export default function SongEditor({ song }: Props) {
           />
 
           <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 6 }}>
-            Sections are separated by a blank line. First line of each block = label (Verse 1, Chorus, Bridge…).
+            Sections are separated by a blank line. First line of each block = label (Verse 1, Chorus, Bridge…). Tag a
+            section&apos;s language in the preview only when it differs from the songbook&apos;s.
           </div>
 
           {saveError && (
@@ -547,7 +586,33 @@ export default function SongEditor({ song }: Props) {
           ) : (
             parsed.map((p, pi) => (
               <div key={pi} className="preview-part">
-                <div className="preview-part-label">{p.label}</div>
+                <div className="preview-part-head">
+                  <div className="preview-part-label">{p.label}</div>
+                  <div className="part-tags">
+                    <input
+                      className="part-tag part-tag--lang"
+                      type="text"
+                      value={tagAt(pi).language}
+                      placeholder={song.songbook.language}
+                      maxLength={8}
+                      aria-label={`Language of ${p.label}`}
+                      title="Language — empty means the songbook's"
+                      onChange={(e) => setTag(pi, { language: e.target.value })}
+                    />
+                    <select
+                      className="part-tag"
+                      value={tagAt(pi).translationType}
+                      aria-label={`Translation type of ${p.label}`}
+                      onChange={(e) => setTag(pi, { translationType: e.target.value as SongTranslationType })}
+                    >
+                      {TRANSLATION_TYPES.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
                 <div className="preview-lyrics">
                   {p.lyrics ? (
                     p.lyrics.split('\n').map((line, li) => (
