@@ -24,6 +24,12 @@
   gap: 20px;
 }
 
+/* Two columns at phone width left each card ~115px of content: the upload box
+   wrapped to one word a line and labels broke mid-phrase. */
+@media (max-width: 600px) {
+  .config-grid { grid-template-columns: 1fr; gap: 12px; }
+}
+
 .config-card {
   background: var(--surface);
   border: 1px solid var(--border);

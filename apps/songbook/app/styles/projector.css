@@ -336,6 +336,23 @@
   border-color: var(--gold);
 }
 
+/* Two rows on narrow screens. Four 44px controls (with line mode) plus the
+   centred nav need ~650px in one row; at 390px the last control, A+, was cut
+   off at the screen edge. */
+@media (max-width: 660px) {
+  .projector__bottombar {
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+  }
+  .projector__nav {
+    grid-column: 1;
+  }
+  .projector__controls {
+    grid-column: 1;
+    justify-self: center;
+  }
+}
+
 .projector[data-slide-theme='light'] {
   --proj-bg:     #ffffff;
   --proj-text:   #1a1a1a;

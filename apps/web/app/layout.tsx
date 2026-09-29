@@ -23,7 +23,7 @@ import './styles/post.css';
 import './styles/legal.css';
 import './styles/about.css';
 import './styles/kontakt.css';
-import './styles/not-found.css';
+import '@sdarm/ui/src/styles/not-found.css';
 
 import { getLocale } from 'next-intl/server';
 import { ThemeScript } from '@sdarm/ui';

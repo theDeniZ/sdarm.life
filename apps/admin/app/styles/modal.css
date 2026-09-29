@@ -8,6 +8,8 @@
   align-items: center;
   justify-content: center;
   z-index: 100;
+  /* Keeps the dialog off the screen edges on a phone (it was 375px wide on 375). */
+  padding: 16px;
 }
 
 .modal {

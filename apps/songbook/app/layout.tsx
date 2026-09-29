@@ -16,6 +16,7 @@ import './styles/projector.css';
 import './styles/presenter.css';
 import './styles/sheets.css';
 import './styles/reader.css';
+import '@sdarm/ui/src/styles/not-found.css';
 import './styles/reduced-motion.css';
 
 import { getLocale } from 'next-intl/server';

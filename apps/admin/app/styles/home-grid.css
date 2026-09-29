@@ -171,6 +171,10 @@
   background: var(--accent-soft);
   color: var(--accent);
 }
+/* On the light tint over --surface-2 the accent is 4.3:1; one step deeper. */
+[data-theme='light'] .grid-editor__segment button.is-active {
+  color: var(--accent-hover);
+}
 
 .grid-editor__frames {
   display: grid;

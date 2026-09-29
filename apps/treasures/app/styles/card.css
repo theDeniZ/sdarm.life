@@ -79,6 +79,7 @@
   display: flex;
   flex-direction: column;
   flex: 1;
+  min-width: 0;
   min-height: 0;
   justify-content: center;
 }
@@ -188,6 +189,18 @@
   pointer-events: none;
 }
 
+/* Two columns on a tablet leave ~350px a card; the 180px cover column left the
+   text 130px. */
+@media (min-width: 601px) and (max-width: 900px) {
+  .item-visual {
+    width: 150px;
+    padding: 1.2rem 0.8rem;
+  }
+  .item-body {
+    padding: 1.1rem 1.1rem 1.1rem 0.4rem;
+  }
+}
+
 @media (max-width: 600px) {
   .item-card {
     flex-direction: column;
@@ -226,4 +239,11 @@
 }
 [data-theme='light'] .book-visual {
   background: transparent;
+}
+
+/* The light gold is darker than the dark theme's; at 0.7 / 0.95 the language
+   tag and the author fell to 2.7:1 and 4.1:1. */
+[data-theme='light'] .item-lang,
+[data-theme='light'] .item-author {
+  opacity: 1;
 }

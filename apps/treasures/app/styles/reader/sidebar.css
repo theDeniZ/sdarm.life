@@ -13,8 +13,13 @@
   transition: width 0.38s var(--ease);
 }
 
+/* Folded away it must also leave the tab order, after the width animation. */
 .epub-sidebar--collapsed {
   width: 0;
+  visibility: hidden;
+  transition:
+    width 0.38s var(--ease),
+    visibility 0s linear 0.38s;
 }
 
 .epub-sidebar__inner {
@@ -205,7 +210,7 @@
   font-family: 'Inter', sans-serif;
   font-size: 0.72rem;
   font-weight: 600;
-  color: rgba(201, 169, 110, 0.5);
+  color: rgba(201, 169, 110, 0.7);
   min-width: 1.4rem;
   flex-shrink: 0;
 }
@@ -247,8 +252,17 @@
     bottom: 0;
     z-index: 200;
     width: 300px;
+    /* As an overlay the list needs a ground of its own: transparent, the book's
+       title page showed through between the chapter names. */
+    background: var(--reader-sidebar);
+    border-right: 1px solid var(--border);
     transform: translateX(-100%);
-    transition: transform 0.38s var(--ease);
+    /* Off-canvas is also out of the tab order; visibility flips after the
+       slide-out and at once on the way in. */
+    visibility: hidden;
+    transition:
+      transform 0.38s var(--ease),
+      visibility 0s linear 0.38s;
   }
   /* The shadow belongs to the open state only. Off-canvas the panel sits at
      translateX(-100%) with its right edge on x=0, so a shadow offset +6px to the
@@ -256,6 +270,8 @@
      attached to it. */
   .epub-sidebar--open {
     transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.38s var(--ease);
   }
   .epub-sidebar--collapsed {
     width: 300px;

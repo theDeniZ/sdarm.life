@@ -123,7 +123,8 @@ body:has(.epub-reader[data-reader-theme='dark']) {
   --book-tone-page: #0c0b09;
   --book-tone-fg: rgba(240, 235, 225, 0.92);
   --book-tone-link: rgba(255, 255, 255, 0.88);
-  --book-tone-muted: rgba(210, 200, 185, 0.4);
+  /* The site's own dark secondary tier (packages/ui navbar.css); 0.4 was 2.7:1. */
+  --book-tone-muted: rgba(210, 200, 185, 0.65);
   --book-tone-line: rgba(201, 169, 110, 0.2);
   --book-tone-accent: #c9a96e;
 }
@@ -132,18 +133,19 @@ body:has(.epub-reader[data-reader-theme='sepia']) {
   --book-tone-page: #faf6ef;
   --book-tone-fg: #1c1208;
   --book-tone-link: rgba(44, 28, 8, 0.85);
-  --book-tone-muted: rgba(44, 28, 8, 0.42);
+  --book-tone-muted: rgba(44, 28, 8, 0.66);
   --book-tone-line: rgba(100, 70, 30, 0.2);
-  --book-tone-accent: #a0692a;
+  --book-tone-accent: #935f24;
 }
 body:has(.epub-reader[data-reader-theme='light']) {
   --book-tone-bar: rgba(238, 238, 240, 0.9);
   --book-tone-page: #f5f4f2;
   --book-tone-fg: #1c1c1e;
   --book-tone-link: rgba(20, 20, 25, 0.85);
-  --book-tone-muted: rgba(20, 20, 25, 0.4);
+  --book-tone-muted: rgba(20, 20, 25, 0.64);
   --book-tone-line: rgba(0, 0, 0, 0.14);
-  --book-tone-accent: #b8924a;
+  /* Same values as the reader palettes in EpubReader.tsx: 4.5:1 on the bar. */
+  --book-tone-accent: #80651d;
 }
 
 body:has(.epub-reader) {

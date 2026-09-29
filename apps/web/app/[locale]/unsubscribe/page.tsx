@@ -1,5 +1,5 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { ConnectedFooter } from '@sdarm/ui';
+import { ConnectedFooter, ConnectedNavbar } from '@sdarm/ui';
 
 const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 
@@ -18,6 +18,7 @@ export default async function UnsubscribePage({
   if (!token) {
     return (
       <>
+        <ConnectedNavbar locale={locale} />
         <main id="main-content" className="page unsubscribe-page">
           <p>{t('invalidLink')}</p>
         </main>
@@ -38,6 +39,7 @@ export default async function UnsubscribePage({
 
   return (
     <>
+      <ConnectedNavbar locale={locale} />
       <main id="main-content" className="page unsubscribe-page">
         {ok ? <p>{t('success')}</p> : <p>{t('error')}</p>}
       </main>

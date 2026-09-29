@@ -186,6 +186,12 @@
   transition: all 0.3s ease;
   line-height: 1;
 }
+/* 44px touch area around the 36px disc */
+.br-close::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+}
 
 .br-close:hover {
   color: var(--gold);
@@ -277,7 +283,7 @@
 }
 
 .br-field input::placeholder {
-  color: rgba(122, 116, 112, 0.6);
+  color: var(--muted);
 }
 
 .br-field input:hover,
@@ -449,7 +455,7 @@
   text-align: center;
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.82rem;
-  color: rgba(122, 116, 112, 0.7);
+  color: var(--muted);
   margin-top: 12px;
   letter-spacing: 0.06em;
 }
@@ -472,7 +478,7 @@
 .br-dsgvo-notice__text {
   font-family: 'Cormorant Garamond', serif;
   font-size: 0.84rem;
-  color: rgba(214, 208, 200, 0.55);
+  color: rgba(214, 208, 200, 0.7);
   line-height: 1.6;
   margin: 0;
 }
@@ -573,6 +579,25 @@
 }
 [data-theme='light'] .br-banner {
   background: var(--bg-section);
+}
+/* These four carried dark-theme literals into the light modal: the privacy
+   notice was 1.2:1, and a ticked book or the success title turned the
+   near-white #f0ebe2 — the choice vanished the moment it was made. */
+[data-theme='light'] .br-dsgvo-notice__text {
+  color: var(--muted);
+}
+[data-theme='light'] .br-consent-link {
+  opacity: 1;
+}
+[data-theme='light'] .br-check-item:hover,
+[data-theme='light'] .br-check-item.selected,
+[data-theme='light'] .br-success-title {
+  color: var(--text-strong);
+}
+/* Light text on the light theme's deeper gold, as on the songbook's active
+   pill; the dark ink was 4.4:1 on it. */
+[data-theme='light'] .br-submit {
+  color: var(--dark);
 }
 /* No treasures component renders .sheet-display — it is the songbook's sheet
    viewer. The rule came along with the light block this split dissolved. */

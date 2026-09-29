@@ -125,8 +125,15 @@ body:has(.reader-wrap) nav.site-nav {
   overflow: hidden;
   transition: width 0.38s cubic-bezier(0.76, 0, 0.24, 1);
 }
+/* Folded to zero width the list is gone from view but not from the tab order:
+   keyboard focus walked through 700 invisible buttons. Hidden too, after the
+   width has finished animating. */
 .reader-sidebar.is-closed {
   width: 0;
+  visibility: hidden;
+  transition:
+    width 0.38s cubic-bezier(0.76, 0, 0.24, 1),
+    visibility 0s linear 0.38s;
 }
 
 /* Behind the list while it overlays the song. Only rendered in that state, so it
@@ -186,7 +193,8 @@ body:has(.reader-wrap) nav.site-nav {
   font-weight: 300;
   letter-spacing: 0.2em;
   text-transform: uppercase;
-  color: rgba(201, 169, 110, 0.4);
+  /* 0.7 is the lowest alpha at 4.5:1 on the list's ground (0.4 was 2.3:1). */
+  color: rgba(201, 169, 110, 0.7);
   flex-shrink: 0;
 }
 
@@ -241,14 +249,14 @@ body:has(.reader-wrap) nav.site-nav {
   font-size: 0.72rem;
   font-weight: 400;
   letter-spacing: 0;
-  color: rgba(201, 169, 110, 0.55);
+  color: rgba(201, 169, 110, 0.7);
   flex-shrink: 0;
   min-width: 2rem;
   text-align: right;
   transition: color 0.18s;
 }
 .reader-toc-item:hover .reader-toc-num {
-  color: rgba(201, 169, 110, 0.8);
+  color: rgba(201, 169, 110, 0.9);
 }
 .reader-toc-item.active .reader-toc-num {
   color: var(--gold);
@@ -363,7 +371,12 @@ body:has(.reader-wrap) nav.site-nav {
     width: min(320px, 85vw) !important;
     z-index: 150;
     transform: translateX(-100%);
-    transition: transform 0.38s cubic-bezier(0.76, 0, 0.24, 1);
+    /* Off-canvas is also out of the tab order; visibility flips after the
+       slide-out and at once on the way in. */
+    visibility: hidden;
+    transition:
+      transform 0.38s cubic-bezier(0.76, 0, 0.24, 1),
+      visibility 0s linear 0.38s;
   }
   .reader-sidebar-inner {
     width: 100%;
@@ -379,7 +392,15 @@ body:has(.reader-wrap) nav.site-nav {
      stripe down the side of the song with no panel attached to it. */
   .reader-sidebar.is-open {
     transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.38s cubic-bezier(0.76, 0, 0.24, 1);
     box-shadow: 10px 0 24px -12px var(--reader-overlay-shadow);
+  }
+  /* Outranks the docked .is-closed rule above, which animates width instead. */
+  .reader-sidebar.is-closed {
+    transition:
+      transform 0.38s cubic-bezier(0.76, 0, 0.24, 1),
+      visibility 0s linear 0.38s;
   }
   .reader-scrim {
     display: block;
@@ -405,8 +426,19 @@ body:has(.reader-wrap) nav.site-nav {
   .reader-content .chord-line {
     justify-content: center;
   }
-  .reader-content .mode-bar {
+  .reader-content .mode-bar,
+  .reader-content .transpose-bar {
     justify-content: center;
+  }
+  /* 44px touch targets in a 44px bar: the list toggle's hit area grows past
+     its 32px box, the visible button does not. */
+  .reader-icon-btn {
+    position: relative;
+  }
+  .reader-icon-btn::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
   }
 }
 
@@ -437,7 +469,7 @@ body:has(.reader-wrap) nav.site-nav {
   border-color: rgba(0, 0, 0, 0.3);
 }
 [data-theme='light'] .reader-sidebar-search-input::placeholder { color: var(--muted); }
-[data-theme='light'] .reader-sidebar-toc-label { color: rgba(146, 114, 35, 0.5); }
+[data-theme='light'] .reader-sidebar-toc-label { color: var(--gold); }
 [data-theme='light'] .reader-toc-item { color: rgba(28, 28, 34, 0.65); }
 [data-theme='light'] .reader-toc-item:hover {
   color: var(--text);
@@ -447,9 +479,10 @@ body:has(.reader-wrap) nav.site-nav {
   color: var(--text-strong);
   background: rgba(146, 114, 35, 0.1);
 }
-[data-theme='light'] .reader-toc-num { color: rgba(146, 114, 35, 0.5); }
-[data-theme='light'] .reader-toc-item:hover .reader-toc-num { color: rgba(146, 114, 35, 0.75); }
-[data-theme='light'] .reader-toc-item.active .reader-toc-num { color: var(--gold); }
+[data-theme='light'] .reader-toc-num,
+[data-theme='light'] .reader-toc-item:hover .reader-toc-num { color: var(--gold); }
+/* On the active row's gold tint the plain gold is 4.0:1; a shade deeper. */
+[data-theme='light'] .reader-toc-item.active .reader-toc-num { color: color-mix(in srgb, var(--gold) 85%, #000); }
 [data-theme='light'] .reader-sidebar-pagination button {
   border-color: rgba(146, 114, 35, 0.25);
   color: var(--gold);

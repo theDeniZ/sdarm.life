@@ -23,7 +23,6 @@
   letter-spacing: 0.32em;
   text-transform: uppercase;
   color: var(--gold);
-  opacity: 0.85;
   margin: 0 0 1.1rem;
 }
 .kontakt-section-title {
@@ -174,7 +173,9 @@
   font-size: 0.85rem;
   letter-spacing: 0.2em;
   color: var(--gold);
-  opacity: 0.6;
+  /* 0.8 keeps the numeral quieter than the name and still 4.5:1 in dark; the
+     light theme's darker gold needs the full colour (0.6 was 2.2:1 there). */
+  opacity: 0.8;
   margin-bottom: 0.4rem;
 }
 .kontakt-loc-city {
@@ -214,7 +215,10 @@
 }
 .kontakt-loc-link {
   margin-top: auto;
-  padding-top: 1rem;
+  /* 12px below the text, taken back from the card's padding, makes the link a
+     44px touch target without moving it. */
+  padding: 1rem 0 12px;
+  margin-bottom: -12px;
   font-family: 'Lexend', sans-serif;
   font-size: 0.66rem;
   font-weight: 500;
@@ -243,4 +247,8 @@
   .kontakt-country-head {
     flex-wrap: wrap;
   }
+}
+
+[data-theme='light'] .kontakt-loc-num {
+  opacity: 1;
 }
