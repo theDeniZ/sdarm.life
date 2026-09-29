@@ -1,6 +1,12 @@
 /* Self-hosted fonts — no third-party requests, no Google tracking */
 @import '@fontsource/lexend/300.css';
 @import '@fontsource/lexend/400.css';
+/* 500–700 must be loaded for Latin too: font-noto-sans.css declares Cyrillic-only
+   Lexend faces at 300–700, and a weight that has only a Cyrillic face makes Latin
+   text at that weight fall back to the system font instead of Lexend. */
+@import '@fontsource/lexend/500.css';
+@import '@fontsource/lexend/600.css';
+@import '@fontsource/lexend/700.css';
 /* Cyrillic for Lexend, which ships none — see font-noto-sans.css (issue #177) */
 @import './font-noto-sans.css';
 @import '@fontsource/playfair-display/400.css';
