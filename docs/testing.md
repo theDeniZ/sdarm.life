@@ -34,9 +34,15 @@ middleware can be exercised from both sides. Do not make it depend on
 migrations applied, so a query against a table says nothing about the code under
 test. `test/index.spec.ts` covers the wiring that actually breaks silently —
 routing, the admin auth gate, the CORS origin list (which drifted once, see
-[api.md](api.md)) and the OpenAPI document. Testing a repository properly means
-first applying migrations via the pool's `readD1Migrations`; that has not been
-set up yet.
+[api.md](api.md)) and the OpenAPI document.
+
+**A spec that needs tables migrates the test D1 itself.** `vitest.config.mts`
+reads `packages/db/migrations` with `readD1Migrations()` and binds the result as
+`TEST_MIGRATIONS`; `test/digest.spec.ts` calls
+`applyD1Migrations(env.DB, env.TEST_MIGRATIONS)` in `beforeAll` and runs the
+subscriber digest's scheduled path against real tables, with `fetch` stubbed so
+nothing can reach the email provider. Specs that do not call it still see an
+empty database.
 
 ⚠️ **`vitest` is deliberately split across the monorepo: 5.x everywhere except `apps/api`, which stays on `~4.1.11`.** `@cloudflare/vitest-pool-workers@0.22.0` peer-requires `vitest@^4.1.0` (likewise `@vitest/runner` and `@vitest/snapshot`), so moving `apps/api` to 5 leaves an unmet peer on every install. The plain-node suites in `@sdarm/types` and `@sdarm/songbook` have no such constraint and run fine on 5. The split is not an oversight — do not "tidy" it by aligning the versions; `apps/api` moves only together with its pool.
 

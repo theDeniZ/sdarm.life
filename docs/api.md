@@ -17,6 +17,7 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/images/*` | Proxy-serves R2 objects by key path (local dev only). |
 | `POST` | `/api/v1/subscribe` | Subscribe email. Body: `{ email, language? }` (`language` defaults to `'de'`). Sends a welcome email in the subscriber's language via Resend (background, non-blocking). 409 if already subscribed. |
 | `GET` | `/api/v1/unsubscribe` | `?token=` — hard-deletes the subscriber row. Idempotent (404 if token not found). |
+| `POST` | `/api/v1/unsubscribe` | `?token=` — RFC 8058 one-click unsubscribe, the target of the digest's `List-Unsubscribe` header (mail clients POST `List-Unsubscribe=One-Click`; the body is not parsed). Same hard delete as the `GET`. 404 if token not found. |
 | `GET` | `/api/v1/songbooks` | All songbooks ordered by `sort_order`, each with `songCount`. |
 | `GET` | `/api/v1/songbooks/:slug` | Songbook metadata + `songCount`. 404 if not found. |
 | `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number, title, and `song_parts.lyrics`. `?limit=N&offset=N`. Returns `{ items, total }`. When `?q=` is set, each item includes `matchType: 'title' \| 'number' \| 'lyrics'` indicating which field caused the match (used by the songbook UI to highlight title hits with `<mark>` and label lyrics-only hits with a small pill). |
@@ -78,6 +79,10 @@ Require `Authorization: Bearer <key>` on every request.
 | `POST` | `/api/v1/admin/api-keys` | Create key. Body: `{ name }`. Returns `{ key, apiKey }` — plaintext shown once. |
 | `DELETE` | `/api/v1/admin/api-keys/:id` | Revoke key — removes from KV, marks revoked in index. |
 | `POST` | `/api/v1/admin/email/send` | Send a single email. Body: `{ to, subject, html }`. Uses Resend. |
+| `GET` | `/api/v1/admin/email/digest` | Subscriber digest settings and state as `DigestSettingsDto`: `enabled`, `frequency`, `weekday`, `since` (window start of the next digest), `lastSentAt`, `lastRun`, `nextRun`, `recipients` (`{ de, en }` counts only — no addresses), `sendingConfigured` (whether `RESEND_API_KEY` is set). See [Subscriber digest](#subscriber-digest). |
+| `PUT` | `/api/v1/admin/email/digest` | Body `{ enabled, frequency: 'weekly'\|'biweekly'\|'monthly', weekday: 0–6 }`. Switching on pins the window start. Returns the updated `DigestSettingsDto`. |
+| `GET` | `/api/v1/admin/email/digest/preview` | The next digest, rendered: `DigestPreviewDto` (`since`, `until`, `hasContent`, `counts`, `subject`, `html`, `text`). `?locale=de\|en` (default `de`), `?since=` ISO override of the window start (preview only — never changes the stored window). Links carry the inert token `preview`. |
+| `POST` | `/api/v1/admin/email/digest/test` | Send that preview to one address. Body `{ to, locale?, since? }`. Subject prefixed `[Test]`, unsubscribe token `preview` (matches nobody). **503** when `RESEND_API_KEY` is unset (nothing is sent), **502** when Resend rejects it. |
 | `GET` | `/api/v1/admin/bible/catalog` | One page of the YouVersion catalog for the Admin → Bible picker. `?language=deu\|eng\|rus\|…\|all`, `?pageToken=`, `?allAvailable=true` (include Bibles our key holds no license for, flagged `licensed: false`). Returns `{ items, total, nextPageToken }`. 503 when `YOUVERSION_API_KEY` is unset or YouVersion is unreachable. |
 | `GET` | `/api/v1/admin/bible/licenses` | Licenses available to the app key, each with the Bible IDs it governs. `?bibleId=N` narrows to the one covering that Bible. Reference data only — **acceptance state is deliberately not exposed** (see below). 503 when unset/unreachable. |
 | `GET` | `/api/v1/admin/bible/translations` | Every row in `sdarm-bible`'s `bible_translations`, both sources, as `BibleAdminTranslationDto` — license, gates, ingest status, plus `enabled` (derived live from the KV allowlist, never stored). Empty array when `BIBLE_DB` is unbound. |
@@ -198,6 +203,31 @@ Plain-text Markdown routes for AI answering agents (ChatGPT, Claude, Gemini, Per
 ⚠️ **Known limitation — crawlers reach the counter through the songbook server.** A song page on `songs.sdarm.life` is rendered server-side, so the request to this route comes from the songbook Worker, not from the visitor: the API sees the server's user agent (`node` in local dev), never the crawler's. The bot filter therefore only works for opens the browser fetches directly (song-to-song navigation inside the reader) and for direct API callers. Measured locally: a page view with a `SemrushBot` user agent was counted. Closing it needs `apps/songbook` to forward the visitor's user agent on that one fetch (the API would still read and discard it) — a decision left open in issue #197.
 
 The upsert's create-then-increment behaviour is SQLite's and cannot be unit-tested under the rules in [testing.md](testing.md) (the test D1 has no migrations). `src/middleware/song-opens.test.ts` pins what can be: one in-place upsert per counted open, cache hits counted, nothing for a 404 or a crawler, and a failed write never failing the response. The rest was verified end to end against the local D1.
+
+## Subscriber digest
+
+One email to every **confirmed** subscriber when new content was published (issue #184) — a digest, never one email per item, so a 700-song import produces one email per subscriber with "and 695 more", not 700 emails.
+
+| Piece | Where |
+|---|---|
+| Trigger | Cron Trigger on this Worker, `triggers.crons: ["0 7 * * *"]` in `apps/api/wrangler.jsonc` — **daily** at 07:00 UTC (09:00 German summer time, 08:00 winter). `scheduled()` in `src/index.ts` calls `runScheduledDigest()`. |
+| Settings + state | KV key `email_digest` (one JSON document: `enabled`, `frequency`, `weekday`, `since`, `lastSentAt`, `lastRun`) — `services/digest/settings.ts`. **Not** inside the `config` key, because `GET /api/v1/config` is public. No D1 table. |
+| What is new | `services/digest/run.ts → collectDigestContent()`: posts with `published_at` in the window (not deleted), songs by `created_at` grouped per songbook, treasures added (`created_at`) and edited (`updated_at`). Queries live in the posts/songs/treasures repositories. |
+| Model + caps | `services/digest/build.ts` (pure): posts ≤ 5, songbooks ≤ 4 with ≤ 5 songs each, new books ≤ 5, edited books ≤ 3 — each list ends in "and N more". |
+| Template | `emails/digest.ts` — table layout, inline styles, fluid 600 px card with an MSO wrapper for Outlook, system fonts only (a web font would be a third-party request), dark like the site. Plain-text part rendered from the same model. |
+| Send | Resend batch API, 100 per request, `Idempotency-Key: digest-<date>-<chunk>`. Each message carries `List-Unsubscribe: <https://api.sdarm.life/api/v1/unsubscribe?token=…>` and `List-Unsubscribe-Post: List-Unsubscribe=One-Click`. |
+
+**When a run sends.** The cron fires every day; `isDigestDue()` decides: the digest must be switched on (default **off** — Admin → Email), today (UTC) must be the chosen weekday, and enough time must have passed since `lastSentAt` (weekly ≥ 6 days, every two weeks ≥ 13; monthly = the first chosen weekday of a month). On any other day the run returns without reading or writing anything. On a send day:
+
+1. Nothing new in `(since, now]` → `lastRun = nothing-new`, window unchanged, no email. **Edited books alone do not count as new** — an edit bumps `updated_at` whatever it touched, and a typo fix must not mail everyone; edits ride along in a digest that goes out anyway.
+2. `RESEND_API_KEY` unset → logged, `lastRun = not-configured`, window unchanged. This check comes before the subscriber list is read, so local dev and tests can never send.
+3. Otherwise one message per confirmed subscriber in their `language` (`en` → English, anything else → German), rendered once per language and personalised by token. A successful send moves `since` and `lastSentAt` to the run time. A batch failure after some chunks went out still advances the window (re-running would mail the first chunks twice) and records `failed` with the count; a failure before anything went out leaves the window, so the next due day retries.
+
+**Links** point at the production hosts (`sdarm.life`, `songs.sdarm.life`, `treasures.sdarm.life`, `api.sdarm.life`) because a cron run has no request origin. The staging Worker inherits the trigger but reads its own KV, where the digest is off unless switched on there; its emails would link to production.
+
+**Footer** (every digest): reason for receiving it, the one-click unsubscribe link (`https://sdarm.life/{locale}/unsubscribe?token=…`, the existing web page → `GET /unsubscribe`), Impressum and Datenschutz links, and the association name and address — taken from `legal.impressum.section1Body` in `@sdarm/i18n`, so the Impressum stays the single source.
+
+**Testing it locally.** `wrangler dev --test-scheduled`, then `curl "http://localhost:8787/__scheduled?cron=0+7+*+*+*"`. Without `RESEND_API_KEY` in `.dev.vars` (keep it that way) the run ends at step 2. The admin panel's preview renders any window without sending.
 
 ## Rate limiting
 

@@ -10,6 +10,8 @@
 
 **Site config lives in Workers KV.** All config key-value pairs are stored as a single JSON object under the KV key `config`. The D1 `site_config` table is dormant (kept as backup, not read or written).
 
+**The API Worker has one Cron Trigger** (`triggers.crons` in `apps/api/wrangler.jsonc`, daily 07:00 UTC). It drives the subscriber digest (issue #184), which is off until switched on in Admin → Email and decides per run whether to send — see [api.md](api.md#subscriber-digest). The trigger only exists once the Worker is deployed; `wrangler dev --test-scheduled` fires it locally. Its state is the KV key `email_digest`, kept out of `config` because `GET /config` is public.
+
 ---
 
 ## Target structure (migration goal)
@@ -309,6 +311,12 @@ apps/api/src/
       youversion.ts    — YouVersion Platform API client (server-side only)
       cache.ts         — KV read-through cache + TTLs for Bible payloads
       catalog.ts       — resolves the KV-configured enabled Bible IDs into translations/books/chapters
+    digest/
+      build.ts         — pure: window content → capped, grouped, localised digest model
+      settings.ts      — KV `email_digest` settings, schedule (isDigestDue / nextDigestRun)
+      run.ts           — collect window, render per language, Resend batch send, cron entry point
+  emails/
+    digest.ts          — digest HTML (table layout, inline styles) + plain text from the model
   middleware/
     auth.ts            — CF Access header verification middleware
   og/
