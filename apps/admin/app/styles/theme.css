@@ -49,7 +49,12 @@
   --danger-soft:  rgba(220, 38, 38, 0.16);
   --row-hover:    rgba(255, 255, 255, 0.04);
   --row-link-hover: rgba(255, 255, 255, 0.07);
+  /* Unfilled part of a chart bar — quiet, but visible on the card surface. */
+  --track:        var(--surface-2);
   --overlay:      rgba(2, 6, 23, 0.55);
+  /* Code-ish text (HTML body, API keys). A bare `monospace` resolves to
+     Courier on macOS; ui-monospace is the platform's modern mono face. */
+  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --r:            10px;
   --sidebar-w:    240px;
   --sidebar-w-collapsed: 65px;
@@ -81,6 +86,8 @@
   --danger-soft:  rgba(220, 38, 38, 0.12);
   --row-hover:    rgba(2, 6, 23, 0.035);
   --row-link-hover: rgba(2, 6, 23, 0.06);
+  /* --surface-2 (#f1f5f9) on the white card all but disappears. */
+  --track:        rgba(2, 6, 23, 0.08);
   --overlay:      rgba(2, 6, 23, 0.45);
 }
 
@@ -105,3 +112,8 @@ body {
 }
 
 a { text-decoration: none; color: inherit; }
+
+/* Form controls do not inherit the page font — browsers give them their own
+   system face. Every control that set no font-family of its own (filter chips,
+   reorder buttons, the Bible catalog search, …) rendered in Arial. */
+button, input, select, textarea { font-family: inherit; }

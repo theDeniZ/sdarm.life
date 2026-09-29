@@ -86,14 +86,14 @@ export default function ApiKeyManager() {
       <div className="page-header">
         <h1>API Keys</h1>
         {!showForm && (
-          <button className="btn-ghost" onClick={() => window.open(API + '/api/ui', '_blank')}>
-            Swagger UI
-          </button>
-        )}
-        {!showForm && (
-          <button className="btn-primary" onClick={() => setShowForm(true)}>
-            New Key
-          </button>
+          <div className="page-header-actions">
+            <button className="btn-ghost" onClick={() => window.open(API + '/api/ui', '_blank')}>
+              Swagger UI
+            </button>
+            <button className="btn-primary" onClick={() => setShowForm(true)}>
+              New Key
+            </button>
+          </div>
         )}
       </div>
 

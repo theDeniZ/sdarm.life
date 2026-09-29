@@ -151,7 +151,9 @@
 
 .bible-field input,
 .bible-field select,
-.bible-field textarea {
+.bible-field textarea,
+.bible-jurisdiction-row select,
+.bible-catalog-toolbar input[type='search'] {
   padding: 8px 10px;
   border: 1px solid var(--border-2);
   border-radius: var(--r);
@@ -163,7 +165,9 @@
 
 .bible-field input:focus,
 .bible-field select:focus,
-.bible-field textarea:focus {
+.bible-field textarea:focus,
+.bible-jurisdiction-row select:focus,
+.bible-catalog-toolbar input[type='search']:focus {
   border-color: var(--gold-dim);
   outline: none;
 }
@@ -234,6 +238,7 @@
 }
 
 .bible-catalog-toolbar input[type='search'] {
+  width: 100%;
   max-width: 340px;
 }
 

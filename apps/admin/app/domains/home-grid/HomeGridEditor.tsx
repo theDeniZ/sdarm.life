@@ -5,7 +5,7 @@ import { defaultGridConfig, parseGridConfig } from '@sdarm/types';
 import type { GridBlockConfig, GridBlockId, GridScrim, GridTextColor, HomeGridConfig } from '@sdarm/types';
 import ImagePicker from '../images/ImagePicker';
 import { measureLuminance } from './luminance';
-import { fetchGridConfigRaw, saveGridConfig, uploadImage } from './repository';
+import { fetchGridConfigRaw, saveGridConfig } from './repository';
 
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL ?? 'https://sdarm.life';
 
@@ -377,24 +377,15 @@ function ImageSettings({
   block: GridBlockConfig;
   onPatch: (p: Partial<GridBlockConfig['image']>) => void;
 }) {
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function onFile(file: File | undefined) {
-    if (!file) return;
-    setBusy(true);
-    setError(null);
-    try {
-      // Measure before upload: the luminance has to come from the local file,
-      // because reading pixels back from the CDN needs cross-origin permission.
-      const luminance = await measureLuminance(file);
-      const key = await uploadImage(file);
-      onPatch({ key, luminance, enabled: true });
-    } catch {
-      setError('Upload failed.');
-    } finally {
-      setBusy(false);
+  // One upload control for the whole admin: ImagePicker uploads and hands the
+  // local file back, and the luminance is measured from that file — reading
+  // pixels back from the CDN would need cross-origin permission.
+  async function onPick(key: string | null, file?: File) {
+    if (!file) {
+      onPatch({ key, luminance: null });
+      return;
     }
+    onPatch({ key, luminance: await measureLuminance(file).catch(() => null), enabled: true });
   }
 
   const auto = block.image.luminance === null ? null : block.image.luminance >= 0.5 ? 'dark' : 'light';
@@ -403,14 +394,7 @@ function ImageSettings({
     <div className="grid-editor__image">
       <h3 className="grid-editor__sub">Image</h3>
 
-      <label className="grid-editor__upload">
-        <input type="file" accept="image/*" onChange={(e) => onFile(e.target.files?.[0])} disabled={busy} />
-        <span>{busy ? 'Uploading…' : 'Upload a new image'}</span>
-      </label>
-      {error && <p className="grid-editor__error">{error}</p>}
-
-      <p className="muted grid-editor__hint">…or pick one already in the library:</p>
-      <ImagePicker value={block.image.key} onChange={(key) => onPatch({ key, luminance: null })} />
+      <ImagePicker value={block.image.key} onChange={onPick} />
 
       {block.image.key && (
         <>
