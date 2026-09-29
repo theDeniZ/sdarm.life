@@ -10,6 +10,7 @@
  */
 import de from '@sdarm/i18n/messages/de';
 import en from '@sdarm/i18n/messages/en';
+import { UNSUBSCRIBE_TOKEN } from '../../emails/layout';
 
 export type DigestLocale = 'de' | 'en';
 
@@ -111,9 +112,10 @@ export interface DigestModel {
 /**
  * Rendered once per language with this in place of the subscriber token, then
  * substituted per recipient — one render per language instead of one per
- * subscriber keeps the cron's CPU time flat as the list grows.
+ * subscriber keeps the cron's CPU time flat as the list grows. Defined with the
+ * shared email layout, which every per-recipient email uses.
  */
-export const UNSUBSCRIBE_TOKEN = '__UNSUBSCRIBE_TOKEN__';
+export { UNSUBSCRIBE_TOKEN };
 
 /** Subscriber `language` → digest language. Anything but English gets German, the site default. */
 export function digestLocale(language: string | null | undefined): DigestLocale {
@@ -134,7 +136,7 @@ export function hasDigestContent(c: DigestContent): boolean {
 const t = {
 	de: {
 		eyebrow: 'Neu auf sdarm.life',
-		heading: 'Was es Neues gibt',
+		heading: 'Was es *Neues* gibt',
 		intro:
 			'Seit unserer letzten Nachricht sind neue Inhalte erschienen. Hier ist eine kurze Übersicht — jeder Link führt direkt zur jeweiligen Seite.',
 		subject: (parts: string) => `Neu auf sdarm.life: ${parts}`,
@@ -167,7 +169,7 @@ const t = {
 	},
 	en: {
 		eyebrow: 'New on sdarm.life',
-		heading: "What's new",
+		heading: "What's *new*",
 		intro:
 			'New content has appeared since our last message. Here is a short overview — each link takes you straight to the page.',
 		subject: (parts: string) => `New on sdarm.life: ${parts}`,

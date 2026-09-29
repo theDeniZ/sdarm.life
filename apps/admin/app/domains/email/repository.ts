@@ -1,5 +1,5 @@
 import { API, adminHeaders } from '../../lib/api';
-import type { DigestFrequency, DigestPreviewDto, DigestSettingsDto } from '@sdarm/types';
+import type { DigestFrequency, DigestPreviewDto, DigestSettingsDto, EmailTemplateDto } from '@sdarm/types';
 import type { EmailFormData } from './types';
 
 export async function sendEmail(data: EmailFormData): Promise<void> {
@@ -12,6 +12,13 @@ export async function sendEmail(data: EmailFormData): Promise<void> {
     const err = (await res.json()) as { error?: string };
     throw new Error(err.error ?? `HTTP ${res.status}`);
   }
+}
+
+/** Composer starting points, rendered by the API in the same layout as every automatic email. */
+export async function fetchEmailTemplates(locale: 'de' | 'en'): Promise<EmailTemplateDto[]> {
+  const res = await fetch(`${API}/api/v1/admin/email/templates?locale=${locale}`, { headers: adminHeaders() });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return ((await res.json()) as { items: EmailTemplateDto[] }).items;
 }
 
 // ── Subscriber digest (issue #184) ───────────────────────────────────────────

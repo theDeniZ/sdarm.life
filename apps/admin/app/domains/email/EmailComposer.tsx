@@ -1,17 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { sendEmail } from './repository';
-import { getTemplate, type Locale, type TemplateName } from './templates';
+import { useEffect, useState } from 'react';
+import type { EmailTemplateDto } from '@sdarm/types';
+import { fetchEmailTemplates, sendEmail } from './repository';
+import EmailPreview, { PLACEHOLDER } from './EmailPreview';
 import type { EmailFormData } from './types';
 
-/* The empty state lives inside the iframe, so it cannot reach the admin's CSS
-   custom properties — an iframe is a separate document. The values are
-   therefore literal here by necessity, but they are the *light* ones: what is
-   being previewed is a white HTML email, and the sheet stays white in both
-   themes so the preview always shows the message as a recipient sees it. The
-   previous placeholder was near-black text on a near-black ground, which read
-   as a component that had failed to load. */
+type Locale = 'de' | 'en';
+
 const PREVIEW_PLACEHOLDER = `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><style>
@@ -22,31 +18,74 @@ const PREVIEW_PLACEHOLDER = `<!DOCTYPE html>
 <body><p>Preview will appear here</p></body>
 </html>`;
 
+/** Every distinct [[placeholder]] still in the subject or body. */
+function placeholdersLeft(form: EmailFormData): string[] {
+  return [...new Set([...form.subject.matchAll(PLACEHOLDER), ...form.html.matchAll(PLACEHOLDER)].map((m) => m[0]))];
+}
+
 export default function EmailComposer() {
   const [form, setForm] = useState<EmailFormData>({ to: '', subject: '', html: '' });
   const [locale, setLocale] = useState<Locale>('de');
-  const [template, setTemplate] = useState<TemplateName | ''>('');
+  const [templates, setTemplates] = useState<EmailTemplateDto[]>([]);
+  const [templatesError, setTemplatesError] = useState<string | null>(null);
+  const [templateId, setTemplateId] = useState<EmailTemplateDto['id'] | ''>('');
+  const [loaded, setLoaded] = useState<EmailTemplateDto | null>(null);
   const [sending, setSending] = useState(false);
   const [status, setStatus] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  useEffect(() => {
+    let live = true;
+    setTemplatesError(null);
+    fetchEmailTemplates(locale)
+      .then((t) => live && setTemplates(t))
+      .catch((err) => live && setTemplatesError(String(err)));
+    return () => {
+      live = false;
+    };
+  }, [locale]);
+
+  const selected = templates.find((t) => t.id === templateId) ?? null;
 
   function set<K extends keyof EmailFormData>(k: K, v: EmailFormData[K]) {
     setForm((f) => ({ ...f, [k]: v }));
   }
 
   function loadTemplate() {
-    if (!template) return;
-    set('html', getTemplate(template, locale));
+    if (!selected) return;
+    if (
+      form.html.trim() &&
+      form.html !== loaded?.html &&
+      !confirm('Replace the body you have written with this template?')
+    )
+      return;
+    // The subject follows the template unless the operator already typed their own.
+    setForm((f) => ({
+      ...f,
+      subject: !f.subject.trim() || f.subject === loaded?.subject ? selected.subject : f.subject,
+      html: selected.html,
+    }));
+    setLoaded(selected);
+    setStatus(null);
   }
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
+    const left = placeholdersLeft(form);
+    if (left.length > 0) {
+      setStatus({
+        ok: false,
+        msg: `Replace ${left.length === 1 ? 'the placeholder' : `all ${left.length} placeholders`} first, starting with ${left[0]}.`,
+      });
+      return;
+    }
     setSending(true);
     setStatus(null);
     try {
       await sendEmail(form);
       setStatus({ ok: true, msg: `Email sent to ${form.to}` });
       setForm({ to: '', subject: '', html: '' });
-      setTemplate('');
+      setTemplateId('');
+      setLoaded(null);
     } catch (err) {
       setStatus({ ok: false, msg: String(err) });
     } finally {
@@ -54,13 +93,15 @@ export default function EmailComposer() {
     }
   }
 
+  const left = form.html ? placeholdersLeft(form).length : 0;
+
   return (
     <div className="email-layout">
-      {/* ── LEFT: form ── */}
       <form className="form-card" onSubmit={submit}>
         <div className="form-row">
-          <label>To *</label>
+          <label htmlFor="email-to">To *</label>
           <input
+            id="email-to"
             type="email"
             required
             placeholder="recipient@example.com"
@@ -70,8 +111,9 @@ export default function EmailComposer() {
         </div>
 
         <div className="form-row">
-          <label>Subject *</label>
+          <label htmlFor="email-subject">Subject *</label>
           <input
+            id="email-subject"
             type="text"
             required
             placeholder="Email subject"
@@ -81,9 +123,10 @@ export default function EmailComposer() {
         </div>
 
         <div className="form-row">
-          <label>Template</label>
+          <label htmlFor="email-template">Template</label>
           <div className="email-template-row">
             <select
+              aria-label="Template language"
               className="email-template-locale"
               value={locale}
               onChange={(e) => setLocale(e.target.value as Locale)}
@@ -92,28 +135,40 @@ export default function EmailComposer() {
               <option value="en">EN</option>
             </select>
             <select
+              id="email-template"
               className="email-template-select"
-              value={template}
-              onChange={(e) => setTemplate(e.target.value as TemplateName | '')}
+              value={templateId}
+              onChange={(e) => setTemplateId(e.target.value as EmailTemplateDto['id'] | '')}
             >
               <option value="">— none —</option>
-              <option value="base">Base layout</option>
-              <option value="updates">We&apos;ve got updates</option>
+              {templates.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.label}
+                </option>
+              ))}
             </select>
-            <button type="button" className="btn-ghost" onClick={loadTemplate} disabled={!template}>
+            <button type="button" className="btn-ghost" onClick={loadTemplate} disabled={!selected}>
               Load
             </button>
           </div>
-          {template && (
-            <p className="email-hint">
-              Replace <code>TOKEN</code> in the unsubscribe URL with the subscriber&apos;s token.
-            </p>
+          {templatesError ? (
+            <p className="flash-err">Templates could not be loaded: {templatesError}</p>
+          ) : (
+            selected && (
+              <p className="email-hint">
+                {selected.description}{' '}
+                {selected.audience === 'subscribers'
+                  ? 'The unsubscribe link is filled in for the recipient on send; if the address is not a subscriber, those footer lines are left out.'
+                  : 'No unsubscribe line — for one person, not the mailing list.'}
+              </p>
+            )
           )}
         </div>
 
         <div className="form-row">
-          <label>Body (HTML) *</label>
+          <label htmlFor="email-body">Body (HTML) *</label>
           <textarea
+            id="email-body"
             className="email-body"
             required
             rows={20}
@@ -121,6 +176,12 @@ export default function EmailComposer() {
             value={form.html}
             onChange={(e) => set('html', e.target.value)}
           />
+          {left > 0 && (
+            <p className="email-hint">
+              {left} {left === 1 ? 'placeholder' : 'placeholders'} in <code>[[…]]</code> left to replace — highlighted
+              in the preview. Sending is blocked until they are gone.
+            </p>
+          )}
         </div>
 
         {status && <div className={`email-status ${status.ok ? 'state-empty' : 'state-error'}`}>{status.msg}</div>}
@@ -132,16 +193,7 @@ export default function EmailComposer() {
         </div>
       </form>
 
-      {/* ── RIGHT: live preview ── */}
-      <div className="email-preview">
-        <p className="email-preview__label">Preview</p>
-        <iframe
-          className="email-preview__frame"
-          srcDoc={form.html || PREVIEW_PLACEHOLDER}
-          title="Email preview"
-          sandbox="allow-same-origin"
-        />
-      </div>
+      <EmailPreview label={form.subject || 'Preview'} html={form.html || PREVIEW_PLACEHOLDER} title="Email preview" />
     </div>
   );
 }

@@ -187,6 +187,14 @@ reaches Resend; what does is listed per call site in `section10`.
   Resend; `BookRequestModal` never sends it, so `section6`/`section10` do not name it.
   Religious belief is Art. 9 data: if the form ever asks for it, both sections must
   name it and the consent must be explicit (Art. 9(2)(a)) — in the same PR.
+- **What every email carries** (shared layout, `emails/layout.ts`): links to Impressum and
+  Datenschutz and the association's name and address from `legal.impressum.section1Body`;
+  mail to subscribers also carries the reason line and a one-click unsubscribe link
+  (`/{locale}/unsubscribe?token=…`). Broadcasts, the digest and subscriber-template single
+  sends add the `List-Unsubscribe` / `List-Unsubscribe-Post` headers. For a single send the
+  API reads the recipient's own subscriber row (token only) to fill the link; a recipient who
+  is not a confirmed subscriber gets no subscription lines — nothing claims a consent that
+  does not exist. No images, remote CSS or web fonts in any email.
 - **A new email type goes into `section10` in the same PR.** So does turning on open
   or click tracking in the Resend dashboard — that is tracking of the recipient and is
   not covered by the current text.

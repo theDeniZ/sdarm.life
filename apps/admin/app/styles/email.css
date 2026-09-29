@@ -61,9 +61,10 @@
   margin-bottom: 8px;
 }
 
-/* A white sheet, not a dark panel: the thing being previewed is a white HTML
-   email, and a recipient never sees it on a dark ground. The frame around it
-   is the card treatment every other surface in the admin uses. */
+/* A plain sheet: the emails paint their own ground (dark, or light when the
+   preview's Appearance switch or the reader's mail app asks for it), and the
+   empty-state pages are white. The frame around it is the card treatment
+   every other surface in the admin uses. */
 .email-preview__frame {
   display: block;
   width: 100%;
@@ -72,6 +73,48 @@
   border: 1px solid var(--border);
   border-radius: var(--r);
   box-shadow: 0 1px 2px rgba(2, 6, 23, 0.04);
+}
+
+/* Preview header, shared by the composer and the digest (EmailPreview.tsx):
+   the subject on the left, appearance and width switches on the right. */
+.email-preview-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.email-preview-head .email-preview__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+}
+
+.email-preview-controls {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.email-preview-select {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  font-size: 12px;
+  font-family: 'Lexend', sans-serif;
+  color: var(--text);
+  background: var(--surface-2);
+  margin-bottom: 8px;
+}
+
+/* A phone-width sheet, to check the single-column layout the emails switch to. */
+.email-preview__frame--phone {
+  max-width: 390px;
+  margin: 0 auto;
 }
 
 /* Below this width the 480px form left the preview a sliver — 192px at
@@ -164,40 +207,6 @@
 
 .digest-test {
   margin-top: 24px;
-}
-
-.digest-preview-head {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-.digest-preview-head .email-preview__label {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  text-transform: none;
-  letter-spacing: 0;
-  font-size: 12px;
-}
-
-.digest-width {
-  flex: 0 0 auto;
-  padding: 4px 8px;
-  border: 1px solid var(--border-2);
-  border-radius: var(--r);
-  font-size: 12px;
-  font-family: 'Lexend', sans-serif;
-  color: var(--text);
-  background: var(--surface-2);
-  margin-bottom: 8px;
-}
-
-/* A phone-width sheet, to check the digest's single-column layout. */
-.digest-frame--phone {
-  max-width: 390px;
-  margin: 0 auto;
 }
 
 @media (max-width: 600px) {
