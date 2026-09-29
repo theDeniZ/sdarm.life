@@ -2,11 +2,7 @@ import { createRoute, OpenAPIHono, z } from '@hono/zod-openapi';
 import type { Bindings } from '../types';
 import { ErrorSchema, OkSchema } from '../schemas';
 import { rateLimit } from '../middleware/rate-limit';
-
-/** Escape user-supplied strings before embedding in HTML email content. */
-function escHtml(s: string): string {
-  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-}
+import { bookRequestEmail, bookRequestSubject } from '../emails/book-request';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -54,25 +50,7 @@ const bookRequestRoute = createRoute({
 router.openapi(bookRequestRoute, async (c) => {
   const { name, email, phone, land, street, plz, city, religion, books, wish } = c.req.valid('json');
 
-  const rows = [
-    ['Name', escHtml(name)],
-    ['E-Mail', escHtml(email)],
-    ['Telefon', escHtml(phone ?? '—')],
-    ['Land', escHtml(land)],
-    ['Straße', escHtml(street)],
-    ['PLZ', escHtml(plz)],
-    ['Stadt', escHtml(city)],
-    ['Hintergrund', escHtml(religion ?? '—')],
-    ['Bücher', escHtml(books.join(', '))],
-    ['Wunsch', escHtml(wish ?? '—')],
-  ]
-    .map(([k, v]) => `<tr><td style="padding:6px 12px;color:#7a7470;font-size:13px;white-space:nowrap">${k}</td><td style="padding:6px 12px;color:#d6d0c8;font-size:13px">${v}</td></tr>`)
-    .join('');
-
-  const html = `<!DOCTYPE html><html><body style="background:#0c0b09;font-family:Georgia,serif;padding:32px">
-<h2 style="color:#c9a96e;margin-bottom:24px">Neue Buchanfrage</h2>
-<table style="border-collapse:collapse;background:#141210;border:1px solid rgba(201,169,110,0.15);border-radius:6px">${rows}</table>
-</body></html>`;
+  const fields = { name, email, phone, land, street, plz, city, religion, books, wish };
 
   c.executionCtx.waitUntil(
     fetch('https://api.resend.com/emails', {
@@ -82,8 +60,8 @@ router.openapi(bookRequestRoute, async (c) => {
         from: 'info@sdarm.life',
         to: 'info@sdarm.life',
         reply_to: email,
-        subject: `Buchanfrage von ${name} (${land})`,
-        html,
+        subject: bookRequestSubject(fields),
+        html: bookRequestEmail(fields),
       }),
     }),
   );

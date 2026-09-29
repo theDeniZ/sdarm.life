@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { DigestFrequency, DigestPreviewDto, DigestRunDto, DigestSettingsDto } from '@sdarm/types';
 import { fetchDigestPreview, fetchDigestSettings, saveDigestSettings, sendDigestTest } from './repository';
+import EmailPreview from './EmailPreview';
 
 // Subscriber digest (issue #184): one email per scheduled run, only when
 // something new was published. The schedule runs on the API Worker's Cron
@@ -76,7 +77,6 @@ export default function DigestPanel() {
 
   const [locale, setLocale] = useState<'de' | 'en'>('de');
   const [since, setSince] = useState(''); // '' = where the next digest starts
-  const [phone, setPhone] = useState(false);
   const [preview, setPreview] = useState<DigestPreviewDto | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
@@ -306,26 +306,11 @@ export default function DigestPanel() {
           </form>
         </div>
 
-        <div className="email-preview">
-          <div className="digest-preview-head">
-            <p className="email-preview__label">{preview?.hasContent ? preview.subject : 'Digest preview'}</p>
-            <select
-              aria-label="Preview width"
-              className="digest-width"
-              value={phone ? 'phone' : 'desktop'}
-              onChange={(e) => setPhone(e.target.value === 'phone')}
-            >
-              <option value="desktop">Desktop</option>
-              <option value="phone">Phone</option>
-            </select>
-          </div>
-          <iframe
-            className={`email-preview__frame${phone ? ' digest-frame--phone' : ''}`}
-            srcDoc={frame}
-            title="Digest preview"
-            sandbox="allow-same-origin"
-          />
-        </div>
+        <EmailPreview
+          label={preview?.hasContent ? preview.subject : 'Digest preview'}
+          html={frame}
+          title="Digest preview"
+        />
       </div>
     </section>
   );

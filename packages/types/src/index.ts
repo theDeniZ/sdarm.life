@@ -71,6 +71,17 @@ export interface DigestPreviewDto {
   text: string;
 }
 
+/** A starting point for Admin → Email, rendered by the API in the shared email layout. */
+export interface EmailTemplateDto {
+  id: 'news' | 'event' | 'release' | 'sabbath' | 'personal';
+  label: string;
+  description: string;
+  /** `subscribers` = carries the unsubscribe line, filled in per recipient on send. */
+  audience: 'subscribers' | 'anyone';
+  subject: string;
+  html: string;
+}
+
 export type ConfigDto = Record<string, string | null>;
 
 export interface ListResponse<T> {

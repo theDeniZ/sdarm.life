@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { subscribers } from '@sdarm/db';
-import { desc, count, eq, isNotNull } from 'drizzle-orm';
+import { and, desc, count, eq, isNotNull } from 'drizzle-orm';
 
 type DB = ReturnType<typeof drizzle>;
 
@@ -8,6 +8,14 @@ export async function listAllConfirmedSubscribers(db: DB) {
 	return db.select().from(subscribers)
 		.where(isNotNull(subscribers.confirmedAt))
 		.orderBy(desc(subscribers.createdAt));
+}
+
+/** One confirmed subscriber by address (stored lower-cased), or null — for filling a single send's unsubscribe link. */
+export async function findConfirmedSubscriberByEmail(db: DB, email: string) {
+	const [sub] = await db.select().from(subscribers)
+		.where(and(eq(subscribers.email, email.toLowerCase().trim()), isNotNull(subscribers.confirmedAt)))
+		.limit(1);
+	return sub ?? null;
 }
 
 /** Confirmed subscribers per language — counts only, for the admin digest panel. */

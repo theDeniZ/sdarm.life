@@ -15,7 +15,7 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/posts/:slug` | Single post by slug. 404 if deleted. |
 | `GET` | `/api/v1/config` | All config as `{ key: value }` map (reads from Workers KV). |
 | `GET` | `/api/v1/images/*` | Proxy-serves R2 objects by key path (local dev only). |
-| `POST` | `/api/v1/subscribe` | Subscribe email. Body: `{ email, language? }` (`language` defaults to `'de'`). Sends a welcome email in the subscriber's language via Resend (background, non-blocking). 409 if already subscribed. |
+| `POST` | `/api/v1/subscribe` | Subscribe email. Body: `{ email, language? }` (`language` defaults to `'de'`). Sends the double opt-in confirmation email in the subscriber's language via Resend (background, non-blocking); the welcome email follows on the first `GET /confirm`. 409 if already subscribed. |
 | `GET` | `/api/v1/unsubscribe` | `?token=` — hard-deletes the subscriber row. Idempotent (404 if token not found). |
 | `POST` | `/api/v1/unsubscribe` | `?token=` — RFC 8058 one-click unsubscribe, the target of the digest's `List-Unsubscribe` header (mail clients POST `List-Unsubscribe=One-Click`; the body is not parsed). Same hard delete as the `GET`. 404 if token not found. |
 | `GET` | `/api/v1/songbooks` | All songbooks ordered by `sort_order`, each with `songCount`. |
@@ -78,7 +78,8 @@ Require `Authorization: Bearer <key>` on every request.
 | `GET` | `/api/v1/admin/api-keys` | List all API keys (active + revoked). |
 | `POST` | `/api/v1/admin/api-keys` | Create key. Body: `{ name }`. Returns `{ key, apiKey }` — plaintext shown once. |
 | `DELETE` | `/api/v1/admin/api-keys/:id` | Revoke key — removes from KV, marks revoked in index. |
-| `POST` | `/api/v1/admin/email/send` | Send a single email. Body: `{ to, subject, html }`. Uses Resend. |
+| `GET` | `/api/v1/admin/email/templates` | `?locale=de\|en` (default `de`). Composer starting points as `{ items: EmailTemplateDto[] }` (`id`, `label`, `description`, `audience: 'subscribers'\|'anyone'`, `subject`, `html`), rendered in the shared email layout. See [Email infrastructure](#email-infrastructure). |
+| `POST` | `/api/v1/admin/email/send` | Send a single email. Body: `{ to, subject, html }`. When `html` contains the unsubscribe placeholder, a confirmed subscriber gets their own token + `List-Unsubscribe` headers and anyone else gets the subscription footer lines removed (**400** if the placeholder is left outside them). **503** when `RESEND_API_KEY` is unset. Uses Resend. |
 | `GET` | `/api/v1/admin/email/digest` | Subscriber digest settings and state as `DigestSettingsDto`: `enabled`, `frequency`, `weekday`, `since` (window start of the next digest), `lastSentAt`, `lastRun`, `nextRun`, `recipients` (`{ de, en }` counts only — no addresses), `sendingConfigured` (whether `RESEND_API_KEY` is set). See [Subscriber digest](#subscriber-digest). |
 | `PUT` | `/api/v1/admin/email/digest` | Body `{ enabled, frequency: 'weekly'\|'biweekly'\|'monthly', weekday: 0–6 }`. Switching on pins the window start. Returns the updated `DigestSettingsDto`. |
 | `GET` | `/api/v1/admin/email/digest/preview` | The next digest, rendered: `DigestPreviewDto` (`since`, `until`, `hasContent`, `counts`, `subject`, `html`, `text`). `?locale=de\|en` (default `de`), `?since=` ISO override of the window start (preview only — never changes the stored window). Links carry the inert token `preview`. |
@@ -90,7 +91,7 @@ Require `Authorization: Bearer <key>` on every request.
 | `PATCH` | `/api/v1/admin/bible/translations/:id` | Partial update of identity, license record, and gates. `:id` is url-encoded (`loc%3Aluther1912`). Body: any of `name, slug, abbreviation, language, year, lxxPsalms, sortOrder, licenseBasis, rightsHolder, notice, provenance, permissionRef, permissionDate, allowDownload, allowOffline, allowSearchIndex, allowProjector, maxVersesPerRequest`. 404 if no record exists for `:id`, 503 if `BIBLE_DB` is unbound. |
 | `PUT` | `/api/v1/admin/bible/allowlist` | Replace the KV allowlist wholesale. Body: `{ ids: string[] }`, ordered. Writes the same `bible_translations` field that `PUT /admin/config/bible_translations` writes — a dedicated, validated entry point onto the same field, not a second store. 400 if any id fails to parse. |
 | `POST` | `/api/v1/admin/bible/takedown` | "Remove now": drop one translation from the allowlist, **bump the Bible cache generation** (stranding every cached chapter/parallel response) and purge the enumerable books index. Body: `{ id }`. Effective within ~1 minute — see [Takedown latency](#takedown-latency). Does not reach `apps/treasures`' own Next Data Cache or a copy a reader already downloaded. |
-| `POST` | `/api/v1/admin/email/broadcast` | Bulk-send the updates email template to subscribers. Body: `{ subject, posts: [{ title, excerpt?, href }], locale? }`. `locale` omitted = send to all subscribers in their preferred language; `'de'`/`'en'` = filter to that language only. Sends via Resend batch API (100 per chunk). Returns `{ sent: N }`. |
+| `POST` | `/api/v1/admin/email/broadcast` | Bulk-send the updates email template to confirmed subscribers. Body: `{ subject, posts: [{ title, excerpt?, href }], locale? }`. `locale` omitted = send to all subscribers in their preferred language; `'de'`/`'en'` = filter to that language only. Sends via Resend batch API (100 per chunk), each message with `List-Unsubscribe` headers. **503** when `RESEND_API_KEY` is unset. Returns `{ sent: N }`. |
 
 **Image usage** — `GET /admin/images` cross-references `posts` (`cover_key`, `thumb_key`) and `site_config` to compute `usedIn` per image. Each item: `{ key, size, uploaded, usedIn: { type, label }[] }`. `?unused=1` filters to images not referenced in either table.
 
@@ -214,7 +215,7 @@ One email to every **confirmed** subscriber when new content was published (issu
 | Settings + state | KV key `email_digest` (one JSON document: `enabled`, `frequency`, `weekday`, `since`, `lastSentAt`, `lastRun`) — `services/digest/settings.ts`. **Not** inside the `config` key, because `GET /api/v1/config` is public. No D1 table. |
 | What is new | `services/digest/run.ts → collectDigestContent()`: posts with `published_at` in the window (not deleted), songs by `created_at` grouped per songbook, treasures added (`created_at`) and edited (`updated_at`). Queries live in the posts/songs/treasures repositories. |
 | Model + caps | `services/digest/build.ts` (pure): posts ≤ 5, songbooks ≤ 4 with ≤ 5 songs each, new books ≤ 5, edited books ≤ 3 — each list ends in "and N more". |
-| Template | `emails/digest.ts` — table layout, inline styles, fluid 600 px card with an MSO wrapper for Outlook, system fonts only (a web font would be a third-party request), dark like the site. Plain-text part rendered from the same model. |
+| Template | `emails/digest.ts` on the shared layout (`emails/layout.ts`, see [Email infrastructure](#email-infrastructure)) — table layout, inline styles, fluid 600 px card, system fonts only, dark like the site with a light variant. Plain-text part rendered from the same model. |
 | Send | Resend batch API, 100 per request, `Idempotency-Key: digest-<date>-<chunk>`. Each message carries `List-Unsubscribe: <https://api.sdarm.life/api/v1/unsubscribe?token=…>` and `List-Unsubscribe-Post: List-Unsubscribe=One-Click`. |
 
 **When a run sends.** The cron fires every day; `isDigestDue()` decides: the digest must be switched on (default **off** — Admin → Email), today (UTC) must be the chosen weekday, and enough time must have passed since `lastSentAt` (weekly ≥ 6 days, every two weeks ≥ 13; monthly = the first chosen weekday of a month). On any other day the run returns without reading or writing anything. On a send day:
@@ -288,18 +289,32 @@ Target DTO types live in `packages/types` (`@sdarm/types`) — see [architecture
 
 Email is sent via **Resend** (`api.resend.com`) using the `RESEND_API_KEY` Worker secret. Sender address: `info@sdarm.life` (domain must be verified in Resend dashboard).
 
-**Templates** live in `apps/api/src/emails/`:
+**Design system.** Every email the API sends is rendered through `apps/api/src/emails/layout.ts` — one shared layout and a set of partials, so colours, type and the footer change in one place:
+
+- `emailDocument({ locale, title, preheader?, body, footer })` — the document: SDARM*.life* wordmark set as text (Cormorant → Garamond → Georgia, gold italic `.life`), a fluid 600 px card (MSO wrapper for Outlook), the footer below it.
+- Partials for the card rows: `row`, `eyebrow`, `headline` (`*word*` = the site's italic gold accent), `title`, `paragraph`, `note`, `small`, `textLink`, `button` (pill; primary gold or outlined secondary, with a VML roundrect for Outlook for Windows), `divider`, `sectionLabel`, `details` (label/value rows), `quote` (verse + reference), `signoff`. Every partial escapes its text — pass raw strings.
+- Palette: dark by default (the site's dark theme); clients that honour `prefers-color-scheme: light` (Apple Mail, iOS Mail, Outlook for Mac) switch to the site's light palette through the `e-*` classes; Gmail and Outlook for Windows keep the dark one. No images, no remote CSS, no web fonts — system stacks with the site's faces first, used only when installed.
+- Footer: `legalFooter(locale, subscription?)` — Impressum and Datenschutz links plus the association's name and address from `legal.impressum.section1Body` in `@sdarm/i18n`; with `subscription`, also the reason line and the unsubscribe link, wrapped in `<!--subscription-->…<!--/subscription-->`.
+- Per-recipient links: render once with `UNSUBSCRIBE_TOKEN`, then `personalise(html, token)`. Unsubscribe links point at the web page `https://sdarm.life/{locale}/unsubscribe?token=…` (which calls `GET /unsubscribe`).
 
 | File | Function | Used by |
 |---|---|---|
-| `base.ts` | `baseLayout(content, { unsubscribeUrl, locale? })` | All templates — wraps content in header + footer |
-| `welcome.ts` | `welcomeEmail({ unsubscribeUrl, locale? })` | Auto-sent on `POST /subscribe` |
-| `updates.ts` | `updatesEmail(posts[], { unsubscribeUrl, locale? })` | `POST /admin/email/broadcast` |
+| `layout.ts` | `emailDocument`, partials, `legalFooter`, `personalise`, `stripSubscription` | Every email below |
+| `confirm.ts` | `confirmEmail({ confirmUrl, token, locale? })`, `confirmSubject()` | Double opt-in mail on `POST /subscribe` |
+| `welcome.ts` | `welcomeEmail({ token, locale? })`, `welcomeSubject()` | Sent once on the first `GET /confirm` |
+| `updates.ts` | `updatesEmail(posts[], { subject, locale? })` | `POST /admin/email/broadcast` (Admin → Subscribers → Notify) |
+| `digest.ts` | `renderDigestHtml(model)`, `renderDigestText(model)` | Subscriber digest (cron + admin preview/test) |
+| `book-request.ts` | `bookRequestEmail(fields)`, `bookRequestSubject()` | `POST /book-request` → `info@sdarm.life` (German only, no subscription footer) |
+| `templates.ts` | `composerTemplates(locale)` | `GET /admin/email/templates` — composer starting points |
 
-All templates are bilingual (`'de'` / `'en'`). The unsubscribe link is always personalised with the subscriber's token (`/api/v1/unsubscribe?token=…`).
+All are bilingual (`'de'` / `'en'`) except the internal book-request notification. `test/emails.spec.ts` renders every one in both languages and checks the legal footer, the unsubscribe line where required, and escaping.
+
+**Composer templates** (Admin → Email → Template): *News update*, *Invitation — service or event*, *New song or book*, *Sabbath greeting* (all for subscribers) and *Personal message* (anyone; no unsubscribe line). Text the operator must replace is marked `[[like this]]`; the admin highlights it in the preview and refuses to send while any is left. Subscriber templates carry `UNSUBSCRIBE_TOKEN`: on `POST /admin/email/send` the API looks the recipient up — a confirmed subscriber gets their own token and the `List-Unsubscribe` headers; anyone else gets the email with the `<!--subscription-->` lines removed. A leftover token outside those lines for a non-subscriber is a 400.
 
 **`RESEND_API_KEY`** — set as a Wrangler secret in production (`wrangler secret put RESEND_API_KEY`). For local dev, add to `apps/api/.dev.vars`.
 
-**Broadcast batching** — `/admin/email/broadcast` uses Resend's batch endpoint (`POST /emails/batch`) in chunks of 100. Each subscriber receives their own HTML with a personalised unsubscribe URL.
+**Broadcast batching** — `/admin/email/broadcast` uses Resend's batch endpoint (`POST /emails/batch`) in chunks of 100. The email is rendered once per language, then each subscriber receives their own copy with a personalised unsubscribe URL and the `List-Unsubscribe` / `List-Unsubscribe-Post` headers.
+
+**No key, no send** — `/admin/email/send` and `/admin/email/broadcast` return **503** without calling Resend when `RESEND_API_KEY` is unset (every local and test environment), like the digest.
 
 **Welcome email** fires via `c.executionCtx.waitUntil()` — non-blocking, does not affect the 201 response. Failures are silent (logged by Cloudflare observability).
