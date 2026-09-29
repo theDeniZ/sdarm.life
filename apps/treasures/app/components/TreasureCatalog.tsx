@@ -195,13 +195,6 @@ export default function TreasureCatalog({
               title={tSec('bible.title')}
               description={tSec('bible.description')}
               tone="bible"
-              mark={
-                <svg viewBox="0 0 44 52" aria-hidden="true">
-                  <path d="M4 4h15c1.7 0 3 1.3 3 3v41c0-1.7-1.3-3-3-3H4V4Z" />
-                  <path d="M40 4H25c-1.7 0-3 1.3-3 3v41c0-1.7 1.3-3 3-3h15V4Z" />
-                  <path d="M22 14v12M16 20h12" />
-                </svg>
-              }
             />
             {/* The one card in this shelf that leaves the app: the lesson is
                 its own site now. No `withTheme` — the sheet is paper, it has
@@ -213,13 +206,6 @@ export default function TreasureCatalog({
               title={tSec('sbl.title')}
               description={tSec('sbl.description')}
               tone="sbl"
-              mark={
-                <svg viewBox="0 0 44 52" aria-hidden="true">
-                  <path d="M8 4h28v44H8z" />
-                  <path d="M8 4h28v9H8z" fill="currentColor" stroke="none" opacity=".22" />
-                  <path d="M14 21h16M14 28h16M14 35h10" />
-                </svg>
-              }
             />
             {displayItems.map((tr) => (
               <TreasureCard key={tr.id} treasure={tr} />
