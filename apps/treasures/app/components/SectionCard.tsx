@@ -8,9 +8,10 @@ import Link from 'next/link';
  *
  * They are cards like every other card — same shape, same shelf, same reveal —
  * because that is where a reader looks for something to read. What sets them
- * apart is a tint of paper behind them and a drawn mark instead of a cover:
- * enough to say "this one is not a book you receive, it is a room you enter",
- * not so much that the shelf stops reading as one shelf.
+ * apart is a tint of paper, a coloured rule and a serif title instead of a
+ * cover: enough to say "this one is not a book you receive, it is a room you
+ * enter", not so much that the shelf stops reading as one shelf. No drawn icon
+ * — a stock book or document glyph said nothing the title does not.
  *
  * They are pinned ahead of the books and take no part in the filters or the
  * paging — a section does not have a language or a price to filter by, and it
@@ -28,7 +29,7 @@ export default function SectionCard({
   title: string;
   description: string;
   tone: 'bible' | 'sbl';
-  mark: React.ReactNode;
+  mark?: React.ReactNode;
   /** The destination is another site (sbl.sdarm.life), so this leaves the app.
    *  `next/link` is for routes within it; a plain anchor is what an address on
    *  another host wants, and it keeps Next from prefetching a page it does not
@@ -38,7 +39,7 @@ export default function SectionCard({
   const className = `item-card item-card--section item-card--${tone}`;
   const body = (
     <>
-      <div className="item-visual section-visual">{mark}</div>
+      {mark && <div className="item-visual section-visual">{mark}</div>}
       <div className="item-body">
         <div className="item-title-row">
           <div className="item-title">{title}</div>
