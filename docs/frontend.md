@@ -251,7 +251,7 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 | Component | Notes |
 |---|---|
 | `AdminShell` | Owns mobile sidebar open/close state. Renders the `.sidebar-toggle` hamburger (mobile only, <768px), `<Sidebar>`, and the `.admin-main` content area. |
-| `Sidebar` | Left nav (replaces the old top `AdminNav` bar). Links: Dashboard, Statistics, Posts, Songbooks, Treasures, Images, Subscribers, Email, Config, API Keys — active state via `usePathname()`. Footer profile menu holds the dark/light theme toggle (`localStorage: sdarm-admin-theme`). Collapses to an off-canvas panel with an overlay below 768px. |
+| `Sidebar` | Left nav (replaces the old top `AdminNav` bar). Links: Dashboard, Statistics, Posts, Songbooks, Treasures, Images, Subscribers, Email, Config, API Keys — active state via `usePathname()`. Footer profile menu holds the dark/light theme toggle (`localStorage: sdarm-admin-theme`). Above 768px a footer button folds it to an icon rail (see [Collapsible sidebar](#collapsible-sidebar)); below 768px it is an off-canvas panel with an overlay. |
 | `ConfirmDialog` | Reusable confirm modal (title, message, confirm/cancel, `danger` variant). Escape-to-cancel, autofocuses Cancel. Reuses the existing `.modal-backdrop`/`.modal`/`.modal-title` classes. Wired into Songbooks/Songs delete; other domains still use the browser `confirm()`. |
 | `Dashboard` | Renders at `/` (replaces the old redirect to `/config`). Hero stat card (posts published this month + `Sparkline`), a compact stats column (subscribers/songs/treasures/images), and "Latest posts"/"Latest subscribers" tables. All data composed client-side from existing endpoints via `domains/dashboard/repository.ts` — no new backend route. |
 | `Sparkline` | Tiny presentational bar chart (`values: number[]`) rendered as inline SVG `<rect>`s — no charting dependency. Used by `Dashboard` for the monthly posts trend. |
@@ -275,6 +275,15 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 Unlike the public apps, the admin app has no `ThemeScript`/FOUC-prevention pass yet — `Sidebar` reads `localStorage.sdarm-admin-theme` in a `useEffect` and sets `data-theme` on `<html>` after mount (default `'dark'`).
 
 The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html` and unlike the public site's warm black museum theme): dark = `#020617` page / `#0b1120` cards, light = `#f8fafc` page / white cards, hairline borders (`rgba(255,255,255,0.07)` dark / `rgba(2,6,23,0.08)` light), UI font Lexend, base radius `--r: 10px` (cards 12px). Accent tokens: `--accent` (`#c9a96e` dark / `#927223` light — deeper gold for contrast on white), `--accent-hover`, `--accent-soft`, `--on-accent`; `--gold` is kept as an alias of `--accent` so pre-existing rules follow it. `--brand-gold` (`#c9a96e`, theme-independent) exists only for the logo. Semantic tokens: `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--red`/`--red-text`/`--danger-soft`, plus `--heading`, `--muted`, `--row-hover`, `--overlay`. Never hardcode colors in admin CSS — every rule goes through these tokens so both themes stay in sync.
+
+### Collapsible sidebar
+
+Above 768px the sidebar folds to a 65px icon rail (`--sidebar-w-collapsed`, beside `--sidebar-w`) from the `Collapse` button in its footer, so the pages that need width — the songs table, the Email composer, the homepage-grid editor — get it (issue #176). `.admin-shell` animates `grid-template-columns` between the two tokens (no transition under `prefers-reduced-motion`).
+
+- **State lives on `<html data-sidebar="collapsed">`**, persisted to `localStorage.sdarm-admin-sidebar` (`'collapsed'` | `'expanded'`, next to `sdarm-admin-theme`). An inline script in `app/layout.tsx`'s `<head>` applies it before first paint, so a collapsed rail never paints at full width and snaps shut after hydration; `<html>` carries `suppressHydrationWarning` for that reason. `Sidebar` mirrors the attribute into state on mount for `aria-expanded` and the tooltips. The theme still has no such script — that is a separate issue.
+- **Every rule for the rail sits inside `@media (min-width: 769px)`.** Below that the off-canvas panel is untouched even if the rail was left collapsed, and the toggle is hidden.
+- **Collapsed, the icons do not move.** 14px sidebar padding + 10px item padding puts them at the same x in both states; only the labels go. Labels are visually hidden rather than `display: none`, so they remain each link's accessible name, and each link gets a `title` tooltip. The wordmark swaps for a one-letter mark.
+- **The settings menu opens beside the rail**, as `position: fixed`, because the rail is too narrow for it and `.sidebar` clips horizontally. The sticky sidebar is its own stacking context, so it takes `z-index: 10` while collapsed or positioned content in `.admin-main` would paint over the menu.
 
 ### Email screen
 

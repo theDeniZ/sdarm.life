@@ -183,6 +183,9 @@ const NAV_LINKS: NavLink[] = [
 ];
 
 const THEME_KEY = 'sdarm-admin-theme';
+// Read before first paint by the inline script in app/layout.tsx, which sets
+// <html data-sidebar="collapsed"> so the page never paints at the wrong width.
+const SIDEBAR_KEY = 'sdarm-admin-sidebar';
 
 type Props = {
   open: boolean;
@@ -193,6 +196,7 @@ export default function Sidebar({ open, onClose }: Props) {
   const path = usePathname();
   const [theme, setTheme] = useState<'dark' | 'light'>('dark');
   const [menuOpen, setMenuOpen] = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const stored = localStorage.getItem(THEME_KEY);
@@ -200,6 +204,9 @@ export default function Sidebar({ open, onClose }: Props) {
       setTheme('light');
       document.documentElement.dataset.theme = 'light';
     }
+    // The layout script has already applied the attribute; mirror it into state
+    // for aria-expanded and the icon tooltips.
+    setCollapsed(document.documentElement.dataset.sidebar === 'collapsed');
   }, []);
 
   useEffect(() => {
@@ -225,13 +232,27 @@ export default function Sidebar({ open, onClose }: Props) {
     localStorage.setItem(THEME_KEY, next);
   }
 
+  function toggleCollapsed() {
+    const next = !collapsed;
+    setCollapsed(next);
+    setMenuOpen(false);
+    if (next) document.documentElement.dataset.sidebar = 'collapsed';
+    else delete document.documentElement.dataset.sidebar;
+    localStorage.setItem(SIDEBAR_KEY, next ? 'collapsed' : 'expanded');
+  }
+
   return (
     <>
       {open && <div className="sidebar-overlay open" onClick={onClose} />}
-      <aside className={`sidebar${open ? ' open' : ''}`}>
+      <aside id="admin-sidebar" className={`sidebar${open ? ' open' : ''}`}>
         <div className="sidebar-logo">
-          SDARM<span className="accent">.life</span>
-          <span className="sidebar-badge">Admin</span>
+          <span className="sidebar-logo-full">
+            SDARM<span className="accent">.life</span>
+            <span className="sidebar-badge">Admin</span>
+          </span>
+          <span className="sidebar-logo-mark" aria-hidden="true">
+            S<span className="accent">.</span>
+          </span>
         </div>
 
         <ul className="sidebar-nav">
@@ -240,9 +261,14 @@ export default function Sidebar({ open, onClose }: Props) {
               href === '/' ? path === '/' : path.startsWith(href) || (alsoActive ? path.startsWith(alsoActive) : false);
             return (
               <li key={href}>
-                <Link href={href} className={`nav-item${active ? ' active' : ''}`} onClick={onClose}>
+                <Link
+                  href={href}
+                  className={`nav-item${active ? ' active' : ''}`}
+                  onClick={onClose}
+                  title={collapsed ? label : undefined}
+                >
                   {ICONS[icon]}
-                  {label}
+                  <span className="nav-label">{label}</span>
                 </Link>
               </li>
             );
@@ -280,7 +306,28 @@ export default function Sidebar({ open, onClose }: Props) {
             </button>
           </div>
           <button
+            className="sidebar-collapse"
+            aria-controls="admin-sidebar"
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+            title={collapsed ? 'Expand sidebar' : undefined}
+            onClick={toggleCollapsed}
+          >
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" />
+            </svg>
+            <span className="nav-label">Collapse</span>
+          </button>
+          <button
             className="profile-trigger"
+            title={collapsed ? 'Settings' : undefined}
             aria-haspopup="menu"
             aria-expanded={menuOpen}
             onClick={() => setMenuOpen((v) => !v)}
@@ -296,7 +343,7 @@ export default function Sidebar({ open, onClose }: Props) {
               <circle cx="12" cy="12" r="3" />
               <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
             </svg>
-            <span>Settings</span>
+            <span className="nav-label">Settings</span>
           </button>
         </div>
       </aside>
