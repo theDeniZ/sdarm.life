@@ -306,6 +306,15 @@ The anchor itself must also carry no `z-index`, for the same reason: it would op
 
 Admin has no screenshot coverage, so verify by clicking: cover, title and empty space all open `/songbooks/{id}/songs`; `Edit` opens `/songbooks/{id}`; `Delete` opens the dialog and does not navigate.
 
+### Clickable table rows
+
+Rows in `SongList`, `PostList`, `TreasureList` and the Dashboard "Latest posts" table open their record on a click anywhere in the row (issue #172). The row carries `className="row-link"` and `onClick={rowLink(href)}` from the `useRowLink()` hook in `lib/hooks.ts`.
+
+- **The real link stays.** The `Edit` link in the last cell (or, in the Dashboard table, which has no Edit column, a `<Link>` around the title) is the keyboard and screen-reader path. A bare `onClick` on a `<tr>` is reachable by neither, so the row click is only a larger pointer target layered on top.
+- **The guard is what keeps `Delete` safe.** The handler returns early when the click started inside `a, button, input, select, textarea, label` or a cell marked `data-no-row-link` (the treasure reorder cluster, where a near miss between the arrows and the swap input is likely). It also ignores a click that ends a text selection, and opens a new tab on Cmd/Ctrl-click.
+- **Affordance.** `cursor: pointer`, a dedicated `--row-link-hover` tint and a 2px accent edge on the first cell, on hover and whenever something inside the row has `:focus-visible`. `--row-hover` itself is unchanged: the nav, the profile menu and several Bible/upload rows use it, and at 3.5–4 % it is right for them and invisible as a "this opens" signal.
+- **Rows with nowhere to go stay inert.** `SubscriberList` and `ApiKeyManager` have no detail page, so their rows do not get `row-link` and must not pretend to be clickable.
+
 ### Pagination pattern
 
 - `LIMIT` constant per component (20 for posts/subscribers, 24 for images)

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Sparkline from '../../components/Sparkline';
+import { useRowLink } from '../../lib/hooks';
 import { fmtDate, fmtSize } from '../../lib/format';
 import { fetchDashboardData } from './repository';
 import type { DashboardData } from './repository';
@@ -10,6 +11,7 @@ import type { DashboardData } from './repository';
 export default function Dashboard() {
   const [data, setData] = useState<DashboardData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const rowLink = useRowLink();
 
   useEffect(() => {
     fetchDashboardData()
@@ -92,8 +94,12 @@ export default function Dashboard() {
                 </thead>
                 <tbody>
                   {data.posts.latest.map((post) => (
-                    <tr key={post.id}>
-                      <td>{post.title}</td>
+                    <tr key={post.id} className="row-link" onClick={rowLink(`/posts/${post.id}`)}>
+                      <td>
+                        {/* This table has no Edit column, so the title is the real link —
+                            the keyboard and screen-reader path the row click sits on top of. */}
+                        <Link href={`/posts/${post.id}`}>{post.title}</Link>
+                      </td>
                       <td>{fmtDate(post.publishedAt)}</td>
                       <td>
                         <span className={post.publishedAt ? 'badge badge-active' : 'badge badge-revoked'}>

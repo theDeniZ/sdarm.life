@@ -44,6 +44,7 @@
   --warn-soft:    rgba(180, 83, 9, 0.16);
   --danger-soft:  rgba(220, 38, 38, 0.16);
   --row-hover:    rgba(255, 255, 255, 0.04);
+  --row-link-hover: rgba(255, 255, 255, 0.07);
   --overlay:      rgba(2, 6, 23, 0.55);
   --r:            10px;
   --sidebar-w:    240px;
@@ -74,6 +75,7 @@
   --warn-soft:    rgba(180, 83, 9, 0.12);
   --danger-soft:  rgba(220, 38, 38, 0.12);
   --row-hover:    rgba(2, 6, 23, 0.035);
+  --row-link-hover: rgba(2, 6, 23, 0.06);
   --overlay:      rgba(2, 6, 23, 0.45);
 }
 
@@ -437,6 +439,18 @@ tbody td {
 
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover td { background: var(--row-hover); }
+
+/* Rows that open a record (issue #172). `--row-hover` stays as it is for the
+   nav, menus and inert rows; at 3.5-4 % it is invisible as a "this opens"
+   signal, so these rows get their own stronger tint plus a gold edge on the
+   first cell. Rows with nowhere to go (subscribers, API keys) stay inert. */
+tbody tr.row-link { cursor: pointer; }
+tbody tr.row-link td[data-no-row-link] { cursor: default; }
+tbody tr.row-link td { transition: background 0.15s; }
+tbody tr.row-link:hover td,
+tbody tr.row-link:has(:focus-visible) td { background: var(--row-link-hover); }
+tbody tr.row-link:hover td:first-child,
+tbody tr.row-link:has(:focus-visible) td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
 
 .td-thumb {
   width: 40px;
