@@ -182,7 +182,10 @@
     top: 0;
     width: var(--sidebar-w);
     transform: translateX(-100%);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    /* Off-canvas it also leaves the tab order (visibility flips after the
+       slide-out, and at once on the way in). */
+    visibility: hidden;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, visibility 0s linear 0.2s;
   }
 
   /* Shadow only while open — on the closed drawer its 40px blur spilled back
@@ -190,7 +193,14 @@
   .sidebar.open {
     transform: translateX(0);
     box-shadow: 0 0 40px rgba(0, 0, 0, 0.4);
+    visibility: visible;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
   }
+
+  /* The fixed "open menu" button sat on top of the open panel's wordmark. The
+     button only ever opens it (the panel closes from its overlay or a link), so
+     while it is open the button just goes. */
+  .admin-shell:has(.sidebar.open) .sidebar-toggle { display: none; }
 
   .sidebar-toggle {
     display: flex;

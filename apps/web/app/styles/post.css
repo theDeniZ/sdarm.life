@@ -61,6 +61,9 @@
   display: flex;
   align-items: center;
   gap: 6px;
+  /* 44px touch target around a 20px line, without moving the text */
+  padding: 12px;
+  margin: -12px;
   transition: color 0.18s;
 }
 .post-back:hover {

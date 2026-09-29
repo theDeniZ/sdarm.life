@@ -62,7 +62,9 @@
 .presenter__font-scale {
   font-family: 'Cormorant Garamond', serif;
   font-size: 11px;
-  color: rgba(255, 255, 255, 0.25);
+  /* Operator read-outs and labels at 0.2–0.3 white were 1.8–2.7:1 on the
+     dashboard; 0.5 is 4.9:1 and still well below the slide text. */
+  color: rgba(255, 255, 255, 0.5);
   min-width: 36px;
   text-align: center;
 }
@@ -116,7 +118,8 @@
 .presenter__close {
   background: none;
   border: none;
-  color: rgba(255, 255, 255, 0.3);
+  /* An icon control: 3:1 minimum (0.3 was 2.2:1). */
+  color: rgba(255, 255, 255, 0.5);
   font-size: 20px;
   cursor: pointer;
   padding: 4px 8px;
@@ -160,7 +163,7 @@
   font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.22);
+  color: rgba(255, 255, 255, 0.5);
   flex-shrink: 0;
 }
 
@@ -387,7 +390,7 @@
   font-family: 'Cormorant Garamond', serif;
   font-size: 1rem;
   font-weight: 300;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
   min-width: 70px;
   text-align: center;
 }
@@ -451,7 +454,7 @@
   font-size: 0.65rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.5);
   margin: 0 2px 0 6px;
 }
 

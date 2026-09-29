@@ -1,5 +1,6 @@
 import '@sdarm/ui/src/styles/index.css';
 import './globals.css';
+import '@sdarm/ui/src/styles/not-found.css';
 import { getLocale } from 'next-intl/server';
 import { ThemeScript } from '@sdarm/ui';
 

@@ -62,8 +62,11 @@
 
 /* ── Light theme ─────────────────────────────────────────────────────────── */
 [data-theme='light'] {
-  /* Accent — muted oxidised gold; calm on cream paper */
-  --gold: #927223;
+  /* Accent — muted oxidised gold; calm on cream paper. #866a1f is the lightest
+     step of this hue that keeps small gold text (links, labels, the active nav
+     item) at 4.5:1 on every light surface, --bg-card included; #927223 was
+     4.0–4.4:1. */
+  --gold: #866a1f;
   /* Surfaces — almost white, hint of warmth so it doesn't read as clinical */
   --dark: #fcfbf8;
   /* Text — near-black charcoal (no brown) */

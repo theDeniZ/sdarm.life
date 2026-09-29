@@ -5,7 +5,7 @@
   --reader-toolbar: #0e0d0b;
   --reader-sidebar: #0a0908;
   --text: #d6d0c8;
-  --muted: #7a7470;
+  --muted: #84807b;
   --gold: #c9a96e;
   --border: rgba(201, 169, 110, 0.12);
   /* Typography defaults — overridden via inline CSS vars from component state */

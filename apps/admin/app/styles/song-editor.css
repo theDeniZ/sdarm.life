@@ -375,9 +375,16 @@
   margin-bottom: 2px;
 }
 
+/* pre-wrap: a token ends where the next chord starts, often on a space
+   ("Unser [D]Vater"), and trailing white space collapses at the edge of an
+   inline-block — the preview read "UnserVater". Only lines that carry a chord
+   reserve the 16px chord row; the others kept a blank row above every line. */
 .chord-token {
   display: inline-block;
   position: relative;
+  white-space: pre-wrap;
+}
+.chord-line:has(.chord) .chord-token {
   padding-top: 16px;
 }
 

@@ -127,7 +127,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  color: rgba(201, 169, 110, 0.45);
+  /* 0.6 keeps the icons above the 3:1 WCAG minimum for graphics (0.45 was 2.6:1). */
+  color: rgba(201, 169, 110, 0.6);
   text-decoration: none;
   transition:
     color 0.45s ease,
@@ -189,8 +190,10 @@
   font-weight: 300;
   color: rgba(214, 208, 200, 0.92);
 }
+/* The placeholder is the field's only visible label, so it has to be read:
+   0.55 of this brown was 1.8:1. */
 .footer-input::placeholder {
-  color: rgba(110, 100, 88, 0.55);
+  color: rgba(150, 140, 125, 0.86);
 }
 .footer-subscribe {
   flex-shrink: 0;
@@ -378,7 +381,7 @@
   font-size: 0.72rem;
   font-weight: 300;
   letter-spacing: 0.06em;
-  color: rgba(140, 130, 115, 0.65);
+  color: rgba(140, 130, 115, 0.95);
   margin-bottom: 0;
 }
 .sunset-footer-day {
@@ -451,7 +454,7 @@
   color: rgba(210, 200, 185, 0.8);
 }
 .sunset-location-input::placeholder {
-  color: rgba(130, 120, 105, 0.38);
+  color: rgba(150, 140, 125, 0.86);
 }
 .sunset-location-btn {
   background: transparent;
@@ -510,7 +513,7 @@
   font-size: 0.85rem;
   font-weight: 400;
   letter-spacing: 0.06em;
-  color: rgba(150, 138, 122, 0.75);
+  color: rgba(150, 138, 122, 0.9);
 }
 .footer-legal a {
   color: inherit;
@@ -548,8 +551,9 @@
   font-size: 0.82rem;
   margin-top: 0.5rem;
 }
+/* The footer is dark in both themes; #c0392b was 3.7:1 on it. */
 .f-sub-err {
-  color: #c0392b;
+  color: #e5675a;
   font-size: 0.82rem;
   margin-top: 0.5rem;
 }
@@ -634,6 +638,61 @@
   }
   .sunset-footer-text {
     text-align: left;
+  }
+
+  /* Touch targets. Every control down here was 21–33px tall; each now has a
+     44px hit area. Where the row spacing allows it the area is invisible
+     (padding cancelled by a negative margin, or a pseudo-element), so the
+     layout does not move; the nav list and the icon row had to open up. */
+  .footer-social {
+    gap: 1.375rem;
+  }
+  .footer-social a {
+    position: relative;
+  }
+  .footer-social a::after {
+    content: '';
+    position: absolute;
+    inset: -11px;
+  }
+  .footer-subscribe {
+    position: relative;
+  }
+  .footer-subscribe::after {
+    content: '';
+    position: absolute;
+    inset: -6px;
+  }
+  .footer-nav-links {
+    gap: 0;
+  }
+  .footer-nav-links a {
+    display: flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0;
+  }
+  .footer-email-link {
+    padding: 9px 0;
+    margin: -9px 0 calc(1.1rem - 9px);
+  }
+  .footer-legal a {
+    padding: 12px 0;
+    margin: -12px 0;
+  }
+  /* 16px is the size below which iOS Safari zooms the page on focus. */
+  .footer-input,
+  .sunset-location-input {
+    font-size: 16px;
+  }
+  .sunset-location-input {
+    min-height: 44px;
+    padding: 0.5rem 0.1rem;
+  }
+  .sunset-location-btn {
+    min-width: 44px;
+    min-height: 44px;
+    justify-content: center;
   }
 }
 

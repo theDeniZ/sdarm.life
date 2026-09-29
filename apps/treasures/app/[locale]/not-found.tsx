@@ -1,6 +1,9 @@
 import Link from 'next/link';
 import { getLocale, getTranslations } from 'next-intl/server';
 
+// Same page as apps/web's not-found (styles in @sdarm/ui not-found.css). The
+// navbar and footer come from the [locale] layout; the only way back offered
+// is this app's own home.
 export default async function NotFound() {
   let locale = 'de';
   try {
@@ -9,32 +12,28 @@ export default async function NotFound() {
     // keep default
   }
   const t = await getTranslations({ locale, namespace: 'common.notFound' });
+  const eyebrow = t('eyebrow');
+  const eyebrowText = eyebrow.startsWith('404') ? eyebrow.replace(/^404\s*[·•]\s*/, '') : eyebrow;
+
   return (
-    <div
-      style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '60vh', padding: '2rem' }}
-    >
-      <section style={{ textAlign: 'center' }}>
-        <h1 style={{ fontSize: '4rem', margin: '0 0 1rem 0', color: '#c0392b' }}>404</h1>
-        <h2 style={{ fontSize: '2rem', margin: '0 0 1rem 0' }}>
-          {t.rich('title', { em: (chunks) => <em>{chunks}</em> })}
-        </h2>
-        <p style={{ fontSize: '1.1rem', color: 'var(--muted)', margin: '1rem 0 2rem 0' }}>{t('backPrompt')}</p>
-        <Link
-          href={`/${locale}`}
-          style={{
-            display: 'inline-block',
-            marginTop: '1rem',
-            padding: '0.75rem 2rem',
-            background: 'var(--gold)',
-            color: 'var(--dark)',
-            textDecoration: 'none',
-            fontWeight: 600,
-            letterSpacing: '0.05em',
-          }}
-        >
-          {t('homeLink')}
-        </Link>
-      </section>
+    <div className="nf-page">
+      <div className="nf-container">
+        <div className="nf-number" aria-hidden="true">
+          404
+        </div>
+        <p className="nf-eyebrow">{eyebrowText}</p>
+        <h1 className="nf-title">{t.rich('title', { em: (chunks) => <em>{chunks}</em> })}</h1>
+
+        <blockquote className="nf-verse">
+          <p>«&nbsp;{t('verseText')}&nbsp;»</p>
+          <cite>— {t('verseRef')}</cite>
+        </blockquote>
+
+        <p className="nf-back-prompt">{t('backPrompt')}</p>
+        <nav className="nf-links">
+          <Link href={`/${locale}`}>{t('homeLink')}</Link>
+        </nav>
+      </div>
     </div>
   );
 }
