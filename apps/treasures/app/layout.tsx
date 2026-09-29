@@ -23,6 +23,7 @@ import './styles/book-request.css';
 import './styles/bible.css';
 import './styles/bible-presenter.css';
 import './styles/bible-license.css';
+import '@sdarm/ui/src/styles/not-found.css';
 import './styles/reduced-motion.css';
 
 import { getLocale } from 'next-intl/server';

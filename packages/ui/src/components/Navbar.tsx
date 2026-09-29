@@ -137,8 +137,11 @@ export default function Navbar({
         {t('skipToContent')}
       </a>
       {/* Stable .site-nav class scopes navbar.css — a bare `nav` element selector
-          would also style other <nav> landmarks (e.g. the footer nav). */}
-      <nav aria-label={t('primaryNavAria')} className={`site-nav${scrolled ? ' scrolled' : ''}${overDark ? ' over-dark' : ''}`}>
+          would also style other <nav> landmarks (e.g. the footer nav).
+          over-dark is dropped while the menu is open: the bar then sits on the
+          menu panel, which follows the theme, not on the dark hero — in light
+          the white logo vanished into the light panel. */}
+      <nav aria-label={t('primaryNavAria')} className={`site-nav${scrolled ? ' scrolled' : ''}${overDark && !menuOpen ? ' over-dark' : ''}`}>
         <Link href={withTheme(webUrl, theme)} className="nav-logo">
           SDARM<span>.life</span>
         </Link>

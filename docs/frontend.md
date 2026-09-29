@@ -160,14 +160,14 @@ Navbar control colours are **two tiers declared as custom properties on `.site-n
 | `--nav-fg-primary` / `--nav-fg-primary-hover` | logo, nav links |
 | `--nav-fg-secondary` / `--nav-fg-secondary-hover` | language switcher, theme toggle, burger lines |
 
-There are three states — dark (the base rule), `[data-theme='light']`, and `[data-theme='light'] .over-dark` (the nav floating over the cosmic hero, set by `data-nav-overlay="dark"` on `HeroWelcome`). **Each state re-sets only the four variables**; no control carries a colour of its own.
+There are three states — dark (the base rule), `[data-theme='light']`, and `[data-theme='light'] .over-dark` (the nav floating over the cosmic hero, set by `data-nav-overlay="dark"` on `HeroWelcome`). `over-dark` is not applied while the mobile menu is open: the bar then sits on the menu panel, which follows the theme. **Each state re-sets only the four variables**; no control carries a colour of its own.
 
-**Every tier value must clear 3:1 against its own background** — the WCAG minimum for UI components. Current measurements:
+**Every tier value must clear 3:1 against its own background** — the WCAG minimum for UI components — and the secondary tier also carries the language switcher's text, which needs 4.5:1. Current measurements:
 
 | State | primary | secondary |
 |---|---|---|
 | dark `#0c0b09` | 14.00:1 | 5.46:1 |
-| light `#fcfbf8` | 13.76:1 | 4.12:1 |
+| light `#fcfbf8` | 13.76:1 | 4.65:1 |
 | over-dark `#090806` | 14.23:1 | 5.48:1 |
 
 This replaced fifteen independently hand-tuned alpha values. The language switcher had ended up at 0.28 in dark (**1.97:1**) and 0.44 in light (**2.10:1**) — both failing — while the theme toggle beside it sat at 0.55/0.65 and the nav link next to it at 10:1, so the switcher read as a disabled control (issue #128).

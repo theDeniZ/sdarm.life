@@ -63,23 +63,27 @@
 /* Light theme — toggled from the Sidebar profile menu, persisted to
    localStorage('sdarm-admin-theme'). Same neutral slate system as dark,
    inverted (shadcn/ui slate palette, mirrors admin-mockup.html). */
+/* Text tokens are set for 4.5:1 on every light surface, the #f1f5f9 table
+   header and the tinted chips included: --muted was 4.3:1 there, the accent
+   4.0:1 on its own soft tint, --ok (badges, "Public domain") 2.9–3.3:1 and
+   --red-text 4.1:1 on the danger tint. */
 [data-theme='light'] {
   color-scheme: light;
-  --accent:       #927223;
-  --accent-hover: #7a5f1d;
+  --accent:       #866a1f;
+  --accent-hover: #6f5719;
   --accent-soft:  rgba(146, 114, 35, 0.1);
   --gold-dim:     rgba(146, 114, 35, 0.45);
   --on-accent:    #ffffff;
-  --red-text:     #dc2626;
+  --red-text:     #b91c1c;
   --dark:         #f8fafc;
   --surface:      #ffffff;
   --surface-2:    #f1f5f9;
   --text:         #1e293b;
   --heading:      #0f172a;
-  --muted:        #64748b;
+  --muted:        #5d6b7f;
   --border:       rgba(2, 6, 23, 0.08);
   --border-2:     rgba(2, 6, 23, 0.14);
-  --ok:           #16a34a;
+  --ok:           #136c33;
   --ok-soft:      rgba(22, 163, 74, 0.12);
   --warn:         #92400e;
   --warn-soft:    rgba(180, 83, 9, 0.12);

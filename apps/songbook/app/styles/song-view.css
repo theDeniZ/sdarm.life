@@ -234,6 +234,15 @@
     display: inline;
     margin-right: 0.4rem;
   }
+  /* The pills stay 32px to the eye; their touch area is 44px. */
+  .mode-btn {
+    position: relative;
+  }
+  .mode-btn::after {
+    content: '';
+    position: absolute;
+    inset: -6px 0;
+  }
 }
 
 @media (max-width: 600px) {
@@ -243,6 +252,8 @@
 }
 
 [data-theme='light'] .song-header__title { color: var(--text-strong); }
+/* The dark theme's pale gold at 0.7 was 1.7:1 on the light page. */
+[data-theme='light'] .song-header__num { color: var(--gold); }
 [data-theme='light'] .song-header__meta { color: var(--muted); }
 [data-theme='light'] .song-part { border-bottom-color: var(--border); }
 [data-theme='light'] .song-part__label { color: var(--gold); }

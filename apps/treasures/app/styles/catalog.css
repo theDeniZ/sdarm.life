@@ -61,9 +61,12 @@
   padding: 2rem 3vw 4rem;
 }
 
+/* minmax(0, 1fr), not 1fr: a bare 1fr track cannot shrink below its card's
+   min-content (the 180px cover plus the longest word), so at 768px the two
+   columns came to 790px and the right-hand cards ran off the screen. */
 .shop-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0.9rem 0.8rem;
   max-width: 1340px;
   margin: 0 auto;
@@ -173,7 +176,7 @@
 [data-theme='light'] .shop-pg-btn,
 [data-theme='light'] .shop-pg-num {
   border-color: rgba(0, 0, 0, 0.1);
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(0, 0, 0, 0.6);
 }
 [data-theme='light'] .shop-pg-btn:hover:not(:disabled),
 [data-theme='light'] .shop-pg-num:hover {
@@ -210,26 +213,26 @@
 
 @media (max-width: 1200px) {
   .shop-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 900px) {
-  .shop-grid {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
 @media (max-width: 600px) {
   .shop-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
   .shop-section {
     padding: 1.5rem 1rem 3rem;
   }
+  /* The pills fill the bar's height, so each is a 44px touch target inside
+     the same 52px strip. */
   .filter-bar {
     justify-content: flex-start;
-    padding: 0.75rem 1rem;
+    padding: 0 1rem;
+  }
+  .filter-pill {
+    min-height: 44px;
+    padding-block: 0;
   }
 }
 
@@ -238,7 +241,7 @@
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 }
 [data-theme='light'] .filter-pill {
-  color: rgba(0, 0, 0, 0.45);
+  color: rgba(0, 0, 0, 0.6);
 }
 [data-theme='light'] .filter-pill:hover {
   color: rgba(0, 0, 0, 0.75);
