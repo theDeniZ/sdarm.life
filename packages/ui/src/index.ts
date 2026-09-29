@@ -12,6 +12,8 @@ export type { PageHeroProps } from './components/PageHero';
 export { default as ScriptureVerseSection } from './components/ScriptureVerseSection';
 export type { ScriptureVerseSectionProps } from './components/ScriptureVerseSection';
 export { default as CommunityMap } from './components/CommunityMap';
+export { default as SunsetClock } from './components/SunsetClock';
+export type { SunsetClockProps } from './components/SunsetClock';
 export type { Location, CountryCode } from './data/locations';
 export { LOCATIONS, COUNTRY_NAMES, locationsByCountry, googleMapsUrl } from './data/locations';
 export { useCurrentTheme, withTheme } from './lib/theme-link';

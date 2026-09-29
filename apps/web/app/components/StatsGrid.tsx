@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
-import { useCurrentTheme, withTheme } from '@sdarm/ui';
+import { SunsetClock, useCurrentTheme, withTheme } from '@sdarm/ui';
 import { parseGridConfig, pick, resolveTextColor } from '@sdarm/types';
 import type { GridBlockConfig, HomeGridConfig } from '@sdarm/types';
 import QuoteShareModal from './QuoteShareModal';
@@ -38,7 +38,16 @@ const HEADLINE_SIZES = [64, 56, 48, 42, 36, 32, 28, 24, 20, 17, 15, 14, 13];
 /** The photo the reading-plan card ships with, used until one is uploaded. */
 const PLAN_FALLBACK_PHOTO = '/youversion-plan.webp';
 
-export default function StatsGrid({ newsData, grid }: { newsData?: NewsData; grid: HomeGridConfig }) {
+export default function StatsGrid({
+  newsData,
+  grid,
+  apiUrl,
+}: {
+  newsData?: NewsData;
+  grid: HomeGridConfig;
+  /** API base for the sunset card's location search — server env, passed down. */
+  apiUrl?: string;
+}) {
   const locale = useLocale();
   const lang = locale === 'en' ? 'en' : 'de';
   const t = useTranslations('web.stats');
@@ -102,7 +111,7 @@ export default function StatsGrid({ newsData, grid }: { newsData?: NewsData; gri
 
   useEffect(() => {
     // ?screenshotVerse=<index> pins the pick for screenshot tests (like the
-    // Footer's ?screenshotTime=); absent, the verse rotates with the hour.
+    // sunset card's ?screenshotTime=); absent, the verse rotates with the hour.
     const override = parseScreenshotVerse(new URLSearchParams(window.location.search).get('screenshotVerse'));
     function refresh() {
       setVerse(pickVerse(locale, override));
@@ -228,7 +237,10 @@ export default function StatsGrid({ newsData, grid }: { newsData?: NewsData; gri
       <section className="stats" id="neuigkeiten" ref={sectionRef}>
         <div className="stats__inner">
           <div className="stats__grid">
-            <div className="stats__col">
+            {/* With the sunset card beside it the reading plan gives up half its
+                height (350 + 24 + 350 = 724); hide either and the other keeps
+                the column as it was. */}
+            <div className={`stats__col${blocks.plan.visible && blocks.sunset.visible ? ' stats__col--split' : ''}`}>
               {blocks.plan.visible && (
                 <CardShell
                   block={blocks.plan}
@@ -252,6 +264,17 @@ export default function StatsGrid({ newsData, grid }: { newsData?: NewsData; gri
                     </div>
                   </div>
                 </CardShell>
+              )}
+
+              {blocks.sunset.visible && (
+                <div className="stats__card stats__card--sunset">
+                  <div className="stats__card-body">
+                    {blocks.sunset.showLabel && (
+                      <p className="stats__card-label">{pick(blocks.sunset.text[lang].label, t('sunset.label'))}</p>
+                    )}
+                    <SunsetClock apiUrl={apiUrl} />
+                  </div>
+                </div>
               )}
             </div>
 

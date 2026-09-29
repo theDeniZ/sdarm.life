@@ -126,7 +126,7 @@ allowlist is still read as `yv:{n}`. Verse text for `loc:` translations lives in
 **nothing is stored** — see [api.md](api.md#bible-content).
 
 **`home_grid` is the one key that holds a document, not a scalar.** Its value is
-`JSON.stringify(HomeGridConfig)` — the five homepage bento blocks with roughly a
+`JSON.stringify(HomeGridConfig)` — the six homepage bento blocks with roughly a
 dozen settings each in two languages, about a hundred values. Flat keys cannot
 carry that. Read it with `parseGridConfig()` from `@sdarm/types`, which merges
 whatever is stored onto the defaults and tolerates missing or malformed fields

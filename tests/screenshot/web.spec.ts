@@ -29,10 +29,11 @@ forEachTheme('web / home', async (page, theme) => {
     undefined,
     { timeout: 15_000 }
   );
-  // Footer sunset clock hydrates from ?screenshotTime= and splits the value into
-  // spans around a `.sunset-colon`. Until that exists, only the dash placeholder
-  // shows, and the location label is also missing.
-  await page.waitForSelector('.sunset-time-value .sunset-colon', { timeout: 15_000 });
+  // The StatsGrid sunset card hydrates from ?screenshotTime= (and
+  // ?screenshotLocation=, pinned to a Wednesday unless ?screenshotDay= says
+  // otherwise) and splits the value into spans around a `.sunset-colon`. Until
+  // that exists, only the dash placeholder shows and the rings are empty.
+  await page.waitForSelector('.stats .sunset-time-value .sunset-colon', { timeout: 15_000 });
   // Last short settle for WebGL texture upload + final frame.
   await page.waitForTimeout(1500);
   await expect(page).toHaveScreenshot(`web-home-${theme}.png`, { fullPage: true });

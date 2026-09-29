@@ -26,10 +26,7 @@
       "subscribeSuccess": "Bitte bestätigen Sie Ihre Anmeldung per E-Mail.",
       "subscribeDuplicate": "Diese E-Mail ist bereits registriert.",
       "subscribeError": "Fehler. Bitte versuchen Sie es später.",
-      "locationPlaceholder": "Stadt oder PLZ",
-      "locationUpdateAria": "Standort aktualisieren",
       "emailInputAria": "E-Mail-Adresse eingeben",
-      "locationInputAria": "Ort oder PLZ eingeben",
       "footerNavAria": "Seitennavigation",
       "copyright": "© {year} SDARM.life",
       "allRightsReserved": "Alle Rechte vorbehalten"
@@ -45,7 +42,10 @@
       "sunset": "Untergang",
       "ringDay": "{label}: noch {remaining}, {percent} % vergangen.",
       "ringWeek": "Woche bis zum Sabbat: {percent} %.",
-      "ringWeekSabbath": "Es ist Sabbat."
+      "ringWeekSabbath": "Es ist Sabbat.",
+      "locationPlaceholder": "Stadt oder PLZ",
+      "locationInputAria": "Ort oder PLZ eingeben",
+      "locationUpdateAria": "Standort aktualisieren"
     },
     "comingSoon": "Demnächst",
     "back": "← Zurück",
@@ -112,6 +112,9 @@
         "title": "Bevor<br></br><em>alles losgeht</em>",
         "cta": "Öffnen",
         "phoneAlt": "Leseplan in der YouVersion-App"
+      },
+      "sunset": {
+        "label": "Sabbat · Sonnenuntergang"
       },
       "invite": {
         "title": "Komm,<br></br><em>wie du bist</em>",

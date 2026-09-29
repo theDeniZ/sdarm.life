@@ -128,8 +128,8 @@ All test URLs include `?screenshotLocation=Pforzheim&screenshotTime=14:30`. Ever
 | Param | Effect |
 |---|---|
 | `screenshot=1` | Freezes dynamic elements on the web home page (used by `PlanetEarth` and any other time-sensitive component that opts in) |
-| `screenshotLocation=Pforzheim` | Sets the sunset clock location to Pforzheim so the SVG ring is deterministic |
-| `screenshotTime=14:30` | Fixes the sunset clock to 14:30 so the countdown is stable |
+| `screenshotLocation=Pforzheim` | Sets the sunset location to Pforzheim — the web home page's sunset card and the footer map's marker on every app — so the rings and the marker are deterministic |
+| `screenshotTime=14:30` | Fixes the sunset card on the web home page to 14:30 so the countdown is stable. It also pins the weekday to Wednesday (`screenshotDay=0–6` picks another, 0 = Sunday), so the labels and the week ring do not depend on the day the suite runs. The other apps no longer render the clock and ignore it |
 | `screenshotVerse=1` | Pins `pickVerse()` in `apps/web` to verse index 1 (`verses[n % length]`), for both the home `StatsGrid` quote card and the "Wort der Stunde" section on home and about. Without it the verse follows the hour of the week, so the baseline only matched when the suite ran in the hour it was recorded in (#198) |
 
 ## Themes
@@ -186,7 +186,7 @@ forEachTheme('songbook / my new page', async (page, theme) => {
 **When to use `waitForLoadState('networkidle')` vs a fixed timeout:**
 - `networkidle` — works for most pages (waits until no in-flight requests for 500 ms).
 - Fixed `waitForTimeout` — needed for WebGL (globe), stagger animations, or any async rendering that fires after `networkidle`. Use the smallest value that makes the test stable.
-- A selector wait tied to a component's own class names — `web / home` waits on the `StatsGrid` verse card and its fitted headlines, because both are filled in after hydration and `networkidle` says nothing about either. The wait only makes sure *a* verse is there; `?screenshotVerse=` decides *which* one.
+- A selector wait tied to a component's own class names — `web / home` waits on the `StatsGrid` verse card and its fitted headlines, and on the sunset card's `.sunset-colon` (the time is split around it only after the first tick), because all of them are filled in after hydration and `networkidle` says nothing about any. The wait only makes sure *a* verse is there; `?screenshotVerse=` decides *which* one.
 
 ⚠️ **A selector waiter outlives the component it was written for.** `web / home` waited on `.masonry-item.is-visible` long after `StatsGrid` replaced `NewsSection` on the home page, so the wait could never resolve and `update-snapshots` failed on a workflow nobody had run since the redesign. **When a page's section is replaced, grep the specs for the old section's class names in the same commit** — a stale waiter fails loudly, but only the next time someone runs the workflow.
 
