@@ -68,6 +68,15 @@ export default async function DatenschutzPage({ params }: { params: Promise<{ lo
       <h2>{t('section9Title')}</h2>
       <p>{t('section9Body')}</p>
 
+      <h2>{t('section10Title')}</h2>
+      <p>
+        {t('section10Body')}{' '}
+        <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">
+          {t('section10PrivacyLink')}
+        </a>
+        .
+      </p>
+
       <h2>{t('section7Title')}</h2>
       <p>
         {t('section7Body')} <a href="mailto:info@sdarm.life">info@sdarm.life</a>.

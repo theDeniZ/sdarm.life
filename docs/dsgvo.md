@@ -44,8 +44,9 @@ These are the only external data recipients currently named in [Datenschutzerkl�
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
 | YouVersion / Life.Church (US) | Bible text for **`yv:` translations only** — `loc:` translations contact nobody | section8 |
 | sbl.sdarm.life (`apps/sbl`) | The Sabbath Bible Lesson — carries **its own** Datenschutzerklärung | section9 |
+| Resend (Plus Five Five, Inc., US) | Email delivery — newsletter confirmation/welcome/broadcast, book-request forward to `info@sdarm.life`, admin single sends | section10 |
 
-**To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
+**To add a new processor:** update [de.json + en.json `web.legal.datenschutz`](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 
 ### Bible feature (treasures.sdarm.life/bible) — two sources
 
@@ -69,7 +70,7 @@ posture (see below), not a data-protection one.
 ⚠️ **The disclosure is conditional on the allowlist, and the allowlist is a button in
 the admin.** An operator enabling one YouVersion translation re-creates the US transfer
 in a single click. Disclosure must precede the transfer, never follow it — so
-`legal.datenschutz.section8` **stays as long as the YouVersion provider exists at all**,
+`web.legal.datenschutz.section8` **stays as long as the YouVersion provider exists at all**,
 even while the allowlist happens to hold only `loc:` ids. Shrink it only when the
 provider is removed from the code, not when it merely happens to be unused.
 
@@ -115,7 +116,7 @@ this repository (`apps/sbl/upstream/`). It is served as-is by `apps/sbl`.
 
 **It carries its own Datenschutzerklärung and Impressum** (`datenschutz.html`,
 `impressum.html` in the same directory), reachable from the page itself.
-`legal.datenschutz.section9` names the address, says the offering is separate
+`web.legal.datenschutz.section9` names the address, says the offering is separate
 and independently maintained, and states that this policy does not apply there.
 
 ⚠️ **Since the page is now maintained in this repository, section9's "independently
@@ -160,13 +161,36 @@ when the lesson moved to its own host.
 
 ⚠️ **The boundary:** the moment this grows a per-event row carrying a timestamp and any request attribute, it is behavioural analytics and this assessment no longer holds. That is a new issue with its own DSGVO pass, not an extension of this one.
 
+### Email delivery (Resend)
+
+Every email leaves through the Resend API, called **server-side** from the Worker
+(`RESEND_API_KEY` is a Worker secret): `routes/book-request.ts`,
+`routes/subscribers.ts` (double opt-in confirmation + welcome) and
+`routes/admin/email.ts` (single send + subscriber broadcast). The visitor's IP never
+reaches Resend; what does is listed per call site in `section10`.
+
+- **Legal entity:** Resend is operated by **Plus Five Five, Inc.**, 2261 Market Street
+  #5039, San Francisco, CA 94114, USA (as named in Resend's DPA). Not "Resend, Inc.".
+- **Transfer basis:** the EU SCCs (Module 2) incorporated in Resend's DPA, which binds on
+  acceptance of their Terms of Service; the DPA also states EU-U.S. DPF participation,
+  which `section10` reports as Resend's own statement. The EU sending region does not
+  move account data, logs or metadata out of the US.
+- ⚠️ **`religion` is accepted by the API but not collected by the form.**
+  `book-request.ts` has an optional `religion` field that would be forwarded to
+  Resend; `BookRequestModal` never sends it, so `section6`/`section10` do not name it.
+  Religious belief is Art. 9 data: if the form ever asks for it, both sections must
+  name it and the consent must be explicit (Art. 9(2)(a)) — in the same PR.
+- **A new email type goes into `section10` in the same PR.** So does turning on open
+  or click tracking in the Resend dashboard — that is tracking of the recipient and is
+  not covered by the current text.
+
 ## ⚠️ Known gaps to close
 
 These are currently in code but not fully DSGVO-clean:
 
 | # | Item | Status |
 |---|---|---|
-| 1 | **Resend** (email sender) — not named in Datenschutz | Needs disclosure (Art. 28) |
+| 1 | ~~**Resend** (email sender) — not named in Datenschutz~~ | ✅ **Disclosed** in section10 (see below) — whether to move to an EU provider is still open (#196) |
 | 2 | ~~**Unsplash FALLBACK_IMG**~~ | ✅ **Closed** — removed, not moved (see below) |
 | 3 | ~~**Wikimedia HeroSection fallback**~~ | ✅ **Closed** — removed with it |
 | 4 | **Double opt-in wording** in Datenschutz | Expand section2Body |
