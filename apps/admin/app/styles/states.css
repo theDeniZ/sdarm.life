@@ -1,0 +1,87 @@
+/* ── States ──────────────────────────────────── */
+
+.state-loading,
+.state-empty {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.state-error {
+  text-align: center;
+  padding: 48px 20px;
+  color: var(--red-text);
+  font-size: 13px;
+}
+
+/* ── Pagination ───────────────────────────────── */
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.pagination-btn {
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: 'Lexend', sans-serif;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  background: transparent;
+  cursor: pointer;
+  color: var(--text);
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  border-color: var(--gold-dim);
+  color: var(--gold);
+}
+
+.pagination-btn:disabled {
+  opacity: .3;
+  cursor: default;
+}
+
+.pagination-info {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.pagination-total {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+/* ── Coming soon (admin stub pages) ──────────── */
+
+.admin-coming-soon {
+  text-align: center;
+  padding: 96px 20px;
+}
+
+.admin-coming-soon-eyebrow {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.admin-coming-soon h1 {
+  font-family: 'Lexend', sans-serif;
+  font-size: 24px;
+  font-weight: 500;
+  color: var(--heading);
+  margin: 10px 0 8px;
+}
+
+.admin-coming-soon p {
+  font-size: 13px;
+  color: var(--muted);
+  max-width: 420px;
+  margin: 0 auto;
+}

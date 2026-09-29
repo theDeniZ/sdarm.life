@@ -1,0 +1,97 @@
+/* ── Table ───────────────────────────────────── */
+
+.table-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead th {
+  background: var(--surface-2);
+  padding: 10px 14px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: .5px;
+  border-bottom: 1px solid var(--border);
+}
+
+tbody td {
+  padding: 11px 14px;
+  font-size: 13px;
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: var(--row-hover); }
+
+/* Rows that open a record (issue #172). `--row-hover` stays as it is for the
+   nav, menus and inert rows; at 3.5-4 % it is invisible as a "this opens"
+   signal, so these rows get their own stronger tint plus a gold edge on the
+   first cell. Rows with nowhere to go (subscribers, API keys) stay inert. */
+tbody tr.row-link { cursor: pointer; }
+tbody tr.row-link td[data-no-row-link] { cursor: default; }
+tbody tr.row-link td { transition: background 0.15s; }
+tbody tr.row-link:hover td,
+tbody tr.row-link:has(:focus-visible) td { background: var(--row-link-hover); }
+tbody tr.row-link:hover td:first-child,
+tbody tr.row-link:has(:focus-visible) td:first-child { box-shadow: inset 2px 0 0 var(--accent); }
+
+.td-thumb {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 3px;
+  display: block;
+  background: var(--surface-2);
+}
+
+.td-title { font-weight: 600; color: var(--heading); }
+.td-slug  { font-size: 11px; color: var(--muted); margin-top: 2px; }
+.td-actions { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+
+.td-reorder { display: flex; align-items: center; gap: 4px; }
+.td-order-num { font-size: 11px; color: var(--muted); min-width: 20px; text-align: center; }
+.btn-reorder {
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+  padding: 2px 5px;
+  transition: color 0.15s, border-color 0.15s;
+}
+.btn-reorder:hover:not(:disabled) { color: var(--heading); border-color: var(--gold-dim); }
+.btn-reorder:disabled { opacity: 0.25; cursor: default; }
+
+.swap-form { display: contents; }
+.swap-input {
+  width: 42px;
+  padding: 2px 4px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 11px;
+  text-align: center;
+  transition: border-color 0.15s;
+}
+.swap-input:focus { border-color: var(--gold-dim); }
+.swap-input:disabled { opacity: 0.25; }
+/* hide browser spinners */
+.swap-input::-webkit-inner-spin-button,
+.swap-input::-webkit-outer-spin-button { -webkit-appearance: none; }
+.swap-input[type=number] { -moz-appearance: textfield; }
+.swap-error { font-size: 10px; color: var(--red-text); margin-top: 3px; }

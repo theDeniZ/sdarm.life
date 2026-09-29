@@ -274,7 +274,7 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 
 Unlike the public apps, the admin app has no `ThemeScript`/FOUC-prevention pass yet — `Sidebar` reads `localStorage.sdarm-admin-theme` in a `useEffect` and sets `data-theme` on `<html>` after mount (default `'dark'`).
 
-The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html` and unlike the public site's warm black museum theme): dark = `#020617` page / `#0b1120` cards, light = `#f8fafc` page / white cards, hairline borders (`rgba(255,255,255,0.07)` dark / `rgba(2,6,23,0.08)` light), UI font Lexend, base radius `--r: 10px` (cards 12px). Accent tokens: `--accent` (`#c9a96e` dark / `#927223` light — deeper gold for contrast on white), `--accent-hover`, `--accent-soft`, `--on-accent`; `--gold` is kept as an alias of `--accent` so pre-existing rules follow it. `--brand-gold` (`#c9a96e`, theme-independent) exists only for the logo. Semantic tokens: `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--red`/`--red-text`/`--danger-soft`, plus `--heading`, `--muted`, `--row-hover`, `--overlay`. Never hardcode colors in admin CSS — every rule goes through these tokens so both themes stay in sync.
+The palette is **neutral slate surfaces + gold accents** (per `admin-mockup.html` and unlike the public site's warm black museum theme): dark = `#020617` page / `#0b1120` cards, light = `#f8fafc` page / white cards, hairline borders (`rgba(255,255,255,0.07)` dark / `rgba(2,6,23,0.08)` light), UI font Lexend, base radius `--r: 10px` (cards 12px). Accent tokens: `--accent` (`#c9a96e` dark / `#927223` light — deeper gold for contrast on white), `--accent-hover`, `--accent-soft`, `--on-accent`, and `--on-solid` (`#ffffff` in both themes — text on a solid dark or danger fill such as the image/sheet delete overlays; not `--on-accent`, which is dark on the dark theme); `--gold` is kept as an alias of `--accent` so pre-existing rules follow it. `--brand-gold` (`#c9a96e`, theme-independent) exists only for the logo. Semantic tokens: `--ok`/`--ok-soft`, `--warn`/`--warn-soft`, `--red`/`--red-text`/`--danger-soft`, plus `--heading`, `--muted`, `--row-hover`, `--overlay`. Never hardcode colors in admin CSS — every rule goes through these tokens so both themes stay in sync.
 
 ### Collapsible sidebar
 
@@ -287,7 +287,7 @@ Above 768px the sidebar folds to a 65px icon rail (`--sidebar-w-collapsed`, besi
 
 ### Email screen
 
-`EmailComposer` at `/email` — recipient/subject/template form on the left, live `srcDoc` iframe preview on the right, same `grid` shape as `HomeGridEditor`. Styles live in `globals.css` under the `.email-*` prefix.
+`EmailComposer` at `/email` — recipient/subject/template form on the left, live `srcDoc` iframe preview on the right, same `grid` shape as `HomeGridEditor`. Styles live in `app/styles/email.css` under the `.email-*` prefix.
 
 **The preview sheet is white in both themes, on purpose.** What is being previewed is a white HTML email; a recipient never sees it on a dark ground, so the frame keeps `#ffffff` and takes the card treatment (`--border`, `var(--r)`, a hairline shadow) around it. The `PREVIEW_PLACEHOLDER` empty state is also light — and its two colours are literals by necessity, because an iframe is a separate document and cannot read the admin's custom properties. That is the **only** place in this app where a hardcoded colour is correct.
 
@@ -295,7 +295,7 @@ Above 768px the sidebar folds to a 65px icon rail (`--sidebar-w-collapsed`, besi
 
 **The layout stacks at 1100px.** Above it, form and preview sit side by side. Below, the preview was a sliver — measured 192px at 1024 and **2px at 834**, still 700px tall — because the form was pinned at `flex: 0 0 480px` and there was no breakpoint anywhere on the screen. Stacked, the frame switches to `60vh` with a 420px floor.
 
-⚠️ This was the one admin screen built outside the design system: every colour and dimension was an inline literal in the component, including a `#0f0e0c` preview with `#3a3830` text that rendered as the same black slab in **both** themes and could not follow the toggle at all (issue #175). Keep new work here in `globals.css` and on tokens.
+⚠️ This was the one admin screen built outside the design system: every colour and dimension was an inline literal in the component, including a `#0f0e0c` preview with `#3a3830` text that rendered as the same black slab in **both** themes and could not follow the toggle at all (issue #175). Keep new work here in `app/styles/email.css` and on tokens.
 
 ### Songbooks card grid
 

@@ -504,6 +504,32 @@ apps/web/app/styles/
 
 Mirrors `packages/ui/src/styles/index.css`. See [conventions.md](conventions.md) for the rule.
 
+**`apps/admin` has no `globals.css`.** Its stylesheets live in `apps/admin/app/styles/` and are imported one by one from `apps/admin/app/layout.tsx` — not through a CSS `@import` index, because Turbopack does not invalidate its CSS cache through an `@import` (see the comment in `apps/web/app/layout.tsx`). The files are named after the folders in `app/domains/`, and each carries its own `@media` blocks; the admin has no trailing light-theme block — `[data-theme='light']` in `theme.css` redefines tokens only (issue #178).
+
+```
+apps/admin/app/styles/
+  theme.css        — fonts, reset, :root tokens, [data-theme='light'] tokens, base
+  sidebar.css      — .admin-shell grid, sidebar, collapsed rail, mobile off-canvas
+  shell.css        — .admin-main, page header
+  buttons.css      — .btn-primary / -ghost / -danger / -sm
+  table.css        — tables, clickable .row-link rows, reorder/swap controls
+  forms.css        — .form-row controls, checkbox, file input
+  images.css       — ImagePicker, upload zone, ImageLibrary
+  config.css       — ConfigEditor
+  states.css       — loading/empty/error, pagination, coming-soon stub
+  songbooks.css    — songbook card grid, filters
+  api-keys.css     — ApiKeyManager
+  modal.css        — modal / ConfirmDialog
+  song-editor.css  — SongEditor, preview pane, sheet drop zone, breadcrumb
+  dashboard.css    — cards, hero stat, compact stats
+  statistics.css   — BarChart, HBarChart, stat-mini, roadmap badge
+  bible.css        — BibleSettings, LicenseEditor, catalog
+  home-grid.css    — HomeGridEditor
+  email.css        — EmailComposer
+```
+
+**Import order is the cascade order**, and it is the order the sections had in the single file they came from. Three small sections moved to join their domain — checkbox and file input into `forms.css`, the image library into `images.css`, the unused coming-soon stub into `states.css` — each only past sections with no selector in common. A before/after check — screenshots of every admin page at 1280 and 834 in both themes, and the computed style of every element on those pages — found no difference. A new file goes where nothing after it can override it by accident.
+
 Do not create `utils/` at the monorepo root for app-specific code — it breaks isolation. Only framework-free, truly cross-app logic belongs in a shared package.
 
 ### Constants
