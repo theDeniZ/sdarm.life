@@ -5,11 +5,12 @@ import Link from 'next/link';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useLocale, useTranslations } from 'next-intl';
 import { SunsetClock, useCurrentTheme, withTheme } from '@sdarm/ui';
-import { parseGridConfig, pick, resolveTextColor } from '@sdarm/types';
-import type { GridBlockConfig, HomeGridConfig } from '@sdarm/types';
+import { GRID_SLOT_IDS, parseGridConfig, pick, resolveTextColor } from '@sdarm/types';
+import type { GridBlockConfig, GridBlockId, GridSlotId, HomeGridConfig } from '@sdarm/types';
 import QuoteShareModal from './QuoteShareModal';
 import { parseScreenshotVerse, pickVerse, splitVerse, type Verse } from '../lib/verses';
 import { r2url, type NewsData } from '../lib/api';
+import type { HomeLive } from '../lib/home-live';
 
 // SDARM Germany on YouVersion. External link — nothing leaves the browser
 // until the visitor clicks, so no DSGVO disclosure is needed.
@@ -38,13 +39,25 @@ const HEADLINE_SIZES = [64, 56, 48, 42, 36, 32, 28, 24, 20, 17, 15, 14, 13];
 /** The photo the reading-plan card ships with, used until one is uploaded. */
 const PLAN_FALLBACK_PHOTO = '/youversion-plan.webp';
 
+/** Height class of each smaller slot: 420 + 280 in column 2, 350 + 350 in column 3. */
+type SlotSize = 'media' | 'short' | 'mid';
+const SLOT_SIZE: Record<GridSlotId, SlotSize> = {
+  col2Top: 'media',
+  col2Bottom: 'short',
+  col3Top: 'mid',
+  col3Bottom: 'mid',
+};
+
 export default function StatsGrid({
   newsData,
   grid,
+  live,
   apiUrl,
 }: {
   newsData?: NewsData;
   grid: HomeGridConfig;
+  /** Lesson of the week, Psalm of the day, song of the week — fetched by the page. */
+  live?: HomeLive;
   /** API base for the sunset card's location search — server env, passed down. */
   apiUrl?: string;
 }) {
@@ -224,39 +237,281 @@ export default function StatsGrid({
   );
 
   const blocks = cfg.blocks;
-  const planPhoto = photoOf(blocks.plan, PLAN_FALLBACK_PHOTO);
-  const invitePhoto = photoOf(blocks.invite);
-  const bookPhoto = photoOf(blocks.book);
-  const faithPhoto = photoOf(blocks.faith);
-  const versePhoto = photoOf(blocks.verse);
+  const photos: Record<GridBlockId, string | null> = {
+    plan: photoOf(blocks.plan, PLAN_FALLBACK_PHOTO),
+    sunset: null,
+    bible: photoOf(blocks.bible),
+    sbl: photoOf(blocks.sbl),
+    book: photoOf(blocks.book),
+    verse: photoOf(blocks.verse),
+    invite: photoOf(blocks.invite),
+    faith: photoOf(blocks.faith),
+  };
 
-  if (!Object.values(blocks).some((b) => b.visible)) return null;
+  /** The block in a slot, or null when the slot is empty or its block is hidden. */
+  const placed = (slot: GridSlotId): GridBlockId | null => {
+    const id = cfg.slots[slot];
+    return id && blocks[id].visible ? id : null;
+  };
+
+  const showPlan = blocks.plan.visible;
+  if (!showPlan && !GRID_SLOT_IDS.some((slot) => placed(slot))) return null;
+
+  /** Headline: the editor's text for this locale, else the translation with its markup. */
+  const headline = (b: GridBlockConfig, key: string) =>
+    b.text[lang].title.trim() !== '' ? b.text[lang].title : t.rich(key, { em, br });
+
+  /** Label, context line, headline, fact line and button — the live cards' shape. */
+  function liveCard(
+    id: 'bible' | 'sbl' | 'book',
+    size: SlotSize,
+    c: {
+      href: string;
+      label: string;
+      /** Context line; `extra` is the part phones leave out. */
+      kicker: { main: string; extra?: string } | null;
+      headline: React.ReactNode;
+      desc: string | null;
+      cta: string | null;
+      rule?: boolean;
+      photoAlt?: string;
+    }
+  ) {
+    const b = blocks[id];
+    const photo = photos[id];
+    const button = pick(b.text[lang].button, c.cta ?? '');
+    // Live text always lies over the photo, so a live card never goes without
+    // a scrim: 'none' and 'light' are read as 'medium' here.
+    const scrimmed: GridBlockConfig =
+      b.image.scrim === 'none' || b.image.scrim === 'light' ? { ...b, image: { ...b.image, scrim: 'medium' } } : b;
+    return (
+      <CardShell
+        key={id}
+        block={b}
+        defaultHref={c.href}
+        className={`stats__card stats__card--${size} stats__card--${id} stats__card--live${imageClasses(
+          scrimmed,
+          !!photo
+        )}`}
+      >
+        {photo && photoLayer(scrimmed, photo, c.photoAlt ?? '')}
+        {c.rule && !photo && <span className="stats__rule" aria-hidden="true" />}
+        <div className="stats__card-body">
+          {b.showLabel && <p className="stats__card-label">{pick(b.text[lang].label, c.label)}</p>}
+          <div className="stats__card-content">
+            {c.kicker && (
+              <p className="stats__card-kicker">
+                {c.kicker.main}
+                {c.kicker.extra && <span className="stats__card-kicker-extra"> · {c.kicker.extra}</span>}
+              </p>
+            )}
+            <p className="stats__card-big" data-fit>
+              {c.headline}
+            </p>
+            {c.desc && <p className="stats__card-sub stats__card-desc">{c.desc}</p>}
+            {b.showButton && button && <span className="stats__btn">{button}</span>}
+          </div>
+        </div>
+      </CardShell>
+    );
+  }
+
+  /**
+   * One card, sized by the slot it sits in — every block can take any of the
+   * four smaller slots, so the height comes from the slot, not the block.
+   */
+  function card(id: GridBlockId, size: SlotSize) {
+    const b = blocks[id];
+    const photo = photos[id];
+    const sizeClass = `stats__card stats__card--${size}`;
+
+    switch (id) {
+      case 'sunset':
+        // No label: the rings, the city and the countdown say what it is.
+        return (
+          <div key={id} className={`${sizeClass} stats__card--sunset`}>
+            <div className="stats__card-body">
+              <SunsetClock apiUrl={apiUrl} />
+            </div>
+          </div>
+        );
+
+      // The three live cards: a small line of context, the concrete thing as
+      // the headline, a fact line in the taller slots. Headline overrides from
+      // the admin do not apply — the content is the point of these cards.
+      case 'bible': {
+        const bible = live?.bible;
+        return liveCard(id, size, {
+          href: withTheme(bible?.href ?? newsData?.bibleUrl ?? '#', theme),
+          label: t('bible.label'),
+          kicker: bible ? { main: t('bible.kicker') } : null,
+          headline: bible ? t.rich('bible.psalm', { n: bible.psalm, em }) : t.rich('bible.title', { em, br }),
+          desc: bible && bible.translations > 0 ? t('bible.translations', { count: bible.translations }) : null,
+          cta: t('bible.cta'),
+        });
+      }
+
+      case 'sbl': {
+        const lesson = live?.lesson;
+        return liveCard(id, size, {
+          href: newsData?.sblUrl ?? '#',
+          label: t('sbl.label'),
+          kicker: lesson ? { main: t('sbl.kicker', { no: lesson.no }), extra: lesson.range } : null,
+          headline: lesson ? lesson.title : t.rich('sbl.title', { em, br }),
+          desc: lesson ? (lesson.quarterTitle ? t('sbl.quarter', { title: lesson.quarterTitle }) : null) : t('sbl.sub'),
+          cta: t('sbl.cta'),
+          rule: true,
+        });
+      }
+
+      case 'book': {
+        const songs = live?.songs;
+        return liveCard(id, size, {
+          href: withTheme(songs?.song?.href ?? newsData?.song?.href ?? '#', theme),
+          label: t('songs.label'),
+          kicker: songs?.song
+            ? { main: t('songs.weekly'), extra: t('songs.number', { number: songs.song.number }) }
+            : null,
+          headline: songs?.song ? songs.song.title : t.rich('songs.title', { em, br }),
+          desc: songs ? t('songs.count', { songs: songs.totalSongs, books: songs.songbooks }) : null,
+          cta: b.text[lang].button || null,
+          photoAlt: t('songs.label'),
+        });
+      }
+
+      case 'verse':
+        return (
+          <div
+            key={id}
+            className={`${sizeClass} stats__card--quote${imageClasses(b, !!photo)}`}
+            role="button"
+            tabIndex={0}
+            onClick={() => setModalOpen(true)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setModalOpen(true);
+              }
+            }}
+            aria-label={tr('quote.openShare')}
+          >
+            {photo && photoLayer(b, photo, '')}
+            {SHOW_VERSE_SAVE && (
+              <button
+                className="quote-save-btn"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setModalOpen(true);
+                }}
+                title={tr('quote.saveImage')}
+                aria-label={tr('quote.saveImage')}
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                  <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" y1="15" x2="12" y2="3" />
+                </svg>
+              </button>
+            )}
+
+            <div className="stats__card-body">
+              {b.showLabel && <p className="stats__card-label">{t('verse.label')}</p>}
+              <div className="stats__card-content">
+                <p className="stats__card-big" data-fit>
+                  {verseParts ? (
+                    <>
+                      {verseParts.before}
+                      <em>{verseParts.word}</em>
+                      {verseParts.after}
+                    </>
+                  ) : (
+                    verse.text
+                  )}
+                </p>
+                <p className="stats__card-sub">{verse.ref}</p>
+              </div>
+            </div>
+          </div>
+        );
+
+      case 'invite':
+        return (
+          <CardShell
+            key={id}
+            block={b}
+            defaultHref={`/${locale}/kontakt`}
+            className={`${sizeClass} stats__card--invite${imageClasses(b, !!photo)}`}
+          >
+            {photo && photoLayer(b, photo, '')}
+            <div className="stats__card-body">
+              {b.showLabel && b.text[lang].label && <p className="stats__card-label">{b.text[lang].label}</p>}
+              <div className="stats__card-content">
+                <p className="stats__card-big" data-fit>
+                  {headline(b, 'invite.title')}
+                </p>
+                {b.showButton && <span className="stats__btn">{pick(b.text[lang].button, t('invite.cta'))}</span>}
+              </div>
+            </div>
+          </CardShell>
+        );
+
+      case 'faith':
+        return (
+          <CardShell
+            key={id}
+            block={b}
+            defaultHref={newsData?.aboutUrl ?? `/${locale}/about`}
+            className={`${sizeClass} stats__card--faith${imageClasses(b, !!photo)}`}
+          >
+            {photo ? (
+              photoLayer(b, photo, '')
+            ) : (
+              <span className="stats__ghost" aria-hidden="true">
+                25
+              </span>
+            )}
+            <div className="stats__card-body">
+              {b.showLabel && <p className="stats__card-label">{pick(b.text[lang].label, tr('faith.label'))}</p>}
+              <div className="stats__card-content">
+                <p className="stats__card-big" data-fit>
+                  {headline(b, 'faith.title')}
+                </p>
+                {b.showButton && <span className="stats__btn">{pick(b.text[lang].button, tr('faith.sub'))}</span>}
+              </div>
+            </div>
+          </CardShell>
+        );
+
+      default:
+        return null;
+    }
+  }
+
+  const slotCard = (slot: GridSlotId) => {
+    const id = placed(slot);
+    return id ? card(id, SLOT_SIZE[slot]) : null;
+  };
 
   return (
     <>
       <section className="stats" id="neuigkeiten" ref={sectionRef}>
         <div className="stats__inner">
           <div className="stats__grid">
-            {/* With the sunset card beside it the reading plan gives up half its
-                height (350 + 24 + 350 = 724); hide either and the other keeps
-                the column as it was. */}
-            <div className={`stats__col${blocks.plan.visible && blocks.sunset.visible ? ' stats__col--split' : ''}`}>
-              {blocks.plan.visible && (
+            <div className="stats__col">
+              {showPlan && (
                 <CardShell
                   block={blocks.plan}
                   defaultHref={PLAN_URL}
-                  className={`stats__card stats__card--tall stats__card--plan${imageClasses(blocks.plan, !!planPhoto)}`}
+                  className={`stats__card stats__card--tall stats__card--plan${imageClasses(blocks.plan, !!photos.plan)}`}
                 >
-                  {planPhoto && photoLayer(blocks.plan, planPhoto, t('plan.phoneAlt'))}
+                  {photos.plan && photoLayer(blocks.plan, photos.plan, t('plan.phoneAlt'))}
                   <div className="stats__card-body">
                     {blocks.plan.showLabel && (
                       <p className="stats__card-label">{pick(blocks.plan.text[lang].label, t('plan.label'))}</p>
                     )}
                     <div className="stats__card-content">
                       <p className="stats__card-big" data-fit>
-                        {blocks.plan.text[lang].title.trim() !== ''
-                          ? blocks.plan.text[lang].title
-                          : t.rich('plan.title', { em, br })}
+                        {headline(blocks.plan, 'plan.title')}
                       </p>
                       {blocks.plan.showButton && (
                         <span className="stats__btn">{pick(blocks.plan.text[lang].button, t('plan.cta'))}</span>
@@ -265,180 +520,16 @@ export default function StatsGrid({
                   </div>
                 </CardShell>
               )}
-
-              {blocks.sunset.visible && (
-                <div className="stats__card stats__card--sunset">
-                  <div className="stats__card-body">
-                    {blocks.sunset.showLabel && (
-                      <p className="stats__card-label">{pick(blocks.sunset.text[lang].label, t('sunset.label'))}</p>
-                    )}
-                    <SunsetClock apiUrl={apiUrl} />
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="stats__col">
-              {blocks.verse.visible && (
-                <div
-                  className={`stats__card stats__card--media stats__card--quote${imageClasses(
-                    blocks.verse,
-                    !!versePhoto
-                  )}`}
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setModalOpen(true)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                      e.preventDefault();
-                      setModalOpen(true);
-                    }
-                  }}
-                  aria-label={tr('quote.openShare')}
-                >
-                  {versePhoto && photoLayer(blocks.verse, versePhoto, '')}
-                  {/* TEMPORARY: the save-as-image button is hidden while the
-                      image QuoteShareModal generates is still being designed.
-                      Restore by flipping this flag — nothing else was removed,
-                      and the modal itself still works. Note the whole card is
-                      clickable and opens the same modal. */}
-                  {SHOW_VERSE_SAVE && (
-                    <button
-                      className="quote-save-btn"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setModalOpen(true);
-                      }}
-                      title={tr('quote.saveImage')}
-                      aria-label={tr('quote.saveImage')}
-                    >
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                        <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4" />
-                        <polyline points="7 10 12 15 17 10" />
-                        <line x1="12" y1="15" x2="12" y2="3" />
-                      </svg>
-                    </button>
-                  )}
-
-                  <div className="stats__card-body">
-                    {blocks.verse.showLabel && <p className="stats__card-label">{t('verse.label')}</p>}
-                    <div className="stats__card-content">
-                      <p className="stats__card-big" data-fit>
-                        {verseParts ? (
-                          <>
-                            {verseParts.before}
-                            <em>{verseParts.word}</em>
-                            {verseParts.after}
-                          </>
-                        ) : (
-                          verse.text
-                        )}
-                      </p>
-                      <p className="stats__card-sub">{verse.ref}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {blocks.invite.visible && (
-                <CardShell
-                  block={blocks.invite}
-                  defaultHref={`/${locale}/kontakt`}
-                  className={`stats__card stats__card--short stats__card--invite${imageClasses(
-                    blocks.invite,
-                    !!invitePhoto
-                  )}`}
-                >
-                  {invitePhoto && photoLayer(blocks.invite, invitePhoto, '')}
-                  <div className="stats__card-body">
-                    {blocks.invite.showLabel && blocks.invite.text[lang].label && (
-                      <p className="stats__card-label">{blocks.invite.text[lang].label}</p>
-                    )}
-                    <div className="stats__card-content">
-                      <p className="stats__card-big" data-fit>
-                        {blocks.invite.text[lang].title.trim() !== ''
-                          ? blocks.invite.text[lang].title
-                          : t.rich('invite.title', { em, br })}
-                      </p>
-                      {blocks.invite.showButton && (
-                        <span className="stats__btn">{pick(blocks.invite.text[lang].button, t('invite.cta'))}</span>
-                      )}
-                    </div>
-                  </div>
-                </CardShell>
-              )}
+              {slotCard('col2Top')}
+              {slotCard('col2Bottom')}
             </div>
 
             <div className="stats__col">
-              {blocks.book.visible && (
-                <CardShell
-                  block={blocks.book}
-                  defaultHref={withTheme(newsData?.song?.href ?? '#', theme)}
-                  className={`stats__card stats__card--mid${imageClasses(blocks.book, !!bookPhoto)}`}
-                >
-                  {bookPhoto && photoLayer(blocks.book, bookPhoto, t('songs.label'))}
-                  <div className="stats__card-body">
-                    {blocks.book.showLabel && (
-                      <p className="stats__card-label">{pick(blocks.book.text[lang].label, t('songs.label'))}</p>
-                    )}
-                    <div className="stats__card-content">
-                      {/* With a photo the picture says "songbooks" and a line of
-                          type on top only competes with it, so the headline sits
-                          out. Without one the card would be a label on an empty
-                          rectangle — which is what the default config gives — so
-                          the headline comes back. An override always wins. */}
-                      {blocks.book.text[lang].title.trim() !== '' ? (
-                        <p className="stats__card-big" data-fit>
-                          {blocks.book.text[lang].title}
-                        </p>
-                      ) : (
-                        !bookPhoto && (
-                          <p className="stats__card-big" data-fit>
-                            {t.rich('songs.title', { em, br })}
-                          </p>
-                        )
-                      )}
-                      {blocks.book.showButton && blocks.book.text[lang].button && (
-                        <span className="stats__btn">{blocks.book.text[lang].button}</span>
-                      )}
-                    </div>
-                  </div>
-                </CardShell>
-              )}
-
-              {blocks.faith.visible && (
-                <CardShell
-                  block={blocks.faith}
-                  defaultHref={newsData?.aboutUrl ?? `/${locale}/about`}
-                  className={`stats__card stats__card--mid stats__card--faith${imageClasses(
-                    blocks.faith,
-                    !!faithPhoto
-                  )}`}
-                >
-                  {faithPhoto ? (
-                    photoLayer(blocks.faith, faithPhoto, '')
-                  ) : (
-                    <span className="stats__ghost" aria-hidden="true">
-                      25
-                    </span>
-                  )}
-                  <div className="stats__card-body">
-                    {blocks.faith.showLabel && (
-                      <p className="stats__card-label">{pick(blocks.faith.text[lang].label, tr('faith.label'))}</p>
-                    )}
-                    <div className="stats__card-content">
-                      <p className="stats__card-big" data-fit>
-                        {blocks.faith.text[lang].title.trim() !== ''
-                          ? blocks.faith.text[lang].title
-                          : t.rich('faith.title', { em, br })}
-                      </p>
-                      {blocks.faith.showButton && (
-                        <span className="stats__btn">{pick(blocks.faith.text[lang].button, tr('faith.sub'))}</span>
-                      )}
-                    </div>
-                  </div>
-                </CardShell>
-              )}
+              {slotCard('col3Top')}
+              {slotCard('col3Bottom')}
             </div>
           </div>
         </div>

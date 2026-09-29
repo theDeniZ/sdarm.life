@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { defaultGridConfig, parseGridConfig } from '@sdarm/types';
-import type { GridBlockConfig, GridBlockId, GridScrim, GridTextColor, HomeGridConfig } from '@sdarm/types';
+import { GRID_SLOT_BLOCK_IDS, GRID_SLOT_IDS, defaultGridConfig, parseGridConfig, slotOf } from '@sdarm/types';
+import type { GridBlockConfig, GridBlockId, GridScrim, GridSlotId, GridTextColor, HomeGridConfig } from '@sdarm/types';
 import ImagePicker from '../images/ImagePicker';
 import { measureLuminance } from './luminance';
 import { fetchGridConfigRaw, saveGridConfig } from './repository';
@@ -10,34 +10,49 @@ import { fetchGridConfigRaw, saveGridConfig } from './repository';
 const WEB_URL = process.env.NEXT_PUBLIC_WEB_URL ?? 'https://sdarm.life';
 
 /** What each block is, and what an editor cannot change about it. */
-const BLOCKS: { id: GridBlockId; name: string; slot: string; note: string }[] = [
+const BLOCKS: { id: GridBlockId; name: string; note: string }[] = [
   {
     id: 'plan',
     name: 'Reading plan',
-    slot: 'Column 1 · 350px',
-    note: 'The only card that sends visitors off-site. Ships with its own photo. Takes the whole column (724px) when the sunset card is hidden.',
+    note: 'Always the whole of column 1 (724px). Ships with its own photo and leads to the reading plan on YouVersion.',
   },
   {
     id: 'sunset',
     name: 'Sabbath · Sunset',
-    slot: 'Column 1 · 350px',
-    note: 'The sunset clock: time, countdown and location search for each visitor, none of which can be typed here. It is not a link and has no button or image — only whether it shows and its label.',
+    note: 'The sunset clock: time, countdown, location search and a tooltip on each ring, none of which can be typed here. It has no label, link, button or image — only whether it shows. It works in every slot; in the 280px slot it turns sideways, and on phones that slot has no room for the location search.',
+  },
+  {
+    id: 'bible',
+    name: 'Bible',
+    note: 'Content is loaded automatically: the Psalm of the day (the same for everyone, all 150 in turn) and how many translations the reader offers. The card opens the reader at that Psalm. Label, button text, link and image can be set here; the headline cannot.',
+  },
+  {
+    id: 'sbl',
+    name: 'Sabbath School lesson',
+    note: "Content is loaded automatically: this week's lesson — number, title, dates and the quarter — from the lesson site. The card opens the lesson site. Label, button text, link and image can be set here; the headline cannot.",
+  },
+  {
+    id: 'book',
+    name: 'Songbook',
+    note: "Content is loaded automatically: the song of the week from the songbook in the page's language, with the number of songs and songbooks. The card opens that song. Label, button text, link and image can be set here; the headline cannot. Over an image the text always gets at least a medium darkening.",
   },
   {
     id: 'verse',
     name: 'Verse of the hour',
-    slot: 'Column 2 · 420px',
     note: 'Verse and reference rotate hourly and cannot be typed here. Clicking always opens the share dialog, so it has no link of its own.',
   },
-  { id: 'invite', name: 'Invitation', slot: 'Column 2 · 280px', note: 'Leads to Kontakt by default.' },
-  {
-    id: 'book',
-    name: 'Latest book',
-    slot: 'Column 3 · 350px',
-    note: 'Title comes from the treasures API unless you override it here.',
-  },
-  { id: 'faith', name: 'Points of faith', slot: 'Column 3 · 350px', note: 'Leads to the Glauben page by default.' },
+  { id: 'invite', name: 'Invitation', note: 'Leads to Kontakt by default.' },
+  { id: 'faith', name: 'Points of faith', note: 'Leads to the Glauben page by default.' },
 ];
+
+const BLOCK_NAME = Object.fromEntries(BLOCKS.map((b) => [b.id, b.name])) as Record<GridBlockId, string>;
+
+const SLOT_LABEL: Record<GridSlotId, string> = {
+  col2Top: 'Column 2 · top · 420px',
+  col2Bottom: 'Column 2 · bottom · 280px',
+  col3Top: 'Column 3 · top · 350px',
+  col3Bottom: 'Column 3 · bottom · 350px',
+};
 
 const POSITIONS = [
   ['0% 0%', '50% 0%', '100% 0%'],
@@ -115,6 +130,22 @@ export default function HomeGridEditor() {
     );
   }, []);
 
+  /**
+   * Put a block into a slot. A block already in another slot swaps places with
+   * the one it replaces, so no block is ever in two slots; one that was off the
+   * page is switched on, since placing it is how an editor asks for it.
+   */
+  const assignSlot = useCallback((slot: GridSlotId, id: GridBlockId) => {
+    setConfig((c) => {
+      if (!c) return c;
+      const slots = { ...c.slots };
+      const from = GRID_SLOT_IDS.find((s) => slots[s] === id);
+      if (from) slots[from] = slots[slot];
+      slots[slot] = id;
+      return { ...c, slots, blocks: { ...c.blocks, [id]: { ...c.blocks[id], visible: true } } };
+    });
+  }, []);
+
   async function apply() {
     if (!config) return;
     setStatus({ kind: 'saving' });
@@ -142,15 +173,40 @@ export default function HomeGridEditor() {
           for that language only.
         </p>
 
-        {BLOCKS.map((meta) => {
+        <section className="card grid-editor__layout">
+          <h3 className="grid-editor__sub">Layout</h3>
+          <p className="muted grid-editor__hint">
+            The reading plan fills column 1. Pick the block for each of the four smaller slots — choosing one that sits
+            in another slot swaps the two. Blocks left out stay configured below and can be brought back any time.
+          </p>
+          {GRID_SLOT_IDS.map((slot) => (
+            <Select
+              key={slot}
+              label={SLOT_LABEL[slot]}
+              value={config.slots[slot] ?? ''}
+              options={[
+                ...(config.slots[slot] ? [] : [{ value: '', label: 'Empty' }]),
+                ...GRID_SLOT_BLOCK_IDS.map((id) => ({ value: id, label: BLOCK_NAME[id] })),
+              ]}
+              onChange={(v) => v && assignSlot(slot, v as GridBlockId)}
+            />
+          ))}
+        </section>
+
+        {orderedBlocks(config).map((meta) => {
           const b = config.blocks[meta.id];
           const isOpen = open === meta.id;
+          const slot = meta.id === 'plan' ? null : slotOf(config, meta.id);
+          const onPage = meta.id === 'plan' || slot !== null;
+          const slotText = meta.id === 'plan' ? 'Column 1 · 724px' : slot ? SLOT_LABEL[slot] : 'Not on the page';
           // The verse opens the share dialog and the sunset card is the clock:
           // neither is a link, and neither has a button.
           const isClock = meta.id === 'sunset';
+          // Headlines of these come from live data, not from the editor.
+          const isLive = meta.id === 'bible' || meta.id === 'sbl' || meta.id === 'book';
           const linkable = meta.id !== 'verse' && !isClock;
           return (
-            <section key={meta.id} className={`card grid-editor__block${b.visible ? '' : ' is-hidden'}`}>
+            <section key={meta.id} className={`card grid-editor__block${b.visible && onPage ? '' : ' is-hidden'}`}>
               <button
                 type="button"
                 className="grid-editor__block-head"
@@ -159,7 +215,7 @@ export default function HomeGridEditor() {
               >
                 <span>
                   <strong>{meta.name}</strong>
-                  <span className="muted grid-editor__slot">{meta.slot}</span>
+                  <span className="muted grid-editor__slot">{slotText}</span>
                 </span>
                 <span className="muted">{isOpen ? '−' : '+'}</span>
               </button>
@@ -167,13 +223,21 @@ export default function HomeGridEditor() {
               {isOpen && (
                 <div className="grid-editor__block-body">
                   <p className="muted grid-editor__hint">{meta.note}</p>
+                  {!onPage && (
+                    <p className="muted grid-editor__hint">
+                      This block is not on the page. Choose it for one of the slots under Layout to show it; its
+                      settings below are kept meanwhile.
+                    </p>
+                  )}
 
                   <div className="grid-editor__row">
-                    <Toggle
-                      label="Show this block"
-                      checked={b.visible}
-                      onChange={(v) => patchBlock(meta.id, { visible: v })}
-                    />
+                    {onPage && (
+                      <Toggle
+                        label="Show this block"
+                        checked={b.visible}
+                        onChange={(v) => patchBlock(meta.id, { visible: v })}
+                      />
+                    )}
                     {linkable && (
                       <Toggle
                         label="Block is clickable"
@@ -199,22 +263,24 @@ export default function HomeGridEditor() {
                     </>
                   )}
 
-                  <div className="grid-editor__row">
-                    <Toggle
-                      label="Show label"
-                      checked={b.showLabel}
-                      onChange={(v) => patchBlock(meta.id, { showLabel: v })}
-                    />
-                    {linkable && (
+                  {!isClock && (
+                    <div className="grid-editor__row">
                       <Toggle
-                        label="Show button"
-                        checked={b.showButton}
-                        onChange={(v) => patchBlock(meta.id, { showButton: v })}
+                        label="Show label"
+                        checked={b.showLabel}
+                        onChange={(v) => patchBlock(meta.id, { showLabel: v })}
                       />
-                    )}
-                  </div>
+                      {linkable && (
+                        <Toggle
+                          label="Show button"
+                          checked={b.showButton}
+                          onChange={(v) => patchBlock(meta.id, { showButton: v })}
+                        />
+                      )}
+                    </div>
+                  )}
 
-                  {meta.id !== 'verse' && (
+                  {meta.id !== 'verse' && !isClock && (
                     <>
                       {b.showLabel && (
                         <Field
@@ -224,7 +290,7 @@ export default function HomeGridEditor() {
                           onChange={(v) => patchText(meta.id, 'label', v)}
                         />
                       )}
-                      {!isClock && (
+                      {!isLive && (
                         <Field
                           label={`Headline (${lang.toUpperCase()})`}
                           value={b.text[lang].title}
@@ -233,7 +299,7 @@ export default function HomeGridEditor() {
                           onChange={(v) => patchText(meta.id, 'title', v)}
                         />
                       )}
-                      {!isClock && b.showButton && (
+                      {b.showButton && (
                         <Field
                           label={`Button text (${lang.toUpperCase()})`}
                           value={b.text[lang].button}
@@ -303,6 +369,16 @@ export default function HomeGridEditor() {
       </div>
     </div>
   );
+}
+
+/**
+ * Blocks in the order an editor meets them on the page: the reading plan, the
+ * four slots top to bottom, then whatever is not placed.
+ */
+function orderedBlocks(config: HomeGridConfig) {
+  const placed = GRID_SLOT_IDS.map((slot) => config.slots[slot]).filter((id): id is GridBlockId => !!id);
+  const rank = (id: GridBlockId) => (id === 'plan' ? -1 : placed.includes(id) ? placed.indexOf(id) : placed.length);
+  return [...BLOCKS].sort((a, b) => rank(a.id) - rank(b.id));
 }
 
 /**

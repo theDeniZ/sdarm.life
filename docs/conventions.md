@@ -83,13 +83,14 @@ Font `url()`s in these files are relative paths into `node_modules`, never `~@fo
 | `TREASURES_URL` | `http://localhost:3002`               | `https://treasures.sdarm.life`   |
 | `SONGBOOK_URL`  | `http://localhost:3003`               | `https://songs.sdarm.life`       |
 | `EVENTS_URL`    | `http://localhost:3004`               | `https://events.sdarm.life`      |
+| `SBL_URL`       | `http://localhost:3005`               | `https://sbl.sdarm.life`         |
 | `R2_TRANSFORMS` | _(not set)_                           | _(not set — enabled by default)_ |
 
 Server-only (no `NEXT_PUBLIC_` prefix) apart from `NEXT_PUBLIC_R2_URL`. Client components cannot read these — pass as props from the server component.
 
 `NEXT_PUBLIC_R2_URL` exists because `StatsGrid` is a client component and resolves the grid card photos through `r2url()`. With only the server-only `R2_URL`, the server rendered `http://localhost:8787/...` while the browser fell back to `https://images.sdarm.life` — a hydration mismatch on every card image, and in local dev the client asked the production host for a file that only exists in `.wrangler`. Production does not need it set: the fallback is already the production host. Same reason `apps/treasures` carries it.
 
-`WEB_URL`, `TREASURES_URL`, `SONGBOOK_URL`, and `EVENTS_URL` are used to build cross-app links (e.g. NewsSection cards linking to other apps). Never hardcode these URLs — always read from `lib/api.ts`.
+`WEB_URL`, `TREASURES_URL`, `SONGBOOK_URL`, `EVENTS_URL` and `SBL_URL` are used to build cross-app links (e.g. the home grid's Bible and lesson cards). `SBL_URL` is also read by the shared `ConnectedNavbar`/`ConnectedFooter` for the SBL link, and is set in `wrangler.jsonc` for production and staging. Never hardcode these URLs — always read from `lib/api.ts`.
 
 `R2_TRANSFORMS` is an emergency kill switch. Set to `false` to disable Cloudflare Image Transformations and serve raw R2 URLs. Leave unset for normal operation.
 

@@ -132,6 +132,13 @@ must therefore cover:**
 | Bible editions, and any quarter not in its own mirror | `app.sdarm.org` | Reader IP to a third party on page load |
 | Quarter list + unpublished quarters — whenever a quarter is missing from our mirror and `app.sdarm.org`, unless the reader has turned the *Alpha-Kanal* off (on by default) | `sbl.thedeniz.dev` | Reader IP to a third party; disclosed in the page's § 4 |
 
+**The home page's lesson card fetches the same quarters server-side**
+(`apps/web/app/lib/home-live.ts`): our mirror on `SBL_URL`, then `app.sdarm.org`,
+then `sbl.thedeniz.dev`, in the page's own order. Those requests come from the
+web worker, not from the reader's browser — they carry no visitor IP or cookie,
+so they are no transfer of the visitor's data and need no entry in the home
+page's policy. Keep it that way: the card must never fetch these from the client.
+
 A subdomain of `sdarm.life` reads as our service to a German visitor, so if that
 page's own policy does not cover the call, the exposure lands here. **Re-check it
 whenever `index.html` gains a new external request.**

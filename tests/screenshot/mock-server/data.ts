@@ -224,3 +224,20 @@ export const mockPostList = [
     deletedAt: null,
   },
 ];
+
+/**
+ * Sabbath School lesson quarters as the lesson site serves them
+ * (`{SBL_URL}/data/{lang}/{lang}-{year}-{quarter}.json`), cut down to the
+ * fields the web home grid reads. `web / home` pins ?screenshotDate=2026-09-16,
+ * which falls in lesson 12's week (13–19 Sept).
+ */
+export const mockSblQuarters: Record<string, unknown> = {
+  'de/de-2026-3.json': {
+    title: 'Mit Jesus wandeln',
+    lessons: [{ no: '12', date: '20260919', title: 'Die Gefahr des Zweifelns', dailyLessons: [{ date: '20260913' }] }],
+  },
+  'en/en-2026-3.json': {
+    title: 'Walking With Jesus',
+    lessons: [{ no: '12', date: '20260919', title: 'What to Do With Doubt', dailyLessons: [{ date: '20260913' }] }],
+  },
+};

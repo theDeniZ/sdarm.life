@@ -3,8 +3,7 @@ import { setRequestLocale, getTranslations } from 'next-intl/server';
 import { ConnectedNavbar, ConnectedFooter, siteHomeMetadata } from '@sdarm/ui';
 import HeroWelcome from '../components/HeroWelcome';
 import StatsGrid from '../components/StatsGrid';
-import ScriptureVerseSection from '../components/ScriptureVerseSection';
-import { parseScreenshotVerse } from '../lib/verses';
+import { fetchHomeLive } from '../lib/home-live';
 import {
   API,
   fetchTreasures,
@@ -14,6 +13,7 @@ import {
   TREASURES_URL,
   SONGBOOK_URL,
   EVENTS_URL,
+  SBL_URL,
 } from '../lib/api';
 import { parseGridConfig } from '@sdarm/types';
 import type { NewsData } from '../lib/api';
@@ -42,16 +42,19 @@ export default async function HomePage({
   searchParams,
 }: {
   params: Promise<{ locale: string }>;
-  searchParams: Promise<{ screenshotVerse?: string | string[] }>;
+  searchParams: Promise<{ screenshotDate?: string | string[] }>;
 }) {
   const { locale } = await params;
-  const verseOverride = parseScreenshotVerse((await searchParams).screenshotVerse);
+  // ?screenshotDate=YYYY-MM-DD pins "today" for the live cards (lesson of the
+  // week, Psalm of the day, song of the week) in screenshot tests.
+  const dateParam = (await searchParams).screenshotDate;
   setRequestLocale(locale);
 
-  const [bookRaw, songbooksRaw, config] = await Promise.all([
+  const [bookRaw, songbooksRaw, config, live] = await Promise.all([
     fetchTreasures('type=book&limit=1'),
     fetchSongbooks(),
     fetchConfig(),
+    fetchHomeLive(locale, Array.isArray(dateParam) ? dateParam[0] : dateParam),
   ]);
 
   // A missing or malformed config falls back to the built-in defaults rather
@@ -68,6 +71,8 @@ export default async function HomePage({
     eventsUrl: `${EVENTS_URL}/${locale}`,
     aboutUrl: `/${locale}/about`,
     youVersionUrl: 'https://www.bible.com/reading-plans',
+    bibleUrl: `${TREASURES_URL}/${locale}/bible`,
+    sblUrl: SBL_URL,
   };
 
   return (
@@ -75,8 +80,7 @@ export default async function HomePage({
       <ConnectedNavbar locale={locale} />
       <main id="main-content">
         <HeroWelcome locale={locale} />
-        <StatsGrid newsData={newsData} grid={grid} apiUrl={API} />
-        <ScriptureVerseSection href={`${TREASURES_URL}/${locale}/bible`} locale={locale} hourOfWeek={verseOverride} />
+        <StatsGrid newsData={newsData} grid={grid} live={live} apiUrl={API} />
       </main>
       <ConnectedFooter locale={locale} />
     </>

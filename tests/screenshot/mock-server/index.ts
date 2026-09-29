@@ -10,6 +10,7 @@ import {
   mockBibleTranslation,
   mockBibleBooks,
   mockBibleChapter,
+  mockSblQuarters,
 } from './data';
 
 const PORT = 8788;
@@ -122,6 +123,13 @@ function handleRequest(req: http.IncomingMessage, res: http.ServerResponse) {
   // /api/v1/geocode
   if (url.startsWith('/api/v1/geocode')) {
     sendJSON(res, 200, []);
+    return;
+  }
+
+  // The lesson site's quarter mirror (SBL_URL points here in the web app).
+  const sbl = url.match(/^\/sbl\/data\/(.+)$/);
+  if (sbl && mockSblQuarters[sbl[1]]) {
+    sendJSON(res, 200, mockSblQuarters[sbl[1]] as JsonValue);
     return;
   }
 

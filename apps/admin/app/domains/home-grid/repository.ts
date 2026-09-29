@@ -4,8 +4,9 @@ import type { ConfigDto, HomeGridConfig } from '@sdarm/types';
 /**
  * The grid lives in the same KV config document as every other setting, under
  * the single key `home_grid`, as a JSON string. It is the one key that holds a
- * document rather than a scalar — five blocks with a dozen settings each in two
- * languages is about a hundred values, well past what flat keys can carry.
+ * document rather than a scalar — eight blocks with a dozen settings each in two
+ * languages plus the slot map is well over a hundred values, far past what flat
+ * keys can carry.
  */
 export const HOME_GRID_KEY = 'home_grid';
 
