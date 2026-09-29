@@ -5,6 +5,7 @@ Pure-logic modules (no DOM, no Workers runtime) get plain [Vitest](https://vites
 | Package | Config | Example |
 |---|---|---|
 | `@sdarm/songbook` | `apps/songbook/vitest.config.mts` (default node environment) | `app/lib/chords.test.ts` |
+| `@sdarm/treasures` | `apps/treasures/vitest.config.mts` (default node environment) | `app/lib/projector.test.ts` |
 | `@sdarm/types` | `packages/types/vitest.config.mts` (default node environment) | `src/psalms.test.ts` |
 | `@sdarm/api` | `apps/api/vitest.config.mts` (`@cloudflare/vitest-pool-workers` — needed for Worker-specific APIs) | `test/index.spec.ts` |
 
@@ -44,7 +45,7 @@ subscriber digest's scheduled path against real tables, with `fetch` stubbed so
 nothing can reach the email provider. Specs that do not call it still see an
 empty database.
 
-⚠️ **`vitest` is deliberately split across the monorepo: 5.x everywhere except `apps/api`, which stays on `~4.1.11`.** `@cloudflare/vitest-pool-workers@0.22.0` peer-requires `vitest@^4.1.0` (likewise `@vitest/runner` and `@vitest/snapshot`), so moving `apps/api` to 5 leaves an unmet peer on every install. The plain-node suites in `@sdarm/types` and `@sdarm/songbook` have no such constraint and run fine on 5. The split is not an oversight — do not "tidy" it by aligning the versions; `apps/api` moves only together with its pool.
+⚠️ **`vitest` is deliberately split across the monorepo: 5.x everywhere except `apps/api`, which stays on `~4.1.11`.** `@cloudflare/vitest-pool-workers@0.22.0` peer-requires `vitest@^4.1.0` (likewise `@vitest/runner` and `@vitest/snapshot`), so moving `apps/api` to 5 leaves an unmet peer on every install. The plain-node suites in `@sdarm/types`, `@sdarm/songbook` and `@sdarm/treasures` have no such constraint and run fine on 5. The split is not an oversight — do not "tidy" it by aligning the versions; `apps/api` moves only together with its pool.
 
 ⚠️ **Every `test` script must be `vitest run`, never bare `vitest`.** Bare
 `vitest` is watch mode: it never exits, so a CI runner sits on it until the job

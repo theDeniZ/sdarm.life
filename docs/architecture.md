@@ -575,7 +575,8 @@ apps/treasures/app/styles/
   book-detail.css      — book page without an EPUB
   book-request.css     — book-request hero button and modal
   bible.css            — Bible reader: landing, index, picker, chapter, parallel view
-  bible-presenter.css  — Bible projector and presenter dashboard
+  bible-projector.css  — Bible projector slide stage (display, mirror, thumbnail), display window
+  bible-presenter.css  — Bible presenter console
   bible-license.css    — copyright notice, license register
   reduced-motion.css   — prefers-reduced-motion, global, last of the site-wide files
   reader/              — EPUB reader; index.css is imported by books/[id]/layout.tsx only

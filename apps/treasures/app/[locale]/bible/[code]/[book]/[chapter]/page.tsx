@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { setRequestLocale } from 'next-intl/server';
 import { API } from '../../../../../lib/api';
 import {
+  extraTranslationCodes,
   fetchBooks,
   fetchChapter,
   fetchParallelChapter,
@@ -59,37 +60,38 @@ export default async function ChapterPage({
   searchParams,
 }: {
   params: Promise<{ locale: string; code: string; book: string; chapter: string }>;
-  searchParams: Promise<{ compare?: string; projector?: string }>;
+  searchParams: Promise<{ compare?: string; with?: string; projector?: string }>;
 }) {
   const { locale, code, book, chapter } = await params;
-  const { compare, projector } = await searchParams;
+  const query = await searchParams;
   setRequestLocale(locale);
 
   const chapterNum = Number(chapter);
   if (!Number.isInteger(chapterNum) || chapterNum < 1) notFound();
 
-  if (projector === '1') {
-    if (compare && compare !== code) {
-      const [ch, parallel] = await Promise.all([
-        fetchChapter(code, book, chapterNum),
-        fetchParallelChapter(code, compare, book, chapterNum),
-      ]);
-      if (!ch) notFound();
-      return <BibleProjectorOnly chapter={ch} parallel={parallel} />;
-    }
-    const ch = await fetchChapter(code, book, chapterNum);
-    if (!ch) notFound();
-    return <BibleProjectorOnly chapter={ch} />;
+  // `?with=a,b,c` names the extra translations in screen order; `?compare=b`
+  // is the older single-translation form and keeps working.
+  const extras = extraTranslationCodes(code, query);
+
+  if (query.projector === '1') {
+    // The display window draws only what the console sends it; the console
+    // fetches that text with `use=projector`, so the API refuses a translation
+    // whose license keeps it off a shared screen. This check covers the window
+    // itself — a bookmarked or hand-typed URL — before anything is drawn.
+    const allTranslations = await fetchTranslations();
+    const named = [code, ...extras].map((c) => findTranslation(allTranslations, c));
+    if (named.some((tr) => !tr)) notFound();
+    return <BibleProjectorOnly allowed={named.every((tr) => tr!.license.allowProjector)} />;
   }
 
-  if (compare) {
+  if (extras.length > 0) {
     const [allTranslations, books, parallel] = await Promise.all([
       fetchTranslations(),
       fetchBooks(code),
-      fetchParallelChapter(code, compare, book, chapterNum),
+      fetchParallelChapter([code, extras[0]], book, chapterNum),
     ]);
     const translationA = findTranslation(allTranslations, code);
-    const translationB = findTranslation(allTranslations, compare);
+    const translationB = findTranslation(allTranslations, extras[0]);
     if (!translationA || !translationB || books.length === 0) notFound();
     const bookMeta = books.find((b) => b.code === book);
     if (!bookMeta || chapterNum > bookMeta.chapterCount) notFound();
@@ -103,6 +105,8 @@ export default async function ChapterPage({
         translations={allTranslations}
         books={books}
         parallel={parallel}
+        apiUrl={API}
+        presenterCodes={[code, ...extras].filter((c) => findTranslation(allTranslations, c))}
       />
     );
   }

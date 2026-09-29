@@ -47,6 +47,17 @@ describe('OpenAPI document', () => {
 		}
 	});
 
+	it('documents /bible/parallel for 2–4 translations and the projector gate (issue #14)', async () => {
+		const res = await SELF.fetch('https://example.com/api/openapi.json');
+		const doc = (await res.json()) as {
+			paths: Record<string, { get?: { parameters?: { name: string }[]; responses?: Record<string, unknown> } }>;
+		};
+		const get = doc.paths['/api/v1/bible/parallel']?.get;
+		const names = (get?.parameters ?? []).map((p) => p.name);
+		expect(names).toEqual(expect.arrayContaining(['t', 'a', 'b', 'book', 'chapter', 'use']));
+		expect(Object.keys(get?.responses ?? {})).toEqual(expect.arrayContaining(['200', '400', '403', '404']));
+	});
+
 	it('registers the admin top-songs route (issue #197)', async () => {
 		const res = await SELF.fetch('https://example.com/api/openapi.json');
 		const doc = (await res.json()) as { paths: Record<string, unknown> };
@@ -173,4 +184,19 @@ describe('routing', () => {
 		const res = await SELF.fetch('https://example.com/nope');
 		expect(res.status).toBe(404);
 	});
+});
+
+// Rejected before any translation is resolved, so these need no Bible data.
+describe('Bible parallel validation', () => {
+	for (const [label, query] of [
+		['a single translation', 't=kjv'],
+		['five translations', 't=a,b,c,d,e'],
+		['the same translation twice', 't=kjv,kjv'],
+		['a legacy pair with one side missing', 'a=kjv'],
+	] as const) {
+		it(`answers 400 for ${label}`, async () => {
+			const res = await SELF.fetch(`https://example.com/api/v1/bible/parallel?${query}&book=JHN&chapter=3`);
+			expect(res.status).toBe(400);
+		});
+	}
 });

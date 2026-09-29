@@ -14,6 +14,7 @@ import { cached } from '../middleware/cache';
 import { getCacheGeneration } from '../services/bible/cache';
 import * as catalog from '../services/bible/catalog';
 import * as local from '../services/bible/local';
+import { parseParallelCodes, projectorRefusals } from '../services/bible/parallel';
 
 /**
  * Public Bible routes. Two sources sit behind this one contract — verses we
@@ -40,6 +41,11 @@ const ONE_DAY = 86400;
 // Keyed by the cache generation, so a takedown or a license edit strands every
 // stored chapter at once instead of leaving it served for up to a day.
 const textCache = cached(ONE_DAY, { version: (c) => getCacheGeneration(c.env) });
+
+const ProjectorUseQuery = z.enum(['projector']).optional().openapi({
+	description:
+		'Set to `projector` when the text is fetched for a shared screen. Every translation whose license has `allowProjector: false` is then refused with 403 — the strictest translation wins.',
+});
 
 router.openapi(
 	createRoute({
@@ -129,9 +135,14 @@ router.openapi(
 		middleware: [textCache],
 		request: {
 			params: z.object({ code: z.string(), bookCode: z.string(), n: z.coerce.number().int().positive() }),
+			query: z.object({ use: ProjectorUseQuery }),
 		},
 		responses: {
 			200: { content: { 'application/json': { schema: BibleChapterSchema } }, description: 'Chapter with all verses' },
+			403: {
+				content: { 'application/json': { schema: ErrorSchema } },
+				description: 'use=projector and the translation is not licensed for a shared screen',
+			},
 			404: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Not found' },
 		},
 	}),
@@ -139,6 +150,9 @@ router.openapi(
 		const { code, bookCode, n } = c.req.valid('param');
 		const t = await catalog.resolveTranslation(c.env, code);
 		if (!t) return c.json(NOT_FOUND, 404);
+		if (c.req.valid('query').use === 'projector' && projectorRefusals([t]).length > 0) {
+			return c.json({ error: `Not licensed for a shared screen: ${t.name}` }, 403);
+		}
 		const chapter = await catalog.getChapter(c.env, t, bookCode, n);
 		if (!chapter) return c.json(NOT_FOUND, 404);
 		return c.json(chapter, 200);
@@ -153,29 +167,67 @@ router.openapi(
 		middleware: [textCache],
 		request: {
 			query: z.object({
-				a: z.string().openapi({ description: 'Translation code A', example: 'delut' }),
-				b: z.string().openapi({ description: 'Translation code B', example: 'kjv' }),
-				book: z.string().openapi({ description: 'USFM book code', example: 'JHN' }),
-				chapter: z.coerce.number().int().positive().openapi({ example: 3 }),
+				t: z
+					.string()
+					.optional()
+					.openapi({ description: '2–4 comma-separated translation codes, primary first', example: 'synodal,schlachter1905,kjv' }),
+				a: z.string().optional().openapi({ description: 'Legacy form: translation code A (use t instead)', example: 'delut' }),
+				b: z.string().optional().openapi({ description: 'Legacy form: translation code B (use t instead)', example: 'kjv' }),
+				book: z.string().openapi({ description: 'USFM book code', example: 'EZK' }),
+				chapter: z.coerce.number().int().positive().openapi({ description: "Chapter in the first translation's numbering", example: 36 }),
+				use: ProjectorUseQuery,
 			}),
 		},
 		responses: {
 			200: {
 				content: { 'application/json': { schema: ParallelChapterSchema } },
-				description: 'Two translations aligned by verse number (Psalms remapped LXX↔Hebrew)',
+				description: '2–4 translations aligned by verse number (Psalms remapped LXX↔Hebrew relative to the first)',
 			},
-			400: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Same translation on both sides' },
+			400: {
+				content: { 'application/json': { schema: ErrorSchema } },
+				description: 'Fewer than 2 or more than 4 translations, or the same one twice',
+			},
+			403: {
+				content: { 'application/json': { schema: ErrorSchema } },
+				description: 'use=projector and a translation is not licensed for a shared screen',
+			},
 			404: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Translation, book, or chapter not found' },
 		},
 	}),
 	async (c) => {
-		const { a, b, book, chapter } = c.req.valid('query');
-		if (a === b) return c.json({ error: 'Pick two different translations' }, 400);
-		const [trA, trB] = await Promise.all([catalog.resolveTranslation(c.env, a), catalog.resolveTranslation(c.env, b)]);
-		if (!trA || !trB) return c.json(NOT_FOUND, 404);
-		const result = await catalog.getParallelChapter(c.env, trA, trB, book, chapter);
+		const { t, a, b, book, chapter, use } = c.req.valid('query');
+		const parsed = parseParallelCodes({ t, a, b });
+		if (!parsed.ok) return c.json({ error: parsed.error }, 400);
+
+		const translations = await Promise.all(parsed.codes.map((code) => catalog.resolveTranslation(c.env, code)));
+		if (translations.some((tr) => !tr)) return c.json(NOT_FOUND, 404);
+		const resolved = translations as catalog.Translation[];
+		if (new Set(resolved.map((tr) => tr.id)).size !== resolved.length) {
+			return c.json({ error: 'Pick different translations' }, 400);
+		}
+
+		if (use === 'projector') {
+			const refused = projectorRefusals(resolved);
+			if (refused.length > 0) {
+				return c.json({ error: `Not licensed for a shared screen: ${refused.join(', ')}` }, 403);
+			}
+		}
+
+		const result = await catalog.getParallelChapter(c.env, resolved, book, chapter);
 		if (!result) return c.json(NOT_FOUND, 404);
-		return c.json(result, 200);
+		if (!parsed.legacy) return c.json(result, 200);
+
+		// The original two-translation shape, for links and clients that predate `t`.
+		const [sideA, sideB] = result.translations;
+		return c.json(
+			{
+				...result,
+				a: sideA,
+				b: sideB,
+				verses: result.verses.map((v) => ({ ...v, a: v.texts[0], b: v.texts[1] })),
+			},
+			200,
+		);
 	},
 );
 
