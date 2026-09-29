@@ -2,8 +2,10 @@
   "common": {
     "nav": {
       "songs": "Lieder",
+      "bible": "Bibel",
       "events": "Events",
       "treasures": "Schätze",
+      "sbl": "SBL",
       "about": "Glauben",
       "contact": "Kontakt",
       "imprint": "Impressum",
