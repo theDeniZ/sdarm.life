@@ -5,7 +5,7 @@
 /* ═══ STATS BENTO GRID ═══
    Three equal columns; each column is a flex stack sharing the same gap, so
    the column bottoms line up. Heights do the arithmetic:
-     col 1  724
+     col 1  350 + 24 + 350 = 724   (reading plan + sunset; 724 alone)
      col 2  420 + 24 + 280 = 724
      col 3  350 + 24 + 350 = 724
    Palette is driven by the --stats-* custom properties below: the base values
@@ -353,6 +353,37 @@
 }
 
 
+/* ── Sunset card ──
+   The clock from @sdarm/ui (styles/sunset-clock.css) on a plain card: its
+   palette is mapped onto the section's, so it follows the theme like every
+   other card. It shares column 1 with the reading plan, which drops from the
+   full 724 to 350 beside it (.stats__col--split, set only when both show). The
+   card is not a link, so it keeps its resting border under the cursor; and it
+   must not clip, or the location suggestions are cut off. */
+.stats__col--split .stats__card--tall {
+  --stats-card-h: 350px;
+}
+.stats__card--sunset {
+  --stats-card-h: 350px;
+  height: var(--stats-card-h);
+  padding-top: 32px;
+  padding-bottom: 32px;
+}
+.stats__card--sunset:hover {
+  border-color: var(--stats-line);
+}
+.stats__card--sunset .sunset-clock {
+  --sunset-size: 140px;
+  --sunset-text: var(--stats-text);
+  --sunset-muted: var(--stats-muted);
+  --sunset-accent: var(--stats-accent);
+  --sunset-surface: var(--stats-card-bg);
+  --sunset-line: var(--stats-line-hover);
+  gap: 14px;
+  /* Centred in the space under the label. */
+  margin: auto 0;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .stats__card,
   .stats__btn,
@@ -372,6 +403,11 @@
   }
   .stats__col:nth-child(3) {
     grid-column: auto;
+  }
+  /* Reading plan and sunset side by side above the two columns. */
+  .stats__col--split {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
   }
   /* Banner needs to read as solid as the cards below it. Sets the variable,
      not min-height — a stray min-height outranks the fixed height whenever it
@@ -412,6 +448,12 @@
   .stats__col:nth-child(3) {
     grid-column: span 1;
   }
+  /* Two half-width cards would leave the clock ~130px to live in, so the
+     reading plan and the sunset stack again, and the clock turns sideways:
+     rings left, city, countdown and search right. */
+  .stats__col--split {
+    display: flex;
+  }
 
   /* 240 + 12 + 192 = 444 = 216 + 12 + 216. The short card is 192 rather than
      the 180 it started at: at 180 column 2 came to 432 against column 3's 444,
@@ -436,6 +478,9 @@
   .stats__card--mid {
     --stats-card-h: 216px;
   }
+  .stats__card--sunset {
+    --stats-card-h: 216px;
+  }
   .stats__card--tall,
   .stats__card--media,
   .stats__card--short,
@@ -450,6 +495,19 @@
 
   .stats__card-label {
     font-size: 11px;
+  }
+  .stats__card--sunset .sunset-clock {
+    --sunset-size: 120px;
+    flex-direction: row;
+    gap: 20px;
+    text-align: left;
+  }
+  .stats__card--sunset .sunset-text {
+    flex: 1;
+    align-items: flex-start;
+  }
+  .stats__card--sunset .sunset-location-wrap {
+    width: 100%;
   }
   .stats__card-sub {
     font-size: 13px;
@@ -487,4 +545,9 @@
   --stats-mark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44' preserveAspectRatio='none'><path fill='rgb(118,170,108)' fill-opacity='0.42' d='M3,16 C30,10 70,12.4 110,9.2 C140,6.8 172,8.6 196,10.5 C198.5,14.4 199,22.6 197,27.8 C170,32.4 130,29.4 92,31.2 C64,32.4 28,31 5,28.4 C1.6,25 1,20.2 3,16 Z'/></svg>");
   --stats-line: #e8e4dc;
   --stats-line-hover: #cdc7bb;
+}
+/* The outer ring pales the umbra toward white; at the dark theme's 55% it
+   fades to ~2.6:1 on the white card, so it keeps more of the accent here. */
+[data-theme='light'] .stats__card--sunset .sunset-clock {
+  --sunset-outer-mix: 62%;
 }

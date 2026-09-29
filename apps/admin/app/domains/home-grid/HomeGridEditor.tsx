@@ -14,8 +14,14 @@ const BLOCKS: { id: GridBlockId; name: string; slot: string; note: string }[] = 
   {
     id: 'plan',
     name: 'Reading plan',
-    slot: 'Column 1 · 724px',
-    note: 'The only card that sends visitors off-site. Ships with its own photo.',
+    slot: 'Column 1 · 350px',
+    note: 'The only card that sends visitors off-site. Ships with its own photo. Takes the whole column (724px) when the sunset card is hidden.',
+  },
+  {
+    id: 'sunset',
+    name: 'Sabbath · Sunset',
+    slot: 'Column 1 · 350px',
+    note: 'The sunset clock: time, countdown and location search for each visitor, none of which can be typed here. It is not a link and has no button or image — only whether it shows and its label.',
   },
   {
     id: 'verse',
@@ -139,6 +145,10 @@ export default function HomeGridEditor() {
         {BLOCKS.map((meta) => {
           const b = config.blocks[meta.id];
           const isOpen = open === meta.id;
+          // The verse opens the share dialog and the sunset card is the clock:
+          // neither is a link, and neither has a button.
+          const isClock = meta.id === 'sunset';
+          const linkable = meta.id !== 'verse' && !isClock;
           return (
             <section key={meta.id} className={`card grid-editor__block${b.visible ? '' : ' is-hidden'}`}>
               <button
@@ -164,7 +174,7 @@ export default function HomeGridEditor() {
                       checked={b.visible}
                       onChange={(v) => patchBlock(meta.id, { visible: v })}
                     />
-                    {meta.id !== 'verse' && (
+                    {linkable && (
                       <Toggle
                         label="Block is clickable"
                         checked={b.clickable}
@@ -173,7 +183,7 @@ export default function HomeGridEditor() {
                     )}
                   </div>
 
-                  {meta.id !== 'verse' && b.clickable && (
+                  {linkable && b.clickable && (
                     <>
                       <Field
                         label="Link"
@@ -195,7 +205,7 @@ export default function HomeGridEditor() {
                       checked={b.showLabel}
                       onChange={(v) => patchBlock(meta.id, { showLabel: v })}
                     />
-                    {meta.id !== 'verse' && (
+                    {linkable && (
                       <Toggle
                         label="Show button"
                         checked={b.showButton}
@@ -214,14 +224,16 @@ export default function HomeGridEditor() {
                           onChange={(v) => patchText(meta.id, 'label', v)}
                         />
                       )}
-                      <Field
-                        label={`Headline (${lang.toUpperCase()})`}
-                        value={b.text[lang].title}
-                        placeholder="From the translation"
-                        textarea
-                        onChange={(v) => patchText(meta.id, 'title', v)}
-                      />
-                      {b.showButton && (
+                      {!isClock && (
+                        <Field
+                          label={`Headline (${lang.toUpperCase()})`}
+                          value={b.text[lang].title}
+                          placeholder="From the translation"
+                          textarea
+                          onChange={(v) => patchText(meta.id, 'title', v)}
+                        />
+                      )}
+                      {!isClock && b.showButton && (
                         <Field
                           label={`Button text (${lang.toUpperCase()})`}
                           value={b.text[lang].button}
@@ -232,7 +244,7 @@ export default function HomeGridEditor() {
                     </>
                   )}
 
-                  <ImageSettings block={b} onPatch={(patch) => patchImage(meta.id, patch)} />
+                  {!isClock && <ImageSettings block={b} onPatch={(patch) => patchImage(meta.id, patch)} />}
                 </div>
               )}
             </section>

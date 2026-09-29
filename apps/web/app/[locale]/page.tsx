@@ -75,7 +75,7 @@ export default async function HomePage({
       <ConnectedNavbar locale={locale} />
       <main id="main-content">
         <HeroWelcome locale={locale} />
-        <StatsGrid newsData={newsData} grid={grid} />
+        <StatsGrid newsData={newsData} grid={grid} apiUrl={API} />
         <ScriptureVerseSection href={`${TREASURES_URL}/${locale}/bible`} locale={locale} hourOfWeek={verseOverride} />
       </main>
       <ConnectedFooter locale={locale} />

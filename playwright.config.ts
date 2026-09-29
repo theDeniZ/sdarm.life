@@ -20,7 +20,8 @@ export default defineConfig({
     animations: 'disabled',
     // Prevent Playwright from injecting `caret-color: transparent` on focusable
     // elements before React hydrates. That inline style causes a hydration
-    // mismatch on Footer inputs (newsletter + location autocomplete).
+    // mismatch on inputs (the footer newsletter, the home sunset card's
+    // location search).
     // Screenshots remain caret-free because inputs are not focused during tests.
     caret: 'initial',
   },

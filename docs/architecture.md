@@ -208,7 +208,11 @@ packages/ui/src/
     ConnectedNavbar.tsx  — wraps Navbar; accepts locale prop, reads translations server-side
     ConnectedFooter.tsx  — wraps Footer; accepts locale prop, reads translations + apiUrl server-side
     Navbar.tsx           — fixed nav; transparent → frosted glass on scroll; language switcher; sun/moon theme toggle (dispatches sdarm:toggle-theme)
-    Footer.tsx           — 3-col: contact+subscribe, nav links, sunset clock
+    Footer.tsx           — contact+subscribe and nav links over the CommunityMap backdrop
+    SunsetClock.tsx      — "ring in ring" sunset clock + location search; rendered by apps/web's StatsGrid sunset card
+    CommunityMap.tsx     — footer map backdrop; marks the visitor's sunset location
+  lib/
+    sunset-location.ts   — useSunsetLocation(): stored sunset location shared by SunsetClock and the footer map
     PageHero.tsx         — full-bleed landing hero: grain, glow, fog, deco-circle, decoration slot, scroll hint
     ScriptureVerseSection.tsx — centered quote band: large italic text + reference tag
     ThemeScript.tsx      — server component; renders inline <script> in <head> that applies the theme (URL ?theme= → localStorage → SSR default) before first paint (prevents FOUC)
@@ -218,7 +222,8 @@ packages/ui/src/
   styles/
     tokens.css           — Google Fonts import, CSS custom properties, base reset
     navbar.css           — nav component styles + responsive breakpoints
-    footer.css           — footer + sunset clock styles + responsive breakpoints
+    footer.css           — footer styles + responsive breakpoints
+    sunset-clock.css     — SunsetClock; NOT in index.css — imported by the one app that renders it (apps/web layout.tsx)
     page-hero.css        — PageHero styles (grain, fog, deco-circle, entrance animations)
     scripture-verse.css  — ScriptureVerseSection styles
     coming-soon.css      — ComingSoon styles

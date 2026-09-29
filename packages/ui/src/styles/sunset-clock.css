@@ -1,0 +1,260 @@
+/* ═══ SUNSET CLOCK ═══
+   <SunsetClock />: the two rings, the time inside them, the city, the countdown
+   label and the location search. It carries no surface of its own — it sits on
+   whatever card holds it, and takes its palette from the --sunset-* properties
+   below, which a host maps onto its own tokens (apps/web's StatsGrid card maps
+   them onto --stats-*). The defaults are the site's dark tokens.
+
+   --sunset-size sets the ring box; the time is sized from it, so "14:30" always
+   clears the inner ring (its inner edge sits at 46/172 of the box, see RING_* in
+   SunsetClock.tsx). */
+
+.sunset-clock {
+  --sunset-size: 180px;
+  --sunset-text: var(--text-strong);
+  --sunset-muted: var(--muted);
+  --sunset-accent: var(--gold);
+  --sunset-surface: var(--dark);
+  --sunset-line: rgba(201, 169, 110, 0.22);
+  /* How much of the accent the outer (day) ring keeps before it pales to white. */
+  --sunset-outer-mix: 55%;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  min-width: 0;
+}
+
+.sunset-clock-wrap {
+  position: relative;
+  width: var(--sunset-size);
+  height: var(--sunset-size);
+  flex-shrink: 0;
+}
+
+/* Ring in ring: the inner (week) ring in the full accent, the outer (day) ring a
+   paler mix of it — lighter outside, stronger inside, as in the reference mark —
+   over a dim track mixed into the surface rather than translucent. */
+.sunset-svg {
+  --ring-track: color-mix(in srgb, var(--sunset-text) 12%, var(--sunset-surface));
+  --ring-outer: color-mix(in srgb, var(--sunset-accent) var(--sunset-outer-mix), #fff);
+  --ring-inner: var(--sunset-accent);
+  display: block;
+  width: 100%;
+  height: 100%;
+  /* Circles start at 3 o'clock; a quarter turn back makes every arc start at 12
+     and run clockwise. */
+  transform: rotate(-90deg);
+}
+.sunset-ring-track,
+.sunset-ring-outer,
+.sunset-ring-inner {
+  fill: none;
+  stroke-width: 16;
+}
+.sunset-ring-track {
+  stroke: var(--ring-track);
+}
+.sunset-ring-outer,
+.sunset-ring-inner {
+  stroke-linecap: round;
+}
+.sunset-ring-outer {
+  stroke: var(--ring-outer);
+}
+.sunset-ring-inner {
+  stroke: var(--ring-inner);
+}
+
+.sunset-clock-inner {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.sunset-time-value {
+  font-family: 'DM Serif Display', serif;
+  /* 2.2rem at the 180px box it was designed for. */
+  font-size: calc(var(--sunset-size) * 0.195);
+  font-weight: 400;
+  color: var(--sunset-text);
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+.sunset-colon {
+  animation: colon-breathe 2s ease-in-out infinite;
+  display: inline-block;
+  font-size: 0.75em;
+  vertical-align: middle;
+  position: relative;
+  top: -0.08em;
+  letter-spacing: 0;
+}
+@keyframes colon-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.08;
+  }
+}
+
+.sunset-text {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+}
+.sunset-city {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 20px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--sunset-text);
+}
+.sunset-label {
+  margin-top: 4px;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.4;
+  color: var(--sunset-muted);
+}
+
+/* ── Location search ── */
+.sunset-location-wrap {
+  position: relative;
+  width: 200px;
+  max-width: 100%;
+  margin-top: 12px;
+}
+.sunset-location-form {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  border-bottom: 1px solid var(--sunset-line);
+  transition: border-color 0.4s ease;
+}
+.sunset-location-form:focus-within {
+  border-color: var(--sunset-muted);
+}
+.sunset-location-input {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  border: none;
+  padding: 6px 2px;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--sunset-text);
+}
+/* The placeholder is the field's only visible label, so it has to be read. */
+.sunset-location-input::placeholder {
+  color: var(--sunset-muted);
+}
+.sunset-location-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  padding: 6px;
+  color: var(--sunset-muted);
+  cursor: pointer;
+  line-height: 1;
+  transition:
+    color 0.4s ease,
+    transform 0.4s ease;
+}
+.sunset-location-btn:hover {
+  color: var(--sunset-text);
+  transform: translateX(3px);
+}
+.sunset-location-btn svg {
+  width: 13px;
+  height: 13px;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  fill: none;
+}
+
+/* Opens upward, over the rings, so it never runs past the bottom of the card. */
+.sunset-suggestions {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 10;
+  list-style: none;
+  margin: 0;
+  padding: 4px 0;
+  background: var(--sunset-surface);
+  border: 1px solid var(--sunset-line);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+  text-align: left;
+  animation: suggestions-in 0.2s cubic-bezier(0.76, 0, 0.24, 1);
+}
+@keyframes suggestions-in {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.sunset-suggestion-item {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  text-align: left;
+  font-family: 'Lexend', system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--sunset-text);
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 0.2s ease;
+}
+.sunset-suggestion-item:hover {
+  background: color-mix(in srgb, var(--sunset-text) 7%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sunset-colon,
+  .sunset-suggestions {
+    animation: none;
+  }
+  .sunset-location-form,
+  .sunset-location-btn,
+  .sunset-suggestion-item {
+    transition: none;
+  }
+}
+
+/* Touch: 16px is the size below which iOS Safari zooms the page on focus, and
+   every control gets a 44px hit area. */
+@media (max-width: 640px) {
+  .sunset-location-input {
+    font-size: 16px;
+    min-height: 44px;
+  }
+  .sunset-location-btn {
+    min-width: 44px;
+    min-height: 44px;
+  }
+  .sunset-suggestion-item {
+    min-height: 44px;
+  }
+}
