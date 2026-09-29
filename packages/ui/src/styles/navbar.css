@@ -369,6 +369,12 @@ nav.site-nav.scrolled {
 [data-theme='light'] .nav-mobile__links a {
   color: rgba(14, 14, 20, 0.85);
 }
+/* Same specificity as the rule above, so the active item needs restating or
+   the light theme loses its highlight in the mobile menu. */
+[data-theme='light'] .nav-mobile__links a:hover,
+[data-theme='light'] .nav-mobile__links a.active {
+  color: var(--gold);
+}
 
 /* ── Adaptive contrast: navbar over a [data-nav-overlay="dark"] section ──
    Forces the dark-style (white) palette regardless of the active theme so

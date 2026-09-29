@@ -12,12 +12,15 @@ export default function Navbar({
   songbookUrl = 'https://songs.sdarm.life',
   eventsUrl = 'https://events.sdarm.life',
   treasuresUrl = 'https://treasures.sdarm.life',
+  sblUrl = 'https://sbl.sdarm.life',
 }: {
   locale: string;
   webUrl?: string;
   songbookUrl?: string;
   eventsUrl?: string;
   treasuresUrl?: string;
+  /** The Sabbath Bible Lesson host — a static app without locales or theme sync. */
+  sblUrl?: string;
 }) {
   const [scrolled, setScrolled] = useState(false);
   const [overDark, setOverDark] = useState(false);
@@ -27,12 +30,18 @@ export default function Navbar({
   const pathname = usePathname();
   const theme = useCurrentTheme();
 
+  const bibleUrl = `${treasuresUrl}/bible`;
+
+  // Content areas first, then the church and contact (#207). `themed: false`
+  // for SBL: a static page that does not read ?theme=.
   const navLinks = [
-    { label: t('songs'), href: songbookUrl, external: true },
-    { label: t('events'), href: eventsUrl, external: true },
-    { label: t('treasures'), href: treasuresUrl, external: true },
-    { label: t('about'), href: `${webUrl}/about`, external: true },
-    { label: t('contact'), href: `${webUrl}/kontakt`, external: true },
+    { label: t('songs'), href: songbookUrl, themed: true },
+    { label: t('bible'), href: bibleUrl, themed: true },
+    { label: t('treasures'), href: treasuresUrl, themed: true },
+    { label: t('sbl'), href: sblUrl, themed: false },
+    { label: t('events'), href: eventsUrl, themed: true },
+    { label: t('about'), href: `${webUrl}/about`, themed: true },
+    { label: t('contact'), href: `${webUrl}/kontakt`, themed: true },
   ];
 
   useEffect(() => {
@@ -68,7 +77,7 @@ export default function Navbar({
   useEffect(() => {
     const host = window.location.hostname;
     if (host.includes('treasures')) {
-      setActiveHref(treasuresUrl);
+      setActiveHref(pathname.match(/^\/(de|en)\/bible(\/|$)/) ? bibleUrl : treasuresUrl);
     } else if (host.includes('songs') || host.includes('songbook')) {
       setActiveHref(songbookUrl);
     } else if (host.includes('events')) {
@@ -80,7 +89,7 @@ export default function Navbar({
     } else {
       setActiveHref(webUrl);
     }
-  }, [webUrl, songbookUrl, eventsUrl, treasuresUrl, pathname]);
+  }, [webUrl, songbookUrl, eventsUrl, treasuresUrl, bibleUrl, pathname]);
 
   // Close mobile menu on route change
   useEffect(() => {
@@ -135,8 +144,12 @@ export default function Navbar({
         </Link>
 
         <div className="nav-links">
-          {navLinks.map(({ label, href }) => (
-            <Link key={href} href={withTheme(href, theme)} className={href === activeHref ? 'active' : undefined}>
+          {navLinks.map(({ label, href, themed }) => (
+            <Link
+              key={href}
+              href={themed ? withTheme(href, theme) : href}
+              className={href === activeHref ? 'active' : undefined}
+            >
               {label}
             </Link>
           ))}
@@ -183,10 +196,10 @@ export default function Navbar({
       {/* Mobile overlay — inert when closed so hidden links are not tabbable (WCAG 4.1.2) */}
       <div className={`nav-mobile${menuOpen ? ' nav-mobile--open' : ''}`} aria-hidden={!menuOpen} inert={!menuOpen || undefined}>
         <div className="nav-mobile__links">
-          {navLinks.map(({ label, href }) => (
+          {navLinks.map(({ label, href, themed }) => (
             <Link
               key={href}
-              href={withTheme(href, theme)}
+              href={themed ? withTheme(href, theme) : href}
               className={href === activeHref ? 'active' : undefined}
               onClick={() => setMenuOpen(false)}
             >

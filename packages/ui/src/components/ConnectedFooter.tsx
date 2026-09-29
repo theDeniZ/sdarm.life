@@ -6,6 +6,7 @@ const DEFAULT_WEB = 'https://sdarm.life';
 const DEFAULT_SONGBOOK = 'https://songs.sdarm.life';
 const DEFAULT_EVENTS = 'https://events.sdarm.life';
 const DEFAULT_TREASURES = 'https://treasures.sdarm.life';
+const DEFAULT_SBL = 'https://sbl.sdarm.life';
 
 async function fetchFooterConfig(apiUrl: string): Promise<FooterConfig | undefined> {
   try {
@@ -30,6 +31,7 @@ export default async function ConnectedFooter({ locale = 'de' }: { locale?: stri
   const songbookUrl = process.env.SONGBOOK_URL ?? DEFAULT_SONGBOOK;
   const eventsUrl = process.env.EVENTS_URL ?? DEFAULT_EVENTS;
   const treasuresUrl = process.env.TREASURES_URL ?? DEFAULT_TREASURES;
+  const sblUrl = process.env.SBL_URL ?? DEFAULT_SBL;
   const config = await fetchFooterConfig(apiUrl);
   return (
     <Footer
@@ -39,6 +41,7 @@ export default async function ConnectedFooter({ locale = 'de' }: { locale?: stri
       songbookUrl={`${songbookUrl}/${locale}`}
       eventsUrl={`${eventsUrl}/${locale}`}
       treasuresUrl={`${treasuresUrl}/${locale}`}
+      sblUrl={sblUrl}
       locale={locale}
     />
   );
