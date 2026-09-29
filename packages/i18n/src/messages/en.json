@@ -62,8 +62,12 @@
   "web": {
     "metadata": {
       "title": "SDARM.life – Seventh Day Adventist Reform Movement",
-      "description": "Seventh Day Adventist Reform Movement in Germany & Austria – news, hymns, spiritual resources and community. Sabbath worship, Bible study and Bible-based Christian living.",
-      "ogTitle": "SDARM.life – Adventist Reform Movement Germany"
+      "description": "Official website of the SDARM in Germany (Seventh Day Adventist Reform Movement). Discover our Songs of Faith, the Bible reading plan, Sabbath worship services and Christian events.",
+      "ogTitle": "SDARM Germany – Seventh Day Adventist Reform Movement",
+      "ogDescription": "We invite you to get to know God. Find our Bible reading plan, Songs of Faith and upcoming Sabbath services here. Come as you are!",
+      "keywords": "SDARM, SDARM Germany, Seventh Day Adventist Reform Movement, Bible reading plan, Songs of Faith, Sabbath, 25 principles of faith, worship service",
+      "cardEyebrow": "SDARM Germany",
+      "cardTitle": "Seventh Day Adventist Reform Movement"
     },
     "hero": {
       "fallbackTitle": "The Reformation and its consequences for Germany and the whole world",
@@ -683,8 +687,11 @@
   },
   "songbook": {
     "metadata": {
-      "title": "Songbook — SDARM",
-      "description": "Seventh Day Adventist Reform Movement — Songbook"
+      "title": "Songs of Faith — SDARM",
+      "description": "Songs of Faith: the hymnals of the Seventh Day Adventist Reform Movement online – lyrics, chords and sheet music for worship, the Sabbath and at home.",
+      "keywords": "Songs of Faith, hymnal, songbook, Christian songs, chords, sheet music, SDARM, Seventh Day Adventist Reform Movement",
+      "cardEyebrow": "Hymnal",
+      "cardTitle": "Songs of Faith"
     },
     "landing": {
       "eyebrow": "Songbook — Hymnarium",
@@ -766,15 +773,21 @@
   "events": {
     "metadata": {
       "title": "Events — SDARM",
-      "description": "Seventh Day Adventist Reform Movement — Events"
+      "description": "Events of the Seventh Day Adventist Reform Movement in Germany – Sabbath services, seminars and gatherings. The overview is coming soon.",
+      "keywords": "Sabbath service, worship service, Christian events, seminars, SDARM, Seventh Day Adventist Reform Movement",
+      "cardEyebrow": "Events",
+      "cardTitle": "Services, seminars and gatherings"
     },
     "comingSoonTitle": "Events",
     "comingSoonSubtitle": "Events, seminars, and services — coming soon."
   },
   "treasures": {
     "metadata": {
-      "title": "Treasures — SDARM",
-      "description": "Seventh Day Adventist Reform Movement — Treasures"
+      "title": "Books & Treasures — SDARM",
+      "description": "Spiritual books and resources of the Seventh Day Adventist Reform Movement – read them free of charge or order them by post. Plus the Bible in several translations and the Sabbath Bible Lesson.",
+      "keywords": "Bible online, Bible translations, Sabbath Bible Lesson, free Christian books, spiritual literature, SDARM, Seventh Day Adventist Reform Movement",
+      "cardEyebrow": "Spiritual Resources",
+      "cardTitle": "Books & Treasures"
     },
     "comingSoonTitle": "Treasures",
     "comingSoonSubtitle": "Spiritual resources, books, and materials — coming soon.",

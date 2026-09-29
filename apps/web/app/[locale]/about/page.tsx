@@ -1,8 +1,8 @@
 import type { Metadata } from 'next';
 import Image from 'next/image';
-import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
+import { ConnectedNavbar, ConnectedFooter, siteOgImage } from '@sdarm/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchConfig, r2url, WEB_URL } from '../../lib/api';
+import { API, fetchConfig, r2url, WEB_URL } from '../../lib/api';
 import ScriptureVerseSection from '../../components/ScriptureVerseSection';
 import { parseScreenshotVerse } from '../../lib/verses';
 import GlaubensLongRead, { type GlaubensArticle } from '../../components/GlaubensLongRead';
@@ -27,6 +27,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       url: canonical,
       title: t('metaTitle'),
       description: t('metaDescription'),
+      images: [siteOgImage(API, 'web', locale, t('metaTitle'))],
     },
   };
 }

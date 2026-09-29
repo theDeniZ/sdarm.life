@@ -4,7 +4,8 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { notFound } from 'next/navigation';
 import { locales } from '@sdarm/i18n';
 import type { Locale } from '@sdarm/i18n';
-import { ConnectedNavbar, ConnectedFooter, ThemeProvider } from '@sdarm/ui';
+import { ConnectedNavbar, ConnectedFooter, ThemeProvider, siteOpenGraph } from '@sdarm/ui';
+import { API, SITE_URL } from '../lib/site';
 
 export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
@@ -13,9 +14,22 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'events.metadata' });
+  // No canonical or og:url here — child pages would inherit the home page's.
+  // The home page sets both (siteHomeMetadata).
   return {
+    metadataBase: new URL(SITE_URL),
     title: t('title'),
     description: t('description'),
+    keywords: t('keywords'),
+    openGraph: siteOpenGraph({
+      app: 'events',
+      base: SITE_URL,
+      api: API,
+      locale,
+      title: t('title'),
+      description: t('description'),
+    }),
+    twitter: { card: 'summary_large_image' },
     icons: { icon: '/icon.svg' },
   };
 }

@@ -62,8 +62,12 @@
   "web": {
     "metadata": {
       "title": "SDARM.life – Siebenten-Tags-Adventisten Reformationsbewegung",
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland & Österreich – Nachrichten, Lieder, geistliche Schätze und Gemeinschaft. Sabbat-Gottesdienst, Bibelstudium und bibeltreues christliches Leben.",
-      "ogTitle": "SDARM.life – Adventisten Reformationsbewegung Deutschland"
+      "description": "Offizielle Seite der SDARM in Deutschland (Siebenten-Tags-Adventisten Reformationsbewegung). Entdecken Sie unsere Lieder des Glaubens, den Bibelleseplan, Sabbat-Gottesdienste und christliche Events.",
+      "ogTitle": "SDARM Germany – Siebenten-Tags-Adventisten Reformationsbewegung",
+      "ogDescription": "Wir laden dich ein, Gott kennenzulernen. Finde hier unseren Bibelleseplan, Lieder des Glaubens und anstehende Sabbat-Gottesdienste. Komm, wie du bist!",
+      "keywords": "SDARM, SDARM Germany, Siebenten-Tags-Adventisten Reformationsbewegung, Bibelleseplan, Lieder des Glaubens, Sabbat, 25 Grundlagen unseres Glaubens, Gottesdienst",
+      "cardEyebrow": "SDARM Germany",
+      "cardTitle": "Siebenten-Tags-Adventisten Reformationsbewegung"
     },
     "hero": {
       "fallbackTitle": "Die Reformation und ihre Folgen für Deutschland und die ganze Welt",
@@ -683,8 +687,11 @@
   },
   "songbook": {
     "metadata": {
-      "title": "Liederbuch — SDARM",
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Liederbuch"
+      "title": "Lieder des Glaubens — SDARM",
+      "description": "Lieder des Glaubens: die Gesangbücher der Siebenten-Tags-Adventisten Reformationsbewegung online – Liedtexte, Akkorde und Noten für Gottesdienst, Sabbat und Zuhause.",
+      "keywords": "Lieder des Glaubens, Gesangbuch, Liederbuch, christliche Lieder, Akkorde, Noten, SDARM, Siebenten-Tags-Adventisten Reformationsbewegung",
+      "cardEyebrow": "Gesangbuch",
+      "cardTitle": "Lieder des Glaubens"
     },
     "landing": {
       "eyebrow": "Gesangbuch — Hymnarium",
@@ -766,15 +773,21 @@
   "events": {
     "metadata": {
       "title": "Events — SDARM",
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Veranstaltungen"
+      "description": "Veranstaltungen der Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland – Sabbat-Gottesdienste, Seminare und Begegnungen. Die Übersicht ist bald hier verfügbar.",
+      "keywords": "Sabbat-Gottesdienst, Gottesdienst, christliche Events, Seminare, Veranstaltungen, SDARM, Siebenten-Tags-Adventisten Reformationsbewegung",
+      "cardEyebrow": "Events",
+      "cardTitle": "Gottesdienste, Seminare und Begegnungen"
     },
     "comingSoonTitle": "Events",
     "comingSoonSubtitle": "Veranstaltungen, Seminare und Gottesdienste — bald hier verfügbar."
   },
   "treasures": {
     "metadata": {
-      "title": "Schätze — SDARM",
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Schätze"
+      "title": "Bücher & Schätze — SDARM",
+      "description": "Geistliche Bücher und Ressourcen der Siebenten-Tags-Adventisten Reformationsbewegung – kostenlos lesen oder per Post bestellen. Dazu die Bibel in mehreren Übersetzungen und die Sabbatschullektion.",
+      "keywords": "Bibel online, Bibelübersetzungen, Sabbatschullektion, christliche Bücher kostenlos, geistliche Literatur, SDARM, Siebenten-Tags-Adventisten Reformationsbewegung",
+      "cardEyebrow": "Geistliche Ressourcen",
+      "cardTitle": "Bücher & Schätze"
     },
     "comingSoonTitle": "Schätze",
     "comingSoonSubtitle": "Geistliche Ressourcen, Bücher und Materialien — bald hier verfügbar.",

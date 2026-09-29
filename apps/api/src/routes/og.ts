@@ -6,6 +6,8 @@ import { getPostBySlug } from '../repositories/posts';
 import { getSongById } from '../repositories/songs';
 import { getTreasureById } from '../repositories/treasures';
 import { ogCardHtml } from '../og/card';
+import de from '@sdarm/i18n/messages/de';
+import en from '@sdarm/i18n/messages/en';
 // Fonts bundled as ArrayBuffers via the wrangler Data rule. Lexend covers
 // Latin (posts, treasures, DE/EN songs); Noto Sans (Cyrillic subset) is the
 // fallback so Russian song titles render instead of tofu boxes.
@@ -27,6 +29,11 @@ const EYEBROW: Record<string, Record<string, string>> = {
   song: { de: 'Lied', en: 'Song' },
   treasure: { de: 'Buch', en: 'Book' },
 };
+
+// Home-page cards for the public apps. The wording lives with the rest of the
+// app's metadata in @sdarm/i18n (`<app>.metadata.cardEyebrow` / `cardTitle`).
+const SITE_APPS = ['web', 'songbook', 'treasures', 'events'] as const;
+type SiteApp = (typeof SITE_APPS)[number];
 
 const MIME: Record<string, string> = { jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif' };
 
@@ -56,6 +63,7 @@ router.get('/', async (c) => {
   let title: string | null = null;
   let subtitle: string | null = null;
   let coverKey: string | null = null;
+  let eyebrow: string | null = null;
 
   if (type === 'post') {
     const slug = c.req.query('slug');
@@ -84,6 +92,13 @@ router.get('/', async (c) => {
     title = song.title;
     subtitle = `${song.songbook.title} · ${song.number}`;
     coverKey = null;
+  } else if (type === 'site') {
+    const app = c.req.query('app') as SiteApp;
+    if (!SITE_APPS.includes(app)) return c.json({ error: 'Invalid app' }, 400);
+    const meta = (locale === 'en' ? en : de)[app].metadata;
+    key = `site:${app}`;
+    eyebrow = meta.cardEyebrow;
+    title = meta.cardTitle;
   } else {
     return c.json({ error: 'Invalid type' }, 400);
   }
@@ -97,7 +112,7 @@ router.get('/', async (c) => {
   }
 
   const html = ogCardHtml({
-    eyebrow: EYEBROW[type]![locale],
+    eyebrow: eyebrow ?? EYEBROW[type]![locale],
     title: title!,
     subtitle,
     coverDataUrl: await coverDataUrl(c.env, coverKey),

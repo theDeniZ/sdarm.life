@@ -4,8 +4,8 @@ import { getMessages, getTranslations, setRequestLocale } from 'next-intl/server
 import { notFound } from 'next/navigation';
 import { locales } from '@sdarm/i18n';
 import type { Locale } from '@sdarm/i18n';
-import { ThemeProvider } from '@sdarm/ui';
-import { WEB_URL } from '../lib/api';
+import { ThemeProvider, siteOpenGraph } from '@sdarm/ui';
+import { API, WEB_URL } from '../lib/api';
 
 const BASE = WEB_URL;
 
@@ -16,9 +16,9 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'web.metadata' });
-  const isDE = locale === 'de';
-  const canonical = `${BASE}/${locale}`;
 
+  // Canonical/hreflang and og:url are per page (see page.tsx): set here, every
+  // page without its own would declare itself a duplicate of the home page.
   return {
     metadataBase: new URL(BASE),
     title: {
@@ -26,30 +26,18 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       template: `%s – sdarm.life`,
     },
     description: t('description'),
-    alternates: {
-      canonical,
-      languages: {
-        de: `${BASE}/de`,
-        en: `${BASE}/en`,
-        'x-default': `${BASE}/de`,
-      },
-    },
-    openGraph: {
-      type: 'website',
-      locale: isDE ? 'de_DE' : 'en_GB',
-      alternateLocale: isDE ? ['en_GB'] : ['de_DE'],
-      url: canonical,
-      siteName: 'SDARM.life',
+    keywords: t('keywords'),
+    openGraph: siteOpenGraph({
+      app: 'web',
+      base: BASE,
+      api: API,
+      locale,
       title: t('title'),
       description: t('description'),
-      images: [{ url: '/og.png', width: 1200, height: 630, alt: 'SDARM.life' }],
-    },
-    twitter: {
-      card: 'summary_large_image',
-      title: t('title'),
-      description: t('description'),
-      images: ['/og.png'],
-    },
+      ogTitle: t('ogTitle'),
+      ogDescription: t('ogDescription'),
+    }),
+    twitter: { card: 'summary_large_image' },
     icons: { icon: '/icon.svg' },
     robots: {
       index: true,

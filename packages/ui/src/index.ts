@@ -18,3 +18,5 @@ export { useCurrentTheme, withTheme } from './lib/theme-link';
 export type { Theme } from './lib/theme-link';
 export { buildRobotsTxt } from './lib/robots';
 export type { RobotsTxtOptions } from './lib/robots';
+export { siteHomeMetadata, siteOpenGraph, siteOgImage, localeAlternates } from './lib/seo';
+export type { SiteApp, SiteMetadataInput } from './lib/seo';
