@@ -2,6 +2,7 @@ export { default as ThemeProvider } from './components/ThemeProvider';
 export { default as ThemeScript } from './components/ThemeScript';
 export { default as Navbar } from './components/Navbar';
 export { default as Footer } from './components/Footer';
+export { default as Wordmark } from './components/Wordmark';
 export type { FooterConfig } from './components/Footer';
 export { default as ConnectedFooter } from './components/ConnectedFooter';
 export { default as ConnectedNavbar } from './components/ConnectedNavbar';

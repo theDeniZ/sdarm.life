@@ -20,11 +20,10 @@
   overflow-x: hidden;
 }
 
+/* The wordmark's face, weight and tracking are @sdarm/ui wordmark.css; the
+   sidebar sets its size and the heading colour for "SDARM". */
 .sidebar-logo {
-  font-family: 'Lexend', sans-serif;
-  font-weight: 300;
-  font-size: 1.05rem;
-  letter-spacing: 0.05em;
+  font-size: 1.3rem;
   color: var(--heading);
   display: flex;
   align-items: baseline;
@@ -34,15 +33,18 @@
 }
 
 /* Wordmark when expanded, a one-letter mark on the collapsed rail. `contents`
-   keeps the wordmark's parts as flex items of .sidebar-logo, as before. */
+   keeps the wordmark and the badge as flex items of .sidebar-logo, as before.
+   The mark is cut from the wordmark: its S and its gold italic point. */
 .sidebar-logo-full { display: contents; }
-.sidebar-logo-mark { display: none; }
+.sidebar-logo-mark {
+  display: none;
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+}
 
 .sidebar-logo .accent {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
   font-style: italic;
-  color: var(--brand-gold);
+  color: var(--gold);
   letter-spacing: 0;
 }
 

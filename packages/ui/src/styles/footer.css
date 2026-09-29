@@ -298,19 +298,11 @@
 .footer-legal span {
   opacity: 0.4;
 }
+/* The mark itself is wordmark.css. "SDARM" takes the primary text colour of this
+   always-dark footer (the navbar's dark-theme primary), not a dimmed grey. */
 .footer-bottom-logo {
-  font-family: 'Cormorant Garamond', serif;
   font-size: 0.95rem;
-  font-weight: 700;
-  color: rgba(222, 210, 192, 0.62);
-  letter-spacing: 0.04em;
-}
-.footer-bottom-logo span {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
-  font-style: italic;
-  color: var(--gold);
-  letter-spacing: 0;
+  color: rgba(240, 235, 225, 0.92);
 }
 
 @keyframes footer-spin {

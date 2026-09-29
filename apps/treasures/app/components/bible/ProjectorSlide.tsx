@@ -1,5 +1,7 @@
 'use client';
 
+import { Wordmark } from '@sdarm/ui';
+
 import {
   Fragment,
   useEffect,
@@ -30,7 +32,6 @@ import {
 } from '../../lib/projector';
 import { useTranslations } from 'next-intl';
 import { licenseNotice } from '../../lib/bible';
-import Wordmark from './Wordmark';
 
 export const STAGE_W = 1920;
 export const STAGE_H = 1080;

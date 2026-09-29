@@ -1,5 +1,7 @@
 'use client';
 
+import { Wordmark } from '@sdarm/ui';
+
 import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
@@ -35,7 +37,6 @@ import {
 } from '../../lib/projector';
 import BiblePassagePicker, { type PassageTarget } from './BiblePassagePicker';
 import ProjectorSlide, { ProjectorFrame, useIsClient, type SlideFit } from './ProjectorSlide';
-import Wordmark from './Wordmark';
 
 interface Props {
   locale: string;

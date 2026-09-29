@@ -174,9 +174,8 @@ body:has(.epub-reader) nav.site-nav.scrolled {
 }
 body:has(.epub-reader) .nav-logo {
   color: var(--book-tone-fg);
-}
-body:has(.epub-reader) .nav-logo span {
-  color: var(--book-tone-accent);
+  /* the .life takes the gold tuned for this paper (wordmark.css) */
+  --wordmark-accent: var(--book-tone-accent);
 }
 body:has(.epub-reader) .nav-links a {
   color: var(--book-tone-link);

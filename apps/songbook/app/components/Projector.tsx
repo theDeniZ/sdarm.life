@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
+import { Wordmark } from '@sdarm/ui';
 import { getSiteTheme } from '@/app/lib/format';
 import { useLineMode, type LineMessage } from '@/app/lib/use-line-mode';
 import ChordLine from './ChordLine';
@@ -317,7 +318,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
       {/* Top bar: logo | song title (part slides only) | send to screen | close */}
       <div className="projector__topbar">
         <div className="projector__logo" aria-hidden="true">
-          SDARM<span className="projector__logo-accent">.life</span>
+          <Wordmark />
         </div>
         {isPartSlide && (
           <div className="projector__header">

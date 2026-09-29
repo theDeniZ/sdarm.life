@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { useCurrentTheme, withTheme } from '../lib/theme-link';
+import Wordmark from './Wordmark';
 
 export default function Navbar({
   locale,
@@ -143,7 +144,7 @@ export default function Navbar({
           the white logo vanished into the light panel. */}
       <nav aria-label={t('primaryNavAria')} className={`site-nav${scrolled ? ' scrolled' : ''}${overDark && !menuOpen ? ' over-dark' : ''}`}>
         <Link href={withTheme(webUrl, theme)} className="nav-logo">
-          SDARM<span>.life</span>
+          <Wordmark />
         </Link>
 
         <div className="nav-links">

@@ -328,22 +328,12 @@
   margin: 0 0.7em;
 }
 
-/* The site wordmark (components/bible/Wordmark.tsx) — the typography of the
-   navbar logo in packages/ui. Used on the stage and in the console header;
-   each place sets its size, `--wordmark-ink` and `--wordmark-accent`. */
-.sdarm-wordmark {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
+/* The site wordmark is the shared <Wordmark /> from @sdarm/ui (styles/wordmark.css
+   owns face, weight and tracking). Each place here only sets its size,
+   `--wordmark-ink` for "SDARM" and `--wordmark-accent` for ".life". */
+.bps-brand.wordmark,
+.bp-brand.wordmark {
   color: var(--wordmark-ink, currentColor);
-}
-.sdarm-wordmark span {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
-  font-style: italic;
-  letter-spacing: 0;
-  color: var(--wordmark-accent, currentColor);
 }
 
 /* The wordmark on every slide: 40 px, top right like a broadcaster's bug

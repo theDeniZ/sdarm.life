@@ -19,6 +19,13 @@ import lexend600 from '../og/fonts/lexend-600.ttf';
 import noto400 from '../og/fonts/noto-cyrillic-400.ttf';
 // @ts-expect-error — see above
 import noto600 from '../og/fonts/noto-cyrillic-600.ttf';
+// Cormorant Garamond Bold and Bold Italic set the SDARM.life wordmark and nothing
+// else: subset (pyftsubset --text="SDARM.life", kern + liga) from
+// @fontsource/cormorant-garamond, ~5 KB each.
+// @ts-expect-error — see above
+import cormorant700 from '../og/fonts/cormorant-garamond-700-normal.ttf';
+// @ts-expect-error — see above
+import cormorant700Italic from '../og/fonts/cormorant-garamond-700-italic.ttf';
 
 // Binary image responder — intentionally outside the OpenAPI spec (same as the
 // local-dev R2 proxy), since it returns image/png rather than a JSON contract.
@@ -103,7 +110,9 @@ router.get('/', async (c) => {
     return c.json({ error: 'Invalid type' }, 400);
   }
 
-  const cacheKey = `og:${key}:${locale}:${version}`;
+  // `d2`: the card's design (d2 = the canonical wordmark). Bump it when card.ts
+  // changes, or KV serves the old drawing for up to a day.
+  const cacheKey = `og:d3:${key}:${locale}:${version}`;
   const cached = await c.env.KV.get(cacheKey, 'arrayBuffer');
   if (cached) {
     return new Response(cached, {
@@ -126,6 +135,8 @@ router.get('/', async (c) => {
       { name: 'Lexend', data: lexend600 as ArrayBuffer, weight: 600, style: 'normal' },
       { name: 'Noto Sans', data: noto400 as ArrayBuffer, weight: 400, style: 'normal' },
       { name: 'Noto Sans', data: noto600 as ArrayBuffer, weight: 600, style: 'normal' },
+      { name: 'Cormorant Garamond', data: cormorant700 as ArrayBuffer, weight: 700, style: 'normal' },
+      { name: 'Cormorant Garamond', data: cormorant700Italic as ArrayBuffer, weight: 700, style: 'italic' },
     ],
   });
 

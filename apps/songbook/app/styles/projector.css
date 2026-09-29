@@ -5,6 +5,8 @@
   --proj-muted:  rgba(255, 255, 255, 0.4);
   --proj-symbol: rgba(255, 255, 255, 0.10);
   --proj-chord:  #c9a96e;
+  /* the wordmark's .life: brand gold for the slide's own theme, not the site's */
+  --proj-gold:   #c9a96e;
   --proj-bar-bg: rgba(12, 11, 9, 0.85);
   /* Display leading, not body leading. 1.5–1.6 is right for running prose and is
      what conventions.md asks for there, but the rule inverts as type grows: at
@@ -103,19 +105,13 @@
   pointer-events: none;
 }
 .projector__logo {
-  font-family: 'Cormorant Garamond', serif;
+  /* The mark is @sdarm/ui wordmark.css; the slide theme sets its colours. */
   font-size: 14px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
   color: var(--proj-text);
-  opacity: 0.35;
+  --wordmark-accent: var(--proj-gold);
   pointer-events: none;
   line-height: 1;
   white-space: nowrap;
-}
-.projector__logo-accent {
-  color: var(--gold);
-  font-style: italic;
 }
 .projector__header {
   flex: 1;
@@ -359,6 +355,7 @@
   --proj-muted:  rgba(0, 0, 0, 0.45);
   --proj-symbol: rgba(0, 0, 0, 0.06);
   --proj-chord:  #8a6a2a;
+  --proj-gold:   #866a1f;
   --proj-bar-bg: rgba(255, 255, 255, 0.90);
 }
 

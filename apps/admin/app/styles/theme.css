@@ -11,6 +11,8 @@
 @import '@fontsource/cormorant-garamond/300.css';
 @import '@fontsource/cormorant-garamond/400.css';
 @import '@fontsource/cormorant-garamond/500.css';
+/* 700 and 700 italic: the SDARM.life wordmark in the sidebar */
+@import '@fontsource/cormorant-garamond/700.css';
 @import '@fontsource/cormorant-garamond/700-italic.css';
 
 *, *::before, *::after {
@@ -31,7 +33,6 @@
      hover). The same in both themes, unlike --on-accent, which is dark on the
      dark theme's light gold. */
   --on-solid:     #ffffff;
-  --brand-gold:   #c9a96e;
   --red:          #dc2626;
   --red-text:     #f87171;
   --dark:         #020617;

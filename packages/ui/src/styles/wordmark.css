@@ -1,0 +1,24 @@
+/* ── The SDARM.life wordmark ──
+   The single definition of the site's mark, rendered by components/Wordmark.tsx
+   (Navbar, Footer, admin sidebar, songbook presenter and projector). The surface
+   sets font-size and the colour of "SDARM" (its primary text colour); everything
+   else is fixed: Cormorant Garamond Bold, 0.04em between the letters of "SDARM",
+   ".life" in Bold Italic, untracked, in the brand gold. Never condensed, never
+   outlined, never re-tracked.
+   Copies that cannot import this file keep the same values by hand: the SBL page
+   (apps/sbl/upstream/index.html), the email layout and OG card (apps/api/src/brand)
+   and the quote-share canvas (apps/web QuoteShareModal). */
+.wordmark {
+  font-family: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  font-weight: 700;
+  font-style: normal;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+/* --wordmark-accent lets a surface with its own gold (a book's paper tone) pass
+   it in; the default is the theme's --gold (#c9a96e dark, #866a1f light). */
+.wordmark__life {
+  font-style: italic;
+  letter-spacing: 0;
+  color: var(--wordmark-accent, var(--gold));
+}

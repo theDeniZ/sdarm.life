@@ -1108,14 +1108,15 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
 
 /* colophon — takes its accent from whatever colour the bands are wearing */
 footer{max-width:820px;margin:0 auto;text-align:center;padding:20px 22px 58px}
-/* the mark, as the site sets it: .04em between the letters and not a hair more */
-.fmark{display:block;text-align:center;font-family:'Cormorant Garamond',Georgia,serif;
-  font-weight:700;font-size:30px;line-height:1;letter-spacing:.04em;color:#8d8578;
-  opacity:.72;margin:0 0 11px;border:0;text-decoration:none;transition:opacity .2s,color .2s}
+/* the mark, as the site sets it (packages/ui/src/styles/wordmark.css): .04em between
+   the letters and not a hair more, SDARM in the sheet's ink, .life in the site's gold */
+.fmark{display:block;text-align:center;font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;
+  font-weight:700;font-size:30px;line-height:1;letter-spacing:.04em;color:var(--ink);
+  margin:0 0 11px;border:0;text-decoration:none}
 /* the rule stands midway: the same 11 px above it as below, so it divides the mark
    from the title instead of sitting on one of them */
-.fmark i{font-style:italic;color:#927223;letter-spacing:0}
-.fmark:hover{opacity:1;border:0}
+.fmark i{font-style:italic;color:var(--sn-gold);letter-spacing:0}
+.fmark:hover{border:0}
 @media (max-width:560px){ .fmark{font-size:24px;margin-bottom:16px} }
 .frule{width:230px;height:1px;margin:0 auto 11px;
   background:linear-gradient(90deg,transparent,var(--gray-dk),transparent)}
@@ -2145,6 +2146,7 @@ html.dark .flegal{color:#5f5e66}
 html.dark .flegal a{border-bottom-color:rgba(255,255,255,.16)}
 html.dark .flegal a:hover{color:#8a8992}
 html.dark footer a{color:#918f99;border-bottom-color:rgba(255,255,255,.15)}
+html.dark footer a.fmark{color:var(--ink)}  /* the mark keeps its ink, not the link grey */
 
 /* the card of keys */
 html.dark .keyspop h4{color:#e9e8eb}
@@ -2392,13 +2394,15 @@ nav.site-nav{
   transition:transform .3s cubic-bezier(.3,.9,.3,1),opacity .22s,background .46s ease}
 /* over the open menu the bar is the menu's own ground, as on the site */
 nav.site-nav.nav--menu-open{background:transparent;-webkit-backdrop-filter:none;backdrop-filter:none}
-:root{--sn-gold:#927223}
+/* the site's gold tokens (packages/ui tokens.css): #866a1f light, #c9a96e dark */
+:root{--sn-gold:#866a1f}
 html.dark{--sn-gold:#c9a96e}
 html.dark nav.site-nav{
   --nav-fg-primary:rgba(240,235,225,.92); --nav-fg-primary-hover:rgba(235,226,210,1);
   --nav-fg-secondary:rgba(210,200,185,.65); --nav-fg-secondary-hover:rgba(228,218,200,.95)}
 
-.nav-logo{font-family:'Cormorant Garamond',serif;font-weight:700;font-size:1.35rem;letter-spacing:.04em;
+/* the wordmark: packages/ui/src/styles/wordmark.css, by hand */
+.nav-logo{font-family:'Cormorant Garamond',Georgia,'Times New Roman',serif;font-weight:700;font-size:1.35rem;letter-spacing:.04em;
   color:var(--nav-fg-primary);text-decoration:none;transition:color .5s ease;flex-shrink:0;white-space:nowrap;
   /* 44px tall hit area without changing the bar's height */
   padding:9px 0;margin:-9px 0}

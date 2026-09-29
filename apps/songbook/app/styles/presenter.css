@@ -22,17 +22,11 @@
 }
 
 .presenter__logo {
-  font-family: 'Cormorant Garamond', serif;
+  /* The mark is @sdarm/ui wordmark.css. The console is dark in either site
+     theme, so "SDARM" is its white and the .life the dark-theme gold. */
   font-size: 13px;
-  font-weight: 400;
-  letter-spacing: 0.06em;
-  color: rgba(255, 255, 255, 0.2);
-  white-space: nowrap;
-}
-
-.presenter__logo-accent {
-  color: var(--gold);
-  font-style: italic;
+  color: #fff;
+  --wordmark-accent: #c9a96e;
 }
 
 .presenter__song-info {
