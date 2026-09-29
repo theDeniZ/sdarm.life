@@ -1,0 +1,251 @@
+/* ── Contents button ────────────────────────────────────────
+   Two rules that fold into a cross. The motion is in two phases and the phases
+   reverse on the way back, which is what keeps it from reading as a plain spin:
+
+     opening — the rules slide together first (row, no delay), then fold
+               (bar, delayed 90ms, easing with a little overshoot)
+     closing — the fold undoes first (bar, no delay), then they slide apart
+               (row, delayed 110ms)
+
+   That is why the slide and the fold sit on two elements: one transform per
+   element, so each can carry its own duration and delay. The timings live on the
+   resting rule for the way out and on --open for the way in.
+
+   At rest the lower rule is short of the upper one and hover extends it — a
+   small sign that the button has something behind it. */
+.epub-toc-btn__row {
+  transform-box: view-box;
+  transform-origin: 9px 9px;
+  transition: transform 0.3s cubic-bezier(0.33, 0, 0.2, 1) 0.11s;
+}
+/* Each rule turns about its own midpoint, not about the middle of the icon.
+   Sharing one 9px 9px origin looked right in a single transform but not once the
+   slide and the fold were split across two elements: the origin is in viewBox
+   coordinates, so the rule spun about the centre before its group had carried it
+   there, and the two strokes ended up crossing at (11.1, 9.9) and (11.1, 8.1) —
+   an X off to the right with a gap in it. Turning about (9, 6) and (9, 12), the
+   groups then bring both midpoints to (9, 9) exactly. */
+.epub-toc-btn__bar {
+  transform-box: view-box;
+  transition:
+    transform 0.26s cubic-bezier(0.33, 0, 0.2, 1),
+    stroke-dashoffset 0.3s ease;
+}
+.epub-toc-btn__row--top .epub-toc-btn__bar {
+  transform-origin: 9px 6px;
+}
+.epub-toc-btn__row--bottom .epub-toc-btn__bar {
+  transform-origin: 9px 12px;
+  stroke-dasharray: 12;
+  stroke-dashoffset: 3.6;
+}
+.epub-toc-btn:hover .epub-toc-btn__row--bottom .epub-toc-btn__bar {
+  stroke-dashoffset: 0;
+}
+
+/* Open look. Applied on an explicit choice, and by default above the breakpoint
+   where the panel is docked open — the same division the panel itself uses, so
+   the glyph never claims a state the panel is not in. */
+.epub-toc-btn--open .epub-toc-btn__row--top {
+  transform: translateY(3px);
+}
+.epub-toc-btn--open .epub-toc-btn__row--bottom {
+  transform: translateY(-3px);
+}
+.epub-toc-btn--open .epub-toc-btn__row {
+  transition: transform 0.24s cubic-bezier(0.33, 0, 0.2, 1);
+}
+.epub-toc-btn--open .epub-toc-btn__row--top .epub-toc-btn__bar {
+  transform: rotate(45deg) scaleX(0.92);
+}
+.epub-toc-btn--open .epub-toc-btn__row--bottom .epub-toc-btn__bar {
+  transform: rotate(-45deg) scaleX(0.92);
+  stroke-dashoffset: 0;
+}
+.epub-toc-btn--open .epub-toc-btn__bar {
+  transition: transform 0.34s cubic-bezier(0.34, 1.4, 0.5, 1) 0.09s;
+}
+
+@media (min-width: 769px) {
+  .epub-toc-btn:not(.epub-toc-btn--closed) .epub-toc-btn__row--top {
+    transform: translateY(3px);
+  }
+  .epub-toc-btn:not(.epub-toc-btn--closed) .epub-toc-btn__row--bottom {
+    transform: translateY(-3px);
+  }
+  .epub-toc-btn:not(.epub-toc-btn--closed) .epub-toc-btn__row--top .epub-toc-btn__bar {
+    transform: rotate(45deg) scaleX(0.92);
+  }
+  .epub-toc-btn:not(.epub-toc-btn--closed) .epub-toc-btn__row--bottom .epub-toc-btn__bar {
+    transform: rotate(-45deg) scaleX(0.92);
+    stroke-dashoffset: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .epub-toc-btn__row,
+  .epub-toc-btn__bar {
+    transition: none;
+  }
+}
+
+/* ── Toolbar ─────────────────────────────────────────────── */
+/* The path to the book lies on the book's own paper. It used to be painted with
+   --reader-toolbar, two points off --reader-bg in the dark theme (#0e0d0b against
+   #0c0b09) and further off in the light one, and that seam read as a rule whether
+   or not one was drawn. Transparent, the two cannot drift apart at all.
+
+   No border under it either: the navbar already draws a line directly above, and
+   two hairlines this close fence the path off as a band of its own instead of
+   letting it sit against the page.
+
+   The height is a variable because the off-canvas contents list is positioned
+   from it — see the responsive block. */
+.epub-toolbar {
+  --epub-toolbar-h: 38px;
+  display: flex;
+  align-items: center;
+  height: var(--epub-toolbar-h);
+  flex-shrink: 0;
+  padding: 0 1rem;
+  background: transparent;
+  gap: 0.8rem;
+}
+
+/* Both sides take an equal share so the middle of the centre cell is the middle
+   of the bar. At flex: 0 0 auto they sized to their contents — a hamburger plus
+   a long breadcrumb on one side, three icons on the other — and the chapter
+   title sat wherever the leftovers happened to fall, visibly off to one side. */
+.epub-toolbar__left {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.epub-toolbar__center {
+  flex: 0 1 auto;
+  max-width: 46%;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.epub-toolbar__right {
+  flex: 1 1 0;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+/* ── Icon button ─────────────────────────────────────────── */
+.epub-icon-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--muted);
+  flex-shrink: 0;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+
+.epub-icon-btn:hover {
+  background: rgba(201, 169, 110, 0.1);
+  color: var(--text);
+}
+
+.epub-icon-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ── Breadcrumb ──────────────────────────────────────────── */
+.epub-breadcrumb {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--muted);
+  min-width: 0;
+}
+
+.epub-breadcrumb__link {
+  color: var(--muted);
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color 0.2s;
+}
+
+.epub-breadcrumb__link:hover {
+  color: var(--gold);
+}
+
+.epub-breadcrumb__sep {
+  opacity: 0.35;
+  flex-shrink: 0;
+}
+
+.epub-breadcrumb__current {
+  color: var(--gold);
+  font-style: italic;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+.epub-chapter-pos {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--muted);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+
+/* ── Reading progress bar ────────────────────────────────── */
+/* Progress is meant to be felt, not read. A 2px band of full-strength gold ran
+   the width of a reading surface and competed with the text; a hairline at a
+   third of that weight still answers "how far in am I" without being the
+   brightest thing on the page. */
+/* Not rendered at present — see EpubReader. Kept because the bar is moving to
+   another surface rather than going away. */
+.epub-progress {
+  height: 2px;
+  background: transparent;
+  flex-shrink: 0;
+}
+
+.epub-progress__fill {
+  height: 100%;
+  background: color-mix(in srgb, var(--gold) 38%, transparent);
+  transition: width 0.3s ease;
+}
+
+@media (max-width: 768px) {
+  .epub-breadcrumb__current {
+    max-width: 130px;
+  }
+
+  .epub-toolbar__center {
+    display: none;
+  }
+}

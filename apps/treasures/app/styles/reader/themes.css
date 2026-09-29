@@ -1,0 +1,53 @@
+/* ── Reader themes ───────────────────────────────────────── */
+/* Default (dark) — scoped inside .epub-reader so the rest of the page is unaffected */
+.epub-reader {
+  --reader-bg: #0c0b09;
+  --reader-toolbar: #0e0d0b;
+  --reader-sidebar: #0a0908;
+  --text: #d6d0c8;
+  --muted: #7a7470;
+  --gold: #c9a96e;
+  --border: rgba(201, 169, 110, 0.12);
+  /* Typography defaults — overridden via inline CSS vars from component state */
+  --epub-font-size: 26px;
+  --epub-font-family: 'Cormorant Garamond', serif;
+  --epub-line-height: 1.9;
+}
+
+
+
+/* ── Toolbar buttons — dark in light themes ──────────────── */
+[data-reader-theme='sepia'] .epub-icon-btn,
+[data-reader-theme='light'] .epub-icon-btn {
+  color: var(--text);
+}
+
+[data-reader-theme='sepia'] .epub-icon-btn:hover,
+[data-reader-theme='light'] .epub-icon-btn:hover {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text);
+}
+
+/* Active button (settings panel open) — gold in all themes */
+.epub-icon-btn--active {
+  color: var(--gold) !important;
+}
+
+/* ── TOC contrast for light reader themes ────────────────── */
+[data-reader-theme='sepia'] .epub-sidebar__toc-label,
+[data-reader-theme='light'] .epub-sidebar__toc-label {
+  color: var(--muted);
+}
+
+[data-reader-theme='sepia'] .epub-toc-item__num,
+[data-reader-theme='light'] .epub-toc-item__num {
+  color: var(--muted);
+  opacity: 0.7;
+}
+
+/* Sidebar border — subtler in light themes */
+/* TOC scrollbar — neutral */
+[data-reader-theme='sepia'] .epub-sidebar__toc::-webkit-scrollbar-thumb,
+[data-reader-theme='light'] .epub-sidebar__toc::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.12);
+}

@@ -511,6 +511,17 @@ No external image hosts are contacted from the catalog. Covers are uploaded thro
 
 `PageHero` (book SVG decoration) → `ScriptureQuote` → `TreasuresFilterBar` → 4-column grid of `TreasureCard`s (2 cols on tablet, 1 col on mobile) → pagination (`pageRange()` with ellipses when more than 7 pages). Cards stagger in via the `.visible` class on `.item-card` (55 ms × index, capped at the first 20 cards).
 
+### Stylesheets (`app/styles/`)
+
+Site-wide styles are one file per section under `apps/treasures/app/styles/`, imported one by one from `app/layout.tsx` in cascade order. Each file owns its breakpoints and its light-theme overrides; there is no trailing responsive or light block.
+
+**The EPUB reader's styles live in `styles/reader/` and load only on the reader's route.** `reader/index.css` fixes their order — `themes` first, then `shell`, `toolbar`, `sidebar`, `chapter`, `highlight`, `nav`, `settings`, and `focus` last (it restates the shared focus ring's 2px corner radius, which would otherwise lose to the reader's own button radii now that the reader loads after the shared styles) — and is imported by `app/[locale]/books/[id]/layout.tsx` and nothing else. The catalogue does not download it.
+
+- **A rule the catalogue or the Bible reader also needs goes in a site-wide file**, never under `reader/`: those pages do not have it.
+- **Every rule under `reader/` stays scoped to the reader** — `.epub-*`, `.hl-*`, `[data-reader-theme]` or `body:has(.epub-reader)`. Next keeps a visited route's stylesheet in the document, so after a reader goes back from a book to the catalogue the reader CSS is still loaded, and it sits after the site-wide files. An unscoped rule there would repaint the catalogue.
+- `BookDetail` (a book without an EPUB) is rendered by the same route and gets the reader stylesheet too. The scoping makes that harmless.
+- The `reader/` files are joined by CSS `@import`, so under Turbopack an edit to one of them appears only after `rm -rf .next`.
+
 ### Bible reader (`/[locale]/bible/...`)
 
 Route structure (all server components fetching via `lib/bible.ts`, silent-error style). `bible/layout.tsx` adds `<ConnectedFooter>` — the section sits outside the `(main)` route group, which is where the footer otherwise lives, and would render without one:

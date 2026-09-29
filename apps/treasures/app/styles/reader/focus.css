@@ -1,0 +1,10 @@
+/* ── Keyboard focus ──
+   packages/ui/src/styles/focus.css sets :focus-visible { border-radius: 2px }.
+   In the built app that file lands after the app's own stylesheets, so its
+   radius has always won over the reader controls' own (7px icon buttons, round
+   size buttons) while they hold keyboard focus. This stylesheet now loads after
+   it, so the rule is restated here, last. It keeps the original specificity —
+   :where() adds none — so a more specific reader rule still wins, as before. */
+:where(.epub-reader, .epub-loading) :focus-visible {
+  border-radius: 2px;
+}
