@@ -64,7 +64,7 @@
 
 .hbar-chart__track {
   height: 10px;
-  background: var(--surface-2);
+  background: var(--track);
   border-radius: 999px;
   overflow: hidden;
 }

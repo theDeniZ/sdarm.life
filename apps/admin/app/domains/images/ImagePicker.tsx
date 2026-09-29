@@ -6,7 +6,8 @@ import type { ImageDto } from '@sdarm/types';
 
 type Props = {
   value: string | null;
-  onChange: (key: string | null) => void;
+  /** `file` is set only for a fresh upload, so a caller can read the local file (e.g. measure it). */
+  onChange: (key: string | null, file?: File) => void;
 };
 
 export default function ImagePicker({ value, onChange }: Props) {
@@ -46,7 +47,7 @@ export default function ImagePicker({ value, onChange }: Props) {
       });
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const { key } = (await res.json()) as { key: string };
-      onChange(key);
+      onChange(key, file);
       setUploadStatus('ok');
     } catch {
       setUploadStatus('err');
@@ -84,7 +85,15 @@ export default function ImagePicker({ value, onChange }: Props) {
 
       <div
         className={`image-drop${drag ? ' drag-over' : ''}`}
+        role="button"
+        tabIndex={0}
+        aria-busy={uploadStatus === 'uploading'}
         onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          inputRef.current?.click();
+        }}
         onDragOver={(e) => {
           e.preventDefault();
           setDrag(true);

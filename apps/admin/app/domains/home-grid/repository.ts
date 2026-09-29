@@ -24,16 +24,3 @@ export async function saveGridConfig(config: HomeGridConfig): Promise<void> {
   });
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
 }
-
-/** Upload a file and return its R2 key. Same endpoint the image library uses. */
-export async function uploadImage(file: File): Promise<string> {
-  const form = new FormData();
-  form.append('file', file);
-  const res = await fetch(`${API}/api/v1/admin/images/upload`, {
-    method: 'POST',
-    headers: adminHeaders(),
-    body: form,
-  });
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return ((await res.json()) as { key: string }).key;
-}

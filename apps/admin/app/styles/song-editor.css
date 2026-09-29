@@ -11,6 +11,11 @@
   .song-editor-grid { grid-template-columns: 1fr; }
 }
 
+/* The title card sits directly above the grid and spans its full width —
+   .form-card's 720px cap is meant for single-column forms and left the card
+   ending short of the preview pane beside it. */
+.form-card:has(> .song-meta-grid) { max-width: none; }
+
 .song-meta-grid {
   display: grid;
   grid-template-columns: 90px 2fr 1.5fr 1.5fr;
@@ -18,20 +23,24 @@
   align-items: end;
 }
 
+/* Two rows: number + title, then author + copyright at equal width. With
+   two columns, author landed in the 90px number column. */
 @media (max-width: 900px) {
   .song-meta-grid {
-    grid-template-columns: 90px 1fr;
+    grid-template-columns: 90px 1fr 90px 1fr;
   }
-  .song-meta-grid .song-meta-field--title { grid-column: 2 / 3; }
-  .song-meta-grid .song-meta-field--author,
-  .song-meta-grid .song-meta-field--copyright { grid-column: span 1; }
+  .song-meta-grid .song-meta-field--title { grid-column: 2 / 5; }
+  .song-meta-grid .song-meta-field--author { grid-column: 1 / 3; }
+  .song-meta-grid .song-meta-field--copyright { grid-column: 3 / 5; }
 }
 
 @media (max-width: 600px) {
   .song-meta-grid {
     grid-template-columns: 1fr;
   }
-  .song-meta-grid .song-meta-field--title { grid-column: auto; }
+  .song-meta-grid .song-meta-field--title,
+  .song-meta-grid .song-meta-field--author,
+  .song-meta-grid .song-meta-field--copyright { grid-column: auto; }
 }
 
 .song-meta-field {

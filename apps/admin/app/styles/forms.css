@@ -25,7 +25,11 @@
 
 .form-row input[type="text"],
 .form-row input[type="url"],
+.form-row input[type="email"],
+.form-row input[type="tel"],
+.form-row input[type="password"],
 .form-row input[type="number"],
+.form-row input[type="date"],
 .form-row input[type="datetime-local"],
 .form-row input[type="search"],
 .form-row select,
@@ -44,6 +48,28 @@
 
 .form-row input:focus,
 .form-row textarea:focus { border-color: var(--gold-dim); }
+
+/* Colour swatch — same height, border and radius as the text field beside it,
+   instead of the browser's bevelled grey button. */
+.form-row input[type="color"] {
+  flex-shrink: 0;
+  width: 44px;
+  height: 38px;
+  padding: 4px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  background: var(--surface-2);
+  cursor: pointer;
+}
+.form-row input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+.form-row input[type="color"]::-webkit-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
+.form-row input[type="color"]::-moz-color-swatch {
+  border: none;
+  border-radius: 6px;
+}
 
 .checkbox-row {
   display: flex;

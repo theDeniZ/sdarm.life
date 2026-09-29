@@ -69,7 +69,7 @@ v1.route('/posts', postsRouter);
 
 v1.route('/config', configRouter); // No cache — handled by KV
 v1.route('/images', imagesRouter);
-v1.route('', subscribersRouter); // /subscribe + /unsubscribe
+v1.route('/', subscribersRouter); // /subscribe + /unsubscribe
 
 v1.use('/songbooks', cached(3600)); // 1 hour — songbook list
 v1.use('/songbooks/*', cached(3600)); // 1 hour — songbook detail + songs
@@ -97,7 +97,7 @@ v1.route('/treasures', treasuresRouter);
 // immediately, while book/chapter/parallel text is immutable and cached a day.
 v1.route('/bible', bibleRouter);
 
-v1.route('', bookRequestRouter); // /book-request
+v1.route('/', bookRequestRouter); // /book-request
 
 v1.route('/geocode', geocodeRouter); // KV-cached Nominatim proxy (DSGVO: hides user IP)
 
@@ -112,15 +112,18 @@ v1.use('/llm/*', llmRateLimit);
 v1.route('/llm', llmRouter);
 
 // ── Admin routes (auth-gated) ─────────────────────────────────────────────────
+// Routers that carry their own path prefix mount at '/', never '': both serve
+// the same URLs, but OpenAPIHono builds the documented path with mergePath(),
+// which turns '' into an extra slash (`/api/v1/admin//songs/{id}`).
 admin.use('*', auth);
 admin.route('/posts', adminPostsRouter);
 admin.route('/config', adminConfigRouter);
 admin.route('/images', adminImagesRouter);
 admin.route('/subscribers', adminSubscribersRouter);
-admin.route('', adminSongbooksRouter);
-admin.route('', adminTreasuresRouter);
-admin.route('', adminEmailRouter);
-admin.route('', adminDigestRouter);
+admin.route('/', adminSongbooksRouter);
+admin.route('/', adminTreasuresRouter);
+admin.route('/', adminEmailRouter);
+admin.route('/', adminDigestRouter);
 admin.route('/bible', adminBibleRouter);
 
 v1.route('/admin', admin);
