@@ -29,6 +29,7 @@ interface FooterProps {
   songbookUrl?: string;
   eventsUrl?: string;
   treasuresUrl?: string;
+  sblUrl?: string;
   locale?: string;
 }
 
@@ -276,6 +277,7 @@ export default function Footer({
   songbookUrl = 'https://songs.sdarm.life',
   eventsUrl = 'https://events.sdarm.life',
   treasuresUrl = 'https://treasures.sdarm.life',
+  sblUrl = 'https://sbl.sdarm.life',
   locale = 'de',
 }: FooterProps) {
   const t = useTranslations('common.footer');
@@ -532,8 +534,10 @@ export default function Footer({
         <nav className="footer-nav" aria-label={t('footerNavAria')}>
           <div className="footer-nav-links">
             <Link href={withTheme(songbookUrl, theme)}>{navT('songs')}</Link>
-            <Link href={withTheme(eventsUrl, theme)}>{navT('events')}</Link>
+            <Link href={withTheme(`${treasuresUrl}/bible`, theme)}>{navT('bible')}</Link>
             <Link href={withTheme(treasuresUrl, theme)}>{navT('treasures')}</Link>
+            <Link href={sblUrl}>{navT('sbl')}</Link>
+            <Link href={withTheme(eventsUrl, theme)}>{navT('events')}</Link>
             <Link href={withTheme(`${webUrl}/about`, theme)}>{navT('about')}</Link>
             <Link href={withTheme(`${webUrl}/kontakt`, theme)}>{navT('contact')}</Link>
           </div>
