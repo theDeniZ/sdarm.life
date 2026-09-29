@@ -1,0 +1,170 @@
+/* ── SONG LIST ── */
+.song-list-header {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 1.8rem;
+  flex-wrap: wrap;
+}
+.song-list-header h1 {
+  font-family: 'Lexend', sans-serif;
+  font-style: normal;
+  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
+  font-weight: 400;
+  color: #fff;
+}
+
+.search-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(201, 169, 110, 0.22);
+  padding: 0.55rem 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.88rem;
+  font-weight: 300;
+  color: var(--text);
+  width: 240px;
+  transition: border-color 0.3s;
+}
+.search-input::placeholder {
+  color: rgba(130, 120, 105, 0.78);
+}
+.search-input:focus {
+  border-color: rgba(201, 169, 110, 0.55);
+}
+
+.song-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.song-table th {
+  text-align: left;
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 200;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  padding: 0.7rem 0.8rem 0.7rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.song-row {
+  border-bottom: 1px solid rgba(201, 169, 110, 0.2);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+.song-row:hover {
+  background: rgba(201, 169, 110, 0.04);
+}
+.song-row td {
+  padding: 0.75rem 0.8rem 0.75rem 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 300;
+}
+.song-row__num {
+  color: var(--muted);
+  width: 48px;
+  font-variant-numeric: tabular-nums;
+}
+.song-row__title {
+  color: #fff;
+  font-weight: 400;
+}
+.song-row__author {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 1.8rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+.pagination button {
+  background: none;
+  border: 1px solid rgba(201, 169, 110, 0.25);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--gold);
+  font-size: 0.9rem;
+  transition:
+    border-color 0.3s,
+    background 0.3s;
+}
+.pagination button:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: rgba(201, 169, 110, 0.08);
+}
+.pagination button:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* ── BACK LINK ── */
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.85rem;
+  font-weight: 300;
+  color: rgba(220, 210, 195, 0.6);
+  letter-spacing: 0.04em;
+  margin-bottom: 1.5rem;
+  transition: color 0.18s;
+}
+.back-link:hover {
+  color: #fff;
+}
+
+/* Within-songbook search: the pill that says a row matched on its lyrics. */
+.song-row__match-pill {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.45rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--gold);
+  background: rgba(201, 169, 110, 0.1);
+  border: 1px solid rgba(201, 169, 110, 0.28);
+  border-radius: 999px;
+  vertical-align: middle;
+  line-height: 1.2;
+}
+
+@media (max-width: 600px) {
+  .search-input {
+    width: 100%;
+  }
+  .song-list-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+[data-theme='light'] .song-list-header h1 { color: var(--text-strong); }
+[data-theme='light'] .song-row { border-bottom-color: rgba(146, 114, 35, 0.32); }
+[data-theme='light'] .song-row:hover { background: var(--bg-card); }
+[data-theme='light'] .song-row__num { color: var(--gold); }
+[data-theme='light'] .song-row__title { color: var(--text-strong); }
+[data-theme='light'] .song-row__author { color: var(--muted); }
+[data-theme='light'] .back-link { color: var(--muted); }
+[data-theme='light'] .back-link:hover { color: var(--text-strong); }
+[data-theme='light'] .song-row__match-pill {
+  color: #5a3d00;
+  background: rgba(255, 226, 125, 0.35);
+  border-color: rgba(146, 114, 35, 0.4);
+}

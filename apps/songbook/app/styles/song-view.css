@@ -1,0 +1,249 @@
+/* ── SONG VIEW ── */
+.song-view {
+  max-width: 720px;
+}
+
+.song-header {
+  margin-bottom: 2rem;
+}
+.song-header__title {
+  font-family: 'Lexend', sans-serif;
+  font-style: normal;
+  font-size: clamp(1.3rem, 2.6vw, 1.75rem);
+  font-weight: 500;
+  color: #fff;
+  line-height: 1.3;
+  margin-bottom: 0.5rem;
+  position: relative;
+}
+.song-header__num {
+  position: absolute;
+  left: -3.2rem;
+  width: 1.8rem;
+  text-align: right;
+  font-family: 'Lexend', sans-serif;
+  font-size: 1em;
+  font-weight: 300;
+  color: rgba(201, 169, 110, 0.7);
+  font-style: normal;
+  letter-spacing: 0;
+}
+.song-header__meta {
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 300;
+  color: var(--muted);
+}
+
+.mode-bar {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+.mode-btn {
+  border: 1px solid var(--border);
+  background: transparent;
+  padding: 0.45rem 1.1rem;
+  border-radius: 999px;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 300;
+  letter-spacing: 0;
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    background 0.3s,
+    color 0.3s,
+    border-color 0.3s;
+}
+.mode-btn:hover {
+  border-color: rgba(201, 169, 110, 0.3);
+  color: #fff;
+}
+[data-theme='light'] .mode-btn:hover {
+  border-color: var(--gold);
+  color: var(--text-strong);
+}
+.mode-btn.active {
+  background: var(--gold);
+  color: var(--dark);
+  border-color: var(--gold);
+}
+
+/* ── TRANSPOSE BAR ── */
+/* The mode bar directly above this is a row of pills. Four square hairline boxes
+   beside them read as a different era of the interface, so the control is one
+   capsule of the same shape and height, divided rather than fragmented.
+   Hover washes use color-mix on --gold so the one rule serves both themes —
+   --gold already flips, and a duplicated [data-theme='light'] block would be
+   one more place for the two to drift apart. */
+.transpose-bar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.transpose-group {
+  display: inline-flex;
+  align-items: stretch;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--gold) 3%, transparent);
+}
+
+.transpose-btn {
+  border: none;
+  background: transparent;
+  padding: 0.42rem 0.9rem;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--muted);
+  cursor: pointer;
+  line-height: 1;
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+.transpose-btn:hover {
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+
+/* Hairlines between the parts, not around each of them. */
+.transpose-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+  min-width: 5.2rem;
+  padding: 0 0.3rem;
+  border-left: 1px solid var(--border);
+  border-right: 1px solid var(--border);
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 300;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+.transpose-key {
+  font-weight: 500;
+  color: var(--muted);
+}
+.transpose-key--active {
+  color: var(--gold);
+}
+.transpose-arrow {
+  color: var(--muted);
+  font-size: 0.66rem;
+  opacity: 0.7;
+}
+.transpose-offset {
+  color: var(--muted);
+}
+.transpose-offset--active {
+  color: var(--gold);
+}
+
+/* Outside the capsule: undoing is not a third way to transpose, and putting it
+   inside would make the control change width every time a key is picked. */
+.transpose-reset {
+  border: none;
+  background: transparent;
+  width: 1.9rem;
+  height: 1.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  font-size: 0.95rem;
+  color: var(--muted);
+  cursor: pointer;
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+.transpose-reset:hover {
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 12%, transparent);
+}
+
+.song-part {
+  margin-bottom: 2rem;
+}
+.song-part__label {
+  font-family: 'Oswald', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 200;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold);
+  margin-bottom: 0.7rem;
+}
+.song-part__lyrics {
+  font-family: 'Lexend', sans-serif;
+  font-size: 1.15rem;
+  line-height: 1.7;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  color: var(--text);
+}
+
+/* ── CHORD LINE ── */
+.chord-line {
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 2px;
+}
+.chord-token {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  white-space: pre;
+}
+.chord-token__chord {
+  font-size: 0.72rem;
+  font-weight: 500;
+  font-family: 'Lexend', sans-serif;
+  letter-spacing: 0.03em;
+  color: var(--chord);
+  line-height: 1.2;
+  min-height: 14px;
+}
+.chord-token__word {
+  font-size: inherit;
+  line-height: inherit;
+  font-family: inherit;
+}
+
+/* Every part is labelled the same way — see .song-part__label above.
+   Verses used to hang their label in a 1.6rem column carved out of the content's
+   left padding. That column was sized for a numeral, but the label came straight
+   from song_parts.label, where the importer had written "Куплет 1"; eight
+   characters in 26px wrapped onto two lines and spilled into the margin. The
+   column also vanished below 700px, so on a phone verses were unlabelled while
+   choruses were not. One placement for all part types removes the whole class of
+   problem, and the label text is now localised by type in SongReader. */
+
+@media (max-width: 700px) {
+  /* not enough left margin for hanging numbers on mobile */
+  .song-header__num {
+    position: static;
+    display: inline;
+    margin-right: 0.4rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .song-header__title {
+    font-size: 1.3rem;
+  }
+}
+
+[data-theme='light'] .song-header__title { color: var(--text-strong); }
+[data-theme='light'] .song-header__meta { color: var(--muted); }
+[data-theme='light'] .song-part { border-bottom-color: var(--border); }
+[data-theme='light'] .song-part__label { color: var(--gold); }
+[data-theme='light'] .song-part__lyrics { color: var(--text); }
