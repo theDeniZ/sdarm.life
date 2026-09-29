@@ -9,6 +9,7 @@ import {
   SongListItemSchema,
   SongPartSchema,
   SongPartTypeSchema,
+  SongTranslationTypeSchema,
   SongSchema,
   SongSheetSchema,
   SongSheetTypeSchema,
@@ -240,6 +241,14 @@ const PartBody = z.object({
   label: z.string().min(1),
   sortOrder: z.number().int(),
   lyrics: z.string(),
+  // Optional so existing clients keep working: omitted on create means the
+  // songbook's language and an original text (the column defaults).
+  language: z
+    .string()
+    .regex(/^[a-z]{2,3}(-[a-z0-9]{2,8})?$/)
+    .nullable()
+    .optional(),
+  translationType: SongTranslationTypeSchema.optional(),
 });
 
 router.openapi(

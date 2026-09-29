@@ -426,3 +426,106 @@
   from { opacity: 0; }
   to   { opacity: 1; }
 }
+
+/* ── LINE-BY-LINE CONTROLS (issue #61) ── */
+.presenter__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px 22px;
+  padding: 10px 20px;
+  border-top: 1px solid rgba(201, 169, 110, 0.08);
+  flex-shrink: 0;
+}
+
+.presenter__group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.presenter__group-label {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.3);
+  margin: 0 2px 0 6px;
+}
+
+.presenter__pill {
+  min-width: 34px;
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.3s, color 0.15s;
+  line-height: 1;
+}
+
+.presenter__pill--square {
+  padding: 0;
+  width: 28px;
+  min-width: 28px;
+}
+
+.presenter__pill:hover {
+  color: #fff;
+  border-color: rgba(201, 169, 110, 0.5);
+}
+
+.presenter__pill.is-active {
+  color: var(--gold);
+  border-color: var(--gold);
+  background: rgba(201, 169, 110, 0.1);
+}
+
+.presenter__pill:disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+.presenter__footer {
+  position: relative;
+}
+
+.presenter__blank {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.presenter__panel-flag {
+  margin-left: 10px;
+  color: var(--gold);
+}
+
+.pres-slide--blank .pres-slide__body,
+.pres-slide--blank .pres-slide__bg {
+  opacity: 0.2;
+}
+
+/* Line text in the previews mirrors the display's proportions */
+.pres-slide .line-stage__line + .line-stage__line {
+  margin-top: 0.3em;
+}
+
+.pres-slide .line-stage__sub--singable {
+  opacity: 0.72;
+}
+
+.pres-slide .line-stage__sub--reference {
+  font-size: 0.55em;
+  margin-top: 0.3em;
+  opacity: 0.5;
+}

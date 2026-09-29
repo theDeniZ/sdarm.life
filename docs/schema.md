@@ -30,8 +30,9 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 `id`, `songbook_id` (FK → `songbooks.id`), `number`, `title`, `author`, `copyright`, `created_at`, `updated_at`
 
 **`song_parts`**
-`id`, `song_id` (FK → `songs.id`), `type` (`verse` | `chorus` | `bridge` | `intro` | `outro` | `coda`), `label`, `sort_order`, `lyrics`
+`id`, `song_id` (FK → `songs.id`), `type` (`verse` | `chorus` | `bridge` | `intro` | `outro` | `coda`), `label`, `sort_order`, `lyrics`, `language`, `translation_type` (`original` | `singable` | `reference`, default `original`)
 - `lyrics` is plain text; chord annotations are embedded inline (e.g. `[G]Amazing [C]grace`)
+- `language` is NULL unless the part is in a different language from its songbook (issue #61). A translated song stores its translation as extra parts in the other language; the projector pairs them with the original by type and occurrence (the second German verse belongs to the second English verse). `singable` fits the melody and is projected at full size, `reference` is a literal gloss projected small and dimmed. The reading view shows the original language only.
 
 **`song_sheets`**
 `id`, `song_id` (FK → `songs.id`), `key` (R2 object key under `sheets/{songId}/{uuid}.{ext}`), `type` (`pdf` | `image`), `sort_order`, `uploaded_at`

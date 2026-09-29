@@ -750,7 +750,9 @@
       "decreaseFont": "Schriftgröße verkleinern",
       "increaseFont": "Schriftgröße vergrößern",
       "lightMode": "Heller Modus",
-      "darkMode": "Dunkler Modus"
+      "darkMode": "Dunkler Modus",
+      "lineMode": "Zeile für Zeile",
+      "swapLanguages": "Sprachen tauschen"
     },
     "presenter": {
       "close": "Präsentation schließen",
@@ -764,7 +766,21 @@
       "titleSlide": "Titel",
       "endOfSong": "Lied beendet",
       "lightMode": "Heller Modus",
-      "darkMode": "Dunkler Modus"
+      "darkMode": "Dunkler Modus",
+      "lineMode": "Zeile für Zeile",
+      "linesPerSlide": "Zeilen",
+      "line": "Zeile {from} / {total}",
+      "lines": "Zeilen {from}–{to} / {total}",
+      "transition": "Übergang",
+      "transitionSlide": "Schieben",
+      "transitionFade": "Blenden",
+      "transitionSpeed": "Übergangstempo",
+      "primaryLanguage": "Hauptsprache",
+      "translation": "Übersetzung",
+      "translationOff": "Aus",
+      "swapLanguages": "Sprachen tauschen",
+      "blank": "Leer",
+      "blankTitle": "Bildschirm leeren (B)"
     },
     "partTypes": {
       "verse": "Strophe",

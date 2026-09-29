@@ -20,4 +20,8 @@
   .reader-sidebar {
     transition: none;
   }
+  /* Line mode: the next line simply appears, whatever transition is chosen. */
+  .line-stage {
+    animation: none;
+  }
 }

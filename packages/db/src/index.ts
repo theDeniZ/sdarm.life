@@ -114,6 +114,11 @@ export const songParts = sqliteTable('song_parts', {
   label:     text('label').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
   lyrics:    text('lyrics').notNull().default(''),
+  // Issue #61. NULL means "the songbook's language" — only a part that differs
+  // from its book needs a tag. `original` is the text the song was written in;
+  // `singable` fits the melody, `reference` is a literal gloss for reading only.
+  language:        text('language'),
+  translationType: text('translation_type', { enum: ['original', 'singable', 'reference'] }).notNull().default('original'),
 }, (t) => [
   index('song_parts_song_id_idx').on(t.songId),
 ]);

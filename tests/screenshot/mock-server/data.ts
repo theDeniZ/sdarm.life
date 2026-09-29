@@ -63,6 +63,8 @@ export const mockSong = {
       type: 'verse',
       label: 'Vers 1',
       sortOrder: 1,
+      language: null,
+      translationType: 'original',
       lyrics: '[G]Wunderbarer König\n[C]Gott der Gnade\n[G]Licht und Leben',
     },
     {
@@ -70,6 +72,8 @@ export const mockSong = {
       type: 'chorus',
       label: 'Refrain',
       sortOrder: 2,
+      language: null,
+      translationType: 'original',
       lyrics: '[C]Halleluja\n[G]Halleluja',
     },
   ],

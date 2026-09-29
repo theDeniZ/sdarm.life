@@ -1,4 +1,4 @@
-import type { SongbookDto, SongPartType } from '@sdarm/types';
+import type { SongbookDto, SongPartType, SongTranslationType } from '@sdarm/types';
 
 export type SongbookFormData = Pick<
   SongbookDto,
@@ -17,4 +17,6 @@ export interface PartFormData {
   label: string;
   sortOrder: number;
   lyrics: string;
+  language?: string | null;
+  translationType?: SongTranslationType;
 }
