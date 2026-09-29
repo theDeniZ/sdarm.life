@@ -26,10 +26,7 @@
       "subscribeSuccess": "Please confirm your subscription via the email we just sent you.",
       "subscribeDuplicate": "This email is already registered.",
       "subscribeError": "Error. Please try again later.",
-      "locationPlaceholder": "City or ZIP",
-      "locationUpdateAria": "Update location",
       "emailInputAria": "Enter email address",
-      "locationInputAria": "Enter city or postal code",
       "footerNavAria": "Site navigation",
       "copyright": "© {year} SDARM.life",
       "allRightsReserved": "All rights reserved"
@@ -45,7 +42,10 @@
       "sunset": "Sunset",
       "ringDay": "{label}: {remaining} left, {percent}% elapsed.",
       "ringWeek": "Week until Sabbath: {percent}%.",
-      "ringWeekSabbath": "It is the Sabbath."
+      "ringWeekSabbath": "It is the Sabbath.",
+      "locationPlaceholder": "City or ZIP",
+      "locationInputAria": "Enter city or postal code",
+      "locationUpdateAria": "Update location"
     },
     "comingSoon": "Coming soon",
     "back": "← Back",
@@ -112,6 +112,9 @@
         "title": "Before<br></br><em>everything starts</em>",
         "cta": "Open",
         "phoneAlt": "Reading plan in the YouVersion app"
+      },
+      "sunset": {
+        "label": "Sabbath · Sunset"
       },
       "invite": {
         "title": "Come<br></br><em>as you are</em>",

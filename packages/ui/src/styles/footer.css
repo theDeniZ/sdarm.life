@@ -23,17 +23,13 @@
   position: relative;
   z-index: 2;
   display: grid;
-  /* 4-track layout: contact (1fr) | nav (1fr) | empty paper (1fr) | sunset (280px).
-     Each flex track ≈ 1/3 of footer width; nav sits in the left-center,
-     sunset is forced into column 4 below so the third column stays as breathing space.
+  /* contact (1fr) | nav (1fr) | open map (2fr). The two columns hold the left
+     half; the right half is left to the map, which centres on DE/AT/CH.
      min-height derived from golden ratio: footer width ÷ φ² ≈ 535 px total footer,
      leaving ~30 rem (480 px) for the inner wrap above the bottom strip. */
-  grid-template-columns: 1fr 1fr 1fr 280px;
+  grid-template-columns: 1fr 1fr 2fr;
   gap: 0;
   min-height: 30rem;
-}
-.footer-sunset {
-  grid-column: 4;
 }
 @keyframes footer-col-in {
   from { opacity: 0; transform: translateY(22px); }
@@ -44,9 +40,6 @@
 }
 .footer-nav {
   animation: footer-col-in 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.22s both;
-}
-.footer-sunset {
-  animation: footer-col-in 0.9s cubic-bezier(0.76, 0, 0.24, 1) 0.36s both;
 }
 .footer-contact {
   padding: 3.6rem 3rem;
@@ -262,227 +255,6 @@
   color: var(--gold);
 }
 
-/* Sunset clock column */
-.footer-sunset {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 3.6rem 3rem;
-  position: relative;
-  z-index: 2;
-}
-
-.footer-sunset::before {
-  content: '';
-  position: absolute;
-  top: 2rem;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1px;
-  height: 20px;
-  background: linear-gradient(to bottom, rgba(201, 169, 110, 0.5), transparent);
-}
-.sunset-clock-wrap {
-  position: relative;
-  /* Sized so "14:30" clears the inner ring: its inner edge sits at 46/172 of the
-     box (see RING_* in Footer.tsx), ~48px from the centre at 180px. */
-  width: 180px;
-  height: 180px;
-  margin-bottom: 1rem;
-  flex-shrink: 0;
-  animation: clock-breathe 5s ease-in-out infinite;
-}
-@keyframes clock-breathe {
-  0%, 100% { filter: drop-shadow(0 0 8px rgba(201, 169, 110, 0.08)); }
-  50%       { filter: drop-shadow(0 0 18px rgba(201, 169, 110, 0.2)); }
-}
-/* Ring in ring. The footer is dark in both themes and pins --gold to its
-   dark-theme value (tokens.css), so one palette serves both: the inner (week)
-   ring in the full accent, the outer (day) ring a paler gold — lighter outside,
-   stronger inside, as in the reference mark — over a dim warm-white track, mixed
-   into the footer colour rather than translucent so the map does not show
-   through it. */
-.sunset-svg {
-  --ring-track: color-mix(in srgb, var(--text) 12%, var(--footer-bg));
-  --ring-outer: color-mix(in srgb, var(--gold) 55%, #fff);
-  --ring-inner: var(--gold);
-  display: block;
-  width: 100%;
-  height: 100%;
-  /* Circles start at 3 o'clock; a quarter turn back makes every arc start at 12
-     and run clockwise. */
-  transform: rotate(-90deg);
-}
-.sunset-ring-track,
-.sunset-ring-outer,
-.sunset-ring-inner {
-  fill: none;
-  stroke-width: 16;
-}
-.sunset-ring-track {
-  stroke: var(--ring-track);
-}
-.sunset-ring-outer,
-.sunset-ring-inner {
-  stroke-linecap: round;
-}
-.sunset-ring-outer {
-  stroke: var(--ring-outer);
-}
-.sunset-ring-inner {
-  stroke: var(--ring-inner);
-}
-.sunset-clock-inner {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-.sunset-time-value {
-  font-family: 'DM Serif Display', serif;
-  font-size: 2.2rem;
-  font-weight: 400;
-  color: #fff;
-  line-height: 1;
-  letter-spacing: -0.02em;
-  text-shadow: 0 0 20px rgba(201, 169, 110, 0.18);
-}
-.sunset-colon {
-  animation: colon-breathe 2s ease-in-out infinite;
-  display: inline-block;
-  font-size: 0.75em;
-  vertical-align: middle;
-  position: relative;
-  top: -0.08em;
-  letter-spacing: 0;
-}
-@keyframes colon-breathe {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.08; }
-}
-.sunset-footer-text {
-  text-align: center;
-}
-.sunset-footer-location {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 1.05rem;
-  font-weight: 400;
-  letter-spacing: 0.04em;
-  color: rgba(228, 218, 202, 0.92);
-  margin-bottom: 0.2rem;
-  line-height: 1.2;
-}
-.sunset-footer-label {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  font-size: 0.72rem;
-  font-weight: 300;
-  letter-spacing: 0.06em;
-  color: rgba(140, 130, 115, 0.95);
-  margin-bottom: 0;
-}
-.sunset-footer-day {
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.68rem;
-  font-weight: 300;
-  color: rgba(201, 169, 110, 0.5);
-  letter-spacing: 0.08em;
-  margin-top: 0.08rem;
-}
-.sunset-location-wrap {
-  position: relative;
-}
-.sunset-location-form {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
-  margin-top: 0.45rem;
-  border-bottom: 1px solid rgba(201, 169, 110, 0.12);
-}
-.sunset-suggestions {
-  position: absolute;
-  bottom: calc(100% + 6px);
-  left: 0;
-  right: 0;
-  list-style: none;
-  margin: 0;
-  padding: 0.25rem 0;
-  background: #161209;
-  border: 1px solid rgba(201, 169, 110, 0.22);
-  z-index: 10;
-  animation: suggestions-in 0.2s cubic-bezier(0.76, 0, 0.24, 1);
-}
-@keyframes suggestions-in {
-  from { opacity: 0; transform: translateY(4px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-.sunset-suggestion-item {
-  display: block;
-  width: 100%;
-  background: transparent;
-  border: none;
-  padding: 0.48rem 0.75rem;
-  text-align: left;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.8rem;
-  font-weight: 400;
-  letter-spacing: 0.03em;
-  color: rgba(230, 222, 210, 0.92);
-  cursor: pointer;
-  transition: color 0.2s ease, background 0.2s ease;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.sunset-suggestion-item:hover {
-  color: #fff;
-  background: rgba(201, 169, 110, 0.1);
-}
-.sunset-location-input {
-  flex: 1;
-  min-width: 0;
-  background: transparent;
-  border: none;
-  padding: 0.25rem 0.1rem;
-  font-family: 'Cormorant Garamond', serif;
-  font-size: 0.72rem;
-  font-weight: 300;
-  letter-spacing: 0.08em;
-  color: rgba(210, 200, 185, 0.8);
-}
-.sunset-location-input::placeholder {
-  color: rgba(150, 140, 125, 0.86);
-}
-.sunset-location-btn {
-  background: transparent;
-  border: none;
-  padding: 0.25rem 0.3rem;
-  color: rgba(201, 169, 110, 0.5);
-  cursor: pointer;
-  line-height: 1;
-  display: flex;
-  align-items: center;
-  transition:
-    color 0.45s ease,
-    transform 0.45s cubic-bezier(0.76, 0, 0.24, 1),
-    filter 0.45s ease;
-}
-.sunset-location-btn:hover {
-  color: var(--gold);
-  transform: translateX(4px);
-  filter: drop-shadow(0 0 3px rgba(201, 169, 110, 0.4));
-}
-.sunset-location-btn svg {
-  width: 13px;
-  height: 13px;
-  stroke: currentColor;
-  stroke-width: 1.4;
-  fill: none;
-}
-
 .footer-bottom {
   border-top: 1px solid rgba(255, 255, 255, 0.04);
   /* Horizontal padding matches .footer-contact / .footer-nav (3rem = 48px)
@@ -562,39 +334,20 @@
   .footer-inner-wrap {
     grid-template-columns: 1fr 1fr;
   }
-  .footer-sunset::before {
-    display: none;
-  }
   .footer-contact {
     padding: 2rem 2rem;
   }
   .footer-nav {
     padding: 2rem 2rem;
   }
-  .footer-sunset {
-    grid-column: 1 / 3;
-    border-left: none;
-    border-top: 1px solid rgba(201, 169, 110, 0.07);
-    flex-direction: row;
-    gap: 3rem;
-    padding: 2.5rem;
-  }
-  .sunset-clock-wrap {
-    width: 150px;
-    height: 150px;
-    margin-bottom: 0;
-  }
-  .sunset-time-value {
-    font-size: 1.8rem;
-  }
-  .sunset-footer-text {
-    text-align: left;
-  }
 }
 
 @media (max-width: 600px) {
+  /* Two short columns on a phone: sized by their content rather than held
+     open to the desktop height. */
   .footer-inner-wrap {
     grid-template-columns: 1fr 1fr;
+    min-height: 0;
   }
   .footer-contact {
     padding: 1.8rem 1.4rem;
@@ -618,28 +371,6 @@
   .footer-bottom .footer-legal {
     justify-content: center;
   }
-  .footer-sunset {
-    grid-column: 1 / 3;
-    flex-direction: row;
-    align-items: center;
-    gap: 2rem;
-    padding: 2rem 1.4rem;
-    border-left: none;
-    border-top: 1px solid rgba(201, 169, 110, 0.07);
-  }
-  .sunset-clock-wrap {
-    width: 132px;
-    height: 132px;
-    margin-bottom: 0;
-    flex-shrink: 0;
-  }
-  .sunset-time-value {
-    font-size: 1.6rem;
-  }
-  .sunset-footer-text {
-    text-align: left;
-  }
-
   /* Touch targets. Every control down here was 21–33px tall; each now has a
      44px hit area. Where the row spacing allows it the area is invisible
      (padding cancelled by a negative margin, or a pseudo-element), so the
@@ -681,18 +412,8 @@
     margin: -12px 0;
   }
   /* 16px is the size below which iOS Safari zooms the page on focus. */
-  .footer-input,
-  .sunset-location-input {
+  .footer-input {
     font-size: 16px;
-  }
-  .sunset-location-input {
-    min-height: 44px;
-    padding: 0.5rem 0.1rem;
-  }
-  .sunset-location-btn {
-    min-width: 44px;
-    min-height: 44px;
-    justify-content: center;
   }
 }
 

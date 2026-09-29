@@ -11,13 +11,13 @@
 | `Navbar` | **Client** (`@sdarm/ui`) | Fixed nav; transparent → frosted glass on scroll. Mobile hamburger menu. Links, hard-coded in this order (#207): Lieder · Bibel (`{treasures}/bible`) · Schätze · SBL (`SBL_URL`, default `https://sbl.sdarm.life`, no `?theme=` — the static page does not read it) · Events · Glauben · Kontakt; the footer's link list repeats it. Active state is by host, plus the `/bible` path on the treasures host. Seven links fit inline down to 768px in both locales (narrowest gap ≈36px), so the burger breakpoint stays at 767px. Uses `useTranslations('common.nav')`. Includes language switcher (DE/EN) and a sun/moon theme toggle that dispatches `sdarm:toggle-theme`. Control colours come from two tiers on `.site-nav` — see [Navbar contrast tiers](#navbar-contrast-tiers). |
 | `HeroWelcome` | **Server** (async) | 3D Earth landing hero — renders `<PlanetEarth />` with grain overlay, badge, title, subtitle, and CTA link to `/{locale}/about`. Uses `web.heroWelcome` i18n namespace. |
 | `PlanetEarth` | **Client** | Three.js WebGL globe with day/night textures, atmosphere shader, cloud layer. Self-hosted textures in `/public/textures/` (MIT, no CDN, DSGVO clean). |
-| `StatsGrid` | **Client** | Bento grid of five blocks — the homepage's main section. Reads `HomeGridConfig` from the `home_grid` KV key, falls back to the built-in defaults. Fits every headline to its card. |
+| `StatsGrid` | **Client** | Bento grid of six blocks — the homepage's main section, including the sunset clock card. Reads `HomeGridConfig` from the `home_grid` KV key, falls back to the built-in defaults. Fits every headline to its card. |
 | `NewsSection` | **Client** | Former masonry section, replaced on the homepage by `StatsGrid`. File and `styles/news.css` are kept but neither is rendered nor imported. |
 | `ProductsSection` | **Client** | 3-col editorial banner — category tabs, central image, text panel, counter/arrows |
 | `ScriptureVerseSection` | **Client** | Daily rotating Scripture verse with `QuoteShareModal`. Verse rotated hourly from `lib/verses.ts` (DE + EN). |
 | `GlaubensLongRead` | **Client** | 25 SDA Reform faith articles with accordion and hanging number layout. Detail content from sta-ref.de. |
 | `QuoteShareModal` | **Client** | Canvas-rendered verse share images. Themes: dark/light/paper. Formats: landscape (16:9), square (1:1), portrait (4:5). |
-| `Footer` | **Client** (`@sdarm/ui`) | Dark theme — dot-grid, 3-column grid: contact+subscribe, nav links, location-aware sunset clock. Uses `useTranslations('common.footer')`. |
+| `Footer` | **Client** (`@sdarm/ui`) | Always dark — contact+subscribe and nav links over the `CommunityMap` backdrop. Uses `useTranslations('common.footer')`. The sunset clock is no longer here; it is a `StatsGrid` card on the home page. |
 
 **Not rendered on home page** (files kept for future use): `VideoSection`, `SongbookSection`, `AboutSection`, `BgCanvas`.
 
@@ -60,21 +60,23 @@ Server component (async). Renders the home page landing hero — no client bundl
 
 `'use client'`. The homepage's main section, in place of the old Releases masonry.
 
-**Layout.** Outer `display: grid` of three equal columns; each column is a flex stack sharing one gap, so the column bottoms line up. The heights do the arithmetic and are the reason no sixth block can be added:
+**Layout.** Outer `display: grid` of three equal columns; each column is a flex stack sharing one gap, so the column bottoms line up. The heights do the arithmetic and are the reason no block can be added or moved:
 
 ```
-col 1  724
+col 1  350 + 24 + 350 = 724   (plan + sunset; plan alone is 724)
 col 2  420 + 24 + 280 = 724
 col 3  350 + 24 + 350 = 724
 ```
 
-**The five blocks.** `plan` (reading plan, photo, external link) · `verse` (verse of the hour, opens `QuoteShareModal`) · `invite` (invitation, links to Kontakt) · `book` (latest treasure, from the API) · `faith` (25 points, ghost numeral).
+**The six blocks.** `plan` (reading plan, photo, external link) · `sunset` (the sunset clock, see [SunsetClock](#sunsetclock-sabbath--sunset-card)) · `verse` (verse of the hour, opens `QuoteShareModal`) · `invite` (invitation, links to Kontakt) · `book` (latest treasure, from the API) · `faith` (25 points, ghost numeral).
+
+**The sunset card shares column 1 with the reading plan.** With both visible the column gets `.stats__col--split` and the plan drops from 724 to 350, so column 1 repeats column 3's rhythm and the middle column stays the offset one. Hide either card in the admin and the other keeps the column as it was — the plan goes back to 724. The slot was picked for balance at every width: at ≤1024px column 1 is the full-width banner row, and split it becomes plan | sunset side by side (350 each) above the two columns; at ≤640px the two stack (plan 280, sunset 216) and the clock turns sideways — rings left, city, countdown and search right — because a half-width card would leave it ~130px.
 
 **Headline fitting.** Card text varies far too much for one type size — the verse alone runs 21 to 112 characters. An effect steps `[data-fit]` elements down a fixed size ladder until the card fits. It measures against the card's `min-height`, **not** its current height: a card that has already overflowed reports the grown height and every size then looks like it fits, which silently knocks the columns out of alignment. It also checks `scrollWidth` so a single long word wraps instead of running past the card edge.
 
 **Verse emphasis.** `splitVerse()` in [lib/verses.ts](../apps/web/app/lib/verses.ts) picks one word to mark: a concept (`Liebe`, `Gnade`, `Hirte`, `erquicken`, …) first, the divine name only if the verse carries no concept, and the longest word as a last resort. Concepts come first because `Gott` appears in most verses — marking it every hour marks nothing. Across the 32 German verses this picks 25 distinct words. The mark is a hand-drawn SVG stroke, not a rectangle.
 
-**No section heading.** The five cards speak for themselves; there is no eyebrow and no `<h2>` above them. `HomeGridConfig` therefore carries `blocks` only.
+**No section heading.** The cards speak for themselves; there is no eyebrow and no `<h2>` above them. `HomeGridConfig` therefore carries `blocks` only.
 
 **Card heights are fixed, not floors.** Each is one number on `--stats-card-h` applied as `height`. As a `min-height` a long verse pushed its card taller, and because the mobile columns are balanced by those heights (240 + 12 + 192 = 444 = 216 + 12 + 216) the two columns stopped ending level — 37px apart at 360px. It looked intermittent only because the verse rotates hourly and only the long ones did it.
 
@@ -86,7 +88,7 @@ col 3  350 + 24 + 350 = 724
 
 **`SHOW_VERSE_SAVE` is temporarily `false`** — the save-as-image affordance on the verse card is hidden while the image `QuoteShareModal` produces is still being designed. The button and the modal are untouched underneath. Note the whole verse card is still clickable and opens the same modal.
 
-**Config.** `HomeGridConfig` decides visibility, clickability, link, label/button visibility, per-locale text overrides and the image (key, crop, scrim, text colour). Empty text means "use the translation", so copy stays in the message files unless an editor overrides it.
+**Config.** `HomeGridConfig` decides visibility, clickability, link, label/button visibility, per-locale text overrides and the image (key, crop, scrim, text colour). The `sunset` block uses only visibility and the label — it ships with `clickable: false` and `showButton: false`, and `StatsGrid` renders no link, headline, button or image for it. A `home_grid` value stored before the block existed has no `sunset` entry; `parseGridConfig()` fills it from the defaults, so the card appears without an edit. Empty text means "use the translation", so copy stays in the message files unless an editor overrides it.
 
 **Preview.** With `?gridPreview=1` the section listens for a `sdarm:grid-preview` `postMessage` and renders that draft instead, and scrolls itself into view. The admin's preview is this page in an iframe, so it cannot drift from what visitors see.
 
@@ -112,44 +114,42 @@ col 3  350 + 24 + 350 = 724
 
 **Layout:** `.prod-banner-stage` is a CSS grid with 3 columns: vertical category tabs (`.prod-cats`) | central image (`.prod-img-wrap`) | text panel (`.prod-text-panel`) + counter/arrows (`.prod-nav`). Clicking a category tab jumps to the first product in that category.
 
-### Footer sunset clock
+### Footer
 
-`'use client'`. 3-column CSS grid (`1fr 1fr 260px`). Props: `config?: FooterConfig`, `apiUrl?`, `webUrl?`, `songbookUrl?`, `eventsUrl?`, `treasuresUrl?`. All visible text uses `useTranslations('common.footer')` and `useTranslations('common.clock')`.
+`'use client'` (`@sdarm/ui`). Props: `config?: FooterConfig`, `apiUrl?`, `webUrl?`, `songbookUrl?`, `eventsUrl?`, `treasuresUrl?`, `sblUrl?`, `locale?`. All visible text uses `useTranslations('common.footer')` and `useTranslations('common.nav')`.
+
+**Columns:** `1fr 1fr 2fr` — contact (heading, social links, email subscribe form with status feedback) and nav links in the left half; the right half is left open to the `CommunityMap` behind them, which centres on DE/AT/CH. ≤900px: two columns. ≤600px: two columns sized by their content (the desktop `min-height` is dropped).
 
 **The newsletter capsule has one fixed width** (`max-width: 220px`). It used to start at 150px and animate to 220px on focus or once text was typed; that moved the submit button 70px out from under the pointer mid-click and reflowed the column beside it, while revealing nothing — the field was equally usable at either width (issue #132). Only colour reacts to focus now.
 
-**Columns:**
-1. **Contact** — heading, social links (fb/wa/ig/yt), email subscribe form with status feedback
-2. **Nav** — navigation links (translated via `useTranslations('common.nav')`)
-3. **Sunset clock** — SVG arc ring + countdown label
+**CommunityMap user-marker.** A single golden ring + dot is rendered at the visitor's sunset location (`useSunsetLocation()`, see below) whenever it falls inside the map BBOX (Europe view); outside it (e.g. Tokyo via the search) no marker is drawn. The marker is the only visual indicator of "this is the picked location" — there is no separate active-pin highlight on LOCATION pins. Pins and capitals carry an `onPick` handler wired to the same shared setter, but they are not reachable: `.footer-inner-wrap` sits above the map (z-index 2) across the whole footer, so it takes every click. That was already so while the clock lived in the footer.
 
-**Sunset clock logic:**
-- Sunrise/sunset times computed locally via `suncalc` (no third-party API call → DSGVO clean). v2 is ESM-only — import `{ getTimes }`, not a default — and returns `null` for a sun event that never occurs at that latitude, so `dateToMsOfDay()` maps `null` to `NaN` (see [gotchas.md](gotchas.md#third-party-api-breaks))
-- Default location: Pforzheim, Baden-Württemberg. Persisted user picks override the default via `localStorage.sdarm_sunset_location`
-- Updates every 1 s via `setInterval`; SVG ring transition is `0.9s` cubic-bezier
-- SVG ring: `r=76`, `CIRC ≈ 477.52px`, `strokeDashoffset = CIRC * (1 - progress)`
+### SunsetClock (Sabbath · Sunset card)
 
-**Location state ownership:**
-Footer is the single owner of `current: StoredLocation = { lat, lng, name, slug? }`. The `<CommunityMap />` and the location autocomplete input are presentational consumers — they call `onPick(loc)` to change the current location. Storage helpers live in [packages/ui/src/lib/sunset-location.ts](../packages/ui/src/lib/sunset-location.ts) (`readStoredLocation`, `writeStoredLocation`, `findLocationSlug`). No CustomEvents, no global event-bus.
+`'use client'` (`@sdarm/ui`, `components/SunsetClock.tsx`). Rendered by `apps/web`'s `StatsGrid` as the `sunset` card; no other app shows it. Props: `apiUrl?` (for the location search — `StatsGrid` receives it from the page as a prop, since `API_URL` is server-only). Text from `useTranslations('common.clock')`; the card's eyebrow is `web.stats.sunset.label` («Sabbat · Sonnenuntergang» / «Sabbath · Sunset»), overridable per locale in the admin.
 
-**CommunityMap user-marker:**
-A single golden ring + dot is rendered at `current.lat/lng` whenever the picked location falls inside the map BBOX (Europe view). For locations outside the BBOX (e.g. Tokyo via Nominatim search), no marker is rendered but the sunset widget still works. The marker is the only visual indicator of "this is the picked location" — there is no separate active-pin highlight on LOCATION pins.
+**Styles.** `packages/ui/src/styles/sunset-clock.css`, imported by `apps/web/app/layout.tsx` directly rather than through the package's `index.css` — only web renders the clock, and an `@import`-ed file does not hot-reload under Turbopack. The component has no surface of its own: colours come from `--sunset-text`, `--sunset-muted`, `--sunset-accent`, `--sunset-surface`, `--sunset-line` (defaults: the site's dark tokens), and `--sunset-size` sets the ring box, from which the time's type size is derived so "14:30" always clears the inner ring. `stats-grid.css` maps them onto the section's `--stats-*` palette, so the card is a white card in light theme and an espresso card in dark, like its neighbours. In light theme the outer ring keeps more of the umbra (`--sunset-outer-mix: 62%`) so it does not fade out on white.
 
-**Location autocomplete input:**
-The input under the clock searches via `GET /api/v1/geocode?q=…&limit=N` — a KV-cached proxy to Nominatim that hides the user's IP from OpenStreetMap (DSGVO). Picking any suggestion calls `handlePickLocation`, which runs `findLocationSlug(name)` against `LOCATIONS` so a typed match (e.g. "Frankfurt") highlights the corresponding congregation pin via the user-marker landing on it.
+**Ring in ring.** Two 16-unit strokes at r 78 and r 54 in a 172-unit box, dim full tracks, round-capped arcs from 12 o'clock clockwise, both showing *elapsed* progress. Outer: the current period (day until sunset, night until sunrise, the Sabbath until it ends). Inner: the week from the end of the last Sabbath (Saturday sunset) to the start of the next (Friday sunset), full for the whole Sabbath. The SVG is `role="img"` with an `aria-label` built from `ringDay` + `ringWeek`/`ringWeekSabbath`. Updates every 1 s via `setInterval`.
+
+**Sun times.** Computed locally via `suncalc` (no third-party API call → DSGVO clean). v2 is ESM-only — import `{ getTimes }`, not a default — and returns `null` for a sun event that never occurs at that latitude, so `dateToMsOfDay()` maps `null` to `NaN` (see [gotchas.md](gotchas.md#third-party-api-breaks)).
+
+**Location state.** `useSunsetLocation(defaultName)` in [packages/ui/src/lib/sunset-location.ts](../packages/ui/src/lib/sunset-location.ts) is the single source: it starts at the default (Pforzheim, Baden-Württemberg — also the server render), restores `localStorage.sdarm_sunset_location` after mount, and a pick is written back and announced with a `sdarm:sunset-location` event on `window` (plus the native `storage` event across tabs). Both consumers — the clock and the footer map's marker — use it, so a search on the home card moves the marker in the footer below it.
+
+**Location search.** The input under the clock searches via `GET /api/v1/geocode?q=…&limit=N` — a KV-cached proxy to Nominatim that hides the user's IP from OpenStreetMap (DSGVO). Picking a suggestion runs `findLocationSlug(name)` against `LOCATIONS`, so a typed congregation city lands the map marker on its pin. The suggestion list opens upward over the rings, so the card must not clip (`overflow` stays visible).
 
 **4 Sabbath-aware states** (determined by `new Date().getDay()` + time of day):
 
 | Condition | `label` | `timeVal` |
 |---|---|---|
 | Friday (dow=5), daytime | `t('untilSabbath')` | today's sunset |
-| Saturday (dow=6) | `t('sabbathEnds')` | today's sunset |
+| Friday after sunset / Saturday before sunset | `t('sabbathEnds')` | the sunset that ends it |
 | Any other day, daytime | `t('untilSunset')` | today's sunset |
 | Any day, nighttime | `t('untilSunrise')` | tomorrow's sunrise |
 
-**Responsive:** tablet (≤900px) — clock spans `grid-column: 1 / 3`, row layout with clock left + text right; mobile (≤600px) — all columns stack, clock column-spans full width.
+**Screenshot mode.** `?screenshotTime=HH:MM` fixes the time and the weekday (Wednesday, or `?screenshotDay=0–6`); `?screenshotLocation=<name>` fixes the location to Pforzheim's coordinates under that name. See [testing.md](testing.md#screenshot-query-parameters).
 
-**Fallback:** API fetch failure is silently swallowed; clock stays at `'–:––'` / `'…'` placeholder.
+**Fallback.** Until the first tick (and in the server HTML) the time shows `'–:––'` and no arcs are drawn; a failed geocode request is silently ignored.
 
 ### Navbar contrast tiers
 
@@ -269,7 +269,7 @@ When adding a new cross-app `<Link>` or `<a>`, **always** wrap the href in `with
 | `ConfigEditor` | Config fields grouped by section. Uses `ImagePicker` for image keys. `bible_translations` is deliberately not rendered here — it is managed by `BibleSettings`. `home_grid` is likewise excluded — it has its own page. |
 | `BibleSettings` | Renders at `/bible`. Curates one unified library of **both** self-hosted (`sdarm-bible` D1) and YouVersion translations, each row tagged with a source badge (`Self-hosted` / `YouVersion`) so an operator is never unsure which one is serving a given text. Top section is the ordered public allowlist (reorder / disable), fetched via `GET /admin/bible/translations` + the KV allowlist and saved with `PUT /admin/bible/allowlist` — **not** the old `PUT /admin/config/bible_translations`. A second section lists library records not yet public (self-hosted translations awaiting publication, or previously-disabled YouVersion ones) with an "Enable" action. Each row can expand an inline `LicenseEditor` and, for self-hosted rows, shows read-only ingest status (verse/book count, ingest date, offline-bundle presence, `lxxPsalms` flag) — ingest itself is a script run by hand, never a UI upload. A per-row "Remove now" `ConfirmDialog` action calls `POST /admin/bible/takedown`, which drops the id from the allowlist **and** purges the edge cache immediately, unlike a plain disable+save (the dialog copy says as much, and that it cannot reach `apps/treasures`' own Data Cache or an already-downloaded offline bundle). Below that: the copyright-jurisdiction selector, a read-only reference list of YouVersion licenses, a paginated language-filtered YouVersion catalog browse (picking an unrecorded Bible first calls `POST /admin/bible/translations` to create its library record), and the curated public-domain reference panel. Public-domain verdicts come from `domains/bible/publicDomain.ts`; the "Not licensed" badge comes from the catalog's `licensed` flag — there is deliberately **no** license-acceptance badge (see [api.md](api.md#bible-content)). |
 | `LicenseEditor` | Per-translation license record form used inline by `BibleSettings`. Edits basis (public-domain / permission / provider), rights holder, verbatim notice, provenance, permission reference/date, and the four gates (`allowDownload`, `allowOffline`, `allowSearchIndex`, `allowProjector`) plus `maxVersesPerRequest`. Each gate is labelled with **where** it is enforced — three by the API (bundle route, search route, chapter/parallel truncation), `allowProjector` only by the site UI, since the projector reads the same chapter route as the reader and there is no server-side way to distinguish the two. Saves via `PATCH /admin/bible/translations/{id}` (id URL-encoded, e.g. `loc%3Aluther1912`). |
-| `HomeGridEditor` | Homepage grid settings — five blocks, per-locale text, images, and a live preview of the real site in an iframe |
+| `HomeGridEditor` | Homepage grid settings — six blocks, per-locale text, images, and a live preview of the real site in an iframe |
 | `SubscriberList` | Active subscribers table with Remove. Paginated (20/page) |
 | `Pagination` | Shared offset-based pagination. Props: `page`, `total`, `limit`, `onChange` |
 
@@ -586,6 +586,7 @@ import '@sdarm/ui/src/styles/index.css';
 | `ThemeProvider` | `@sdarm/ui` | Client component. Place inside `<body>` once per `[locale]/layout.tsx`. Listens for `sdarm:toggle-theme` and toggles `data-theme` on `<html>`. Persists to `localStorage`. No visible output. |
 | `ConnectedNavbar` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads nav translations internally. Use in every locale layout. |
 | `ConnectedFooter` | `@sdarm/ui` | Server component. Pass `locale` prop. Reads footer translations + `apiUrl` from env internally. Use in every locale layout. |
+| `SunsetClock` | `@sdarm/ui` | Client component. The two-ring sunset clock with its location search; pass `apiUrl`. Brings no surface — map `--sunset-*` onto the host's palette and import `@sdarm/ui/src/styles/sunset-clock.css` in the app that renders it. Used by `apps/web`'s `StatsGrid`. |
 | `PageHero` | `@sdarm/ui` | Full-bleed dark landing hero. Pass `title` (ReactNode), `eyebrow?`, `subtitle?`, `decoration?` (SVG), `scrollHint?`. Already has grain, fog, deco-circle, entrance animations — **do not re-implement these**. |
 | `ScriptureVerseSection` | `@sdarm/ui` | Centered italic quote band. Pass `text` and `reference`. |
 | `ComingSoon` | `@sdarm/ui` | Placeholder for unreleased pages. Pass `title` and `subtitle`. |
@@ -670,7 +671,9 @@ Settings panel on the left, preview on the right. Route `/home-grid`, domain fol
 
 **Per block:** show/hide · clickable · link (empty = built-in destination) · open in new tab · show label · show button · label / headline / button text per locale · image with crop, scrim strength and text colour.
 
-The section has no heading of its own — the five cards carry it. There is no eyebrow or title to configure.
+The section has no heading of its own — the cards carry it. There is no eyebrow or title to configure.
+
+**Fixed slots.** Blocks cannot be added or reordered — each has a fixed slot, listed under its name. The `sunset` block ("Sabbath · Sunset", column 1 under the reading plan) shows only *Show this block*, *Show label* and the label text: its content is the clock itself, and it has no link, headline, button or image.
 
 **Preview is the real site.** Each pane is an `<iframe>` of `${NEXT_PUBLIC_WEB_URL}/{locale}?gridPreview=1&theme=…`, and the draft config goes in over `postMessage` on every keystroke. Rebuilding the card inside the admin would mean two implementations and a preview that lies the first time either changes. Theme (dark / light / both side by side), locale and width (desktop / tablet / mobile) are switchable; the iframe renders at its true width and is scaled with a transform, because resizing it would trip a different media query and preview the wrong layout.
 

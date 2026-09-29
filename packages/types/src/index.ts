@@ -355,15 +355,16 @@ export interface BibleSearchHitDto {
 }
 
 /* ── Homepage bento grid ──────────────────────────────────────────────────
-   The grid has exactly five blocks and no way to add a sixth: the column
-   arithmetic (724 = 420+24+280 = 350+24+350) is what keeps the three columns
-   ending on the same line, and an extra block would break it. So the config
-   configures the five that exist rather than describing an arbitrary list. */
+   The grid has a fixed set of six blocks in fixed slots, and no way to add or
+   move one: the column arithmetic (350+24+350 = 420+24+280 = 350+24+350 = 724)
+   is what keeps the three columns ending on the same line, and a block in
+   another slot would break it. So the config configures the six that exist
+   rather than describing an arbitrary list. */
 
-export type GridBlockId = 'plan' | 'verse' | 'invite' | 'book' | 'faith';
+export type GridBlockId = 'plan' | 'sunset' | 'verse' | 'invite' | 'book' | 'faith';
 
 /** Fixed slots, in render order. Each block occupies exactly one. */
-export const GRID_BLOCK_IDS: GridBlockId[] = ['plan', 'verse', 'invite', 'book', 'faith'];
+export const GRID_BLOCK_IDS: GridBlockId[] = ['plan', 'sunset', 'verse', 'invite', 'book', 'faith'];
 
 export type GridScrim = 'none' | 'light' | 'medium' | 'strong';
 export type GridTextColor = 'auto' | 'light' | 'dark';
@@ -451,6 +452,11 @@ export function defaultGridConfig(): HomeGridConfig {
   blocks.invite.showLabel = false;
   blocks.faith.showLabel = false;
   blocks.book.showButton = false;
+  // The sunset card is the clock and its location field — nothing to follow and
+  // no button. A stored config from before it existed has no entry for it, so
+  // parseGridConfig() fills these in and the card appears without an edit.
+  blocks.sunset.clickable = false;
+  blocks.sunset.showButton = false;
 
   return { blocks };
 }
