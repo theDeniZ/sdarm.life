@@ -24,6 +24,7 @@ import { resolveParallelPsalmChapters } from '@sdarm/types';
 import type { Bindings } from '../../types';
 import { BIBLE_TTL, kvKey, withCache } from './cache';
 import * as local from './local';
+import { mergeParallelVerses } from './parallel';
 import * as yv from './youversion';
 
 export type Translation = BibleTranslationDto;
@@ -237,34 +238,42 @@ export async function getChapter(
   return { translation: textIdentity(translation), book, chapter, verses, truncated };
 }
 
+/**
+ * Two to four translations of one chapter, aligned by verse number.
+ *
+ * The first translation is the primary one: its chapter number is the one
+ * requested, and every other side's Psalm chapter is mapped relative to it
+ * (LXX ↔ Hebrew), so all columns show the same psalm.
+ */
 export async function getParallelChapter(
   env: Bindings,
-  a: Translation,
-  b: Translation,
+  translations: Translation[],
   bookCode: string,
   chapter: number,
 ): Promise<ParallelChapterDto | null> {
-  // Psalms are numbered differently between LXX and Hebrew traditions; map the
-  // B side so both columns show the same psalm.
-  const { chapterA, chapterB } = resolveParallelPsalmChapters(a.lxxPsalms, b.lxxPsalms, bookCode.toUpperCase(), chapter);
-  const [chA, chB] = await Promise.all([getChapter(env, a, bookCode, chapterA), getChapter(env, b, bookCode, chapterB)]);
-  if (!chA || !chB) return null;
+  const [primary] = translations;
+  const code = bookCode.toUpperCase();
+  const chapters = await Promise.all(
+    translations.map((t) =>
+      getChapter(env, t, code, resolveParallelPsalmChapters(primary.lxxPsalms, t.lxxPsalms, code, chapter).chapterB),
+    ),
+  );
+  if (chapters.some((ch) => !ch)) return null;
+  const loaded = chapters as BibleChapterDto[];
 
-  const merged = new Map<number, { verse: number; a: string | null; b: string | null }>();
-  for (const v of chA.verses) merged.set(v.verse, { verse: v.verse, a: v.text, b: null });
-  for (const v of chB.verses) {
-    const existing = merged.get(v.verse);
-    if (existing) existing.b = v.text;
-    else merged.set(v.verse, { verse: v.verse, a: null, b: v.text });
-  }
-
-  // Each side went through `getChapter`, so each side's own cap has already been
-  // applied. `ParallelChapterDto` carries no `truncated` flag to report it with.
+  // Each side went through `getChapter`, so each side's own verse cap has
+  // already been applied — and is reported per side as `truncated`.
   return {
-    bookCode: chA.book.code,
-    a: { ...textIdentity(a), chapter: chapterA },
-    b: { ...textIdentity(b), chapter: chapterB },
-    verses: [...merged.values()].sort((x, y) => x.verse - y.verse),
+    bookCode: loaded[0].book.code,
+    translations: loaded.map((ch, i) => ({
+      ...textIdentity(translations[i]),
+      abbreviation: translations[i].abbreviation,
+      language: translations[i].language,
+      chapter: ch.chapter,
+      bookName: ch.book.name,
+      truncated: ch.truncated,
+    })),
+    verses: mergeParallelVerses(loaded.map((ch) => ch.verses)),
   };
 }
 

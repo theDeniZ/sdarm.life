@@ -320,22 +320,48 @@ export interface BibleChapterDto {
   truncated: boolean;
 }
 
+/** Most translations one parallel request may carry — more is not legible on a projector. */
+export const PARALLEL_MAX_TRANSLATIONS = 4;
+
 export interface ParallelVerseDto {
   verse: number;
-  a: string | null; // null when this side has no verse N
-  b: string | null;
+  /**
+   * One entry per translation, in the order of `ParallelChapterDto.translations`;
+   * null when that translation has no verse with this number.
+   */
+  texts: (string | null)[];
+  /** Deprecated alias of `texts[0]` — present only on the legacy `?a=&b=` form. */
+  a?: string | null;
+  /** Deprecated alias of `texts[1]` — present only on the legacy `?a=&b=` form. */
+  b?: string | null;
 }
 
 export interface ParallelSideDto extends BibleTextTranslationDto {
   /** The chapter actually read on this side — differs across LXX/Hebrew Psalms. */
   chapter: number;
+  abbreviation: string;
+  /** BCP-47 short tag, e.g. 'ru' — drives the language label beside the text. */
+  language: string;
+  /** The book's name in this translation's own language, e.g. 'Hesekiel'. */
+  bookName: string;
+  /** True when this side's `license.maxVersesPerRequest` cut the chapter short. */
+  truncated: boolean;
 }
 
+/**
+ * Two to four translations of one chapter, aligned by verse number.
+ *
+ * `translations` is in request order — the first is the primary one, and the
+ * Psalm chapter of every other side is mapped relative to it.
+ */
 export interface ParallelChapterDto {
   bookCode: string;
-  a: ParallelSideDto;
-  b: ParallelSideDto;
+  translations: ParallelSideDto[];
   verses: ParallelVerseDto[];
+  /** Deprecated alias of `translations[0]` — present only on the legacy `?a=&b=` form. */
+  a?: ParallelSideDto;
+  /** Deprecated alias of `translations[1]` — present only on the legacy `?a=&b=` form. */
+  b?: ParallelSideDto;
 }
 
 /**

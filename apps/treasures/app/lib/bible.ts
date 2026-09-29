@@ -91,9 +91,9 @@ export async function fetchTranslation(code: string): Promise<BibleTranslation |
   }
 }
 
-export async function fetchBooks(code: string, opts: FetchOpts = {}): Promise<BibleBook[]> {
+export async function fetchBooks(code: string, opts: FetchOpts = {}, apiBase: string = API): Promise<BibleBook[]> {
   try {
-    const res = await fetch(`${API}/bible/translations/${code}/books`, {
+    const res = await fetch(`${apiBase}/bible/translations/${code}/books`, {
       next: { revalidate: opts.revalidate ?? METADATA_REVALIDATE },
     });
     if (!res.ok) return [];
@@ -116,11 +116,23 @@ export async function fetchBook(code: string, bookCode: string): Promise<BibleBo
   }
 }
 
-export async function fetchChapter(code: string, bookCode: string, chapter: number): Promise<BibleChapter | null> {
+/**
+ * `projector` asks the API to refuse a translation whose license keeps it off
+ * a shared screen (403 → null here). Every fetch that feeds the projector sets
+ * it, so the gate holds in the API rather than in a component.
+ */
+export async function fetchChapter(
+  code: string,
+  bookCode: string,
+  chapter: number,
+  opts: { projector?: boolean; apiBase?: string } = {}
+): Promise<BibleChapter | null> {
   try {
-    const res = await fetch(`${API}/bible/translations/${code}/books/${bookCode}/chapters/${chapter}`, {
-      next: { revalidate: CHAPTER_REVALIDATE },
-    });
+    const query = opts.projector ? '?use=projector' : '';
+    const res = await fetch(
+      `${opts.apiBase ?? API}/bible/translations/${code}/books/${bookCode}/chapters/${chapter}${query}`,
+      { next: { revalidate: CHAPTER_REVALIDATE } }
+    );
     if (!res.ok) return null;
     return (await res.json()) as BibleChapter;
   } catch {
@@ -129,23 +141,41 @@ export async function fetchChapter(code: string, bookCode: string, chapter: numb
 }
 
 /**
- * Also called from client components (presenter compare mode), where the
+ * 2–4 translations of one chapter aligned by verse, primary first.
+ *
+ * Also called from client components (the presenter console), where the
  * server-only API_URL is not inlined — those callers pass `apiBase`, threaded
  * down as a prop from the server page.
  */
 export async function fetchParallelChapter(
-  a: string,
-  b: string,
+  codes: string[],
   bookCode: string,
   chapter: number,
-  apiBase: string = API
+  opts: { projector?: boolean; apiBase?: string } = {}
 ): Promise<ParallelChapter | null> {
   try {
-    const params = new URLSearchParams({ a, b, book: bookCode, chapter: String(chapter) });
-    const res = await fetch(`${apiBase}/bible/parallel?${params}`, { next: { revalidate: CHAPTER_REVALIDATE } });
+    const params = new URLSearchParams({ t: codes.join(','), book: bookCode, chapter: String(chapter) });
+    if (opts.projector) params.set('use', 'projector');
+    const res = await fetch(`${opts.apiBase ?? API}/bible/parallel?${params}`, {
+      next: { revalidate: CHAPTER_REVALIDATE },
+    });
     if (!res.ok) return null;
     return (await res.json()) as ParallelChapter;
   } catch {
     return null;
   }
+}
+
+/**
+ * The extra translations named in a chapter URL, in order: `?with=a,b,c`, or
+ * the older single `?compare=b`. The page's own translation and repeats are
+ * dropped, and at most three extras are kept (four on screen in all).
+ */
+export function extraTranslationCodes(primary: string, params: { with?: string; compare?: string }): string[] {
+  const raw = params.with ? params.with.split(',') : params.compare ? [params.compare] : [];
+  const out: string[] = [];
+  for (const c of raw.map((s) => s.trim())) {
+    if (c && c !== primary && !out.includes(c)) out.push(c);
+  }
+  return out.slice(0, 3);
 }

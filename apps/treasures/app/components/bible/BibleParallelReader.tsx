@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
 import { remapPsalmChapter } from '@sdarm/types';
-import type { BibleBook, BibleChapter, BibleTranslation, ParallelChapter } from '../../lib/bible';
+import type { BibleBook, BibleTranslation, ParallelChapter } from '../../lib/bible';
 import {
   DEFAULT_FONT_SCALE,
   FONT_SCALES,
@@ -15,8 +15,8 @@ import {
   type FontScale,
 } from './lastRead';
 import BiblePresenterDashboard from './BiblePresenterDashboard';
+import { displayUrl, openDisplayWindow } from './presenterWindow';
 import BibleLicenseNotice from './BibleLicenseNotice';
-import type { PassageTarget } from './BiblePassagePicker';
 
 interface Props {
   translationA: BibleTranslation;
@@ -24,9 +24,25 @@ interface Props {
   translations: BibleTranslation[];
   books: BibleBook[];
   parallel: ParallelChapter;
+  /** API base for the presenter's client-side fetches. */
+  apiUrl: string;
+  /**
+   * Translations the presenter starts with, primary first — the pair shown
+   * here, or the longer list a `?with=` URL named.
+   */
+  presenterCodes: string[];
 }
 
-export default function BibleParallelReader({ translationA, translationB, translations, books, parallel }: Props) {
+export default function BibleParallelReader({
+  translationA,
+  translationB,
+  translations,
+  books,
+  parallel,
+  apiUrl,
+  presenterCodes,
+}: Props) {
+  const [sideA, sideB] = parallel.translations;
   const t = useTranslations('treasures.bible');
   const locale = useLocale();
   const router = useRouter();
@@ -46,23 +62,23 @@ export default function BibleParallelReader({ translationA, translationB, transl
 
   const prev = useMemo(() => {
     if (!currentBook) return null;
-    if (parallel.a.chapter > 1) return { book: currentBook.code, n: parallel.a.chapter - 1 };
+    if (sideA.chapter > 1) return { book: currentBook.code, n: sideA.chapter - 1 };
     if (bookIdx > 0) {
       const prevBook = books[bookIdx - 1];
       return { book: prevBook.code, n: prevBook.chapterCount };
     }
     return null;
-  }, [bookIdx, books, currentBook, parallel.a.chapter]);
+  }, [bookIdx, books, currentBook, sideA.chapter]);
 
   const next = useMemo(() => {
     if (!currentBook) return null;
-    if (parallel.a.chapter < currentBook.chapterCount) return { book: currentBook.code, n: parallel.a.chapter + 1 };
+    if (sideA.chapter < currentBook.chapterCount) return { book: currentBook.code, n: sideA.chapter + 1 };
     if (bookIdx < books.length - 1) {
       const nextBook = books[bookIdx + 1];
       return { book: nextBook.code, n: 1 };
     }
     return null;
-  }, [bookIdx, books, currentBook, parallel.a.chapter]);
+  }, [bookIdx, books, currentBook, sideA.chapter]);
 
   const showToast = useCallback((msg: string) => {
     setToast(msg);
@@ -81,10 +97,10 @@ export default function BibleParallelReader({ translationA, translationB, transl
       translationName: translationA.name,
       bookCode: parallel.bookCode,
       bookName: currentBook?.name ?? parallel.bookCode,
-      chapter: parallel.a.chapter,
+      chapter: sideA.chapter,
       savedAt: Date.now(),
     });
-  }, [translationA.code, translationA.name, parallel.bookCode, parallel.a.chapter, currentBook]);
+  }, [translationA.code, translationA.name, parallel.bookCode, sideA.chapter, currentBook]);
 
   // Keyboard: ←/→ for chapters
   useEffect(() => {
@@ -123,65 +139,25 @@ export default function BibleParallelReader({ translationA, translationB, transl
 
   function handleSwap() {
     // After swap, B becomes A — the URL chapter is now in B's numbering (which becomes new A's).
-    router.push(buildHref(translationB.code, parallel.bookCode, parallel.b.chapter, translationA.code));
+    router.push(buildHref(translationB.code, parallel.bookCode, sideB.chapter, translationA.code));
   }
 
   function handleSingleView() {
-    router.push(buildHref(translationA.code, parallel.bookCode, parallel.a.chapter));
+    router.push(buildHref(translationA.code, parallel.bookCode, sideA.chapter));
   }
 
   // Build a minimal BibleChapter for the dashboard (it uses chapter only for
   // breadcrumbs in parallel mode — verse text comes from `parallel`).
-  const synthChapter: BibleChapter = useMemo(
-    () => ({
-      translation: {
-        id: translationA.id,
-        code: translationA.code,
-        name: translationA.name,
-        license: translationA.license,
-      },
-      book: currentBook ?? {
-        id: 0,
-        code: parallel.bookCode,
-        number: 0,
-        name: parallel.bookCode,
-        abbreviation: parallel.bookCode,
-        testament: 'OT',
-        chapterCount: 1,
-      },
-      chapter: parallel.a.chapter,
-      verses: parallel.verses.map((v) => ({ verse: v.verse, text: v.a ?? v.b ?? '' })),
-      truncated: false,
-    }),
-    [translationA, currentBook, parallel]
-  );
+  async function openDisplay(codes: string[], bookCode: string, chapterNum: number) {
+    displayWinRef.current = await openDisplayWindow(
+      displayUrl(locale, codes, bookCode, chapterNum),
+      displayWinRef.current
+    );
+  }
 
   async function openPresenter() {
-    let features = `width=${screen.availWidth},height=${screen.availHeight},left=${
-      (screen as Screen & { availLeft?: number }).availLeft ?? 0
-    },top=${(screen as Screen & { availTop?: number }).availTop ?? 0}`;
-    try {
-      type ScreenInfo = {
-        availLeft: number;
-        availTop: number;
-        availWidth: number;
-        availHeight: number;
-        isPrimary: boolean;
-      };
-      const details = await (
-        window as Window & { getScreenDetails?: () => Promise<{ screens: ScreenInfo[] }> }
-      ).getScreenDetails?.();
-      const external = details?.screens.find((s) => !s.isPrimary) ?? details?.screens[0];
-      if (external) {
-        features = `width=${external.availWidth},height=${external.availHeight},left=${external.availLeft},top=${external.availTop}`;
-      }
-    } catch {
-      // fall back to current screen dimensions
-    }
-    const projectorUrl = `/${locale}/bible/${translationA.code}/${parallel.bookCode}/${parallel.a.chapter}?projector=1&compare=${translationB.code}`;
-    const win = window.open(projectorUrl, 'bible-projector-display', features);
-    displayWinRef.current = win;
     setPresenterOpen(true);
+    await openDisplay(presenterCodes, parallel.bookCode, sideA.chapter);
   }
 
   function closePresenter() {
@@ -189,34 +165,6 @@ export default function BibleParallelReader({ translationA, translationB, transl
     // which means keeping the handle too, otherwise the next openPresenter()
     // spawns a second window and the first is left orphaned on screen.
     setPresenterOpen(false);
-  }
-
-  function handlePresenterPick(target: PassageTarget) {
-    // The dashboard has already told the display to navigate; closing the window
-    // here would black out the projector mid-service. Matches BibleChapterReader.
-    setPresenterOpen(false);
-    const verseSuffix = target.verse !== undefined ? `#v${target.verse}` : '';
-    router.push(
-      `/${locale}/bible/${translationA.code}/${target.bookCode}/${target.chapter}?compare=${translationB.code}${verseSuffix}`
-    );
-  }
-
-  function handlePresenterCompare(secondaryCode: string | null) {
-    if (!secondaryCode) {
-      // Switch to single view
-      closePresenter();
-      router.push(buildHref(translationA.code, parallel.bookCode, parallel.a.chapter));
-      return;
-    }
-    // Reload display window + push the operator window URL.
-    const win = displayWinRef.current;
-    if (win && !win.closed) {
-      const params = new URLSearchParams({ projector: '1', compare: secondaryCode });
-      win.location.assign(
-        `/${locale}/bible/${translationA.code}/${parallel.bookCode}/${parallel.a.chapter}?${params.toString()}`
-      );
-    }
-    router.push(buildHref(translationA.code, parallel.bookCode, parallel.a.chapter, secondaryCode));
   }
 
   function handlePickA(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -227,13 +175,13 @@ export default function BibleParallelReader({ translationA, translationB, transl
       translationA.lxxPsalms,
       newTranslation?.lxxPsalms ?? translationA.lxxPsalms,
       parallel.bookCode,
-      parallel.a.chapter
+      sideA.chapter
     );
     router.push(buildHref(newCode, parallel.bookCode, newChapter, translationB.code));
   }
 
   function handlePickB(e: React.ChangeEvent<HTMLSelectElement>) {
-    router.push(buildHref(translationA.code, parallel.bookCode, parallel.a.chapter, e.target.value));
+    router.push(buildHref(translationA.code, parallel.bookCode, sideA.chapter, e.target.value));
   }
 
   function handleBookChange(e: React.ChangeEvent<HTMLSelectElement>) {
@@ -246,7 +194,7 @@ export default function BibleParallelReader({ translationA, translationB, transl
 
   async function handleVerseClick(verse: number) {
     setHighlightedVerse((cur) => (cur === verse ? null : verse));
-    const url = `${window.location.origin}${buildHref(translationA.code, parallel.bookCode, parallel.a.chapter, translationB.code)}#v${verse}`;
+    const url = `${window.location.origin}${buildHref(translationA.code, parallel.bookCode, sideA.chapter, translationB.code)}#v${verse}`;
     try {
       await navigator.clipboard.writeText(url);
       showToast(t('linkCopied'));
@@ -266,7 +214,7 @@ export default function BibleParallelReader({ translationA, translationB, transl
         </Link>
         <span className="bible-breadcrumb-sep">/</span>
         <span className="bible-breadcrumb-current">
-          {currentBook?.name ?? parallel.bookCode} {parallel.a.chapter}
+          {currentBook?.name ?? parallel.bookCode} {sideA.chapter}
         </span>
       </nav>
 
@@ -298,7 +246,7 @@ export default function BibleParallelReader({ translationA, translationB, transl
           </select>
           {currentBook && (
             <select
-              value={parallel.a.chapter}
+              value={sideA.chapter}
               onChange={handleChapterChange}
               className="bible-picker bible-picker-chapter"
               aria-label={t('pickChapter')}
@@ -339,7 +287,7 @@ export default function BibleParallelReader({ translationA, translationB, transl
                 </option>
               ))}
             </select>
-            <div className="bible-parallel-col-chapter">{t('chapter', { n: parallel.a.chapter })}</div>
+            <div className="bible-parallel-col-chapter">{t('chapter', { n: sideA.chapter })}</div>
           </header>
           <header className="bible-parallel-grid__col-header">
             <select
@@ -354,7 +302,7 @@ export default function BibleParallelReader({ translationA, translationB, transl
                 </option>
               ))}
             </select>
-            <div className="bible-parallel-col-chapter">{t('chapter', { n: parallel.b.chapter })}</div>
+            <div className="bible-parallel-col-chapter">{t('chapter', { n: sideB.chapter })}</div>
           </header>
         </div>
         {parallel.verses.map((v) => {
@@ -363,14 +311,18 @@ export default function BibleParallelReader({ translationA, translationB, transl
             <div
               key={v.verse}
               className={`bible-parallel-grid__row${isHighlighted ? ' is-highlighted' : ''}`}
-              onClick={() => (v.a != null || v.b != null) && handleVerseClick(v.verse)}
+              onClick={() => (v.texts[0] != null || v.texts[1] != null) && handleVerseClick(v.verse)}
             >
               <span className="bible-parallel-grid__num">{v.verse}</span>
-              <span className={`bible-parallel-grid__text${v.a == null ? ' bible-parallel-grid__text--empty' : ''}`}>
-                {v.a ?? '—'}
+              <span
+                className={`bible-parallel-grid__text${v.texts[0] == null ? ' bible-parallel-grid__text--empty' : ''}`}
+              >
+                {v.texts[0] ?? '—'}
               </span>
-              <span className={`bible-parallel-grid__text${v.b == null ? ' bible-parallel-grid__text--empty' : ''}`}>
-                {v.b ?? '—'}
+              <span
+                className={`bible-parallel-grid__text${v.texts[1] == null ? ' bible-parallel-grid__text--empty' : ''}`}
+              >
+                {v.texts[1] ?? '—'}
               </span>
             </div>
           );
@@ -379,8 +331,8 @@ export default function BibleParallelReader({ translationA, translationB, transl
 
       <BibleLicenseNotice
         sources={[
-          { name: parallel.a.name, license: parallel.a.license },
-          { name: parallel.b.name, license: parallel.b.license },
+          { name: sideA.name, license: sideA.license },
+          { name: sideB.name, license: sideB.license },
         ]}
       />
 
@@ -420,18 +372,15 @@ export default function BibleParallelReader({ translationA, translationB, transl
 
       {presenterOpen && (
         <BiblePresenterDashboard
-          chapter={synthChapter}
-          books={books}
           locale={locale}
+          apiUrl={apiUrl}
           translations={translations}
-          parallel={parallel}
-          compareCode={translationB.code}
+          initialCodes={presenterCodes}
+          bookCode={parallel.bookCode}
+          chapter={sideA.chapter}
+          initialBooks={books}
+          onOpenDisplay={openDisplay}
           onClose={closePresenter}
-          onPickPassage={handlePresenterPick}
-          onCompareChange={handlePresenterCompare}
-          onTranslationChange={(code) =>
-            router.push(buildHref(code, parallel.bookCode, parallel.a.chapter, translationB.code))
-          }
         />
       )}
 

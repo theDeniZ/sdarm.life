@@ -91,7 +91,7 @@ What keeps the **YouVersion** half defensible:
 - **No YouVersion branding** in the UI — the Platform Terms forbid using their marks without explicit authorisation. Do not add a "Powered by YouVersion" logo.
 - **Publisher copyright notices are rendered** with the text (`.bible-copyright`) — several per-Bible licenses require this. Do not remove it.
 - **Do not add "Sign in with YouVersion".** That would send the user's browser to YouVersion directly and trigger consent-banner requirements.
-- Reader localStorage keys (`bible_last_read`, `bible_font_scale`, `bible_copy_options`) are functional preferences with no identifiers — same category as `sdarm-theme`.
+- Reader localStorage keys (`bible_last_read`, `bible_font_scale`, `bible_copy_options`, `bible_presenter_settings`) are functional preferences with no identifiers — same category as `sdarm-theme`.
 
 **Which translations are exposed is an operator decision** (Admin → Bible). Each Bible carries its own license; enabling a restrictively-licensed translation is a licensing decision, not a technical one.
 

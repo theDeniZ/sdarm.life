@@ -21,6 +21,7 @@ import './styles/quote.css';
 import './styles/book-detail.css';
 import './styles/book-request.css';
 import './styles/bible.css';
+import './styles/bible-projector.css';
 import './styles/bible-presenter.css';
 import './styles/bible-license.css';
 import '@sdarm/ui/src/styles/not-found.css';
