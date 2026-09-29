@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import Pagination from '../../components/Pagination';
-import { usePaginatedList } from '../../lib/hooks';
+import { usePaginatedList, useRowLink } from '../../lib/hooks';
 import { r2url } from '../../lib/api';
 import { fmtDate } from '../../lib/format';
 import { fetchPosts, deletePost, toggleFeatured, LIMIT } from './repository';
@@ -11,6 +11,7 @@ import type { PostListItem } from './types';
 
 export default function PostList() {
   const { items, total, page, loading, setPage, reload } = usePaginatedList<PostListItem>(fetchPosts);
+  const rowLink = useRowLink();
 
   async function handleToggleFeatured(post: PostListItem) {
     await toggleFeatured(post.id, !post.isFeatured);
@@ -43,7 +44,7 @@ export default function PostList() {
           </thead>
           <tbody>
             {items.map((post) => (
-              <tr key={post.id}>
+              <tr key={post.id} className="row-link" onClick={rowLink(`/posts/${post.id}`)}>
                 <td>
                   {post.coverKey ? (
                     <Image

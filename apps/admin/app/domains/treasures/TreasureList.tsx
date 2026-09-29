@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Pagination from '../../components/Pagination';
-import { usePaginatedList } from '../../lib/hooks';
+import { usePaginatedList, useRowLink } from '../../lib/hooks';
 import { fetchTreasures, deleteTreasure, swapSortOrder, swapWithSortOrder, LIMIT } from './repository';
 import type { TreasureListItem } from './types';
 
@@ -12,6 +12,7 @@ export default function TreasureList() {
   const [moving, setMoving] = useState<number | null>(null);
   const [swapInputs, setSwapInputs] = useState<Record<number, string>>({});
   const [swapErrors, setSwapErrors] = useState<Record<number, string>>({});
+  const rowLink = useRowLink();
 
   async function handleMove(index: number, direction: 'up' | 'down') {
     const target = direction === 'up' ? index - 1 : index + 1;
@@ -69,8 +70,8 @@ export default function TreasureList() {
           </thead>
           <tbody>
             {items.map((t, i) => (
-              <tr key={t.id}>
-                <td>
+              <tr key={t.id} className="row-link" onClick={rowLink(`/treasures/${t.id}`)}>
+                <td data-no-row-link>
                   <div className="td-reorder">
                     <button
                       className="btn-reorder"
