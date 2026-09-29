@@ -31,6 +31,46 @@ export interface SubscriberDto {
   createdAt: string;
 }
 
+// ── Subscriber digest (issue #184) ─────────────────────────────────────────────
+
+export type DigestFrequency = 'weekly' | 'biweekly' | 'monthly';
+
+/** Outcome of the most recent scheduled run — shown in Admin → Email. */
+export interface DigestRunDto {
+  at: string;
+  outcome: 'sent' | 'nothing-new' | 'not-configured' | 'failed';
+  recipients: number;
+  detail: string | null;
+}
+
+export interface DigestSettingsDto {
+  enabled: boolean;
+  frequency: DigestFrequency;
+  /** 0 = Sunday … 6 = Saturday. */
+  weekday: number;
+  /** Start of the window the next digest covers. */
+  since: string;
+  lastSentAt: string | null;
+  lastRun: DigestRunDto | null;
+  /** Next cron run that would send; null while switched off. */
+  nextRun: string | null;
+  /** Confirmed subscribers per digest language — counts only. */
+  recipients: { de: number; en: number };
+  /** False when the Worker has no email API key: every send is skipped. */
+  sendingConfigured: boolean;
+}
+
+export interface DigestPreviewDto {
+  since: string;
+  until: string;
+  /** False = a scheduled run would send nothing for this window. */
+  hasContent: boolean;
+  counts: { posts: number; songs: number; books: number; revisedBooks: number };
+  subject: string;
+  html: string;
+  text: string;
+}
+
 export type ConfigDto = Record<string, string | null>;
 
 export interface ListResponse<T> {

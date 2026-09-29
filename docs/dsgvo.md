@@ -226,6 +226,18 @@ If any answer triggers extra work, **raise it before coding**. Don't merge first
 - Unsubscribe link must be in every marketing email, one-click, no login required. Already implemented — do not weaken.
 - `unsubscribed_at` is a hard delete in this project — good, don't convert to soft-delete without a retention reason disclosed.
 
+### Subscriber digest (issue #184)
+
+The automatic "what's new" email (see [api.md](api.md#subscriber-digest)) is the newsletter the subscriber already consented to, not a new processing activity:
+
+- **Same recipients, same basis.** Only rows with `confirmed_at` set receive it — double opt-in stays the gate. Basis is the consent in `legal.datenschutz.section2Body` (Art. 6(1)(a)); UWG §7 is satisfied by the same DOI.
+- **Same processor, same data.** Resend receives the email address and the rendered message, exactly as for the welcome email. No new recipient, no new data category. Resend's own disclosure is known gap 1 above (being closed separately); the digest adds volume to that transfer, not a new one — **close gap 1 before switching the digest on in production.**
+- **Nothing in the email phones home.** No images, no remote CSS, no web fonts (system font stacks only), no tracking pixel, no link rewriting on our side. ⚠️ Resend's **open/click tracking** is a per-domain dashboard switch: turning it on would add a pixel and redirect every link through Resend — that is behavioural tracking of subscribers and needs its own consent and disclosure. Keep it off.
+- **Unsubscribe is one click, twice over.** A visible link in every digest (`/{locale}/unsubscribe?token=…`) and the `List-Unsubscribe` / `List-Unsubscribe-Post: List-Unsubscribe=One-Click` headers (RFC 8058), which let the mail client unsubscribe with no page visit. Both hard-delete the row.
+- **Impressum in every digest** — association name and address from `legal.impressum.section1Body`, plus links to Impressum and Datenschutz.
+- **Off by default.** The owner switches it on in Admin → Email; nothing is sent from any environment without `RESEND_API_KEY`.
+- **Wording to confirm.** The subscribe form only says "Newsletter" and does not describe what it contains; section2 speaks of "unseren Newsletter" without content either. A digest of new posts, songs and books is what a church-site newsletter is commonly understood to be, so the consent plausibly covers it — but a one-line description at the point of subscription ("Neuigkeiten zu neuen Beiträgen, Liedern und Büchern") would make the consent specific (Art. 4(11), Art. 7). A legal-text decision for the owner; not changed in #184.
+
 ## Language
 
 All user-facing legal and consent copy must be available in **both `de` and `en`**. German is the binding version — add a courtesy note if English diverges. Already done in `legal.courtesyNote`.

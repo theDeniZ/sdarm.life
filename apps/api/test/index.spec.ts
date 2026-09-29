@@ -56,6 +56,16 @@ describe('OpenAPI document', () => {
 		expect(paths).toContain('/api/v1/admin/songs/top');
 	});
 
+	it('registers the subscriber digest routes and one-click unsubscribe (issue #184)', async () => {
+		const res = await SELF.fetch('https://example.com/api/openapi.json');
+		const doc = (await res.json()) as { paths: Record<string, Record<string, unknown>> };
+		const paths = Object.fromEntries(Object.entries(doc.paths).map(([p, v]) => [p.replace(/\/{2,}/g, '/'), v]));
+		for (const path of ['/api/v1/admin/email/digest', '/api/v1/admin/email/digest/preview', '/api/v1/admin/email/digest/test']) {
+			expect(Object.keys(paths)).toContain(path);
+		}
+		expect(Object.keys(paths['/api/v1/unsubscribe'])).toEqual(expect.arrayContaining(['get', 'post']));
+	});
+
 	it('serves the Swagger UI', async () => {
 		const res = await SELF.fetch('https://example.com/api/ui');
 		expect(res.status).toBe(200);

@@ -133,6 +133,12 @@ whatever is stored onto the defaults and tolerates missing or malformed fields
 rather than throwing: a bad value in KV must not be able to blank the homepage.
 The generic admin Config page excludes this key; it is edited at `/home-grid`.
 
+**`email_digest` is a separate KV key, not a config key.** The subscriber digest
+(issue #184) keeps its settings and run state there (`enabled`, `frequency`,
+`weekday`, `since`, `lastSentAt`, `lastRun`) because the `config` key is served
+publicly by `GET /api/v1/config`. It is read and written only by
+`services/digest/settings.ts`; see [api.md](api.md#subscriber-digest).
+
 ## Drizzle notes
 
 - `mode: 'timestamp'` stores dates as integer seconds in SQLite; Hono serializes them to ISO strings on the way out

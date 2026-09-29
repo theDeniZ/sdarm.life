@@ -89,3 +89,121 @@
     min-height: 420px;
   }
 }
+
+/* ═══ UPDATE DIGEST (issue #184) ═══
+   Second section of the Email screen, below the composer, on the same
+   settings-left / preview-right grid. */
+
+.digest {
+  margin-top: 48px;
+}
+
+.digest-intro {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+
+/* .flash-err carries only a top margin; as a banner above the toggle it needs the gap below. */
+.digest-warning {
+  margin: 0 0 18px;
+}
+
+.digest-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Two selects (or select + date) side by side; one column on a phone. */
+.digest-schedule {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+.digest-schedule .form-row {
+  margin-bottom: 0;
+}
+
+.digest-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 20px 0 0;
+  font-size: 13px;
+}
+.digest-facts dt {
+  color: var(--muted);
+}
+.digest-facts dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.digest-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 28px 0 24px;
+}
+
+.digest-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.digest-row input {
+  flex: 1;
+  min-width: 0;
+}
+.form-row .digest-row {
+  margin-top: 0;
+}
+
+.digest-test {
+  margin-top: 24px;
+}
+
+.digest-preview-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.digest-preview-head .email-preview__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+}
+
+.digest-width {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  font-size: 12px;
+  font-family: 'Lexend', sans-serif;
+  color: var(--text);
+  background: var(--surface-2);
+  margin-bottom: 8px;
+}
+
+/* A phone-width sheet, to check the digest's single-column layout. */
+.digest-frame--phone {
+  max-width: 390px;
+  margin: 0 auto;
+}
+
+@media (max-width: 600px) {
+  .digest-schedule {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .digest-schedule .form-row {
+    margin-bottom: 18px;
+  }
+}
