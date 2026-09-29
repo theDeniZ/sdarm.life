@@ -126,6 +126,27 @@ router.openapi(confirmRoute, async (c) => {
   return c.json({ status: result.status }, 200);
 });
 
+// RFC 8058 one-click unsubscribe: mail clients POST `List-Unsubscribe=One-Click`
+// to the URL in the digest's List-Unsubscribe header. Same token, same hard
+// delete as the GET; the form body carries nothing we need, so it is not parsed.
+const oneClickUnsubscribeRoute = createRoute({
+  method: 'post',
+  path: '/unsubscribe',
+  tags: ['Subscribers'],
+  request: { query: z.object({ token: z.string() }) },
+  responses: {
+    200: { content: { 'application/json': { schema: OkSchema } }, description: 'Unsubscribed successfully' },
+    400: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Missing token' },
+    404: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Invalid token' },
+  },
+});
+
+router.openapi(oneClickUnsubscribeRoute, async (c) => {
+  const sub = await unsubscribeByToken(drizzle(c.env.DB), c.req.valid('query').token);
+  if (!sub) return c.json({ error: 'Invalid token' }, 404);
+  return c.json({ ok: true as const }, 200);
+});
+
 router.openapi(unsubscribeRoute, async (c) => {
   const db = drizzle(c.env.DB);
   const { token } = c.req.valid('query');

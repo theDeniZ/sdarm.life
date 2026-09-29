@@ -19,6 +19,7 @@ import adminSongbooksRouter from './routes/admin/songbooks';
 import adminTreasuresRouter from './routes/admin/treasures';
 import adminApiKeysRouter from './routes/admin/api-keys';
 import adminEmailRouter from './routes/admin/email';
+import adminDigestRouter from './routes/admin/digest';
 import adminBibleRouter from './routes/admin/bible';
 import treasuresRouter from './routes/treasures';
 import bibleRouter from './routes/bible';
@@ -30,6 +31,7 @@ import robotsRouter from './routes/robots';
 import { llmRateLimit } from './middleware/llm-rate-limit';
 import { countSongOpen } from './middleware/song-opens';
 import { buildIndexMarkdown } from './services/llm/markdown';
+import { runScheduledDigest } from './services/digest/run';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -118,6 +120,7 @@ admin.route('/subscribers', adminSubscribersRouter);
 admin.route('', adminSongbooksRouter);
 admin.route('', adminTreasuresRouter);
 admin.route('', adminEmailRouter);
+admin.route('', adminDigestRouter);
 admin.route('/bible', adminBibleRouter);
 
 v1.route('/admin', admin);
@@ -151,4 +154,12 @@ apiKeysApp.use('*', bootstrapAuth);
 apiKeysApp.route('', adminApiKeysRouter);
 app.route('/api/v1/admin/api-keys', apiKeysApp);
 
-export default app;
+export default {
+	fetch: app.fetch,
+	// Cron Trigger (`triggers.crons` in wrangler.jsonc) — daily. The subscriber
+	// digest decides for itself whether today is a send day and whether there is
+	// anything to send; see services/digest/settings.ts (issue #184).
+	async scheduled(controller, env, ctx) {
+		ctx.waitUntil(runScheduledDigest(env, new Date(controller.scheduledTime)));
+	},
+} satisfies ExportedHandler<Bindings>;

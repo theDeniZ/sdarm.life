@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, like, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, like, lte, or, sql } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import { songbooks, songOpens, songParts, songSheets, songs } from '@sdarm/db';
 
@@ -333,6 +333,41 @@ export async function listTopSongs(db: DrizzleD1Database, limit: number) {
     })),
     total: total ?? 0,
   };
+}
+
+/**
+ * Songs added inside the subscriber digest window `(since, until]` (issue #184),
+ * grouped by songbook. `songbooks` carries the full count per book; `songs`
+ * holds at most `perSongbook` rows per book (lowest numbers first), so a bulk
+ * import of hundreds of songs reads a handful of rows, not all of them.
+ */
+export async function listSongsCreatedBetween(db: DrizzleD1Database, since: Date, until: Date, perSongbook: number) {
+  const window = and(gt(songs.createdAt, since), lte(songs.createdAt, until));
+  const [books, rows] = await Promise.all([
+    db
+      .select({
+        id: songbooks.id,
+        title: songbooks.title,
+        slug: songbooks.slug,
+        language: songbooks.language,
+        createdAt: songbooks.createdAt,
+        total: sql<number>`count(${songs.id})`,
+      })
+      .from(songs)
+      .innerJoin(songbooks, eq(songs.songbookId, songbooks.id))
+      .where(window)
+      .groupBy(songbooks.id)
+      .orderBy(asc(songbooks.sortOrder), asc(songbooks.title)),
+    db.all<{ id: number; number: number; title: string; songbookId: number }>(sql`
+      SELECT id, number, title, songbook_id AS songbookId FROM (
+        SELECT id, number, title, songbook_id,
+               ROW_NUMBER() OVER (PARTITION BY songbook_id ORDER BY number, id) AS rn
+        FROM songs
+        WHERE created_at > ${Math.floor(since.getTime() / 1000)} AND created_at <= ${Math.floor(until.getTime() / 1000)}
+      ) WHERE rn <= ${perSongbook}
+    `),
+  ]);
+  return { songbooks: books, songs: rows };
 }
 
 // ── Song Parts ────────────────────────────────────────────────────────────────

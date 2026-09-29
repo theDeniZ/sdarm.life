@@ -1,4 +1,4 @@
-import { and, asc, count, eq } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gt, lte } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
 import { treasures } from '@sdarm/db';
 
@@ -97,4 +97,26 @@ export async function updateTreasure(db: DrizzleD1Database, id: number, data: Pa
 
 export async function deleteTreasure(db: DrizzleD1Database, id: number) {
   await db.delete(treasures).where(eq(treasures.id, id));
+}
+
+/**
+ * Treasures added, and treasures edited, inside the subscriber digest window
+ * `(since, until]` (issue #184). An edit bumps `updated_at` whatever it
+ * changed, so `updated` is a weaker signal than `added` — the digest lists it
+ * but never sends because of it alone (see services/digest/build.ts).
+ */
+export async function listTreasuresChangedBetween(db: DrizzleD1Database, since: Date, until: Date, limit: number) {
+  const pick = { id: treasures.id, title: treasures.title, author: treasures.author, language: treasures.language };
+  const added = and(gt(treasures.createdAt, since), lte(treasures.createdAt, until));
+  const updated = and(lte(treasures.createdAt, since), gt(treasures.updatedAt, since), lte(treasures.updatedAt, until));
+  const [addedItems, [{ addedTotal }], updatedItems, [{ updatedTotal }]] = await Promise.all([
+    db.select(pick).from(treasures).where(added).orderBy(desc(treasures.createdAt), asc(treasures.id)).limit(limit),
+    db.select({ addedTotal: count() }).from(treasures).where(added),
+    db.select(pick).from(treasures).where(updated).orderBy(desc(treasures.updatedAt), asc(treasures.id)).limit(limit),
+    db.select({ updatedTotal: count() }).from(treasures).where(updated),
+  ]);
+  return {
+    added: { items: addedItems, total: addedTotal },
+    updated: { items: updatedItems, total: updatedTotal },
+  };
 }

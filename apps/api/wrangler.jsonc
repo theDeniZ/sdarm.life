@@ -44,6 +44,13 @@
 			"id": "f5ccbc653cc746898fd1e0be864310da"
 		}
 	],
+	// Daily at 07:00 UTC. Drives the subscriber digest (issue #184), which is OFF
+	// until switched on in Admin → Email and decides itself whether today is a
+	// send day — see docs/api.md#subscriber-digest. Takes effect only on deploy.
+	// The hour is mirrored in DIGEST_CRON_HOUR_UTC (services/digest/settings.ts).
+	"triggers": {
+		"crons": ["0 7 * * *"]
+	},
 	"ratelimits": [
 		{
 			"name": "LLM_RATE_LIMITER",

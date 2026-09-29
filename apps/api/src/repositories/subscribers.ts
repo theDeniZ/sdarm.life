@@ -10,6 +10,13 @@ export async function listAllConfirmedSubscribers(db: DB) {
 		.orderBy(desc(subscribers.createdAt));
 }
 
+/** Confirmed subscribers per language — counts only, for the admin digest panel. */
+export async function countConfirmedSubscribersByLanguage(db: DB) {
+	return db.select({ language: subscribers.language, count: count() }).from(subscribers)
+		.where(isNotNull(subscribers.confirmedAt))
+		.groupBy(subscribers.language);
+}
+
 export async function listSubscribers(db: DB, opts: { limit?: number; offset?: number }) {
 	const [items, [{ total }]] = await Promise.all([
 		db.select().from(subscribers).orderBy(desc(subscribers.createdAt))

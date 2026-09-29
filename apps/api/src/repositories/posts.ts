@@ -1,6 +1,6 @@
 import { drizzle } from 'drizzle-orm/d1';
 import { posts } from '@sdarm/db';
-import { and, isNull, eq, isNotNull, desc, count } from 'drizzle-orm';
+import { and, isNull, eq, isNotNull, desc, count, gt, lte } from 'drizzle-orm';
 
 type DB = ReturnType<typeof drizzle>;
 
@@ -100,4 +100,19 @@ export async function softDeletePost(db: DB, id: number) {
 		.where(and(eq(posts.id, id), isNull(posts.deletedAt)))
 		.returning();
 	return post ?? null;
+}
+
+/**
+ * Posts that went live inside the subscriber digest window `(since, until]`
+ * (issue #184). Keyed on `published_at`, not `created_at`, so a post scheduled
+ * for later is picked up by the digest that follows its publication date.
+ */
+export async function listPostsPublishedBetween(db: DB, since: Date, until: Date, limit: number) {
+	const filter = and(isNull(posts.deletedAt), gt(posts.publishedAt, since), lte(posts.publishedAt, until));
+	const [items, [{ total }]] = await Promise.all([
+		db.select({ title: posts.title, slug: posts.slug, excerpt: posts.excerpt, publishedAt: posts.publishedAt })
+			.from(posts).where(filter).orderBy(desc(posts.publishedAt)).limit(limit),
+		db.select({ total: count() }).from(posts).where(filter),
+	]);
+	return { items, total };
 }

@@ -1,5 +1,11 @@
+import path from 'node:path';
 import { defineConfig } from 'vitest/config';
-import { cloudflareTest } from '@cloudflare/vitest-pool-workers';
+import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-pool-workers';
+
+// Read in Node at config time and handed to the Worker as a binding; a spec that
+// needs tables calls applyD1Migrations(env.DB, env.TEST_MIGRATIONS) itself.
+// The D1 starts empty otherwise — see docs/testing.md.
+const migrations = await readD1Migrations(path.join(import.meta.dirname, '../../packages/db/migrations'));
 
 // The pool is a Vite plugin now. The `@cloudflare/vitest-pool-workers/config`
 // entrypoint that used to export `defineWorkersConfig` no longer exists — see
@@ -17,7 +23,7 @@ export default defineConfig({
 			miniflare: {
 				// Bootstrap key, so the auth middleware can be exercised from both
 				// sides. Test-only value; production uses a Worker secret.
-				bindings: { API_KEY: 'test-key' },
+				bindings: { API_KEY: 'test-key', TEST_MIGRATIONS: migrations },
 			},
 		}),
 	],
