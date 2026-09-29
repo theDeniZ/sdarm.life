@@ -453,6 +453,13 @@ Main screen (presenter)              External screen (display window)
 | `fontScale` | bidirectional | `{ value: number }` | Resize lyrics on the display; reflected in presenter header |
 | `requestFullscreen` | presenter → display | — | Display shows a "tap to enter fullscreen" overlay; click on display triggers `requestFullscreen()` |
 | `slideTheme` | bidirectional | `{ value: 'dark' \| 'light' }` | Sync the slide color theme (☀/☾ toggle, `data-slide-theme` + `--proj-*` CSS tokens). The mount render never broadcasts — a fresh display window must not clobber the presenter's choice with its default. Initial state defaults to the current site theme (`getSiteTheme()` in `lib/format.ts`, reads `data-theme` off `<html>`), not always `'dark'` |
+| `lineIndex` | bidirectional | `{ partIndex, lineIndex }` | Line mode position: `partIndex` is the full-verse slide number, `lineIndex` the first line on screen |
+| `lineMode` | presenter → display | `{ active, linesPerSlide: 1 \| 2 }` | Toggle line-by-line mode and lines per slide; both sides snap the line to the start of its slide |
+| `primaryLang` / `secondaryLang` | presenter → display | `{ lang }` (`secondaryLang` may be `null`) | Which language leads and which is shown underneath; a swap keeps the position |
+| `blank` | presenter → display | `{ active: boolean }` | Hide the text, keep the slide surface |
+| `transition` | presenter → display | `{ style: 'slide' \| 'fade', durationMs }` | Line-change animation; none under `prefers-reduced-motion` |
+
+**Line-by-line mode (issue #61):** `lib/line-mode.ts` holds the pure pieces (language list, pairing a part with its translation, line alignment, steps) and `lib/use-line-mode.ts` the state both windows share, so only positions and settings travel over the channel, never text. Full-verse mode is unchanged apart from showing the primary language only. On `ready` the presenter re-pushes the line state after the slide. Keys on both sides: ← → move, `B` blank, `1` / `2` lines per slide (and switch line mode on); `F` on the presenter asks the display for fullscreen. A `slide` or `lineIndex` message that repeats the current slide is ignored rather than marking the next change as remote.
 
 **Connecting overlay:** `PresenterDashboard` shows a pulsing dots overlay until the first `ready` message arrives. The fullscreen button is disabled until connected. This covers the ~10 s cold-start time for the display window to load Next.js.
 

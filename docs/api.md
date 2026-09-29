@@ -63,7 +63,7 @@ Require `Authorization: Bearer <key>` on every request.
 | `POST` | `/api/v1/admin/songs` | Create song. Body: `{ songbookId, number, title, author?, copyright? }`. |
 | `PATCH` | `/api/v1/admin/songs/:id` | Partial update (title, number, author, copyright). |
 | `DELETE` | `/api/v1/admin/songs/:id` | Hard-delete song + all its parts and sheets (R2 keys deleted too). |
-| `POST` | `/api/v1/admin/songs/:id/parts` | Add a part. Body: `{ type, label, sortOrder, lyrics }`. |
+| `POST` | `/api/v1/admin/songs/:id/parts` | Add a part. Body: `{ type, label, sortOrder, lyrics, language?, translationType? }` — `language` is a lowercase code (`de`, `en`, `pt-br`) or `null` for the songbook's; `translationType` is `original` (default), `singable` or `reference`. |
 | `PATCH` | `/api/v1/admin/songs/:id/parts/:partId` | Partial update a part. |
 | `DELETE` | `/api/v1/admin/songs/:id/parts/:partId` | Delete a part. |
 | `POST` | `/api/v1/admin/songs/:id/sheets/upload` | `multipart/form-data` (`file`, optional `type`). Accepts PDF and images (jpg, png, webp, gif). Stores under `sheets/{songId}/{uuid}.{ext}` in R2. |
