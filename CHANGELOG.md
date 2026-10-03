@@ -1,3 +1,37 @@
+# [1.10.0](https://github.com/theDeniZ/sdarm.life/compare/v1.9.0...v1.10.0) (2026-10-03)
+
+
+### Bug Fixes
+
+* **admin:** open a record by clicking anywhere in its row ([0c74e97](https://github.com/theDeniZ/sdarm.life/commit/0c74e97fb4fa56a1665b920cb00b4ca2156a546a)), closes [#172](https://github.com/theDeniZ/sdarm.life/issues/172)
+* **admin:** polish pass — fonts, form controls, one upload control, clean OpenAPI paths ([ff5391e](https://github.com/theDeniZ/sdarm.life/commit/ff5391e5ff56b0d812319bac70044cff25604e50))
+* layout, contrast and tap-target defects from a full design pass ([8d56682](https://github.com/theDeniZ/sdarm.life/commit/8d566821d58f7554b97eb8ace79468b4af8a594b)), closes [#927223](https://github.com/theDeniZ/sdarm.life/issues/927223)
+* one canonical SDARM.life wordmark on every surface ([fb885ae](https://github.com/theDeniZ/sdarm.life/commit/fb885ae714b462f6b0e128d4eedc27a50c9c3e43)), closes [#927223](https://github.com/theDeniZ/sdarm.life/issues/927223) [#c9a96e](https://github.com/theDeniZ/sdarm.life/issues/c9a96e) [#866a1f](https://github.com/theDeniZ/sdarm.life/issues/866a1f)
+* **sbl:** default alpha ON ([54cbdd6](https://github.com/theDeniZ/sdarm.life/commit/54cbdd6f83b2787d3c89a5168c099a547bf52228))
+* **sbl:** give the lesson page the site navigation ([143aeaf](https://github.com/theDeniZ/sdarm.life/commit/143aeaf29818b997d9e73c7b8e45edbd902350c5)), closes [#207](https://github.com/theDeniZ/sdarm.life/issues/207)
+* **sbl:** remove merging of notes ([bda6fdf](https://github.com/theDeniZ/sdarm.life/commit/bda6fdfa8979878f1fbfa2cccf18ef27d739fa1d))
+* **treasures:** drop the stock icons from the Bible and lesson cards ([4e0086a](https://github.com/theDeniZ/sdarm.life/commit/4e0086a648e5104fd41da75bd9f96724d101219b))
+* **treasures:** stop book covers standing out of their cards on phones ([288856c](https://github.com/theDeniZ/sdarm.life/commit/288856cac5367041ad7f3e4820306a6e059bc87c))
+* **ui:** give the display faces a Cyrillic face ([8acccd6](https://github.com/theDeniZ/sdarm.life/commit/8acccd68e1e6b05ab0c2b09282d3af0d4249b045)), closes [#193](https://github.com/theDeniZ/sdarm.life/issues/193) [#199](https://github.com/theDeniZ/sdarm.life/issues/199)
+* **ui:** load Lexend 500-700 so bold Latin stops falling back ([b32457e](https://github.com/theDeniZ/sdarm.life/commit/b32457ef02aca95167390c5532cfefaca6d59ece)), closes [#177](https://github.com/theDeniZ/sdarm.life/issues/177)
+* **web:** pin the hourly verse in screenshot tests ([7cee303](https://github.com/theDeniZ/sdarm.life/commit/7cee303c1685fdbb016a2aa9d3e5c2c7b9b46ae1)), closes [#198](https://github.com/theDeniZ/sdarm.life/issues/198)
+
+
+### Features
+
+* **admin:** let the sidebar collapse to an icon rail on desktop ([3977caa](https://github.com/theDeniZ/sdarm.life/commit/3977caaa454f798c15285e51ba7fdfc427d06a40)), closes [#176](https://github.com/theDeniZ/sdarm.life/issues/176)
+* count song opens and show the top 10 on the Statistics page ([5f5076a](https://github.com/theDeniZ/sdarm.life/commit/5f5076a6f86d948e3210be630d8c6b669b4c4ad3)), closes [#197](https://github.com/theDeniZ/sdarm.life/issues/197)
+* **email:** one email design system for every message and composer template ([496f372](https://github.com/theDeniZ/sdarm.life/commit/496f372e6f365f38e50ef2f7cf64309b6d16603d)), closes [#184](https://github.com/theDeniZ/sdarm.life/issues/184) [#184](https://github.com/theDeniZ/sdarm.life/issues/184)
+* send subscribers one digest email when new content is published ([b6bd44f](https://github.com/theDeniZ/sdarm.life/commit/b6bd44fee8a7b7937e185fb8121f2ece1599e172)), closes [#184](https://github.com/theDeniZ/sdarm.life/issues/184)
+* **seo:** localized meta, social cards and canonicals for the public apps ([aae38a9](https://github.com/theDeniZ/sdarm.life/commit/aae38a978f88a14ce9cd40bfc0972612cf4f3235)), closes [#102](https://github.com/theDeniZ/sdarm.life/issues/102) [#185](https://github.com/theDeniZ/sdarm.life/issues/185)
+* **songbook:** line-by-line projector mode with parallel translations ([ae1b25e](https://github.com/theDeniZ/sdarm.life/commit/ae1b25e541eed4206f3e2e48a64907ed796badad)), closes [#61](https://github.com/theDeniZ/sdarm.life/issues/61)
+* **treasures:** show up to four Bible translations on the projector ([2b5d70a](https://github.com/theDeniZ/sdarm.life/commit/2b5d70aa6bcbb195cb476ff4d0e9b2ac47a4d4f3)), closes [#14](https://github.com/theDeniZ/sdarm.life/issues/14)
+* **ui:** add Bibel and SBL to the navigation ([708a622](https://github.com/theDeniZ/sdarm.life/commit/708a622820f742fefde1424764aa7ae7489c348f)), closes [#207](https://github.com/theDeniZ/sdarm.life/issues/207)
+* **ui:** redesign the footer sunset clock as two rings ([0eb2f2e](https://github.com/theDeniZ/sdarm.life/commit/0eb2f2ee443cc8f843c17857ef01650f41f4ee55))
+* **web:** disclose Resend as email processor in the Datenschutz ([09cba07](https://github.com/theDeniZ/sdarm.life/commit/09cba077ac955750a5e51d55b9eaa9d60a98d084)), closes [#1](https://github.com/theDeniZ/sdarm.life/issues/1) [#1](https://github.com/theDeniZ/sdarm.life/issues/1) [#196](https://github.com/theDeniZ/sdarm.life/issues/196)
+* **web:** home grid with Bible, lesson and live content in assignable slots ([39254be](https://github.com/theDeniZ/sdarm.life/commit/39254be147fdbfe8c14ed406bad212107446ff5a))
+* **web:** move the sunset clock from the footer to the home grid ([c4d8920](https://github.com/theDeniZ/sdarm.life/commit/c4d8920566953baa343966439b44425ea1fe58f9))
+
 # [1.9.0](https://github.com/theDeniZ/sdarm.life/compare/v1.8.0...v1.9.0) (2026-09-26)
 
 
