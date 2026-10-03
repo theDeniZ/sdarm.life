@@ -1,10 +1,11 @@
 import type { Metadata } from 'next';
 import { setRequestLocale, getTranslations } from 'next-intl/server';
-import { ConnectedNavbar, ConnectedFooter } from '@sdarm/ui';
+import { ConnectedNavbar, ConnectedFooter, siteHomeMetadata } from '@sdarm/ui';
 import HeroWelcome from '../components/HeroWelcome';
 import StatsGrid from '../components/StatsGrid';
-import ScriptureVerseSection from '../components/ScriptureVerseSection';
+import { fetchHomeLive } from '../lib/home-live';
 import {
+  API,
   fetchTreasures,
   fetchSongbooks,
   fetchConfig,
@@ -12,6 +13,7 @@ import {
   TREASURES_URL,
   SONGBOOK_URL,
   EVENTS_URL,
+  SBL_URL,
 } from '../lib/api';
 import { parseGridConfig } from '@sdarm/types';
 import type { NewsData } from '../lib/api';
@@ -23,26 +25,36 @@ const BASE = WEB_URL;
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'web.metadata' });
-  const canonical = `${BASE}/${locale}`;
-  return {
+  return siteHomeMetadata({
+    app: 'web',
+    base: BASE,
+    api: API,
+    locale,
     title: t('title'),
     description: t('description'),
-    alternates: {
-      canonical,
-      languages: { de: `${BASE}/de`, en: `${BASE}/en`, 'x-default': `${BASE}/de` },
-    },
-    openGraph: { type: 'website', url: canonical, title: t('title'), description: t('description') },
-  };
+    ogTitle: t('ogTitle'),
+    ogDescription: t('ogDescription'),
+  });
 }
 
-export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
+export default async function HomePage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ screenshotDate?: string | string[] }>;
+}) {
   const { locale } = await params;
+  // ?screenshotDate=YYYY-MM-DD pins "today" for the live cards (lesson of the
+  // week, Psalm of the day, song of the week) in screenshot tests.
+  const dateParam = (await searchParams).screenshotDate;
   setRequestLocale(locale);
 
-  const [bookRaw, songbooksRaw, config] = await Promise.all([
+  const [bookRaw, songbooksRaw, config, live] = await Promise.all([
     fetchTreasures('type=book&limit=1'),
     fetchSongbooks(),
     fetchConfig(),
+    fetchHomeLive(locale, Array.isArray(dateParam) ? dateParam[0] : dateParam),
   ]);
 
   // A missing or malformed config falls back to the built-in defaults rather
@@ -59,6 +71,8 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
     eventsUrl: `${EVENTS_URL}/${locale}`,
     aboutUrl: `/${locale}/about`,
     youVersionUrl: 'https://www.bible.com/reading-plans',
+    bibleUrl: `${TREASURES_URL}/${locale}/bible`,
+    sblUrl: SBL_URL,
   };
 
   return (
@@ -66,8 +80,7 @@ export default async function HomePage({ params }: { params: Promise<{ locale: s
       <ConnectedNavbar locale={locale} />
       <main id="main-content">
         <HeroWelcome locale={locale} />
-        <StatsGrid newsData={newsData} grid={grid} />
-        <ScriptureVerseSection href={`${TREASURES_URL}/${locale}/bible`} locale={locale} />
+        <StatsGrid newsData={newsData} grid={grid} live={live} apiUrl={API} />
       </main>
       <ConnectedFooter locale={locale} />
     </>

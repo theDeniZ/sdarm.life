@@ -7,17 +7,13 @@ import { licenseNotice, type BibleLicense } from '../../lib/bible';
 interface Props {
   /** One entry per translation whose text is on screen. */
   sources: { name: string; license: BibleLicense }[];
-  /**
-   * `page` sits under the text in the reader. `projector` is the discreet line
-   * on the display window and the presenter's mirror of it — no register link
-   * there, because a link on the projector is a way to navigate the room's
-   * screen away from scripture mid-service.
-   */
-  variant?: 'page' | 'projector';
 }
 
 /**
- * The notice that every surface showing verse text must carry.
+ * The notice that every reader page showing verse text must carry. (The
+ * projector prints its own, one line under each translation's text — see
+ * `ProjectorSlide` — with no register link, because a link on the projector
+ * is a way to navigate the room's screen away from scripture mid-service.)
  *
  * `licenseNotice()` decides what to show; this only decides where. The text is
  * printed exactly as the API delivered it — a rights holder's wording is a
@@ -25,7 +21,7 @@ interface Props {
  * only when two translations share the screen, where an unlabelled pair of
  * notices would not say which belongs to which.
  */
-export default function BibleLicenseNotice({ sources, variant = 'page' }: Props) {
+export default function BibleLicenseNotice({ sources }: Props) {
   const t = useTranslations('treasures.bible');
   const locale = useLocale();
 
@@ -35,19 +31,6 @@ export default function BibleLicenseNotice({ sources, variant = 'page' }: Props)
   if (items.length === 0) return null;
 
   const labelled = items.length > 1;
-
-  if (variant === 'projector') {
-    return (
-      <p className="bible-projector__notice">
-        {items.map((it) => (
-          <span key={it.name} className="bible-projector__notice-item">
-            {labelled && <strong>{it.name}: </strong>}
-            {it.text}
-          </span>
-        ))}
-      </p>
-    );
-  }
 
   return (
     <aside className="bible-copyright" aria-label={t('licenseNoticeAria')}>

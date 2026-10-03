@@ -2,8 +2,10 @@
   "common": {
     "nav": {
       "songs": "Lieder",
+      "bible": "Bibel",
       "events": "Events",
       "treasures": "Schätze",
+      "sbl": "SBL",
       "about": "Glauben",
       "contact": "Kontakt",
       "imprint": "Impressum",
@@ -24,10 +26,7 @@
       "subscribeSuccess": "Bitte bestätigen Sie Ihre Anmeldung per E-Mail.",
       "subscribeDuplicate": "Diese E-Mail ist bereits registriert.",
       "subscribeError": "Fehler. Bitte versuchen Sie es später.",
-      "locationPlaceholder": "Stadt oder PLZ",
-      "locationUpdateAria": "Standort aktualisieren",
       "emailInputAria": "E-Mail-Adresse eingeben",
-      "locationInputAria": "Ort oder PLZ eingeben",
       "footerNavAria": "Seitennavigation",
       "copyright": "© {year} SDARM.life",
       "allRightsReserved": "Alle Rechte vorbehalten"
@@ -40,7 +39,15 @@
       "untilSunset": "Bis Sonnenuntergang",
       "untilSunrise": "Bis Sonnenaufgang",
       "defaultLocation": "Pforzheim, Baden-Württemberg",
-      "sunset": "Untergang"
+      "sunset": "Untergang",
+      "ringDay": "{label}: noch {remaining} · {percent} % {period, select, night {der Nacht} sabbath {des Sabbats} other {des Tages}} vergangen",
+      "ringWeek": "Woche bis zum Sabbat: {percent} %",
+      "ringWeekSabbath": "Sabbat — die Woche ist erfüllt",
+      "durationHM": "{h} Std. {m} Min.",
+      "durationM": "{m} Min.",
+      "locationPlaceholder": "Stadt oder PLZ",
+      "locationInputAria": "Ort oder PLZ eingeben",
+      "locationUpdateAria": "Standort aktualisieren"
     },
     "comingSoon": "Demnächst",
     "back": "← Zurück",
@@ -59,8 +66,12 @@
   "web": {
     "metadata": {
       "title": "SDARM.life – Siebenten-Tags-Adventisten Reformationsbewegung",
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland & Österreich – Nachrichten, Lieder, geistliche Schätze und Gemeinschaft. Sabbat-Gottesdienst, Bibelstudium und bibeltreues christliches Leben.",
-      "ogTitle": "SDARM.life – Adventisten Reformationsbewegung Deutschland"
+      "description": "Offizielle Seite der SDARM in Deutschland (Siebenten-Tags-Adventisten Reformationsbewegung). Entdecken Sie unsere Lieder des Glaubens, den Bibelleseplan, Sabbat-Gottesdienste und christliche Events.",
+      "ogTitle": "SDARM Germany – Siebenten-Tags-Adventisten Reformationsbewegung",
+      "ogDescription": "Wir laden dich ein, Gott kennenzulernen. Finde hier unseren Bibelleseplan, Lieder des Glaubens und anstehende Sabbat-Gottesdienste. Komm, wie du bist!",
+      "keywords": "SDARM, SDARM Germany, Siebenten-Tags-Adventisten Reformationsbewegung, Bibelleseplan, Lieder des Glaubens, Sabbat, 25 Grundlagen unseres Glaubens, Gottesdienst",
+      "cardEyebrow": "SDARM Germany",
+      "cardTitle": "Siebenten-Tags-Adventisten Reformationsbewegung"
     },
     "hero": {
       "fallbackTitle": "Die Reformation und ihre Folgen für Deutschland und die ganze Welt",
@@ -104,6 +115,22 @@
         "cta": "Öffnen",
         "phoneAlt": "Leseplan in der YouVersion-App"
       },
+      "bible": {
+        "label": "Bibel",
+        "title": "Lies die <em>Bibel</em>",
+        "kicker": "Heute",
+        "psalm": "Psalm <em>{n}</em>",
+        "translations": "{count, plural, one {# Übersetzung} other {# Übersetzungen, parallel lesbar}}",
+        "cta": "Lesen"
+      },
+      "sbl": {
+        "label": "Sabbatschule",
+        "title": "Die Lektion<br></br><em>der Woche</em>",
+        "sub": "Im Layout des gedruckten Heftes — markieren, notieren, als PDF speichern.",
+        "kicker": "Lektion {no}",
+        "quarter": "Quartal „{title}“",
+        "cta": "Öffnen"
+      },
       "invite": {
         "title": "Komm,<br></br><em>wie du bist</em>",
         "cta": "Besuchen",
@@ -114,7 +141,10 @@
       },
       "songs": {
         "label": "Gesangbuch",
-        "title": "Lieder des <em>Glaubens</em>"
+        "title": "Lieder des <em>Glaubens</em>",
+        "weekly": "Lied der Woche",
+        "number": "Nr. {number}",
+        "count": "{songs, plural, one {# Lied} other {# Lieder}} in {books, plural, one {# Liederbuch} other {# Liederbüchern}}"
       },
       "faith": {
         "title": "Grundlagen<br></br>unseres Glaubens"
@@ -673,6 +703,9 @@
         "section8PrivacyLink": "Datenschutzerklärung von YouVersion",
         "section9Title": "Sabbatschullektion (sbl.sdarm.life)",
         "section9Body": "Die Sabbatschullektion wird unter der eigenen Adresse sbl.sdarm.life bereitgestellt. Dabei handelt es sich um ein eigenständiges, unabhängig gepflegtes Angebot, das wir lediglich unter dieser Subdomain hosten. Es verarbeitet Daten nach eigenen Maßgaben und ruft beim Aufruf der Seite Inhalte von Dritten ab. Für dieses Angebot gelten daher eine eigene Datenschutzerklärung und ein eigenes Impressum, die Sie unmittelbar unter sbl.sdarm.life finden. Die vorliegende Datenschutzerklärung gilt für sbl.sdarm.life nicht.",
+        "section10Title": "E-Mail-Versand (Resend)",
+        "section10Body": "Für den Versand von E-Mails setzen wir den Dienst Resend (Plus Five Five, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA) als Auftragsverarbeiter ein. Über Resend werden versandt: die Bestätigungs- und die Willkommens-E-Mail zur Newsletter-Anmeldung und unsere Newsletter – dabei erhält Resend Ihre E-Mail-Adresse und den Inhalt der jeweiligen E-Mail; Ihre Buchanfrage, die als E-Mail an unser Postfach info@sdarm.life übermittelt wird – dabei erhält Resend sämtliche Angaben aus dem Formular: Name, E-Mail-Adresse, Postanschrift (Straße, PLZ, Stadt), Land, die ausgewählten Bücher sowie, falls angegeben, Telefonnummer und persönliche Mitteilung; sowie einzelne E-Mails, die wir Ihnen schreiben, etwa als Antwort auf eine Anfrage – dabei erhält Resend Ihre E-Mail-Adresse und den Inhalt der Nachricht. Der Versand erfolgt ausschließlich serverseitig über unseren Cloudflare Worker; Ihre IP-Adresse wird dabei nicht an Resend übermittelt. Resend verarbeitet die Daten in unserem Auftrag zur Zustellung der E-Mails und setzt dafür weitere Unterauftragsverarbeiter ein, darunter Amazon Web Services (USA). Rechtsgrundlage ist die für den jeweiligen Vorgang maßgebliche: beim Newsletter und bei der Buchanfrage Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO), bei einzelnen E-Mails unser berechtigtes Interesse an der Kommunikation mit Ihnen (Art. 6 Abs. 1 lit. f DSGVO). Mit Resend besteht ein Vertrag über die Auftragsverarbeitung gemäß Art. 28 DSGVO. Die Übermittlung in die USA stützt sich auf die darin vereinbarten EU-Standardvertragsklauseln (Art. 46 Abs. 2 lit. c DSGVO); nach eigenen Angaben nimmt Resend zudem am EU-U.S. Data Privacy Framework teil, für das ein Angemessenheitsbeschluss der Europäischen Kommission besteht (Art. 45 DSGVO). Weitere Informationen finden Sie in der",
+        "section10PrivacyLink": "Datenschutzerklärung von Resend",
         "section7Title": "Ihre Rechte",
         "section7Body": "Sie haben das Recht auf Auskunft, Berichtigung, Löschung und Einschränkung der Verarbeitung Ihrer gespeicherten Daten sowie das Recht auf Datenübertragbarkeit. Wenden Sie sich dazu an"
       }
@@ -680,8 +713,11 @@
   },
   "songbook": {
     "metadata": {
-      "title": "Liederbuch — SDARM",
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Liederbuch"
+      "title": "Lieder des Glaubens — SDARM",
+      "description": "Lieder des Glaubens: die Gesangbücher der Siebenten-Tags-Adventisten Reformationsbewegung online – Liedtexte, Akkorde und Noten für Gottesdienst, Sabbat und Zuhause.",
+      "keywords": "Lieder des Glaubens, Gesangbuch, Liederbuch, christliche Lieder, Akkorde, Noten, SDARM, Siebenten-Tags-Adventisten Reformationsbewegung",
+      "cardEyebrow": "Gesangbuch",
+      "cardTitle": "Lieder des Glaubens"
     },
     "landing": {
       "eyebrow": "Gesangbuch — Hymnarium",
@@ -735,7 +771,9 @@
       "decreaseFont": "Schriftgröße verkleinern",
       "increaseFont": "Schriftgröße vergrößern",
       "lightMode": "Heller Modus",
-      "darkMode": "Dunkler Modus"
+      "darkMode": "Dunkler Modus",
+      "lineMode": "Zeile für Zeile",
+      "swapLanguages": "Sprachen tauschen"
     },
     "presenter": {
       "close": "Präsentation schließen",
@@ -749,7 +787,21 @@
       "titleSlide": "Titel",
       "endOfSong": "Lied beendet",
       "lightMode": "Heller Modus",
-      "darkMode": "Dunkler Modus"
+      "darkMode": "Dunkler Modus",
+      "lineMode": "Zeile für Zeile",
+      "linesPerSlide": "Zeilen",
+      "line": "Zeile {from} / {total}",
+      "lines": "Zeilen {from}–{to} / {total}",
+      "transition": "Übergang",
+      "transitionSlide": "Schieben",
+      "transitionFade": "Blenden",
+      "transitionSpeed": "Übergangstempo",
+      "primaryLanguage": "Hauptsprache",
+      "translation": "Übersetzung",
+      "translationOff": "Aus",
+      "swapLanguages": "Sprachen tauschen",
+      "blank": "Leer",
+      "blankTitle": "Bildschirm leeren (B)"
     },
     "partTypes": {
       "verse": "Strophe",
@@ -763,15 +815,21 @@
   "events": {
     "metadata": {
       "title": "Events — SDARM",
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Veranstaltungen"
+      "description": "Veranstaltungen der Siebenten-Tags-Adventisten Reformationsbewegung in Deutschland – Sabbat-Gottesdienste, Seminare und Begegnungen. Die Übersicht ist bald hier verfügbar.",
+      "keywords": "Sabbat-Gottesdienst, Gottesdienst, christliche Events, Seminare, Veranstaltungen, SDARM, Siebenten-Tags-Adventisten Reformationsbewegung",
+      "cardEyebrow": "Events",
+      "cardTitle": "Gottesdienste, Seminare und Begegnungen"
     },
     "comingSoonTitle": "Events",
     "comingSoonSubtitle": "Veranstaltungen, Seminare und Gottesdienste — bald hier verfügbar."
   },
   "treasures": {
     "metadata": {
-      "title": "Schätze — SDARM",
-      "description": "Siebenten-Tags-Adventisten Reformationsbewegung — Schätze"
+      "title": "Bücher & Schätze — SDARM",
+      "description": "Geistliche Bücher und Ressourcen der Siebenten-Tags-Adventisten Reformationsbewegung – kostenlos lesen oder per Post bestellen. Dazu die Bibel in mehreren Übersetzungen und die Sabbatschullektion.",
+      "keywords": "Bibel online, Bibelübersetzungen, Sabbatschullektion, christliche Bücher kostenlos, geistliche Literatur, SDARM, Siebenten-Tags-Adventisten Reformationsbewegung",
+      "cardEyebrow": "Geistliche Ressourcen",
+      "cardTitle": "Bücher & Schätze"
     },
     "comingSoonTitle": "Schätze",
     "comingSoonSubtitle": "Geistliche Ressourcen, Bücher und Materialien — bald hier verfügbar.",
@@ -836,13 +894,6 @@
       "sameTranslation": "Wählen Sie zwei verschiedene Übersetzungen für den Parallelmodus.",
       "presenter": "Präsentation",
       "presenterSingleScreenHint": "Öffnet sich in einem separaten Fenster — auf den Beamer ziehen",
-      "primaryTranslation": "Hauptübersetzung",
-      "currentSlide": "Aktueller Vers",
-      "blankScreen": "Schwarzer Bildschirm",
-      "unblankScreen": "Bildschirm wieder zeigen",
-      "rangeShiftClickHint": "Klicken: Vers wählen · Umschalt+Klick: Bereich erweitern",
-      "compareWith": "Parallel-Übersetzung",
-      "compareOff": "+ Parallel",
       "connecting": "Verbinde mit Anzeige…",
       "tapForFullscreen": "Tippen für Vollbild",
       "increaseFont": "Schrift größer",
@@ -919,7 +970,70 @@
       "licenseNoticeLabel": "Hinweis",
       "licenseProvenanceLabel": "Herkunft",
       "projectorNotAllowedTitle": "Nicht für die Anzeige lizenziert",
-      "projectorNotAllowedBody": "Die Lizenz dieser Übersetzung erlaubt keine Anzeige des Textes auf einem gemeinsam genutzten Bildschirm. Bitte den Lesemodus verwenden."
+      "projectorNotAllowedBody": "Die Lizenz dieser Übersetzung erlaubt keine Anzeige des Textes auf einem gemeinsam genutzten Bildschirm. Bitte den Lesemodus verwenden.",
+      "prInHall": "Im Saal",
+      "prInHallFrozen": "eingefroren",
+      "prLiveNothing": "Noch nichts gezeigt",
+      "prLiveSummary": "{reference} · {count, plural, one {# Übersetzung} other {# Übersetzungen}}",
+      "prLayoutAria": "Anordnung auf der Leinwand",
+      "prLayoutRows": "Zeilen",
+      "prLayoutColumns": "Spalten",
+      "prLayoutGrid": "Raster",
+      "prLayoutFocus": "Fokus",
+      "prAuto": "Auto · {px} px",
+      "prTranslations": "Übersetzungen",
+      "prCountOf": "{n} von {max}",
+      "prRemove": "Entfernen",
+      "prDragHandle": "{name} verschieben — ziehen oder Pfeiltasten",
+      "prAddTranslation": "Übersetzung hinzufügen",
+      "prSortHint": "Ziehen zum Sortieren. Die erste Übersetzung ist die Hauptübersetzung — im Layout „Fokus“ steht sie groß.",
+      "prMaxReached": "Maximal 4 Übersetzungen — mehr ist auf der Leinwand nicht lesbar.",
+      "prAvailable": "Verfügbar",
+      "prNotLicensed": "Nicht für den Beamer freigegeben (Lizenz)",
+      "prBackground": "Hintergrund",
+      "prThemeViolet": "Violett",
+      "prThemeGraphite": "Graphit",
+      "prThemeInk": "Tinte",
+      "prThemePaper": "Papier",
+      "prAllBookNames": "Buchnamen in allen Sprachen",
+      "prLabels": "Kürzel vor jeder Übersetzung",
+      "prDirectShow": "Klick zeigt sofort an",
+      "prLicenseAlways": "Lizenzhinweise stehen immer auf der Leinwand — gemeinfreie Übersetzungen in einer Zeile unten, andere unter ihrem Text. Nicht abschaltbar.",
+      "prPublicDomain": "Public domain",
+      "prSettings": "Einstellungen",
+      "prSearchHint": "z. B. Joh 3:16, Ps 23",
+      "prListTranslation": "Text in der Liste",
+      "prShow": "Anzeigen",
+      "prListHint": "Klick: in die Vorschau · Doppelklick oder Enter: anzeigen · Umschalt+Klick: Bereich",
+      "prListHintDirect": "Klick: sofort anzeigen · Umschalt+Klick: Bereich",
+      "prLiveCaption": "Das sieht der Saal",
+      "prConnected": "Anzeige verbunden · {w} × {h}",
+      "prDisconnected": "Anzeige nicht verbunden",
+      "prConnectHint": "Fenster auf den Beamer ziehen und antippen für Vollbild",
+      "prOpenDisplay": "Anzeige öffnen",
+      "prFrozenBanner": "Eingefroren — der Saal sieht weiter {live}. Du bereitest {preview} vor.",
+      "prBlankTitle": "Schwarz",
+      "prBlankBody": "Der Saal sieht nichts. B oder Klick zum Zurückholen.",
+      "prPreview": "Vorschau",
+      "prOverflow": "Passt auch auf 8 Bildschirme geteilt nicht — weniger Verse wählen.",
+      "prSplitPreview": "Zu lang für einen Bildschirm — wird auf {total} geteilt, 1/{total} bis {total}/{total}.",
+      "prSplitLive": "Auf {total} Bildschirme geteilt — › oder Enter zeigt Teil {next}.",
+      "prPart": "Teil {n}/{total}",
+      "prRangeCap": "Höchstens {max} Verse gleichzeitig",
+      "prPrev": "Vorheriger Vers",
+      "prNext": "Nächster Vers",
+      "prBlank": "Schwarz",
+      "prFreeze": "Einfrieren",
+      "prFrozen": "Eingefroren",
+      "prFreezeHint": "Einfrieren: der Saal behält den aktuellen Vers, du blätterst frei weiter.",
+      "prUnavailable": "Diese Stelle ist in einer der gewählten Übersetzungen nicht verfügbar oder nicht für den Beamer freigegeben.",
+      "prKeyboard": "Tastatur",
+      "prKeyVerse": "Vers",
+      "prKeyRange": "Bereich",
+      "prKeyLayout": "Layout",
+      "prKeyFont": "Schrift",
+      "prKeySearch": "Stelle suchen",
+      "prKeyClose": "Schließen"
     },
     "bookRequest": {
       "bannerEyebrow": "Kostenlose Bücher",

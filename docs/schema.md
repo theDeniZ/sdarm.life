@@ -30,13 +30,20 @@ Schema defined in `packages/db/src/index.ts` using Drizzle ORM. Shared across `a
 `id`, `songbook_id` (FK → `songbooks.id`), `number`, `title`, `author`, `copyright`, `created_at`, `updated_at`
 
 **`song_parts`**
-`id`, `song_id` (FK → `songs.id`), `type` (`verse` | `chorus` | `bridge` | `intro` | `outro` | `coda`), `label`, `sort_order`, `lyrics`
+`id`, `song_id` (FK → `songs.id`), `type` (`verse` | `chorus` | `bridge` | `intro` | `outro` | `coda`), `label`, `sort_order`, `lyrics`, `language`, `translation_type` (`original` | `singable` | `reference`, default `original`)
 - `lyrics` is plain text; chord annotations are embedded inline (e.g. `[G]Amazing [C]grace`)
+- `language` is NULL unless the part is in a different language from its songbook (issue #61). A translated song stores its translation as extra parts in the other language; the projector pairs them with the original by type and occurrence (the second German verse belongs to the second English verse). `singable` fits the melody and is projected at full size, `reference` is a literal gloss projected small and dimmed. The reading view shows the original language only.
 
 **`song_sheets`**
 `id`, `song_id` (FK → `songs.id`), `key` (R2 object key under `sheets/{songId}/{uuid}.{ext}`), `type` (`pdf` | `image`), `sort_order`, `uploaded_at`
 - Stored in the same R2 bucket (`IMAGES` binding) as post cover images
 - Deleted from R2 on `DELETE /admin/songs/:id/sheets/:sheetId`
+
+**`song_opens`**
+`song_id` (PK, FK → `songs.id`, `ON DELETE CASCADE`), `opens` (default 0), `last_opened`
+- One counter row per song, created on the first open and incremented in place by a single upsert (`INSERT … ON CONFLICT(song_id) DO UPDATE SET opens = opens + 1`) — no event log, nothing that grows per visit (issue #197). Written by `recordSongOpen()`, read by `GET /admin/songs/top`; see [api.md](api.md#song-open-counter).
+- `last_opened` is a property of the song ("still in use?"), not of a visitor. No IP, user agent, session or per-event timestamp is stored anywhere — see [dsgvo.md](dsgvo.md#song-open-counter--not-personal-data). Adding any per-request column turns this into behavioural analytics and needs its own DSGVO pass.
+- `ON DELETE CASCADE` relies on D1 enforcing foreign keys, which it does by default: deleting a song (or a songbook, which deletes its songs) removes the counter with it. Verified locally.
 
 **`treasures`**
 `id`, `title`, `author`, `description`, `type` (`book`), `language`, `cover_gradient`, `cover_accent_color`, `cover_key`, `is_free` (boolean), `price`, `sort_order`, `epub_url`, `epub_key`, `created_at`, `updated_at`
@@ -119,12 +126,22 @@ allowlist is still read as `yv:{n}`. Verse text for `loc:` translations lives in
 **nothing is stored** — see [api.md](api.md#bible-content).
 
 **`home_grid` is the one key that holds a document, not a scalar.** Its value is
-`JSON.stringify(HomeGridConfig)` — the five homepage bento blocks with roughly a
-dozen settings each in two languages, about a hundred values. Flat keys cannot
-carry that. Read it with `parseGridConfig()` from `@sdarm/types`, which merges
-whatever is stored onto the defaults and tolerates missing or malformed fields
-rather than throwing: a bad value in KV must not be able to blank the homepage.
+`JSON.stringify(HomeGridConfig)` — `slots` (which of the eight homepage bento
+blocks fills each of the four smaller slots) and `blocks` (roughly a dozen
+settings per block in two languages, well over a hundred values). Flat keys
+cannot carry that. Read it with `parseGridConfig()` from `@sdarm/types`, which
+merges whatever is stored onto the defaults and tolerates missing or malformed
+fields rather than throwing: a bad value in KV must not be able to blank the
+homepage. A value stored before `slots` existed is migrated on read — default
+layout, default visibility, every other stored setting kept; see
+[frontend.md](frontend.md#statsgrid-bento-grid).
 The generic admin Config page excludes this key; it is edited at `/home-grid`.
+
+**`email_digest` is a separate KV key, not a config key.** The subscriber digest
+(issue #184) keeps its settings and run state there (`enabled`, `frequency`,
+`weekday`, `since`, `lastSentAt`, `lastRun`) because the `config` key is served
+publicly by `GET /api/v1/config`. It is read and written only by
+`services/digest/settings.ts`; see [api.md](api.md#subscriber-digest).
 
 ## Drizzle notes
 

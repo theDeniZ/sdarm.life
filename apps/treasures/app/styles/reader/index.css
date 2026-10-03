@@ -1,0 +1,26 @@
+/* The EPUB reader's stylesheet, imported only by app/[locale]/books/[id]/layout.tsx.
+ *
+ * The catalogue is the most-visited page of this app and none of these rules
+ * describe an element on it, so it no longer downloads them. Every rule here is
+ * scoped to an .epub-* class, .hl-*, [data-reader-theme] or
+ * body:has(.epub-reader), because Next keeps a visited route's CSS in the
+ * document: after a reader returns to the catalogue these rules are still
+ * loaded, and an unscoped one would repaint it.
+ *
+ * Loaded after every site-wide file in app/layout.tsx. Anything the catalogue
+ * and the reader both use belongs there, not here.
+ *
+ * themes.css comes first: the others read its custom properties. Order below is
+ * the cascade order; do not reorder. These are
+ * CSS @imports, so under Turbopack an edit to one of them shows up only after
+ * `rm -rf .next` (see apps/web/app/layout.tsx). */
+
+@import './themes.css';
+@import './shell.css';
+@import './toolbar.css';
+@import './sidebar.css';
+@import './chapter.css';
+@import './highlight.css';
+@import './nav.css';
+@import './settings.css';
+@import './focus.css';

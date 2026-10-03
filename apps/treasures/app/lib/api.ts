@@ -8,6 +8,8 @@ export const R2 = process.env.NEXT_PUBLIC_R2_URL ?? process.env.R2_URL ?? 'https
    linked to from the shelf, so the URL belongs here with the other cross-app
    addresses rather than inline at the call site. */
 export const SBL = process.env.SBL_URL ?? 'https://sbl.sdarm.life';
+/** Production origin — canonical and og:url point here in every environment. */
+export const SITE_URL = 'https://treasures.sdarm.life';
 
 const TRANSFORMS_ENABLED = process.env.R2_TRANSFORMS !== 'false';
 

@@ -1,6 +1,12 @@
 /* Self-hosted fonts — no third-party requests, no Google tracking */
 @import '@fontsource/lexend/300.css';
 @import '@fontsource/lexend/400.css';
+/* 500–700 must be loaded for Latin too: font-noto-sans.css declares Cyrillic-only
+   Lexend faces at 300–700, and a weight that has only a Cyrillic face makes Latin
+   text at that weight fall back to the system font instead of Lexend. */
+@import '@fontsource/lexend/500.css';
+@import '@fontsource/lexend/600.css';
+@import '@fontsource/lexend/700.css';
 /* Cyrillic for Lexend, which ships none — see font-noto-sans.css (issue #177) */
 @import './font-noto-sans.css';
 @import '@fontsource/playfair-display/400.css';
@@ -21,6 +27,9 @@
 @import '@fontsource/fraunces/500.css';
 @import '@fontsource/instrument-serif/400.css';
 @import '@fontsource/instrument-serif/400-italic.css';
+/* Cyrillic for the three display faces above, which ship none — see
+   font-display-cyrillic.css (issue #199) */
+@import './font-display-cyrillic.css';
 @import '@fontsource/oswald/200.css';
 @import '@fontsource/oswald/300.css';
 @import '@fontsource/oswald/400.css';
@@ -53,8 +62,11 @@
 
 /* ── Light theme ─────────────────────────────────────────────────────────── */
 [data-theme='light'] {
-  /* Accent — muted oxidised gold; calm on cream paper */
-  --gold: #927223;
+  /* Accent — muted oxidised gold; calm on cream paper. #866a1f is the lightest
+     step of this hue that keeps small gold text (links, labels, the active nav
+     item) at 4.5:1 on every light surface, --bg-card included; #927223 was
+     4.0–4.4:1. */
+  --gold: #866a1f;
   /* Surfaces — almost white, hint of warmth so it doesn't read as clinical */
   --dark: #fcfbf8;
   /* Text — near-black charcoal (no brown) */

@@ -2,6 +2,8 @@ import type { SongbookDto, SongListItemDto, SongDto, ListResponse } from '@sdarm
 
 export const API = process.env.API_URL ?? 'https://api.sdarm.life/api/v1';
 export const R2 = process.env.R2_URL ?? 'https://images.sdarm.life';
+/** Production origin — canonical and og:url point here in every environment. */
+export const SITE_URL = 'https://songs.sdarm.life';
 
 export interface ImageTransform {
   w?: number;

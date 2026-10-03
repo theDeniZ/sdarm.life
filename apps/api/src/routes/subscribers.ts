@@ -3,8 +3,8 @@ import { drizzle } from 'drizzle-orm/d1';
 import type { Bindings } from '../types';
 import { createSubscriber, unsubscribeByToken, confirmSubscriber } from '../repositories/subscribers';
 import { ErrorSchema, OkSchema } from '../schemas';
-import { welcomeEmail } from '../emails/welcome';
-import { confirmEmail } from '../emails/confirm';
+import { welcomeEmail, welcomeSubject } from '../emails/welcome';
+import { confirmEmail, confirmSubject } from '../emails/confirm';
 import { rateLimit } from '../middleware/rate-limit';
 
 const router = new OpenAPIHono<{ Bindings: Bindings }>();
@@ -76,8 +76,6 @@ router.openapi(subscribeRoute, async (c) => {
   }
 
   const locale = (language ?? 'de') as 'de' | 'en';
-  const apiBase = new URL(c.req.url).origin;
-  const unsubscribeUrl = `${apiBase}/api/v1/unsubscribe?token=${token}`;
   const confirmUrl = `${WEB_ORIGIN}/${locale}/confirm?token=${token}`;
 
   c.executionCtx.waitUntil(
@@ -87,8 +85,8 @@ router.openapi(subscribeRoute, async (c) => {
       body: JSON.stringify({
         from: FROM,
         to: email.toLowerCase().trim(),
-        subject: locale === 'de' ? 'Anmeldung bei sdarm.life bestätigen' : 'Confirm your subscription to sdarm.life',
-        html: confirmEmail({ confirmUrl, unsubscribeUrl, locale }),
+        subject: confirmSubject(locale),
+        html: confirmEmail({ confirmUrl, token, locale }),
       }),
     }),
   );
@@ -106,8 +104,6 @@ router.openapi(confirmRoute, async (c) => {
   if (result.status === 'confirmed') {
     // Send welcome email only on first confirmation
     const locale = (result.sub.language ?? 'de') as 'de' | 'en';
-    const apiBase = new URL(c.req.url).origin;
-    const unsubscribeUrl = `${apiBase}/api/v1/unsubscribe?token=${result.sub.token}`;
 
     c.executionCtx.waitUntil(
       fetch('https://api.resend.com/emails', {
@@ -116,14 +112,35 @@ router.openapi(confirmRoute, async (c) => {
         body: JSON.stringify({
           from: FROM,
           to: result.sub.email,
-          subject: locale === 'de' ? 'Willkommen bei sdarm.life' : 'Welcome to sdarm.life',
-          html: welcomeEmail({ unsubscribeUrl, locale }),
+          subject: welcomeSubject(locale),
+          html: welcomeEmail({ token: result.sub.token, locale }),
         }),
       }),
     );
   }
 
   return c.json({ status: result.status }, 200);
+});
+
+// RFC 8058 one-click unsubscribe: mail clients POST `List-Unsubscribe=One-Click`
+// to the URL in the digest's List-Unsubscribe header. Same token, same hard
+// delete as the GET; the form body carries nothing we need, so it is not parsed.
+const oneClickUnsubscribeRoute = createRoute({
+  method: 'post',
+  path: '/unsubscribe',
+  tags: ['Subscribers'],
+  request: { query: z.object({ token: z.string() }) },
+  responses: {
+    200: { content: { 'application/json': { schema: OkSchema } }, description: 'Unsubscribed successfully' },
+    400: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Missing token' },
+    404: { content: { 'application/json': { schema: ErrorSchema } }, description: 'Invalid token' },
+  },
+});
+
+router.openapi(oneClickUnsubscribeRoute, async (c) => {
+  const sub = await unsubscribeByToken(drizzle(c.env.DB), c.req.valid('query').token);
+  if (!sub) return c.json({ error: 'Invalid token' }, 404);
+  return c.json({ ok: true as const }, 200);
 });
 
 router.openapi(unsubscribeRoute, async (c) => {

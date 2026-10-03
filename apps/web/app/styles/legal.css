@@ -55,3 +55,23 @@
 [data-theme='light'] .legal-page h1,
 [data-theme='light'] .legal-page h2,
 [data-theme='light'] .legal-page h3 { color: var(--text-strong); }
+
+/* ═══ CONFIRM / UNSUBSCRIBE ═══
+   One sentence of feedback after a newsletter link. It used to render with no
+   rule at all — no navbar, the message pinned to the top-left corner at x=0,
+   and the footer floating mid-screen above an empty band. */
+.unsubscribe-page {
+  min-height: 70vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 1.4rem 80px;
+  text-align: center;
+}
+.unsubscribe-page p {
+  max-width: 34rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  color: var(--text);
+}

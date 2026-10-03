@@ -15,26 +15,27 @@ Source: `apps/api/src/routes/` (see [architecture.md](architecture.md)).
 | `GET` | `/api/v1/posts/:slug` | Single post by slug. 404 if deleted. |
 | `GET` | `/api/v1/config` | All config as `{ key: value }` map (reads from Workers KV). |
 | `GET` | `/api/v1/images/*` | Proxy-serves R2 objects by key path (local dev only). |
-| `POST` | `/api/v1/subscribe` | Subscribe email. Body: `{ email, language? }` (`language` defaults to `'de'`). Sends a welcome email in the subscriber's language via Resend (background, non-blocking). 409 if already subscribed. |
+| `POST` | `/api/v1/subscribe` | Subscribe email. Body: `{ email, language? }` (`language` defaults to `'de'`). Sends the double opt-in confirmation email in the subscriber's language via Resend (background, non-blocking); the welcome email follows on the first `GET /confirm`. 409 if already subscribed. |
 | `GET` | `/api/v1/unsubscribe` | `?token=` — hard-deletes the subscriber row. Idempotent (404 if token not found). |
+| `POST` | `/api/v1/unsubscribe` | `?token=` — RFC 8058 one-click unsubscribe, the target of the digest's `List-Unsubscribe` header (mail clients POST `List-Unsubscribe=One-Click`; the body is not parsed). Same hard delete as the `GET`. 404 if token not found. |
 | `GET` | `/api/v1/songbooks` | All songbooks ordered by `sort_order`, each with `songCount`. |
 | `GET` | `/api/v1/songbooks/:slug` | Songbook metadata + `songCount`. 404 if not found. |
 | `GET` | `/api/v1/songbooks/:slug/songs` | Paginated song list. `?q=` searches number, title, and `song_parts.lyrics`. `?limit=N&offset=N`. Returns `{ items, total }`. When `?q=` is set, each item includes `matchType: 'title' \| 'number' \| 'lyrics'` indicating which field caused the match (used by the songbook UI to highlight title hits with `<mark>` and label lyrics-only hits with a small pill). |
 | `GET` | `/api/v1/songs/search` | Global search across all songbooks. `?q=` (required, max 100 chars), `?limit=N&offset=N`. Returns `{ items, total }` of `SongSearchResultDto` (id, number, title, author, songbook). |
-| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays; `songbook` includes `language` (drives the projector's chorus/Amen slide labels). 404 if not found. |
+| `GET` | `/api/v1/songs/:id` | Full song with `parts` and `sheets` arrays; `songbook` includes `language` (drives the projector's chorus/Amen slide labels). 404 if not found. Every 200 counts one open (see [Song open counter](#song-open-counter)). |
 | `GET` | `/api/v1/treasures` | Paginated treasure list. `?type=book`, `?language=de`, `?limit=N&offset=N`. Returns `{ items, total }`. |
 | `GET` | `/api/v1/treasures/:id` | Single treasure by ID. 404 if not found. |
 | `GET` | `/api/v1/bible/translations` | Translations the operator enabled in Admin → Bible, in the configured order. Empty array when none are configured. Each item's `id` is a prefixed string (`loc:luther1912`, `yv:51`) and carries a `license` object (see below). |
 | `GET` | `/api/v1/bible/translations/:code` | Translation metadata. `:code` is the URL slug, the prefixed id, or (YouVersion only) the raw numeric ID. 404 if unknown or not enabled. |
 | `GET` | `/api/v1/bible/translations/:code/books` | Books in canonical order with localized names and chapter counts. 404 if unknown/not enabled. |
 | `GET` | `/api/v1/bible/translations/:code/books/:bookCode` | Single book metadata (USFM code, e.g. `JHN`). 404 if not found. |
-| `GET` | `/api/v1/bible/translations/:code/books/:bookCode/chapters/:n` | Chapter with all verses. `truncated: true` when `license.maxVersesPerRequest` cut it short. 404 if translation/book/chapter not found. |
-| `GET` | `/api/v1/bible/parallel` | `?a=&b=&book=&chapter=` — two translations side-by-side, aligned by verse number. Psalm chapters are remapped between LXX and Hebrew numbering (see below). 400 if `a === b`, 404 if anything is missing. |
+| `GET` | `/api/v1/bible/translations/:code/books/:bookCode/chapters/:n` | Chapter with all verses. `truncated: true` when `license.maxVersesPerRequest` cut it short. `?use=projector` answers **403** when the translation's `license.allowProjector` is false. 404 if translation/book/chapter not found. |
+| `GET` | `/api/v1/bible/parallel` | `?t=code1,code2[,code3,code4]&book=&chapter=` — 2–4 translations aligned by verse number, in request order (the first is primary). Response: `{ bookCode, translations: ParallelSideDto[], verses: [{ verse, texts: (string\|null)[] }] }`; each side carries its own `license`, `abbreviation`, `language`, localized `bookName`, the `chapter` it actually read and its own `truncated`. Psalm chapters of every side are remapped LXX↔Hebrew relative to the first (see below). The original `?a=&b=` form still works and additionally returns the deprecated `a`/`b` sides and per-verse `a`/`b` texts. `&use=projector` refuses with **403** if any translation has `allowProjector: false`. 400 for fewer than 2, more than 4 or repeated translations; 404 if anything is missing. |
 | `GET` | `/api/v1/bible/search` | `?q=` (required, 2–100 chars), `?translation=` (code, prefixed id, or numeric id — restricts to one), `?book=` (USFM code), `?limit=N&offset=N`. Searches only locally-hosted translations with `license.allowSearchIndex` set. Returns `{ items, total }` of `BibleSearchHitDto`. 400 if `q` is out of range, 404 if `translation` doesn't resolve, **403** (not 404) if it resolves but isn't indexable. |
 | `GET` | `/api/v1/bible/translations/:code/bundle` | Offline bundle manifest — `{ translationId, code, name, language, verseCount, bookCount, key, license }`. `key` is the R2 object key of the generated bundle (see caveat below — no bucket binding actually serves it yet). 403 if `license.allowOffline` or `license.allowDownload` is false, 404 if the translation doesn't resolve or no bundle has been generated. |
 | `POST` | `/api/v1/book-request` | Submit a free-book delivery request. Body: `{ name, email, phone?, land (DE/AT/CH), street, plz, city, books[] (min 1), wish?, language? }`. Sends a formatted email to `info@sdarm.life` via Resend (background, non-blocking). Rate-limited: 2 requests per IP per minute. Returns `{ ok: true }` (201). |
 | `GET` | `/api/v1/geocode` | Geocode proxy. `?q=` (1–100 chars, required), `?limit=N` (1–10, default 3). Forwards to Nominatim with the project User-Agent and caches the upstream JSON in KV for 30 days. Hides the user's IP from OpenStreetMap (DSGVO). Response: `X-Cache: HIT|MISS`; upstream errors return `[]` to keep the autocomplete resilient. |
-| `GET` | `/api/v1/og` | Generated OpenGraph social card (1200×630 PNG). `?type=post\|song\|treasure`, `?slug=` (post) or `?id=` (song/treasure), `?locale=de\|en`, optional `?v=` (content `updatedAt`, makes the URL self-busting). Rendered with `workers-og` (Satori + resvg-wasm), self-hosted Lexend + Noto-Sans-Cyrillic fonts (DSGVO-clean, no external fetch). KV-cached 24 h (`X-Cache: HIT\|MISS`) + `Cache-Control: public, max-age=3600`. Cover fetched from the R2 binding and embedded. Binary responder — excluded from the OpenAPI spec, like the local-dev R2 proxy. 400 on missing/invalid params, 404 if the content doesn't exist. |
+| `GET` | `/api/v1/og` | Generated OpenGraph social card (1200×630 PNG). `?type=post\|song\|treasure\|site`, `?slug=` (post), `?id=` (song/treasure) or `?app=web\|songbook\|treasures\|events` (site — the home-page card of that app, worded by `<app>.metadata.cardEyebrow` / `cardTitle` in `@sdarm/i18n`), `?locale=de\|en`, optional `?v=` (content `updatedAt`, makes the URL self-busting). Rendered with `workers-og` (Satori + resvg-wasm), self-hosted Lexend + Noto-Sans-Cyrillic fonts, plus Cormorant Garamond 700/700 italic subset to the wordmark's glyphs (DSGVO-clean, no external fetch). KV-cached 24 h under `og:d<design>:…` (bump the design number when `og/card.ts` changes) (`X-Cache: HIT\|MISS`) + `Cache-Control: public, max-age=3600`. Cover fetched from the R2 binding and embedded. Binary responder — excluded from the OpenAPI spec, like the local-dev R2 proxy. 400 on missing/invalid params, 404 if the content doesn't exist. |
 
 **`epubKey` wins over `epubUrl`.** A treasure carries both fields (see [schema.md](schema.md)); when `epubKey` is set, `apps/treasures` resolves the reader URL via `r2url(epubKey)` (self-hosted, on `images.sdarm.life`) and ignores `epubUrl`. When `epubKey` is null, `epubUrl` is used as-is (external host, e.g. `media2.egwwritings.org`). This lets self-hosted books coexist with the ~49 existing rows that still point at the external host without touching them.
 
@@ -58,11 +59,12 @@ Require `Authorization: Bearer <key>` on every request.
 | `POST` | `/api/v1/admin/songbooks` | Create songbook. |
 | `PATCH` | `/api/v1/admin/songbooks/:id` | Partial update. |
 | `DELETE` | `/api/v1/admin/songbooks/:id` | Hard-delete songbook. |
+| `GET` | `/api/v1/admin/songs/top` | Most-opened songs from the open counter. `?limit=N` (1–100, default 10). Returns `{ items, total }` of `TopSongDto` (`id`, `number`, `title`, `songbook { title, slug }`, `opens`, `lastOpened`), ordered by `opens` desc; `total` is the number of songs opened at least once. Registered before `/songs/:id` so `top` is not read as an id. |
 | `GET` | `/api/v1/admin/songs/:id` | Song for edit (includes parts + sheets). |
 | `POST` | `/api/v1/admin/songs` | Create song. Body: `{ songbookId, number, title, author?, copyright? }`. |
 | `PATCH` | `/api/v1/admin/songs/:id` | Partial update (title, number, author, copyright). |
 | `DELETE` | `/api/v1/admin/songs/:id` | Hard-delete song + all its parts and sheets (R2 keys deleted too). |
-| `POST` | `/api/v1/admin/songs/:id/parts` | Add a part. Body: `{ type, label, sortOrder, lyrics }`. |
+| `POST` | `/api/v1/admin/songs/:id/parts` | Add a part. Body: `{ type, label, sortOrder, lyrics, language?, translationType? }` — `language` is a lowercase code (`de`, `en`, `pt-br`) or `null` for the songbook's; `translationType` is `original` (default), `singable` or `reference`. |
 | `PATCH` | `/api/v1/admin/songs/:id/parts/:partId` | Partial update a part. |
 | `DELETE` | `/api/v1/admin/songs/:id/parts/:partId` | Delete a part. |
 | `POST` | `/api/v1/admin/songs/:id/sheets/upload` | `multipart/form-data` (`file`, optional `type`). Accepts PDF and images (jpg, png, webp, gif). Stores under `sheets/{songId}/{uuid}.{ext}` in R2. |
@@ -76,7 +78,12 @@ Require `Authorization: Bearer <key>` on every request.
 | `GET` | `/api/v1/admin/api-keys` | List all API keys (active + revoked). |
 | `POST` | `/api/v1/admin/api-keys` | Create key. Body: `{ name }`. Returns `{ key, apiKey }` — plaintext shown once. |
 | `DELETE` | `/api/v1/admin/api-keys/:id` | Revoke key — removes from KV, marks revoked in index. |
-| `POST` | `/api/v1/admin/email/send` | Send a single email. Body: `{ to, subject, html }`. Uses Resend. |
+| `GET` | `/api/v1/admin/email/templates` | `?locale=de\|en` (default `de`). Composer starting points as `{ items: EmailTemplateDto[] }` (`id`, `label`, `description`, `audience: 'subscribers'\|'anyone'`, `subject`, `html`), rendered in the shared email layout. See [Email infrastructure](#email-infrastructure). |
+| `POST` | `/api/v1/admin/email/send` | Send a single email. Body: `{ to, subject, html }`. When `html` contains the unsubscribe placeholder, a confirmed subscriber gets their own token + `List-Unsubscribe` headers and anyone else gets the subscription footer lines removed (**400** if the placeholder is left outside them). **503** when `RESEND_API_KEY` is unset. Uses Resend. |
+| `GET` | `/api/v1/admin/email/digest` | Subscriber digest settings and state as `DigestSettingsDto`: `enabled`, `frequency`, `weekday`, `since` (window start of the next digest), `lastSentAt`, `lastRun`, `nextRun`, `recipients` (`{ de, en }` counts only — no addresses), `sendingConfigured` (whether `RESEND_API_KEY` is set). See [Subscriber digest](#subscriber-digest). |
+| `PUT` | `/api/v1/admin/email/digest` | Body `{ enabled, frequency: 'weekly'\|'biweekly'\|'monthly', weekday: 0–6 }`. Switching on pins the window start. Returns the updated `DigestSettingsDto`. |
+| `GET` | `/api/v1/admin/email/digest/preview` | The next digest, rendered: `DigestPreviewDto` (`since`, `until`, `hasContent`, `counts`, `subject`, `html`, `text`). `?locale=de\|en` (default `de`), `?since=` ISO override of the window start (preview only — never changes the stored window). Links carry the inert token `preview`. |
+| `POST` | `/api/v1/admin/email/digest/test` | Send that preview to one address. Body `{ to, locale?, since? }`. Subject prefixed `[Test]`, unsubscribe token `preview` (matches nobody). **503** when `RESEND_API_KEY` is unset (nothing is sent), **502** when Resend rejects it. |
 | `GET` | `/api/v1/admin/bible/catalog` | One page of the YouVersion catalog for the Admin → Bible picker. `?language=deu\|eng\|rus\|…\|all`, `?pageToken=`, `?allAvailable=true` (include Bibles our key holds no license for, flagged `licensed: false`). Returns `{ items, total, nextPageToken }`. 503 when `YOUVERSION_API_KEY` is unset or YouVersion is unreachable. |
 | `GET` | `/api/v1/admin/bible/licenses` | Licenses available to the app key, each with the Bible IDs it governs. `?bibleId=N` narrows to the one covering that Bible. Reference data only — **acceptance state is deliberately not exposed** (see below). 503 when unset/unreachable. |
 | `GET` | `/api/v1/admin/bible/translations` | Every row in `sdarm-bible`'s `bible_translations`, both sources, as `BibleAdminTranslationDto` — license, gates, ingest status, plus `enabled` (derived live from the KV allowlist, never stored). Empty array when `BIBLE_DB` is unbound. |
@@ -84,7 +91,7 @@ Require `Authorization: Bearer <key>` on every request.
 | `PATCH` | `/api/v1/admin/bible/translations/:id` | Partial update of identity, license record, and gates. `:id` is url-encoded (`loc%3Aluther1912`). Body: any of `name, slug, abbreviation, language, year, lxxPsalms, sortOrder, licenseBasis, rightsHolder, notice, provenance, permissionRef, permissionDate, allowDownload, allowOffline, allowSearchIndex, allowProjector, maxVersesPerRequest`. 404 if no record exists for `:id`, 503 if `BIBLE_DB` is unbound. |
 | `PUT` | `/api/v1/admin/bible/allowlist` | Replace the KV allowlist wholesale. Body: `{ ids: string[] }`, ordered. Writes the same `bible_translations` field that `PUT /admin/config/bible_translations` writes — a dedicated, validated entry point onto the same field, not a second store. 400 if any id fails to parse. |
 | `POST` | `/api/v1/admin/bible/takedown` | "Remove now": drop one translation from the allowlist, **bump the Bible cache generation** (stranding every cached chapter/parallel response) and purge the enumerable books index. Body: `{ id }`. Effective within ~1 minute — see [Takedown latency](#takedown-latency). Does not reach `apps/treasures`' own Next Data Cache or a copy a reader already downloaded. |
-| `POST` | `/api/v1/admin/email/broadcast` | Bulk-send the updates email template to subscribers. Body: `{ subject, posts: [{ title, excerpt?, href }], locale? }`. `locale` omitted = send to all subscribers in their preferred language; `'de'`/`'en'` = filter to that language only. Sends via Resend batch API (100 per chunk). Returns `{ sent: N }`. |
+| `POST` | `/api/v1/admin/email/broadcast` | Bulk-send the updates email template to confirmed subscribers. Body: `{ subject, posts: [{ title, excerpt?, href }], locale? }`. `locale` omitted = send to all subscribers in their preferred language; `'de'`/`'en'` = filter to that language only. Sends via Resend batch API (100 per chunk), each message with `List-Unsubscribe` headers. **503** when `RESEND_API_KEY` is unset. Returns `{ sent: N }`. |
 
 **Image usage** — `GET /admin/images` cross-references `posts` (`cover_key`, `thumb_key`) and `site_config` to compute `usedIn` per image. Each item: `{ key, size, uploaded, usedIn: { type, label }[] }`. `?unused=1` filters to images not referenced in either table.
 
@@ -129,7 +136,7 @@ Every translation carries a `license` object (`BibleLicenseDto`) with a `basis` 
 | `allowSearchIndex` | API: `GET /bible/search` 403s a named translation that isn't indexable; the search itself only ever runs over local translations with the flag set — a YouVersion translation can never appear in results even unnamed. |
 | `allowDownload` + `allowOffline` | API: `GET /bible/translations/:code/bundle` 403s unless both are true. |
 | `maxVersesPerRequest` | API: `catalog.ts` truncates chapter and parallel responses to the cap and sets `truncated: true`. Public-domain texts carry no cap (`null`). |
-| `allowProjector` | **UI only** (`apps/treasures`), hiding the projector/presenter entry points. There is no API-level check: the projector reads the same chapter route as the reader, so enforcing this server-side would mean trusting a client-supplied "I am a projector" flag, which is not enforcement. |
+| `allowProjector` | API: `?use=projector` on the chapter and parallel routes 403s any translation with the flag off (in parallel, the strictest translation wins). Every fetch the presenter console makes sets it, so the projector path fails closed in the API rather than in a component. It is a declared purpose, not access control — the same text stays readable through the reader routes — so `apps/treasures` also hides the presenter entry points and the display window (`?projector=1`) refuses to open for such a translation. |
 
 **Editing a license record or gate** goes through `PATCH /admin/bible/translations/:id` — never a raw D1 write. Enabling/disabling a translation for the public goes through `PUT /admin/bible/allowlist` (or the plain `PUT /admin/config/bible_translations`, which is the same field).
 
@@ -184,6 +191,44 @@ Plain-text Markdown routes for AI answering agents (ChatGPT, Claude, Gemini, Per
 **Caching:** the index (`/llm` and `/llms.txt`) is cached 1 day; `/llm/site`, `/llm/posts[/:slug]`, `/llm/songbooks[/:slug]`, `/llm/songs/:id`, and `/llm/treasures` are cached 1 hour (`cached(3600)`). `/llm/bible/:code` and `/llm/bible/:code/:book` use the same generation-keyed edge cache as `routes/bible.ts` (1 day, stranded immediately by a takedown or license edit). `/llm/bible` (the translation index) is deliberately left uncached, like `/bible/translations`, since it reflects the admin allowlist and the `allowDownload` gate.
 
 **`robots.txt`** (`GET /robots.txt`, plain text, cached 1 day, source `routes/robots.ts`): the default `*` group sets `Content-Signal: search=yes, ai-input=yes, ai-train=no` and disallows everything (this is where general AI-training crawlers land). A named group for the AI answer-engine user agents (`ChatGPT-User`, `OAI-SearchBot`, `Claude-User`, `Claude-SearchBot`, `Perplexity-User`, `PerplexityBot`, `MistralAI-User`, `DuckAssistBot`) allows only `/llms.txt` and `/api/v1/llm`, disallowing everything else.
+
+## Song open counter
+
+`song_opens` holds one integer per song (issue #197): how many times `GET /api/v1/songs/:id` answered 200. It feeds the "Top 10 songs" card on the admin Statistics page. Admin-only on purpose — a public "most popular" list would turn a pastoral signal into a leaderboard, and nobody has decided that.
+
+- **It is a middleware, not a line in the handler.** `countSongOpen` (`middleware/song-opens.ts`) is mounted in `index.ts` on `/songs/:id{[0-9]+}` **before** `cached(3600)`. `/songs/*` is edge-cached for an hour and a cache hit returns before the handler runs, so a handler-level counter would record at most one open per song per hour per colo. The middleware sees hits and misses alike; since only 200s are cached and 200 means the song exists, a 404 is never counted. It reads the `id` param **before** `next()` — afterwards `c.req.param()` resolves against `cached()`'s `/songs/*`, which has no `id`, and every hit silently went uncounted.
+- **The write never touches the response.** `recordSongOpen()` (`repositories/songs.ts`) runs under `executionCtx.waitUntil`; a failed write is logged and swallowed.
+- **Automated user agents are skipped** (`/bot|crawler|spider|headless/i`). The UA is read and discarded, never stored.
+- **The songbook site must keep fetching this route with `cache: 'no-store'`** (`apps/songbook/app/lib/api.ts`). A client-side cache there would under-count. Next.js memoizes the two `fetchSong()` calls of one page render (`generateMetadata` + page) into one request, so one page view is one open — verified locally.
+
+⚠️ **Known limitation — crawlers reach the counter through the songbook server.** A song page on `songs.sdarm.life` is rendered server-side, so the request to this route comes from the songbook Worker, not from the visitor: the API sees the server's user agent (`node` in local dev), never the crawler's. The bot filter therefore only works for opens the browser fetches directly (song-to-song navigation inside the reader) and for direct API callers. Measured locally: a page view with a `SemrushBot` user agent was counted. Closing it needs `apps/songbook` to forward the visitor's user agent on that one fetch (the API would still read and discard it) — a decision left open in issue #197.
+
+The upsert's create-then-increment behaviour is SQLite's and cannot be unit-tested under the rules in [testing.md](testing.md) (the test D1 has no migrations). `src/middleware/song-opens.test.ts` pins what can be: one in-place upsert per counted open, cache hits counted, nothing for a 404 or a crawler, and a failed write never failing the response. The rest was verified end to end against the local D1.
+
+## Subscriber digest
+
+One email to every **confirmed** subscriber when new content was published (issue #184) — a digest, never one email per item, so a 700-song import produces one email per subscriber with "and 695 more", not 700 emails.
+
+| Piece | Where |
+|---|---|
+| Trigger | Cron Trigger on this Worker, `triggers.crons: ["0 7 * * *"]` in `apps/api/wrangler.jsonc` — **daily** at 07:00 UTC (09:00 German summer time, 08:00 winter). `scheduled()` in `src/index.ts` calls `runScheduledDigest()`. |
+| Settings + state | KV key `email_digest` (one JSON document: `enabled`, `frequency`, `weekday`, `since`, `lastSentAt`, `lastRun`) — `services/digest/settings.ts`. **Not** inside the `config` key, because `GET /api/v1/config` is public. No D1 table. |
+| What is new | `services/digest/run.ts → collectDigestContent()`: posts with `published_at` in the window (not deleted), songs by `created_at` grouped per songbook, treasures added (`created_at`) and edited (`updated_at`). Queries live in the posts/songs/treasures repositories. |
+| Model + caps | `services/digest/build.ts` (pure): posts ≤ 5, songbooks ≤ 4 with ≤ 5 songs each, new books ≤ 5, edited books ≤ 3 — each list ends in "and N more". |
+| Template | `emails/digest.ts` on the shared layout (`emails/layout.ts`, see [Email infrastructure](#email-infrastructure)) — table layout, inline styles, fluid 600 px card, system fonts only, dark like the site with a light variant. Plain-text part rendered from the same model. |
+| Send | Resend batch API, 100 per request, `Idempotency-Key: digest-<date>-<chunk>`. Each message carries `List-Unsubscribe: <https://api.sdarm.life/api/v1/unsubscribe?token=…>` and `List-Unsubscribe-Post: List-Unsubscribe=One-Click`. |
+
+**When a run sends.** The cron fires every day; `isDigestDue()` decides: the digest must be switched on (default **off** — Admin → Email), today (UTC) must be the chosen weekday, and enough time must have passed since `lastSentAt` (weekly ≥ 6 days, every two weeks ≥ 13; monthly = the first chosen weekday of a month). On any other day the run returns without reading or writing anything. On a send day:
+
+1. Nothing new in `(since, now]` → `lastRun = nothing-new`, window unchanged, no email. **Edited books alone do not count as new** — an edit bumps `updated_at` whatever it touched, and a typo fix must not mail everyone; edits ride along in a digest that goes out anyway.
+2. `RESEND_API_KEY` unset → logged, `lastRun = not-configured`, window unchanged. This check comes before the subscriber list is read, so local dev and tests can never send.
+3. Otherwise one message per confirmed subscriber in their `language` (`en` → English, anything else → German), rendered once per language and personalised by token. A successful send moves `since` and `lastSentAt` to the run time. A batch failure after some chunks went out still advances the window (re-running would mail the first chunks twice) and records `failed` with the count; a failure before anything went out leaves the window, so the next due day retries.
+
+**Links** point at the production hosts (`sdarm.life`, `songs.sdarm.life`, `treasures.sdarm.life`, `api.sdarm.life`) because a cron run has no request origin. The staging Worker inherits the trigger but reads its own KV, where the digest is off unless switched on there; its emails would link to production.
+
+**Footer** (every digest): reason for receiving it, the one-click unsubscribe link (`https://sdarm.life/{locale}/unsubscribe?token=…`, the existing web page → `GET /unsubscribe`), Impressum and Datenschutz links, and the association name and address — taken from `legal.impressum.section1Body` in `@sdarm/i18n`, so the Impressum stays the single source.
+
+**Testing it locally.** `wrangler dev --test-scheduled`, then `curl "http://localhost:8787/__scheduled?cron=0+7+*+*+*"`. Without `RESEND_API_KEY` in `.dev.vars` (keep it that way) the run ends at step 2. The admin panel's preview renders any window without sending.
 
 ## Rate limiting
 
@@ -244,18 +289,32 @@ Target DTO types live in `packages/types` (`@sdarm/types`) — see [architecture
 
 Email is sent via **Resend** (`api.resend.com`) using the `RESEND_API_KEY` Worker secret. Sender address: `info@sdarm.life` (domain must be verified in Resend dashboard).
 
-**Templates** live in `apps/api/src/emails/`:
+**Design system.** Every email the API sends is rendered through `apps/api/src/emails/layout.ts` — one shared layout and a set of partials, so colours, type and the footer change in one place:
+
+- `emailDocument({ locale, title, preheader?, body, footer })` — the document: SDARM*.life* wordmark set as text by `wordmarkHtml()` (`src/brand/wordmark.ts`, shared with the OG card): Cormorant Garamond → Georgia → Times New Roman, Bold, gold Bold Italic `.life`, a fluid 600 px card (MSO wrapper for Outlook), the footer below it.
+- Partials for the card rows: `row`, `eyebrow`, `headline` (`*word*` = the site's italic gold accent), `title`, `paragraph`, `note`, `small`, `textLink`, `button` (pill; primary gold or outlined secondary, with a VML roundrect for Outlook for Windows), `divider`, `sectionLabel`, `details` (label/value rows), `quote` (verse + reference), `signoff`. Every partial escapes its text — pass raw strings.
+- Palette: dark by default (the site's dark theme); clients that honour `prefers-color-scheme: light` (Apple Mail, iOS Mail, Outlook for Mac) switch to the site's light palette through the `e-*` classes; Gmail and Outlook for Windows keep the dark one. No images, no remote CSS, no web fonts — system stacks with the site's faces first, used only when installed.
+- Footer: `legalFooter(locale, subscription?)` — Impressum and Datenschutz links plus the association's name and address from `legal.impressum.section1Body` in `@sdarm/i18n`; with `subscription`, also the reason line and the unsubscribe link, wrapped in `<!--subscription-->…<!--/subscription-->`.
+- Per-recipient links: render once with `UNSUBSCRIBE_TOKEN`, then `personalise(html, token)`. Unsubscribe links point at the web page `https://sdarm.life/{locale}/unsubscribe?token=…` (which calls `GET /unsubscribe`).
 
 | File | Function | Used by |
 |---|---|---|
-| `base.ts` | `baseLayout(content, { unsubscribeUrl, locale? })` | All templates — wraps content in header + footer |
-| `welcome.ts` | `welcomeEmail({ unsubscribeUrl, locale? })` | Auto-sent on `POST /subscribe` |
-| `updates.ts` | `updatesEmail(posts[], { unsubscribeUrl, locale? })` | `POST /admin/email/broadcast` |
+| `layout.ts` | `emailDocument`, partials, `legalFooter`, `personalise`, `stripSubscription` | Every email below |
+| `confirm.ts` | `confirmEmail({ confirmUrl, token, locale? })`, `confirmSubject()` | Double opt-in mail on `POST /subscribe` |
+| `welcome.ts` | `welcomeEmail({ token, locale? })`, `welcomeSubject()` | Sent once on the first `GET /confirm` |
+| `updates.ts` | `updatesEmail(posts[], { subject, locale? })` | `POST /admin/email/broadcast` (Admin → Subscribers → Notify) |
+| `digest.ts` | `renderDigestHtml(model)`, `renderDigestText(model)` | Subscriber digest (cron + admin preview/test) |
+| `book-request.ts` | `bookRequestEmail(fields)`, `bookRequestSubject()` | `POST /book-request` → `info@sdarm.life` (German only, no subscription footer) |
+| `templates.ts` | `composerTemplates(locale)` | `GET /admin/email/templates` — composer starting points |
 
-All templates are bilingual (`'de'` / `'en'`). The unsubscribe link is always personalised with the subscriber's token (`/api/v1/unsubscribe?token=…`).
+All are bilingual (`'de'` / `'en'`) except the internal book-request notification. `test/emails.spec.ts` renders every one in both languages and checks the legal footer, the unsubscribe line where required, and escaping.
+
+**Composer templates** (Admin → Email → Template): *News update*, *Invitation — service or event*, *New song or book*, *Sabbath greeting* (all for subscribers) and *Personal message* (anyone; no unsubscribe line). Text the operator must replace is marked `[[like this]]`; the admin highlights it in the preview and refuses to send while any is left. Subscriber templates carry `UNSUBSCRIBE_TOKEN`: on `POST /admin/email/send` the API looks the recipient up — a confirmed subscriber gets their own token and the `List-Unsubscribe` headers; anyone else gets the email with the `<!--subscription-->` lines removed. A leftover token outside those lines for a non-subscriber is a 400.
 
 **`RESEND_API_KEY`** — set as a Wrangler secret in production (`wrangler secret put RESEND_API_KEY`). For local dev, add to `apps/api/.dev.vars`.
 
-**Broadcast batching** — `/admin/email/broadcast` uses Resend's batch endpoint (`POST /emails/batch`) in chunks of 100. Each subscriber receives their own HTML with a personalised unsubscribe URL.
+**Broadcast batching** — `/admin/email/broadcast` uses Resend's batch endpoint (`POST /emails/batch`) in chunks of 100. The email is rendered once per language, then each subscriber receives their own copy with a personalised unsubscribe URL and the `List-Unsubscribe` / `List-Unsubscribe-Post` headers.
+
+**No key, no send** — `/admin/email/send` and `/admin/email/broadcast` return **503** without calling Resend when `RESEND_API_KEY` is unset (every local and test environment), like the digest.
 
 **Welcome email** fires via `c.executionCtx.waitUntil()` — non-blocking, does not affect the 201 response. Failures are silent (logged by Cloudflare observability).

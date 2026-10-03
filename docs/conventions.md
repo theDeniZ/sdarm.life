@@ -44,13 +44,17 @@ Styles for a component that exists but is not rendered anywhere stay in `styles/
   --sidebar-w: 220px --admin-bg: #f4f2ef;
 ```
 
-**Typography stack (web):** Cormorant Garamond (body), DM Serif Display (headings, italic), Playfair Display (logo, footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Self-hosted via `@fontsource/*` in `packages/ui/src/styles/tokens.css`.
+**Typography stack (web):** Cormorant Garamond (body; Bold and Bold Italic for the SDARM.life wordmark, see [frontend.md](frontend.md#sdarmlife-wordmark)), DM Serif Display (headings, italic), Playfair Display (footer heading), Bebas Neue (card numbers), Oswald (counters, buttons). Self-hosted via `@fontsource/*` in `packages/ui/src/styles/tokens.css`.
 
 **Cyrillic rides on the Latin family name, not on a fallback stack.** Lexend — the UI face — ships latin, latin-ext and vietnamese and no Cyrillic, so every Russian string fell through to the device's own font and sat beside German set in Lexend (issue #177). The remedy is `packages/ui/src/styles/font-noto-sans.css` (and its admin twin `apps/admin/app/font-cyrillic.css`, because the admin does not import the package's design system): Noto Sans faces declared **under the name `Lexend`** with a Cyrillic `unicode-range`, so the browser picks per glyph and all ~100 existing `font-family: 'Lexend'` rules keep working untouched. Appending `'Noto Sans'` to each of them instead would be ~100 edits that the next new rule silently forgets.
 
-Two rules follow from that. **Never import `@fontsource/noto-sans/cyrillic-*.css` directly** — those files carry no `unicode-range`, so under the name `Lexend` they would take the Latin glyphs too and replace the UI face everywhere. And **keep the weight lists in step**: a weight present in Latin but missing in Cyrillic is synthesised, a fake bold beside a real one.
+Two rules follow from that. **Never import `@fontsource/noto-sans/cyrillic-*.css` directly** — those files carry no `unicode-range`, so under the name `Lexend` they would take the Latin glyphs too and replace the UI face everywhere. And **keep the weight and style lists in step**: a weight present in Latin but missing in Cyrillic is synthesised, a fake bold beside a real one (and a missing italic, a slanted roman beside a real italic).
 
 Font `url()`s in these files are relative paths into `node_modules`, never `~@fontsource/…`. The tilde resolves under webpack (`next build --webpack`) but not under Turbopack (`next dev`), so it passes CI and breaks every developer's dev server.
+
+**Every family that can render Cyrillic needs a Cyrillic face** — body, UI and display alike. The display faces had the same gap as Lexend (issue #199): DM Serif Display, Fraunces and Instrument Serif ship latin and latin-ext only, so every Russian `PageHero` title, treasure title and projector word was drawn in the device's serif. `packages/ui/src/styles/font-display-cyrillic.css` declares Playfair Display's Cyrillic files under those three names with the same `unicode-range` and the same rules as above; the styles mirror what `tokens.css` loads for Latin (DM Serif and Instrument Serif 400 roman + italic, Fraunces 400 + 500 roman), because a missing italic is synthesised as a slanted roman. The families in use are now all covered: Cormorant Garamond, Inter, Oswald, Playfair Display and Lora through their own `@fontsource` Cyrillic subsets; Lexend (Noto Sans) and the three display faces (Playfair Display) through faces under their names. A new family joins this list before it ships — check its `@fontsource` package for a `cyrillic` subset, and if there is none, add a face here rather than letting it fall through.
+
+`SLTF Silver Editorial` (`apps/web/app/styles/fonts.css`) is the one exception: a self-hosted custom face whose files contain no Cyrillic at all (checked with fontTools — 636 codepoints, none in U+0400–052F), declared but not referenced by any `font-family` rule. Whoever first uses it must give it a Cyrillic face the same way, or use it only for strings that are never Russian or Ukrainian.
 
 **Full-width layout.** All sections are full-width (no `.page` wrapper, no grid margins). Section backgrounds span the viewport.
 
@@ -79,13 +83,14 @@ Font `url()`s in these files are relative paths into `node_modules`, never `~@fo
 | `TREASURES_URL` | `http://localhost:3002`               | `https://treasures.sdarm.life`   |
 | `SONGBOOK_URL`  | `http://localhost:3003`               | `https://songs.sdarm.life`       |
 | `EVENTS_URL`    | `http://localhost:3004`               | `https://events.sdarm.life`      |
+| `SBL_URL`       | `http://localhost:3005`               | `https://sbl.sdarm.life`         |
 | `R2_TRANSFORMS` | _(not set)_                           | _(not set — enabled by default)_ |
 
 Server-only (no `NEXT_PUBLIC_` prefix) apart from `NEXT_PUBLIC_R2_URL`. Client components cannot read these — pass as props from the server component.
 
 `NEXT_PUBLIC_R2_URL` exists because `StatsGrid` is a client component and resolves the grid card photos through `r2url()`. With only the server-only `R2_URL`, the server rendered `http://localhost:8787/...` while the browser fell back to `https://images.sdarm.life` — a hydration mismatch on every card image, and in local dev the client asked the production host for a file that only exists in `.wrangler`. Production does not need it set: the fallback is already the production host. Same reason `apps/treasures` carries it.
 
-`WEB_URL`, `TREASURES_URL`, `SONGBOOK_URL`, and `EVENTS_URL` are used to build cross-app links (e.g. NewsSection cards linking to other apps). Never hardcode these URLs — always read from `lib/api.ts`.
+`WEB_URL`, `TREASURES_URL`, `SONGBOOK_URL`, `EVENTS_URL` and `SBL_URL` are used to build cross-app links (e.g. the home grid's Bible and lesson cards). `SBL_URL` is also read by the shared `ConnectedNavbar`/`ConnectedFooter` for the SBL link, and is set in `wrangler.jsonc` for production and staging. Never hardcode these URLs — always read from `lib/api.ts`.
 
 `R2_TRANSFORMS` is an emergency kill switch. Set to `false` to disable Cloudflare Image Transformations and serve raw R2 URLs. Leave unset for normal operation.
 

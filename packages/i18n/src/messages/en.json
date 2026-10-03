@@ -2,8 +2,10 @@
   "common": {
     "nav": {
       "songs": "Songs",
+      "bible": "Bible",
       "events": "Events",
       "treasures": "Treasures",
+      "sbl": "SBL",
       "about": "Faith",
       "contact": "Contact",
       "imprint": "Imprint",
@@ -24,10 +26,7 @@
       "subscribeSuccess": "Please confirm your subscription via the email we just sent you.",
       "subscribeDuplicate": "This email is already registered.",
       "subscribeError": "Error. Please try again later.",
-      "locationPlaceholder": "City or ZIP",
-      "locationUpdateAria": "Update location",
       "emailInputAria": "Enter email address",
-      "locationInputAria": "Enter city or postal code",
       "footerNavAria": "Site navigation",
       "copyright": "© {year} SDARM.life",
       "allRightsReserved": "All rights reserved"
@@ -40,7 +39,15 @@
       "untilSunset": "Until sunset",
       "untilSunrise": "Until sunrise",
       "defaultLocation": "Pforzheim, Baden-Württemberg",
-      "sunset": "Sunset"
+      "sunset": "Sunset",
+      "ringDay": "{label}: {remaining} left · {percent}% of the {period, select, night {night} sabbath {Sabbath} other {day}} gone",
+      "ringWeek": "Week until Sabbath: {percent}%",
+      "ringWeekSabbath": "Sabbath — the week is complete",
+      "durationHM": "{h} h {m} min",
+      "durationM": "{m} min",
+      "locationPlaceholder": "City or ZIP",
+      "locationInputAria": "Enter city or postal code",
+      "locationUpdateAria": "Update location"
     },
     "comingSoon": "Coming soon",
     "back": "← Back",
@@ -59,8 +66,12 @@
   "web": {
     "metadata": {
       "title": "SDARM.life – Seventh Day Adventist Reform Movement",
-      "description": "Seventh Day Adventist Reform Movement in Germany & Austria – news, hymns, spiritual resources and community. Sabbath worship, Bible study and Bible-based Christian living.",
-      "ogTitle": "SDARM.life – Adventist Reform Movement Germany"
+      "description": "Official website of the SDARM in Germany (Seventh Day Adventist Reform Movement). Discover our Songs of Faith, the Bible reading plan, Sabbath worship services and Christian events.",
+      "ogTitle": "SDARM Germany – Seventh Day Adventist Reform Movement",
+      "ogDescription": "We invite you to get to know God. Find our Bible reading plan, Songs of Faith and upcoming Sabbath services here. Come as you are!",
+      "keywords": "SDARM, SDARM Germany, Seventh Day Adventist Reform Movement, Bible reading plan, Songs of Faith, Sabbath, 25 principles of faith, worship service",
+      "cardEyebrow": "SDARM Germany",
+      "cardTitle": "Seventh Day Adventist Reform Movement"
     },
     "hero": {
       "fallbackTitle": "The Reformation and its consequences for Germany and the whole world",
@@ -104,6 +115,22 @@
         "cta": "Open",
         "phoneAlt": "Reading plan in the YouVersion app"
       },
+      "bible": {
+        "label": "Bible",
+        "title": "Read the <em>Bible</em>",
+        "kicker": "Today",
+        "psalm": "Psalm <em>{n}</em>",
+        "translations": "{count, plural, one {# translation} other {# translations, side by side}}",
+        "cta": "Read"
+      },
+      "sbl": {
+        "label": "Sabbath School",
+        "title": "This week's<br></br><em>lesson</em>",
+        "sub": "In the printed booklet's layout — mark it, write on it, save it as PDF.",
+        "kicker": "Lesson {no}",
+        "quarter": "Quarter: “{title}”",
+        "cta": "Open"
+      },
       "invite": {
         "title": "Come<br></br><em>as you are</em>",
         "cta": "Visit",
@@ -114,7 +141,10 @@
       },
       "songs": {
         "label": "Hymnal",
-        "title": "Songs of <em>faith</em>"
+        "title": "Songs of <em>faith</em>",
+        "weekly": "Song of the week",
+        "number": "No. {number}",
+        "count": "{songs, plural, one {# song} other {# songs}} in {books, plural, one {# songbook} other {# songbooks}}"
       },
       "faith": {
         "title": "Foundations<br></br>of our faith"
@@ -673,6 +703,9 @@
         "section8PrivacyLink": "YouVersion Privacy Policy",
         "section9Title": "Sabbath Bible Lesson (sbl.sdarm.life)",
         "section9Body": "The Sabbath Bible Lesson is provided at its own address, sbl.sdarm.life. It is a separate, independently maintained offering that we merely host under that subdomain. It processes data on its own terms and retrieves content from third parties when the page is opened. It therefore carries its own privacy policy and its own legal notice (Impressum), which you will find directly at sbl.sdarm.life. This privacy policy does not apply to sbl.sdarm.life.",
+        "section10Title": "Email Delivery (Resend)",
+        "section10Body": "We use the Resend service (Plus Five Five, Inc., 2261 Market Street #5039, San Francisco, CA 94114, USA) as a processor to send emails. The following are sent through Resend: the confirmation and welcome emails for newsletter subscriptions and our newsletters – Resend receives your email address and the content of the respective email; your book request, which is forwarded as an email to our mailbox info@sdarm.life – Resend receives all details from the form: name, email address, postal address (street, postal code, city), country, the selected books and, if provided, phone number and personal message; and individual emails we write to you, for example in reply to an enquiry – Resend receives your email address and the content of the message. Sending takes place exclusively server-side via our Cloudflare Worker; your IP address is not transmitted to Resend. Resend processes the data on our behalf to deliver the emails and uses further sub-processors for this, including Amazon Web Services (USA). The legal basis is the one that applies to the respective process: for the newsletter and the book request, your consent (Art. 6(1)(a) GDPR); for individual emails, our legitimate interest in communicating with you (Art. 6(1)(f) GDPR). A data processing agreement pursuant to Art. 28 GDPR is in place with Resend. The transfer to the USA is based on the EU Standard Contractual Clauses agreed therein (Art. 46(2)(c) GDPR); according to its own statement, Resend also participates in the EU-U.S. Data Privacy Framework, for which an adequacy decision of the European Commission exists (Art. 45 GDPR). For more information, see the",
+        "section10PrivacyLink": "Resend Privacy Policy",
         "section7Title": "Your Rights",
         "section7Body": "You have the right to information, correction, deletion and restriction of processing of your stored data as well as the right to data portability. Please contact"
       }
@@ -680,8 +713,11 @@
   },
   "songbook": {
     "metadata": {
-      "title": "Songbook — SDARM",
-      "description": "Seventh Day Adventist Reform Movement — Songbook"
+      "title": "Songs of Faith — SDARM",
+      "description": "Songs of Faith: the hymnals of the Seventh Day Adventist Reform Movement online – lyrics, chords and sheet music for worship, the Sabbath and at home.",
+      "keywords": "Songs of Faith, hymnal, songbook, Christian songs, chords, sheet music, SDARM, Seventh Day Adventist Reform Movement",
+      "cardEyebrow": "Hymnal",
+      "cardTitle": "Songs of Faith"
     },
     "landing": {
       "eyebrow": "Songbook — Hymnarium",
@@ -735,7 +771,9 @@
       "decreaseFont": "Decrease font size",
       "increaseFont": "Increase font size",
       "lightMode": "Light mode",
-      "darkMode": "Dark mode"
+      "darkMode": "Dark mode",
+      "lineMode": "Line by line",
+      "swapLanguages": "Swap languages"
     },
     "presenter": {
       "close": "Close presenter",
@@ -749,7 +787,21 @@
       "titleSlide": "Title",
       "endOfSong": "End of song",
       "lightMode": "Light mode",
-      "darkMode": "Dark mode"
+      "darkMode": "Dark mode",
+      "lineMode": "Line by line",
+      "linesPerSlide": "Lines",
+      "line": "line {from} / {total}",
+      "lines": "lines {from}–{to} / {total}",
+      "transition": "Transition",
+      "transitionSlide": "Slide",
+      "transitionFade": "Fade",
+      "transitionSpeed": "Transition speed",
+      "primaryLanguage": "Primary",
+      "translation": "Translation",
+      "translationOff": "Off",
+      "swapLanguages": "Swap languages",
+      "blank": "Blank",
+      "blankTitle": "Blank the screen (B)"
     },
     "partTypes": {
       "verse": "Verse",
@@ -763,15 +815,21 @@
   "events": {
     "metadata": {
       "title": "Events — SDARM",
-      "description": "Seventh Day Adventist Reform Movement — Events"
+      "description": "Events of the Seventh Day Adventist Reform Movement in Germany – Sabbath services, seminars and gatherings. The overview is coming soon.",
+      "keywords": "Sabbath service, worship service, Christian events, seminars, SDARM, Seventh Day Adventist Reform Movement",
+      "cardEyebrow": "Events",
+      "cardTitle": "Services, seminars and gatherings"
     },
     "comingSoonTitle": "Events",
     "comingSoonSubtitle": "Events, seminars, and services — coming soon."
   },
   "treasures": {
     "metadata": {
-      "title": "Treasures — SDARM",
-      "description": "Seventh Day Adventist Reform Movement — Treasures"
+      "title": "Books & Treasures — SDARM",
+      "description": "Spiritual books and resources of the Seventh Day Adventist Reform Movement – read them free of charge or order them by post. Plus the Bible in several translations and the Sabbath Bible Lesson.",
+      "keywords": "Bible online, Bible translations, Sabbath Bible Lesson, free Christian books, spiritual literature, SDARM, Seventh Day Adventist Reform Movement",
+      "cardEyebrow": "Spiritual Resources",
+      "cardTitle": "Books & Treasures"
     },
     "comingSoonTitle": "Treasures",
     "comingSoonSubtitle": "Spiritual resources, books, and materials — coming soon.",
@@ -836,13 +894,6 @@
       "sameTranslation": "Pick two different translations for parallel mode.",
       "presenter": "Presenter",
       "presenterSingleScreenHint": "Opens in a separate window — drag it to your projector",
-      "primaryTranslation": "Primary translation",
-      "currentSlide": "Current verse",
-      "blankScreen": "Blank screen",
-      "unblankScreen": "Show screen",
-      "rangeShiftClickHint": "Click: pick verse · Shift+click: extend passage",
-      "compareWith": "Parallel translation",
-      "compareOff": "+ Parallel",
       "connecting": "Connecting to display…",
       "tapForFullscreen": "Tap for fullscreen",
       "increaseFont": "Larger text",
@@ -919,7 +970,70 @@
       "licenseNoticeLabel": "Notice",
       "licenseProvenanceLabel": "Provenance",
       "projectorNotAllowedTitle": "Not licensed for display",
-      "projectorNotAllowedBody": "This translation's license does not permit showing its text on a shared screen. Use the reader instead."
+      "projectorNotAllowedBody": "This translation's license does not permit showing its text on a shared screen. Use the reader instead.",
+      "prInHall": "In the hall",
+      "prInHallFrozen": "frozen",
+      "prLiveNothing": "Nothing shown yet",
+      "prLiveSummary": "{reference} · {count, plural, one {# translation} other {# translations}}",
+      "prLayoutAria": "Layout on the screen",
+      "prLayoutRows": "Rows",
+      "prLayoutColumns": "Columns",
+      "prLayoutGrid": "Grid",
+      "prLayoutFocus": "Focus",
+      "prAuto": "Auto · {px} px",
+      "prTranslations": "Translations",
+      "prCountOf": "{n} of {max}",
+      "prRemove": "Remove",
+      "prDragHandle": "Move {name} — drag or use the arrow keys",
+      "prAddTranslation": "Add translation",
+      "prSortHint": "Drag to reorder. The first translation is the main one — the Focus layout sets it large.",
+      "prMaxReached": "At most 4 translations — more is not legible on the screen.",
+      "prAvailable": "Available",
+      "prNotLicensed": "Not licensed for the projector",
+      "prBackground": "Background",
+      "prThemeViolet": "Violet",
+      "prThemeGraphite": "Graphite",
+      "prThemeInk": "Ink",
+      "prThemePaper": "Paper",
+      "prAllBookNames": "Book names in every language",
+      "prLabels": "Abbreviation before each translation",
+      "prDirectShow": "Click shows at once",
+      "prLicenseAlways": "License notices are always on screen — public-domain translations in one line at the bottom, others under their text. Cannot be switched off.",
+      "prPublicDomain": "Public domain",
+      "prSettings": "Settings",
+      "prSearchHint": "e.g. John 3:16, Ps 23",
+      "prListTranslation": "Text in the list",
+      "prShow": "Show",
+      "prListHint": "Click: to preview · Double-click or Enter: show · Shift+click: range",
+      "prListHintDirect": "Click: show at once · Shift+click: range",
+      "prLiveCaption": "What the room sees",
+      "prConnected": "Display connected · {w} × {h}",
+      "prDisconnected": "Display not connected",
+      "prConnectHint": "Drag the window onto the projector and tap it for full screen",
+      "prOpenDisplay": "Open display",
+      "prFrozenBanner": "Frozen — the room still sees {live}. You are preparing {preview}.",
+      "prBlankTitle": "Black",
+      "prBlankBody": "The room sees nothing. Press B or click to bring it back.",
+      "prPreview": "Preview",
+      "prOverflow": "Does not fit even split across 8 screens — choose fewer verses.",
+      "prSplitPreview": "Too long for one screen — split across {total}, 1/{total} to {total}/{total}.",
+      "prSplitLive": "Split across {total} screens — › or Enter shows part {next}.",
+      "prPart": "Part {n}/{total}",
+      "prRangeCap": "At most {max} verses at once",
+      "prPrev": "Previous verse",
+      "prNext": "Next verse",
+      "prBlank": "Black",
+      "prFreeze": "Freeze",
+      "prFrozen": "Frozen",
+      "prFreezeHint": "Freeze: the room keeps the current verse while you browse freely.",
+      "prUnavailable": "This passage is not available in one of the chosen translations, or not licensed for the projector.",
+      "prKeyboard": "Keyboard",
+      "prKeyVerse": "Verse",
+      "prKeyRange": "Range",
+      "prKeyLayout": "Layout",
+      "prKeyFont": "Text size",
+      "prKeySearch": "Find passage",
+      "prKeyClose": "Close"
     },
     "bookRequest": {
       "bannerEyebrow": "Free Books",

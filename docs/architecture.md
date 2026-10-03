@@ -10,6 +10,8 @@
 
 **Site config lives in Workers KV.** All config key-value pairs are stored as a single JSON object under the KV key `config`. The D1 `site_config` table is dormant (kept as backup, not read or written).
 
+**The API Worker has one Cron Trigger** (`triggers.crons` in `apps/api/wrangler.jsonc`, daily 07:00 UTC). It drives the subscriber digest (issue #184), which is off until switched on in Admin → Email and decides per run whether to send — see [api.md](api.md#subscriber-digest). The trigger only exists once the Worker is deployed; `wrangler dev --test-scheduled` fires it locally. Its state is the KV key `email_digest`, kept out of `config` because `GET /config` is public.
+
 ---
 
 ## Target structure (migration goal)
@@ -22,7 +24,7 @@ API response shapes (`PostDto`, `ImageDto`, etc.) are currently redefined in bot
 
 **Separation of concerns:**
 - `@sdarm/db` — Drizzle schema definitions (DB layer). Types have `Date` objects and internal fields.
-- `@sdarm/types` — HTTP response types (API contract layer). Types have ISO strings and only publicly surfaced fields. Also holds the homepage grid config (`HomeGridConfig`) together with the pure functions that read it — `defaultGridConfig`, `parseGridConfig`, `pick`, `resolveTextColor`. Both `apps/web` (renders the grid) and `apps/admin` (edits it) need that logic, neither may import from the other, and a duplicated merge routine is exactly how the two would drift apart.
+- `@sdarm/types` — HTTP response types (API contract layer). Types have ISO strings and only publicly surfaced fields. Also holds the homepage grid config (`HomeGridConfig`) together with the pure functions that read it — `defaultGridConfig`, `parseGridConfig`, `slotOf`, `pick`, `resolveTextColor`. The grid's live content (lesson of the week, Psalm of the day, song of the week) is not config: `apps/web/app/lib/home-live.ts` fetches it server-side on each home render, memoised per isolate. Both `apps/web` (renders the grid) and `apps/admin` (edits it) need that logic, neither may import from the other, and a duplicated merge routine is exactly how the two would drift apart.
 - `@sdarm/ui` — Shared React components and the dark museum CSS design system used by all public-facing apps.
 - `@sdarm/i18n` — Shared i18n config (`locales`, `defaultLocale`) and message JSON files (`de.json`, `en.json`).
 
@@ -42,6 +44,9 @@ packages/
 Lesson. It is a zero-build static site (one `index.html` with its CSS and JS
 inline, a service worker, its own web fonts, its own `datenschutz.html` /
 `impressum.html`, a mirror of the quarters), served by an assets-only Worker.
+It carries a static copy of the shared site navigation (`Navbar` from
+`@sdarm/ui`) inline — see [apps/sbl/README.md](../apps/sbl/README.md#the-site-navigation-is-a-copy);
+a change to the shared Navbar has to be repeated there.
 
 ```
 apps/sbl/
@@ -206,7 +211,11 @@ packages/ui/src/
     ConnectedNavbar.tsx  — wraps Navbar; accepts locale prop, reads translations server-side
     ConnectedFooter.tsx  — wraps Footer; accepts locale prop, reads translations + apiUrl server-side
     Navbar.tsx           — fixed nav; transparent → frosted glass on scroll; language switcher; sun/moon theme toggle (dispatches sdarm:toggle-theme)
-    Footer.tsx           — 3-col: contact+subscribe, nav links, sunset clock
+    Footer.tsx           — contact+subscribe and nav links over the CommunityMap backdrop
+    SunsetClock.tsx      — "ring in ring" sunset clock + location search; rendered by apps/web's StatsGrid sunset card
+    CommunityMap.tsx     — footer map backdrop; marks the visitor's sunset location
+  lib/
+    sunset-location.ts   — useSunsetLocation(): stored sunset location shared by SunsetClock and the footer map
     PageHero.tsx         — full-bleed landing hero: grain, glow, fog, deco-circle, decoration slot, scroll hint
     ScriptureVerseSection.tsx — centered quote band: large italic text + reference tag
     ThemeScript.tsx      — server component; renders inline <script> in <head> that applies the theme (URL ?theme= → localStorage → SSR default) before first paint (prevents FOUC)
@@ -216,7 +225,8 @@ packages/ui/src/
   styles/
     tokens.css           — Google Fonts import, CSS custom properties, base reset
     navbar.css           — nav component styles + responsive breakpoints
-    footer.css           — footer + sunset clock styles + responsive breakpoints
+    footer.css           — footer styles + responsive breakpoints
+    sunset-clock.css     — SunsetClock; NOT in index.css — imported by the one app that renders it (apps/web layout.tsx)
     page-hero.css        — PageHero styles (grain, fog, deco-circle, entrance animations)
     scripture-verse.css  — ScriptureVerseSection styles
     coming-soon.css      — ComingSoon styles
@@ -309,6 +319,12 @@ apps/api/src/
       youversion.ts    — YouVersion Platform API client (server-side only)
       cache.ts         — KV read-through cache + TTLs for Bible payloads
       catalog.ts       — resolves the KV-configured enabled Bible IDs into translations/books/chapters
+    digest/
+      build.ts         — pure: window content → capped, grouped, localised digest model
+      settings.ts      — KV `email_digest` settings, schedule (isDigestDue / nextDigestRun)
+      run.ts           — collect window, render per language, Resend batch send, cron entry point
+  emails/
+    digest.ts          — digest HTML (table layout, inline styles) + plain text from the model
   middleware/
     auth.ts            — CF Access header verification middleware
   og/
@@ -502,7 +518,69 @@ apps/web/app/styles/
   uber-uns.css       — NOT imported; UberUnsSection.tsx is not rendered
 ```
 
+`apps/songbook/app/styles/` follows the same rule. The files are imported one by one from `apps/songbook/app/layout.tsx`, in cascade order — the app has no `globals.css`. There is no trailing responsive or light-theme block; `reduced-motion.css` is the one global block, because its universal rule reaches into every section, and it is imported last.
+
+```
+apps/songbook/app/styles/
+  base.css           — fonts, reset, songbook tokens, page shell, top nav
+  songbooks.css      — songbook landing grid
+  song-list.css      — song table, search, pagination, lyric-match pill
+  song-view.css      — song header, mode bar, transpose capsule, parts, chord line
+  projector.css      — inline fullscreen and the display window (?projector=1)
+  presenter.css      — presenter dashboard, display-window fullscreen overlay
+  sheets.css         — sheet music viewer
+  reader.css         — reader layout: toolbar, song-list sidebar, reading area
+  reduced-motion.css — prefers-reduced-motion, global, imported last
+```
+
 Mirrors `packages/ui/src/styles/index.css`. See [conventions.md](conventions.md) for the rule.
+
+**`apps/admin` has no `globals.css`.** Its stylesheets live in `apps/admin/app/styles/` and are imported one by one from `apps/admin/app/layout.tsx` — not through a CSS `@import` index, because Turbopack does not invalidate its CSS cache through an `@import` (see the comment in `apps/web/app/layout.tsx`). The files are named after the folders in `app/domains/`, and each carries its own `@media` blocks; the admin has no trailing light-theme block — `[data-theme='light']` in `theme.css` redefines tokens only (issue #178).
+
+```
+apps/admin/app/styles/
+  theme.css        — fonts, reset, :root tokens, [data-theme='light'] tokens, base
+  sidebar.css      — .admin-shell grid, sidebar, collapsed rail, mobile off-canvas
+  shell.css        — .admin-main, page header
+  buttons.css      — .btn-primary / -ghost / -danger / -sm
+  table.css        — tables, clickable .row-link rows, reorder/swap controls
+  forms.css        — .form-row controls, checkbox, file input
+  images.css       — ImagePicker, upload zone, ImageLibrary
+  config.css       — ConfigEditor
+  states.css       — loading/empty/error, pagination, coming-soon stub
+  songbooks.css    — songbook card grid, filters
+  api-keys.css     — ApiKeyManager
+  modal.css        — modal / ConfirmDialog
+  song-editor.css  — SongEditor, preview pane, sheet drop zone, breadcrumb
+  dashboard.css    — cards, hero stat, compact stats
+  statistics.css   — BarChart, HBarChart, stat-mini, roadmap badge
+  bible.css        — BibleSettings, LicenseEditor, catalog
+  home-grid.css    — HomeGridEditor
+  email.css        — EmailComposer
+```
+
+**Import order is the cascade order**, and it is the order the sections had in the single file they came from. Three small sections moved to join their domain — checkbox and file input into `forms.css`, the image library into `images.css`, the unused coming-soon stub into `states.css` — each only past sections with no selector in common. A before/after check — screenshots of every admin page at 1280 and 834 in both themes, and the computed style of every element on those pages — found no difference. A new file goes where nothing after it can override it by accident.
+
+`apps/treasures/app/styles/` follows the same rule for the site-wide files — imported one by one from `apps/treasures/app/layout.tsx`, no `globals.css` — with one addition: the EPUB reader's stylesheet is **layout-scoped**. `styles/reader/index.css` is imported only by `app/[locale]/books/[id]/layout.tsx`, so a route that does not render the reader (the catalogue above all) never loads it. The rules that come with that are in [frontend.md](frontend.md#stylesheets-appstyles).
+
+```
+apps/treasures/app/styles/
+  base.css             — fonts, reset, tokens, navbar overrides
+  catalog-hero.css     — photo hero behind PageHero
+  catalog.css          — filter bar, shop grid, bibles shelf, pagination, spinner
+  card.css             — item card: visual, badge, body
+  tome.css             — 3-D book cover
+  sections.css         — Bible / lesson cards on the shelf
+  quote.css            — scripture quote band
+  book-detail.css      — book page without an EPUB
+  book-request.css     — book-request hero button and modal
+  bible.css            — Bible reader: landing, index, picker, chapter, parallel view
+  bible-projector.css  — Bible projector slide stage (display, mirror, thumbnail), display window
+  bible-presenter.css  — Bible presenter console
+  bible-license.css    — copyright notice, license register
+  reduced-motion.css   — prefers-reduced-motion, global, last of the site-wide files
+  reader/              — EPUB reader; index.css is imported by books/[id]/layout.tsx only
+```
 
 Do not create `utils/` at the monorepo root for app-specific code — it breaks isolation. Only framework-free, truly cross-app logic belongs in a shared package.
 

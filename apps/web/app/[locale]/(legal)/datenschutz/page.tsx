@@ -1,9 +1,11 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { localeAlternates } from '@sdarm/ui';
+import { WEB_URL } from '../../../lib/api';
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const t = await getTranslations({ locale, namespace: 'web.legal.datenschutz' });
-  return { title: t('metaTitle') };
+  return { title: t('metaTitle'), alternates: localeAlternates(WEB_URL, locale, '/datenschutz') };
 }
 
 export default async function DatenschutzPage({ params }: { params: Promise<{ locale: string }> }) {
@@ -65,6 +67,15 @@ export default async function DatenschutzPage({ params }: { params: Promise<{ lo
 
       <h2>{t('section9Title')}</h2>
       <p>{t('section9Body')}</p>
+
+      <h2>{t('section10Title')}</h2>
+      <p>
+        {t('section10Body')}{' '}
+        <a href="https://resend.com/legal/privacy-policy" target="_blank" rel="noopener noreferrer">
+          {t('section10PrivacyLink')}
+        </a>
+        .
+      </p>
 
       <h2>{t('section7Title')}</h2>
       <p>

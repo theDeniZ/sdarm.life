@@ -92,6 +92,7 @@ export const SongSearchResultSchema = z
 
 export const SongPartTypeSchema = z.enum(['verse', 'chorus', 'bridge', 'intro', 'outro', 'coda']);
 export const SongSheetTypeSchema = z.enum(['pdf', 'image']);
+export const SongTranslationTypeSchema = z.enum(['original', 'singable', 'reference']);
 
 export const SongPartSchema = z
 	.object({
@@ -100,6 +101,8 @@ export const SongPartSchema = z
 		label: z.string(),
 		sortOrder: z.number(),
 		lyrics: z.string(),
+		language: z.string().nullable(),
+		translationType: SongTranslationTypeSchema,
 	})
 	.openapi('SongPart');
 
@@ -126,6 +129,17 @@ export const SongSchema = z
 		updatedAt: z.string(),
 	})
 	.openapi('Song');
+
+export const TopSongSchema = z
+	.object({
+		id: z.number(),
+		number: z.number(),
+		title: z.string(),
+		songbook: z.object({ title: z.string(), slug: z.string() }),
+		opens: z.number().openapi({ description: 'Times the song was opened (automated user agents excluded)' }),
+		lastOpened: z.string().nullable().openapi({ description: 'ISO timestamp of the most recent open' }),
+	})
+	.openapi('TopSong');
 
 // ── Treasures ─────────────────────────────────────────────────────────────────
 
@@ -251,19 +265,31 @@ export const BibleChapterSchema = z
 	.openapi('BibleChapter');
 
 export const ParallelVerseSchema = z
-	.object({ verse: z.number(), a: z.string().nullable(), b: z.string().nullable() })
+	.object({
+		verse: z.number(),
+		texts: z.array(z.string().nullable()).openapi({
+			description: 'One entry per translation, in the order of `translations`; null when that side has no such verse',
+		}),
+		a: z.string().nullable().optional().openapi({ description: 'Deprecated: texts[0], only on the legacy a/b form' }),
+		b: z.string().nullable().optional().openapi({ description: 'Deprecated: texts[1], only on the legacy a/b form' }),
+	})
 	.openapi('ParallelVerse');
 
 const ParallelSideSchema = BibleTextTranslationSchema.extend({
 	chapter: z.number().openapi({ description: 'The chapter actually read on this side (LXX/Hebrew Psalms differ)' }),
+	abbreviation: z.string().openapi({ example: 'KJV' }),
+	language: z.string().openapi({ example: 'ru' }),
+	bookName: z.string().openapi({ description: "The book's name in this translation's language", example: 'Hesekiel' }),
+	truncated: z.boolean().openapi({ description: "True when this side's license.maxVersesPerRequest cut it short" }),
 }).openapi('ParallelSide');
 
 export const ParallelChapterSchema = z
 	.object({
 		bookCode: z.string(),
-		a: ParallelSideSchema,
-		b: ParallelSideSchema,
+		translations: z.array(ParallelSideSchema).openapi({ description: '2–4 translations in request order; the first is primary' }),
 		verses: z.array(ParallelVerseSchema),
+		a: ParallelSideSchema.optional().openapi({ description: 'Deprecated: translations[0], only on the legacy a/b form' }),
+		b: ParallelSideSchema.optional().openapi({ description: 'Deprecated: translations[1], only on the legacy a/b form' }),
 	})
 	.openapi('ParallelChapter');
 

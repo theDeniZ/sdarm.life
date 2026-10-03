@@ -1,6 +1,6 @@
-import { and, asc, eq, like, or, sql } from 'drizzle-orm';
+import { and, asc, desc, eq, gt, like, lte, or, sql } from 'drizzle-orm';
 import type { DrizzleD1Database } from 'drizzle-orm/d1';
-import { songbooks, songParts, songSheets, songs } from '@sdarm/db';
+import { songbooks, songOpens, songParts, songSheets, songs } from '@sdarm/db';
 
 // ── Songbooks ─────────────────────────────────────────────────────────────────
 
@@ -287,6 +287,89 @@ export async function deleteSong(db: DrizzleD1Database, id: number) {
   return sheets.map((s) => s.key);
 }
 
+// ── Song opens ────────────────────────────────────────────────────────────────
+// A counter, not analytics: one row per song, incremented in place. Nothing
+// about the request is written — see docs/dsgvo.md before adding a column here.
+
+/** Count one open of an existing song. Creates the row on the first open. */
+export async function recordSongOpen(db: DrizzleD1Database, songId: number, now: Date = new Date()) {
+  await db
+    .insert(songOpens)
+    .values({ songId, opens: 1, lastOpened: now })
+    .onConflictDoUpdate({
+      target: songOpens.songId,
+      // In-place increment in the same statement — no read-modify-write, so two
+      // concurrent opens cannot overwrite each other's count.
+      set: { opens: sql`${songOpens.opens} + 1`, lastOpened: sql`excluded.last_opened` },
+    });
+}
+
+/** Most-opened songs first; `total` is how many songs have been opened at all. */
+export async function listTopSongs(db: DrizzleD1Database, limit: number) {
+  const [rows, [{ total }]] = await Promise.all([
+    db
+      .select({
+        id: songs.id,
+        number: songs.number,
+        title: songs.title,
+        sbTitle: songbooks.title,
+        sbSlug: songbooks.slug,
+        opens: songOpens.opens,
+        lastOpened: songOpens.lastOpened,
+      })
+      .from(songOpens)
+      .innerJoin(songs, eq(songOpens.songId, songs.id))
+      .innerJoin(songbooks, eq(songs.songbookId, songbooks.id))
+      .orderBy(desc(songOpens.opens), asc(songs.id))
+      .limit(limit),
+    db.select({ total: sql<number>`count(*)` }).from(songOpens),
+  ]);
+
+  return {
+    items: rows.map(({ sbTitle, sbSlug, lastOpened, ...r }) => ({
+      ...r,
+      songbook: { title: sbTitle, slug: sbSlug },
+      lastOpened: lastOpened ? lastOpened.toISOString() : null,
+    })),
+    total: total ?? 0,
+  };
+}
+
+/**
+ * Songs added inside the subscriber digest window `(since, until]` (issue #184),
+ * grouped by songbook. `songbooks` carries the full count per book; `songs`
+ * holds at most `perSongbook` rows per book (lowest numbers first), so a bulk
+ * import of hundreds of songs reads a handful of rows, not all of them.
+ */
+export async function listSongsCreatedBetween(db: DrizzleD1Database, since: Date, until: Date, perSongbook: number) {
+  const window = and(gt(songs.createdAt, since), lte(songs.createdAt, until));
+  const [books, rows] = await Promise.all([
+    db
+      .select({
+        id: songbooks.id,
+        title: songbooks.title,
+        slug: songbooks.slug,
+        language: songbooks.language,
+        createdAt: songbooks.createdAt,
+        total: sql<number>`count(${songs.id})`,
+      })
+      .from(songs)
+      .innerJoin(songbooks, eq(songs.songbookId, songbooks.id))
+      .where(window)
+      .groupBy(songbooks.id)
+      .orderBy(asc(songbooks.sortOrder), asc(songbooks.title)),
+    db.all<{ id: number; number: number; title: string; songbookId: number }>(sql`
+      SELECT id, number, title, songbook_id AS songbookId FROM (
+        SELECT id, number, title, songbook_id,
+               ROW_NUMBER() OVER (PARTITION BY songbook_id ORDER BY number, id) AS rn
+        FROM songs
+        WHERE created_at > ${Math.floor(since.getTime() / 1000)} AND created_at <= ${Math.floor(until.getTime() / 1000)}
+      ) WHERE rn <= ${perSongbook}
+    `),
+  ]);
+  return { songbooks: books, songs: rows };
+}
+
 // ── Song Parts ────────────────────────────────────────────────────────────────
 
 export async function createSongPart(
@@ -297,6 +380,8 @@ export async function createSongPart(
     label: string;
     sortOrder: number;
     lyrics: string;
+    language?: string | null;
+    translationType?: 'original' | 'singable' | 'reference';
   },
 ) {
   const [part] = await db.insert(songParts).values(data).returning();
@@ -307,7 +392,14 @@ export async function createSongPart(
 export async function updateSongPart(
   db: DrizzleD1Database,
   id: number,
-  data: Partial<{ type: 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda'; label: string; sortOrder: number; lyrics: string }>,
+  data: Partial<{
+    type: 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda';
+    label: string;
+    sortOrder: number;
+    lyrics: string;
+    language: string | null;
+    translationType: 'original' | 'singable' | 'reference';
+  }>,
 ) {
   const [part] = await db.update(songParts).set(data).where(eq(songParts.id, id)).returning();
   if (!part) return null;

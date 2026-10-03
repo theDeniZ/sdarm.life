@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslations, useLocale } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
 import { hasChords } from '@/app/lib/chords';
+import { partsInLanguage, songLanguages } from '@/app/lib/line-mode';
 import SongReader from './SongReader';
 import Projector from './Projector';
 import SheetViewer from './SheetViewer';
@@ -19,6 +20,10 @@ export default function SongView({ song }: { song: SongDto }) {
   const [multiScreen, setMultiScreen] = useState(false);
   const displayWinRef = useRef<Window | null>(null);
   const anyChords = song.parts.some((p) => p.lyrics.split('\n').some(hasChords));
+  // Translations tagged for the projector (issue #61) are not further verses:
+  // the reading view shows the song in its original language only.
+  const bookLanguage = song.songbook.language;
+  const readerParts = partsInLanguage(song.parts, songLanguages(song.parts, bookLanguage)[0], bookLanguage);
 
   useEffect(() => {
     setMultiScreen(!!(window.screen as Screen & { isExtended?: boolean }).isExtended);
@@ -95,7 +100,7 @@ export default function SongView({ song }: { song: SongDto }) {
         )}
       </div>
 
-      {mode === 'reader' && <SongReader parts={song.parts} showChords={showChords} songId={song.id} />}
+      {mode === 'reader' && <SongReader parts={readerParts} showChords={showChords} songId={song.id} />}
       {mode === 'fullscreen' && <Projector song={song} onClose={() => setMode('reader')} />}
       {mode === 'presenter' && <PresenterDashboard song={song} onClose={closePresenter} />}
       {mode === 'sheets' && <SheetViewer sheets={song.sheets} onClose={() => setMode('reader')} />}

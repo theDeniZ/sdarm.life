@@ -3,6 +3,8 @@
 // gutter. Colors mirror the site's dark museum theme (self-contained, no
 // external asset fetch → DSGVO-clean).
 
+import { wordmarkHtml } from '../brand/wordmark';
+
 export interface OgCardInput {
   eyebrow: string; // localized type label, e.g. "Beitrag" / "Song" / "Buch"
   title: string;
@@ -10,8 +12,12 @@ export interface OgCardInput {
   coverDataUrl?: string | null; // data: URI of the R2 cover, or null
 }
 
-function escapeHtml(s: string): string {
-  return s.replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]!);
+// workers-og hands text nodes to satori verbatim: an entity such as `&amp;`
+// is drawn as those five characters ("Bücher &amp; Schätze"). So text is not
+// entity-escaped; `&` and quotes are safe inside a text node, and the only
+// characters that could open markup, `<` and `>`, become ‹ and ›.
+function ogText(s: string): string {
+  return s.replace(/</g, '‹').replace(/>/g, '›');
 }
 
 function clamp(s: string, max: number): string {
@@ -19,9 +25,9 @@ function clamp(s: string, max: number): string {
 }
 
 export function ogCardHtml(input: OgCardInput): string {
-  const title = escapeHtml(clamp(input.title, 90));
-  const subtitle = input.subtitle ? escapeHtml(clamp(input.subtitle, 140)) : '';
-  const eyebrow = escapeHtml(input.eyebrow.toUpperCase());
+  const title = ogText(clamp(input.title, 90));
+  const subtitle = input.subtitle ? ogText(clamp(input.subtitle, 140)) : '';
+  const eyebrow = ogText(input.eyebrow.toUpperCase());
 
   const cover = input.coverDataUrl
     ? `<div style="display:flex;width:460px;height:100%;">
@@ -38,7 +44,7 @@ export function ogCardHtml(input: OgCardInput): string {
       <div style="display:flex;color:#c9a96e;font-size:24px;font-weight:600;letter-spacing:6px;margin-bottom:28px;">${eyebrow}</div>
       <div style="display:flex;color:#f5f0e8;font-size:60px;font-weight:600;line-height:1.15;">${title}</div>
       ${subtitle ? `<div style="display:flex;color:#8a8178;font-size:28px;font-weight:400;line-height:1.4;margin-top:28px;">${subtitle}</div>` : ''}
-      <div style="display:flex;margin-top:auto;color:#6b6259;font-size:22px;font-weight:400;letter-spacing:2px;">sdarm.life</div>
+      <div style="display:flex;align-items:baseline;margin-top:auto;">${wordmarkHtml({ size: 34, strong: '#f5f0e8', gold: '#c9a96e' })}</div>
     </div>
   </div>`;
 }

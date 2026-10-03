@@ -31,6 +31,57 @@ export interface SubscriberDto {
   createdAt: string;
 }
 
+// ── Subscriber digest (issue #184) ─────────────────────────────────────────────
+
+export type DigestFrequency = 'weekly' | 'biweekly' | 'monthly';
+
+/** Outcome of the most recent scheduled run — shown in Admin → Email. */
+export interface DigestRunDto {
+  at: string;
+  outcome: 'sent' | 'nothing-new' | 'not-configured' | 'failed';
+  recipients: number;
+  detail: string | null;
+}
+
+export interface DigestSettingsDto {
+  enabled: boolean;
+  frequency: DigestFrequency;
+  /** 0 = Sunday … 6 = Saturday. */
+  weekday: number;
+  /** Start of the window the next digest covers. */
+  since: string;
+  lastSentAt: string | null;
+  lastRun: DigestRunDto | null;
+  /** Next cron run that would send; null while switched off. */
+  nextRun: string | null;
+  /** Confirmed subscribers per digest language — counts only. */
+  recipients: { de: number; en: number };
+  /** False when the Worker has no email API key: every send is skipped. */
+  sendingConfigured: boolean;
+}
+
+export interface DigestPreviewDto {
+  since: string;
+  until: string;
+  /** False = a scheduled run would send nothing for this window. */
+  hasContent: boolean;
+  counts: { posts: number; songs: number; books: number; revisedBooks: number };
+  subject: string;
+  html: string;
+  text: string;
+}
+
+/** A starting point for Admin → Email, rendered by the API in the shared email layout. */
+export interface EmailTemplateDto {
+  id: 'news' | 'event' | 'release' | 'sabbath' | 'personal';
+  label: string;
+  description: string;
+  /** `subscribers` = carries the unsubscribe line, filled in per recipient on send. */
+  audience: 'subscribers' | 'anyone';
+  subject: string;
+  html: string;
+}
+
 export type ConfigDto = Record<string, string | null>;
 
 export interface ListResponse<T> {
@@ -60,6 +111,8 @@ export interface SongListItemDto {
 
 export type SongPartType = 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'coda';
 export type SongSheetType = 'pdf' | 'image';
+/** How a part relates to the song's melody (issue #61). */
+export type SongTranslationType = 'original' | 'singable' | 'reference';
 
 export interface SongPartDto {
   id: number;
@@ -67,6 +120,9 @@ export interface SongPartDto {
   label: string;
   sortOrder: number;
   lyrics: string;
+  /** ISO code such as `en` or `de`; `null` means the songbook's language. */
+  language: string | null;
+  translationType: SongTranslationType;
 }
 
 export interface SongSheetDto {
@@ -95,6 +151,16 @@ export interface SongSearchResultDto {
   title: string;
   author: string | null;
   songbook: { id: number; title: string; slug: string };
+}
+
+/** GET /admin/songs/top — one row of the per-song open counter (issue #197). */
+export interface TopSongDto {
+  id: number;
+  number: number;
+  title: string;
+  songbook: { title: string; slug: string };
+  opens: number;
+  lastOpened: string | null;
 }
 
 export type TreasureType = 'book';
@@ -254,22 +320,48 @@ export interface BibleChapterDto {
   truncated: boolean;
 }
 
+/** Most translations one parallel request may carry — more is not legible on a projector. */
+export const PARALLEL_MAX_TRANSLATIONS = 4;
+
 export interface ParallelVerseDto {
   verse: number;
-  a: string | null; // null when this side has no verse N
-  b: string | null;
+  /**
+   * One entry per translation, in the order of `ParallelChapterDto.translations`;
+   * null when that translation has no verse with this number.
+   */
+  texts: (string | null)[];
+  /** Deprecated alias of `texts[0]` — present only on the legacy `?a=&b=` form. */
+  a?: string | null;
+  /** Deprecated alias of `texts[1]` — present only on the legacy `?a=&b=` form. */
+  b?: string | null;
 }
 
 export interface ParallelSideDto extends BibleTextTranslationDto {
   /** The chapter actually read on this side — differs across LXX/Hebrew Psalms. */
   chapter: number;
+  abbreviation: string;
+  /** BCP-47 short tag, e.g. 'ru' — drives the language label beside the text. */
+  language: string;
+  /** The book's name in this translation's own language, e.g. 'Hesekiel'. */
+  bookName: string;
+  /** True when this side's `license.maxVersesPerRequest` cut the chapter short. */
+  truncated: boolean;
 }
 
+/**
+ * Two to four translations of one chapter, aligned by verse number.
+ *
+ * `translations` is in request order — the first is the primary one, and the
+ * Psalm chapter of every other side is mapped relative to it.
+ */
 export interface ParallelChapterDto {
   bookCode: string;
-  a: ParallelSideDto;
-  b: ParallelSideDto;
+  translations: ParallelSideDto[];
   verses: ParallelVerseDto[];
+  /** Deprecated alias of `translations[0]` — present only on the legacy `?a=&b=` form. */
+  a?: ParallelSideDto;
+  /** Deprecated alias of `translations[1]` — present only on the legacy `?a=&b=` form. */
+  b?: ParallelSideDto;
 }
 
 /**
@@ -300,15 +392,33 @@ export interface BibleSearchHitDto {
 }
 
 /* ── Homepage bento grid ──────────────────────────────────────────────────
-   The grid has exactly five blocks and no way to add a sixth: the column
-   arithmetic (724 = 420+24+280 = 350+24+350) is what keeps the three columns
-   ending on the same line, and an extra block would break it. So the config
-   configures the five that exist rather than describing an arbitrary list. */
+   Five slots of fixed size: column 1 is the reading plan alone (724), column 2
+   holds 420 + 280, column 3 holds 350 + 350. The column arithmetic
+   (724 = 420+24+280 = 350+24+350) is what keeps the three columns ending on the
+   same line, so the slots never change size and there is no way to add one.
+   What an editor can change is which block sits in each of the four smaller
+   slots: eight blocks exist, five are on the page. */
 
-export type GridBlockId = 'plan' | 'verse' | 'invite' | 'book' | 'faith';
+export type GridBlockId = 'plan' | 'sunset' | 'bible' | 'sbl' | 'book' | 'verse' | 'invite' | 'faith';
 
-/** Fixed slots, in render order. Each block occupies exactly one. */
-export const GRID_BLOCK_IDS: GridBlockId[] = ['plan', 'verse', 'invite', 'book', 'faith'];
+/** Every block the config carries, placed or not. */
+export const GRID_BLOCK_IDS: GridBlockId[] = ['plan', 'sunset', 'bible', 'sbl', 'book', 'verse', 'invite', 'faith'];
+
+/** The four smaller slots, in render order: column 2 top and bottom, column 3 top and bottom. */
+export type GridSlotId = 'col2Top' | 'col2Bottom' | 'col3Top' | 'col3Bottom';
+
+export const GRID_SLOT_IDS: GridSlotId[] = ['col2Top', 'col2Bottom', 'col3Top', 'col3Bottom'];
+
+/** Height of each slot on desktop — the numbers the column arithmetic is made of. */
+export const GRID_SLOT_HEIGHTS: Record<GridSlotId, number> = {
+  col2Top: 420,
+  col2Bottom: 280,
+  col3Top: 350,
+  col3Bottom: 350,
+};
+
+/** Blocks that can go into a slot. The reading plan always fills column 1. */
+export const GRID_SLOT_BLOCK_IDS: GridBlockId[] = GRID_BLOCK_IDS.filter((id) => id !== 'plan');
 
 export type GridScrim = 'none' | 'light' | 'medium' | 'strong';
 export type GridTextColor = 'auto' | 'light' | 'dark';
@@ -350,6 +460,12 @@ export interface GridBlockConfig {
 }
 
 export interface HomeGridConfig {
+  /**
+   * Which block fills each of the four smaller slots; null leaves the slot
+   * empty. A block that is in no slot is not rendered, whatever its `visible`
+   * says — `visible` hides a placed block without giving up its slot.
+   */
+  slots: Record<GridSlotId, GridBlockId | null>;
   blocks: Record<GridBlockId, GridBlockConfig>;
 }
 
@@ -396,8 +512,29 @@ export function defaultGridConfig(): HomeGridConfig {
   blocks.invite.showLabel = false;
   blocks.faith.showLabel = false;
   blocks.book.showButton = false;
+  // The sunset card is the clock and its location field — nothing to follow and
+  // no button.
+  blocks.sunset.clickable = false;
+  blocks.sunset.showButton = false;
+  // Out of the default layout; an editor can put them back into a slot.
+  blocks.verse.visible = false;
+  blocks.invite.visible = false;
+  blocks.faith.visible = false;
 
-  return { blocks };
+  return { slots: defaultGridSlots(), blocks };
+}
+
+/**
+ * The default layout: the clock takes the tallest small slot, the lesson the
+ * shortest, the Bible and the songbook share column 3.
+ */
+export function defaultGridSlots(): Record<GridSlotId, GridBlockId | null> {
+  return { col2Top: 'sunset', col2Bottom: 'sbl', col3Top: 'bible', col3Bottom: 'book' };
+}
+
+/** The slot a block sits in, or null when it is not on the page. */
+export function slotOf(config: HomeGridConfig, id: GridBlockId): GridSlotId | null {
+  return GRID_SLOT_IDS.find((slot) => config.slots[slot] === id) ?? null;
 }
 
 const SCRIMS: GridScrim[] = ['none', 'light', 'medium', 'strong'];
@@ -444,9 +581,38 @@ function mergeBlock(raw: unknown, base: GridBlockConfig): GridBlockConfig {
 }
 
 /**
+ * Read the stored slot map. Each slot takes a known, slottable block that no
+ * earlier slot already holds; anything else leaves the slot empty. `null` is a
+ * valid stored value (an empty slot).
+ */
+function mergeSlots(raw: Record<string, unknown>): Record<GridSlotId, GridBlockId | null> {
+  const slots = {} as Record<GridSlotId, GridBlockId | null>;
+  const used = new Set<GridBlockId>();
+  for (const slot of GRID_SLOT_IDS) {
+    const v = raw[slot];
+    if (typeof v === 'string' && GRID_SLOT_BLOCK_IDS.includes(v as GridBlockId) && !used.has(v as GridBlockId)) {
+      slots[slot] = v as GridBlockId;
+      used.add(v as GridBlockId);
+    } else {
+      slots[slot] = null;
+    }
+  }
+  return slots;
+}
+
+/**
  * Merge a stored config onto the defaults. Anything missing, malformed or of
  * the wrong type falls back rather than throwing — a bad value in KV must not
  * be able to take the homepage down.
+ *
+ * Migration rule for configs stored before the slots existed (no `slots` key —
+ * every config the editor saved while the blocks had fixed places): the layout becomes the default
+ * one (plan · sunset · lesson · Bible · songbook) and every block's `visible`
+ * is reset to its default, so exactly those five show even where the stored
+ * config had the verse, invitation or points-of-faith card switched on.
+ * Everything else a block stored — texts, images, links, toggles — is kept.
+ * The first save from the admin writes `slots`, and from then on the stored
+ * config is read as it is.
  */
 export function parseGridConfig(raw: string | null | undefined): HomeGridConfig {
   const base = defaultGridConfig();
@@ -466,7 +632,13 @@ export function parseGridConfig(raw: string | null | undefined): HomeGridConfig 
   const merged = {} as Record<GridBlockId, GridBlockConfig>;
   for (const id of GRID_BLOCK_IDS) merged[id] = mergeBlock(blocks[id], base.blocks[id]);
 
-  return { blocks: merged };
+  const hasSlots = !!o.slots && typeof o.slots === 'object';
+  if (!hasSlots) {
+    for (const id of GRID_BLOCK_IDS) merged[id].visible = base.blocks[id].visible;
+    return { slots: base.slots, blocks: merged };
+  }
+
+  return { slots: mergeSlots(o.slots as Record<string, unknown>), blocks: merged };
 }
 
 /** Config text wins when set; otherwise the translation does. */

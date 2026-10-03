@@ -5,6 +5,7 @@ Pure-logic modules (no DOM, no Workers runtime) get plain [Vitest](https://vites
 | Package | Config | Example |
 |---|---|---|
 | `@sdarm/songbook` | `apps/songbook/vitest.config.mts` (default node environment) | `app/lib/chords.test.ts` |
+| `@sdarm/treasures` | `apps/treasures/vitest.config.mts` (default node environment) | `app/lib/projector.test.ts` |
 | `@sdarm/types` | `packages/types/vitest.config.mts` (default node environment) | `src/psalms.test.ts` |
 | `@sdarm/api` | `apps/api/vitest.config.mts` (`@cloudflare/vitest-pool-workers` — needed for Worker-specific APIs) | `test/index.spec.ts` |
 
@@ -34,11 +35,17 @@ middleware can be exercised from both sides. Do not make it depend on
 migrations applied, so a query against a table says nothing about the code under
 test. `test/index.spec.ts` covers the wiring that actually breaks silently —
 routing, the admin auth gate, the CORS origin list (which drifted once, see
-[api.md](api.md)) and the OpenAPI document. Testing a repository properly means
-first applying migrations via the pool's `readD1Migrations`; that has not been
-set up yet.
+[api.md](api.md)) and the OpenAPI document.
 
-⚠️ **`vitest` is deliberately split across the monorepo: 5.x everywhere except `apps/api`, which stays on `~4.1.11`.** `@cloudflare/vitest-pool-workers@0.22.0` peer-requires `vitest@^4.1.0` (likewise `@vitest/runner` and `@vitest/snapshot`), so moving `apps/api` to 5 leaves an unmet peer on every install. The plain-node suites in `@sdarm/types` and `@sdarm/songbook` have no such constraint and run fine on 5. The split is not an oversight — do not "tidy" it by aligning the versions; `apps/api` moves only together with its pool.
+**A spec that needs tables migrates the test D1 itself.** `vitest.config.mts`
+reads `packages/db/migrations` with `readD1Migrations()` and binds the result as
+`TEST_MIGRATIONS`; `test/digest.spec.ts` calls
+`applyD1Migrations(env.DB, env.TEST_MIGRATIONS)` in `beforeAll` and runs the
+subscriber digest's scheduled path against real tables, with `fetch` stubbed so
+nothing can reach the email provider. Specs that do not call it still see an
+empty database.
+
+⚠️ **`vitest` is deliberately split across the monorepo: 5.x everywhere except `apps/api`, which stays on `~4.1.11`.** `@cloudflare/vitest-pool-workers@0.22.0` peer-requires `vitest@^4.1.0` (likewise `@vitest/runner` and `@vitest/snapshot`), so moving `apps/api` to 5 leaves an unmet peer on every install. The plain-node suites in `@sdarm/types`, `@sdarm/songbook` and `@sdarm/treasures` have no such constraint and run fine on 5. The split is not an oversight — do not "tidy" it by aligning the versions; `apps/api` moves only together with its pool.
 
 ⚠️ **Every `test` script must be `vitest run`, never bare `vitest`.** Bare
 `vitest` is watch mode: it never exits, so a CI runner sits on it until the job
@@ -117,13 +124,15 @@ The mock server intercepts all API calls the apps make during page load. It serv
 
 ## Screenshot query parameters
 
-All test URLs include `?screenshotLocation=Pforzheim&screenshotTime=14:30`. The web app home also gets `?screenshot=1`.
+All test URLs include `?screenshotLocation=Pforzheim&screenshotTime=14:30`. Every web app URL also gets `?screenshot=1&screenshotVerse=1`.
 
 | Param | Effect |
 |---|---|
 | `screenshot=1` | Freezes dynamic elements on the web home page (used by `PlanetEarth` and any other time-sensitive component that opts in) |
-| `screenshotLocation=Pforzheim` | Sets the sunset clock location to Pforzheim so the SVG ring is deterministic |
-| `screenshotTime=14:30` | Fixes the sunset clock to 14:30 so the countdown is stable |
+| `screenshotLocation=Pforzheim` | Sets the sunset location to Pforzheim — the web home page's sunset card and the footer map's marker on every app — so the rings and the marker are deterministic |
+| `screenshotTime=14:30` | Fixes the sunset card on the web home page to 14:30 so the countdown is stable. It also pins the weekday to Wednesday (`screenshotDay=0–6` picks another, 0 = Sunday), so the labels and the week ring do not depend on the day the suite runs. The other apps no longer render the clock and ignore it |
+| `screenshotDate=2026-09-16` | Pins "today" (normally Europe/Berlin) for the web home grid's live cards: the Psalm of the day, the lesson of the week and the song of the week. In the suite `SBL_URL` points at the mock server, whose `mockSblQuarters` holds a cut-down `de-2026-3`/`en-2026-3` with lesson 12 (13–19 Sept), so the lesson card is deterministic and nothing is fetched from the real lesson hosts; the Bible and songbook cards read the mock's translation and songbook |
+| `screenshotVerse=1` | Pins `pickVerse()` in `apps/web` to verse index 1 (`verses[n % length]`), for the home `StatsGrid` quote card (when one is placed — the default layout has none) and the "Wort der Stunde" section on `/about` (the home page no longer renders it). Without it the verse follows the hour of the week, so the baseline only matched when the suite ran in the hour it was recorded in (#198) |
 
 ## Themes
 
@@ -179,7 +188,7 @@ forEachTheme('songbook / my new page', async (page, theme) => {
 **When to use `waitForLoadState('networkidle')` vs a fixed timeout:**
 - `networkidle` — works for most pages (waits until no in-flight requests for 500 ms).
 - Fixed `waitForTimeout` — needed for WebGL (globe), stagger animations, or any async rendering that fires after `networkidle`. Use the smallest value that makes the test stable.
-- A selector wait tied to a component's own class names — `web / home` waits on the `StatsGrid` verse card and its fitted headlines, because both are filled in after hydration and `networkidle` says nothing about either.
+- A selector wait tied to a component's own class names — `web / home` waits on the `StatsGrid` fitted headlines, on the verse card's reference *if a verse card is placed* (the default layout has none since the Bible and lesson cards took its slot), and on the sunset card's `.sunset-colon` (the time is split around it only after the first tick), because all of them are filled in after hydration and `networkidle` says nothing about any. The wait only makes sure *a* verse is there; `?screenshotVerse=` decides *which* one — it still pins the "Wort der Stunde" section below the grid.
 
 ⚠️ **A selector waiter outlives the component it was written for.** `web / home` waited on `.masonry-item.is-visible` long after `StatsGrid` replaced `NewsSection` on the home page, so the wait could never resolve and `update-snapshots` failed on a workflow nobody had run since the redesign. **When a page's section is replaced, grep the specs for the old section's class names in the same commit** — a stale waiter fails loudly, but only the next time someone runs the workflow.
 

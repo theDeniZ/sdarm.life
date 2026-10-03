@@ -1,0 +1,280 @@
+/* ── Sidebar ─────────────────────────────────────────────── */
+/* No wall between the contents and the book. The rule down the right edge and a
+   ground of its own were doing the same job twice, and a full-height line beside
+   a column of text is the loudest thing on a reading surface. What tells the two
+   apart now is the type: the entries are small, quiet and set in Inter, the book
+   is not. The current chapter is marked instead — see .epub-toc-item--active. */
+.epub-sidebar {
+  width: 300px;
+  flex-shrink: 0;
+  background: transparent;
+  display: flex;
+  overflow: hidden;
+  transition: width 0.38s var(--ease);
+}
+
+/* Folded away it must also leave the tab order, after the width animation. */
+.epub-sidebar--collapsed {
+  width: 0;
+  visibility: hidden;
+  transition:
+    width 0.38s var(--ease),
+    visibility 0s linear 0.38s;
+}
+
+.epub-sidebar__inner {
+  width: 300px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.epub-sidebar__book {
+  padding: 1.2rem 1.4rem 1rem;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.epub-sidebar__eyebrow {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.55);
+  margin-bottom: 0.5rem;
+}
+
+.epub-sidebar__title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1.35;
+  margin-bottom: 0.25rem;
+}
+
+.epub-sidebar__author {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.7rem;
+  font-weight: 400;
+  color: var(--muted);
+}
+
+/* ── Search ─────────────────────────────────────────────────
+   One object, not a row of parts. The field used to be a bordered box with its
+   own fill sitting inside a bordered strip, and the arrows and counter stood
+   outside it — four rectangles where the reader sees one control. Now the strip
+   is the control: the glyph, the field, the counter and the arrows share a
+   single rounded surface, and the only line is the one under the whole strip. */
+.epub-sidebar__search {
+  position: relative;
+  margin: 0.75rem 1rem;
+  padding: 0 0.7rem;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  height: 34px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--text) 5%, transparent);
+  transition: background 0.22s ease;
+}
+/* Focus lands on the strip, not on a border of the input — the whole control
+   answers, which is what makes it read as one thing. */
+.epub-sidebar__search:focus-within {
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--gold) 45%, transparent);
+}
+
+.epub-sidebar__search-icon {
+  width: 13px;
+  height: 13px;
+  flex-shrink: 0;
+  color: var(--muted);
+  transition: color 0.22s ease;
+}
+.epub-sidebar__search:focus-within .epub-sidebar__search-icon {
+  color: var(--gold);
+}
+
+.epub-sidebar__search-input {
+  flex: 1;
+  min-width: 0;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--text);
+}
+.epub-sidebar__search-input:focus {
+  outline: none;
+}
+.epub-sidebar__search-input::placeholder {
+  color: var(--muted);
+}
+/* The type=search widget draws its own clear button, in its own style, in every
+   browser differently. The strip has a counter and arrows of its own. */
+.epub-sidebar__search-input::-webkit-search-cancel-button {
+  appearance: none;
+}
+
+.epub-sidebar__search-nav {
+  display: flex;
+  align-items: center;
+  gap: 0.1rem;
+  flex-shrink: 0;
+}
+
+.epub-sidebar__search-count {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.66rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  white-space: nowrap;
+  margin-right: 0.25rem;
+}
+
+.epub-sidebar__search-arrow {
+  width: 20px;
+  height: 20px;
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  border-radius: 5px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    background 0.2s;
+}
+.epub-sidebar__search-arrow:hover:not(:disabled) {
+  color: var(--gold);
+  background: color-mix(in srgb, var(--gold) 14%, transparent);
+}
+.epub-sidebar__search-arrow:disabled {
+  opacity: 0.28;
+  cursor: default;
+}
+
+.epub-sidebar__search-empty {
+  padding: 1.5rem 1.4rem;
+  font-family: 'Inter', sans-serif;
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-align: center;
+}
+
+/* ── TOC item ────────────────────────────────────────────── */
+.epub-toc-item {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  padding: 0.35rem 1.2rem;
+  width: 100%;
+  background: none;
+  border: none;
+  border-left: 2px solid transparent;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    color 0.2s,
+    background 0.2s,
+    border-color 0.2s;
+}
+
+/* One hover rule for all three themes: derived from --text, so it is a light
+   wash on dark paper and a dark one on light paper. The hardcoded per-theme
+   values it replaces had drifted apart. */
+.epub-toc-item:hover {
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+/* The chapter being read is washed, not boxed. A flat tint behind the row read as
+   a second surface once the panel lost its own — what makes a slab a slab is its
+   edge. This gradient has none: it starts at 14% gold against the left margin and
+   is gone by 78% across, so the row is marked without anything being drawn on it. */
+.epub-toc-item--active {
+  border-left-color: transparent;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--gold) 14%, transparent), transparent 78%);
+}
+
+.epub-toc-item__num {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(201, 169, 110, 0.7);
+  min-width: 1.4rem;
+  flex-shrink: 0;
+}
+
+.epub-toc-item--active .epub-toc-item__num {
+  color: var(--gold);
+}
+
+/* Inter, fixed — not var(--epub-font-family). Choosing a face for the book is a
+   choice about the book; the chrome around it should not move underfoot at the
+   same time. Only .epub-chapter__body and its headings follow the reader's pick. */
+.epub-toc-item__title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--muted);
+  line-height: 1.4;
+  letter-spacing: 0;
+}
+
+.epub-toc-item--active .epub-toc-item__title {
+  color: var(--text);
+  font-weight: 400;
+}
+
+@media (max-width: 768px) {
+  /* Below this the contents list is an overlay over the page, and it starts
+     closed: a phone has no room to show a table of contents and the chapter at
+     the same time. The class is absent until the reader touches the toggle, so
+     CSS owns the default and React owns the intent — see EpubReader.
+
+     The shadow was 24px of blur at 60% black, which put a bruise across the
+     text beside it. Depth here only has to say "this floats"; the panel already
+     has its own ground and a border. */
+  .epub-sidebar {
+    position: fixed;
+    top: calc(var(--nav-h) + 38px); /* nav + .epub-toolbar; the progress bar is not rendered */
+    left: 0;
+    bottom: 0;
+    z-index: 200;
+    width: 300px;
+    /* As an overlay the list needs a ground of its own: transparent, the book's
+       title page showed through between the chapter names. */
+    background: var(--reader-sidebar);
+    border-right: 1px solid var(--border);
+    transform: translateX(-100%);
+    /* Off-canvas is also out of the tab order; visibility flips after the
+       slide-out and at once on the way in. */
+    visibility: hidden;
+    transition:
+      transform 0.38s var(--ease),
+      visibility 0s linear 0.38s;
+  }
+  /* The shadow belongs to the open state only. Off-canvas the panel sits at
+     translateX(-100%) with its right edge on x=0, so a shadow offset +6px to the
+     right stays in frame — a stripe down the side of a page with no panel
+     attached to it. */
+  .epub-sidebar--open {
+    transform: translateX(0);
+    visibility: visible;
+    transition: transform 0.38s var(--ease);
+  }
+  .epub-sidebar--collapsed {
+    width: 300px;
+    transform: translateX(-100%);
+  }
+}

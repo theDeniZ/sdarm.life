@@ -23,9 +23,9 @@ export const KNOWN_CONFIG_KEYS = [
   'bible_translations',
   /**
    * Homepage bento grid. Unlike every other key this holds a JSON document
-   * (HomeGridConfig from @sdarm/types) rather than a scalar: the grid has five
-   * blocks with roughly a dozen settings each in two languages, which is about
-   * a hundred values — far past what flat keys can carry sanely.
+   * (HomeGridConfig from @sdarm/types) rather than a scalar: the grid has eight
+   * blocks with roughly a dozen settings each in two languages plus the slot
+   * map, well over a hundred values — far past what flat keys can carry sanely.
    */
   'home_grid',
 ] as const;
@@ -114,6 +114,11 @@ export const songParts = sqliteTable('song_parts', {
   label:     text('label').notNull(),
   sortOrder: integer('sort_order').notNull().default(0),
   lyrics:    text('lyrics').notNull().default(''),
+  // Issue #61. NULL means "the songbook's language" — only a part that differs
+  // from its book needs a tag. `original` is the text the song was written in;
+  // `singable` fits the melody, `reference` is a literal gloss for reading only.
+  language:        text('language'),
+  translationType: text('translation_type', { enum: ['original', 'singable', 'reference'] }).notNull().default('original'),
 }, (t) => [
   index('song_parts_song_id_idx').on(t.songId),
 ]);
@@ -128,6 +133,15 @@ export const songSheets = sqliteTable('song_sheets', {
 }, (t) => [
   index('song_sheets_song_id_idx').on(t.songId),
 ]);
+
+// One counter row per song, incremented in place by GET /api/v1/songs/{id}
+// (issue #197). Deliberately no event log and no request attribute of any kind —
+// see docs/dsgvo.md. `lastOpened` belongs to the song, not to a visitor.
+export const songOpens = sqliteTable('song_opens', {
+  songId:     integer('song_id').primaryKey().references(() => songs.id, { onDelete: 'cascade' }),
+  opens:      integer('opens').notNull().default(0),
+  lastOpened: integer('last_opened', { mode: 'timestamp' }),
+});
 
 export const treasures = sqliteTable('treasures', {
   id:               integer('id').primaryKey({ autoIncrement: true }),

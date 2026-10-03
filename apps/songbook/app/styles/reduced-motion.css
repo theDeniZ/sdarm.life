@@ -1,0 +1,27 @@
+/* ── REDUCED MOTION ──
+   The one block that stays global: the universal rule reaches into every
+   section, so it is imported last and wins over all of them. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .presenter__connecting-dots span {
+    animation: none;
+    opacity: 1;
+  }
+  .reader-content--loading {
+    animation: none;
+    opacity: 0.5;
+  }
+  .reader-sidebar {
+    transition: none;
+  }
+  /* Line mode: the next line simply appears, whatever transition is chosen. */
+  .line-stage {
+    animation: none;
+  }
+}

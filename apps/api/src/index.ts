@@ -19,6 +19,7 @@ import adminSongbooksRouter from './routes/admin/songbooks';
 import adminTreasuresRouter from './routes/admin/treasures';
 import adminApiKeysRouter from './routes/admin/api-keys';
 import adminEmailRouter from './routes/admin/email';
+import adminDigestRouter from './routes/admin/digest';
 import adminBibleRouter from './routes/admin/bible';
 import treasuresRouter from './routes/treasures';
 import bibleRouter from './routes/bible';
@@ -28,7 +29,9 @@ import ogRouter from './routes/og';
 import llmRouter from './routes/llm';
 import robotsRouter from './routes/robots';
 import { llmRateLimit } from './middleware/llm-rate-limit';
+import { countSongOpen } from './middleware/song-opens';
 import { buildIndexMarkdown } from './services/llm/markdown';
+import { runScheduledDigest } from './services/digest/run';
 
 const app = new OpenAPIHono<{ Bindings: Bindings }>();
 
@@ -66,7 +69,7 @@ v1.route('/posts', postsRouter);
 
 v1.route('/config', configRouter); // No cache — handled by KV
 v1.route('/images', imagesRouter);
-v1.route('', subscribersRouter); // /subscribe + /unsubscribe
+v1.route('/', subscribersRouter); // /subscribe + /unsubscribe
 
 v1.use('/songbooks', cached(3600)); // 1 hour — songbook list
 v1.use('/songbooks/*', cached(3600)); // 1 hour — songbook detail + songs
@@ -75,6 +78,9 @@ v1.route('/songbooks', songbooksRouter);
 v1.use('/songs/search', cached(300)); // 5 min — search results vary by query, shorter TTL
 v1.route('/songs/search', songSearchRouter); // literal path — must be mounted before /songs/{id}
 
+// Open counter for the admin Statistics page (issue #197). Registered BEFORE
+// cached() so it sees cache hits too — see middleware/song-opens.ts.
+v1.use('/songs/:id{[0-9]+}', countSongOpen);
 v1.use('/songs/*', cached(3600));    // 1 hour — individual songs
 v1.route('/songs', songsRouter);
 
@@ -91,7 +97,7 @@ v1.route('/treasures', treasuresRouter);
 // immediately, while book/chapter/parallel text is immutable and cached a day.
 v1.route('/bible', bibleRouter);
 
-v1.route('', bookRequestRouter); // /book-request
+v1.route('/', bookRequestRouter); // /book-request
 
 v1.route('/geocode', geocodeRouter); // KV-cached Nominatim proxy (DSGVO: hides user IP)
 
@@ -106,14 +112,18 @@ v1.use('/llm/*', llmRateLimit);
 v1.route('/llm', llmRouter);
 
 // ── Admin routes (auth-gated) ─────────────────────────────────────────────────
+// Routers that carry their own path prefix mount at '/', never '': both serve
+// the same URLs, but OpenAPIHono builds the documented path with mergePath(),
+// which turns '' into an extra slash (`/api/v1/admin//songs/{id}`).
 admin.use('*', auth);
 admin.route('/posts', adminPostsRouter);
 admin.route('/config', adminConfigRouter);
 admin.route('/images', adminImagesRouter);
 admin.route('/subscribers', adminSubscribersRouter);
-admin.route('', adminSongbooksRouter);
-admin.route('', adminTreasuresRouter);
-admin.route('', adminEmailRouter);
+admin.route('/', adminSongbooksRouter);
+admin.route('/', adminTreasuresRouter);
+admin.route('/', adminEmailRouter);
+admin.route('/', adminDigestRouter);
 admin.route('/bible', adminBibleRouter);
 
 v1.route('/admin', admin);
@@ -147,4 +157,12 @@ apiKeysApp.use('*', bootstrapAuth);
 apiKeysApp.route('', adminApiKeysRouter);
 app.route('/api/v1/admin/api-keys', apiKeysApp);
 
-export default app;
+export default {
+	fetch: app.fetch,
+	// Cron Trigger (`triggers.crons` in wrangler.jsonc) — daily. The subscriber
+	// digest decides for itself whether today is a send day and whether there is
+	// anything to send; see services/digest/settings.ts (issue #184).
+	async scheduled(controller, env, ctx) {
+		ctx.waitUntil(runScheduledDigest(env, new Date(controller.scheduledTime)));
+	},
+} satisfies ExportedHandler<Bindings>;

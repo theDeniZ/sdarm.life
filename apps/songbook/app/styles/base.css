@@ -1,0 +1,152 @@
+/* Fonts, reset, songbook tokens, the page shell and the top nav. */
+@import '@fontsource/lexend/300.css';
+@import '@fontsource/lexend/400.css';
+@import '@fontsource/lexend/500.css';
+@import '@fontsource/lexend/600.css';
+
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+:root {
+  /* Songbook-specific tokens (common tokens inherited from @sdarm/ui tokens.css) */
+  --chord: #c9a96e;
+  /* Depth for the off-canvas song list. Per theme, because a shadow is light
+     falling on a surface: the same 45% black that separates a near-black panel
+     from a near-black page is a bruise under a white one. */
+  --reader-overlay-shadow: rgba(0, 0, 0, 0.45);
+  --reader-scrim: rgba(4, 3, 2, 0.5);
+}
+
+[data-theme='light'] {
+  --chord: #b8872c;
+  --reader-overlay-shadow: rgba(28, 28, 34, 0.13);
+  --reader-scrim: rgba(28, 28, 34, 0.26);
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--dark);
+  color: var(--text);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ── TOP NAV ── */
+.top-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  padding: 0 2.8rem;
+  min-height: 52px;
+  background: rgba(9, 8, 6, 0.82);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  gap: 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.top-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.top-nav__brand {
+  /* face, weight and tracking: @sdarm/ui wordmark.css */
+  font-size: 1.05rem;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  padding-right: 1.4rem;
+  margin-right: 0.6rem;
+  border-right: 1px solid rgba(201, 169, 110, 0.15);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.top-nav__link {
+  display: flex;
+  align-items: center;
+  padding: 0.4rem 0.9rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+  color: rgba(220, 210, 195, 0.82);
+  white-space: nowrap;
+  transition: color 0.3s;
+  position: relative;
+}
+.top-nav__link:hover {
+  color: rgba(220, 210, 195, 0.9);
+}
+.top-nav__link.active {
+  color: #fff;
+}
+.top-nav__link.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0.9rem;
+  right: 0.9rem;
+  height: 1px;
+  background: var(--gold);
+}
+
+/* ── PAGE ── */
+.page {
+  padding: 84px 3rem 5rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+@media (max-width: 900px) {
+  .top-nav {
+    padding: 0 1.5rem;
+  }
+  .page {
+    padding: 72px 2rem 3.5rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .top-nav {
+    padding: 0 1rem;
+    min-height: 46px;
+  }
+  .top-nav__brand {
+    font-size: 0.9rem;
+    padding-right: 1rem;
+    margin-right: 0.4rem;
+  }
+  .page {
+    padding: 64px 1.2rem 3rem;
+  }
+}
+
+[data-theme='light'] .top-nav {
+  background: rgba(246, 245, 242, 0.93);
+  border-bottom-color: rgba(184, 135, 44, 0.14);
+}
+[data-theme='light'] .top-nav__brand { color: rgba(14, 14, 18, 0.88); }
+[data-theme='light'] .top-nav__link { color: rgba(28, 28, 34, 0.68); }
+[data-theme='light'] .top-nav__link:hover,
+[data-theme='light'] .top-nav__link.active { color: var(--gold); }

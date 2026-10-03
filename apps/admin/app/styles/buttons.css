@@ -1,0 +1,66 @@
+/* ── Buttons ─────────────────────────────────── */
+
+.btn-primary,
+.btn-ghost,
+.btn-danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 18px;
+  border-radius: var(--r);
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
+}
+
+.btn-primary:disabled,
+.btn-ghost:disabled,
+.btn-danger:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-primary {
+  background: var(--gold);
+  color: var(--on-accent);
+  border: 1px solid var(--gold);
+}
+
+.btn-primary:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--border-2);
+}
+
+.btn-ghost:hover {
+  border-color: var(--gold-dim);
+  color: var(--text);
+}
+
+.btn-danger {
+  background: transparent;
+  color: var(--red-text);
+  border: 1px solid rgba(192, 57, 43, 0.4);
+}
+
+.btn-danger:hover {
+  background: var(--red);
+  color: var(--on-solid);
+  border-color: var(--red);
+}
+
+.btn-sm {
+  min-height: 26px;
+  padding: 3px 10px;
+  font-size: 11px;
+  border-radius: 8px;
+}

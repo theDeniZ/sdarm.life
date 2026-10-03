@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
-import { ConnectedNavbar, ConnectedFooter, PageHero } from '@sdarm/ui';
+import { ConnectedNavbar, ConnectedFooter, PageHero, siteOgImage } from '@sdarm/ui';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { fetchConfig } from '../../lib/api';
+import { API, fetchConfig } from '../../lib/api';
 import { LOCATIONS, COUNTRY_NAMES, googleMapsUrl, locationsByCountry, type CountryCode } from './data';
 
 const BASE = 'https://sdarm.life';
@@ -22,6 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       url: canonical,
       title: t('eyebrow'),
       description: t('heroSubtitle'),
+      images: [siteOgImage(API, 'web', locale, t('eyebrow'))],
     },
   };
 }

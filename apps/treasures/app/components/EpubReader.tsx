@@ -48,7 +48,10 @@ const READER_THEMES: Record<ReaderTheme, Record<string, string>> = {
     '--reader-toolbar': '#0e0d0b',
     '--reader-sidebar': '#0a0908',
     '--text': '#d6d0c8',
-    '--muted': '#7a7470',
+    // Secondary text (chapter titles in the contents, the position, settings
+    // labels) must reach 4.5:1 on every surface of its palette; the old values
+    // were 4.2:1 (dark), 3.3:1 (sepia) and 3.1:1 (light), and the light gold 2.6:1.
+    '--muted': '#84807b',
     '--gold': '#c9a96e',
     '--border': 'rgba(201, 169, 110, 0.12)',
   },
@@ -57,8 +60,8 @@ const READER_THEMES: Record<ReaderTheme, Record<string, string>> = {
     '--reader-toolbar': '#faf6ef',
     '--reader-sidebar': '#fdf9f4',
     '--text': '#3b2f1e',
-    '--muted': '#9c8468',
-    '--gold': '#a0692a',
+    '--muted': '#7f6a50',
+    '--gold': '#935f24',
     '--border': 'rgba(100, 70, 30, 0.12)',
   },
   light: {
@@ -66,8 +69,8 @@ const READER_THEMES: Record<ReaderTheme, Record<string, string>> = {
     '--reader-toolbar': '#f0efed',
     '--reader-sidebar': '#f5f4f2',
     '--text': '#1c1c1e',
-    '--muted': '#8a8a8e',
-    '--gold': '#b8924a',
+    '--muted': '#68686d',
+    '--gold': '#80651d',
     '--border': 'rgba(0, 0, 0, 0.1)',
   },
 };

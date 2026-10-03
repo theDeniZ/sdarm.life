@@ -4,8 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useLocale, useTranslations } from 'next-intl';
-import type { BibleBook, BibleChapter, BibleTranslation, ParallelChapter } from '../../lib/bible';
-import { fetchParallelChapter } from '../../lib/bible';
+import type { BibleBook, BibleChapter, BibleTranslation } from '../../lib/bible';
 import {
   buildCopyText,
   DEFAULT_COPY_OPTIONS,
@@ -24,6 +23,7 @@ import {
   type FontScale,
 } from './lastRead';
 import BiblePresenterDashboard from './BiblePresenterDashboard';
+import { displayUrl, openDisplayWindow } from './presenterWindow';
 import BibleLicenseNotice from './BibleLicenseNotice';
 import BiblePassagePicker, { type PassageTarget } from './BiblePassagePicker';
 
@@ -69,8 +69,6 @@ export default function BibleChapterReader({ translation, translations, books, c
   const [presenterOpen, setPresenterOpen] = useState(false);
   const [multiScreen, setMultiScreen] = useState(false);
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [compareCode, setCompareCode] = useState<string | null>(null);
-  const [parallelChapter, setParallelChapter] = useState<ParallelChapter | null>(null);
   const [copyOptionsOpen, setCopyOptionsOpen] = useState(false);
   const [selectionInfo, setSelectionInfo] = useState<{ text: string; verseNum: number } | null>(null);
   const displayWinRef = useRef<Window | null>(null);
@@ -142,42 +140,17 @@ export default function BibleChapterReader({ translation, translations, books, c
     setMultiScreen(!!(window.screen as Screen & { isExtended?: boolean }).isExtended);
   }, [translation.code, translation.name, chapter.book.code, chapter.book.name, chapter.chapter]);
 
+  async function openDisplay(codes: string[], bookCode: string, chapterNum: number) {
+    displayWinRef.current = await openDisplayWindow(
+      displayUrl(locale, codes, bookCode, chapterNum),
+      displayWinRef.current
+    );
+  }
+
   async function openPresenter() {
-    const projectorUrl = `/${locale}/bible/${translation.code}/${chapter.book.code}/${chapter.chapter}?projector=1`;
-
-    // Reuse the existing display window if it's still alive — just navigate it.
-    if (displayWinRef.current && !displayWinRef.current.closed) {
-      displayWinRef.current.location.assign(projectorUrl);
-      document.body.style.overflow = 'hidden';
-      setPresenterOpen(true);
-      return;
-    }
-
-    let features = `width=${screen.availWidth},height=${screen.availHeight},left=${
-      (screen as Screen & { availLeft?: number }).availLeft ?? 0
-    },top=${(screen as Screen & { availTop?: number }).availTop ?? 0}`;
-    try {
-      type ScreenInfo = {
-        availLeft: number;
-        availTop: number;
-        availWidth: number;
-        availHeight: number;
-        isPrimary: boolean;
-      };
-      const details = await (
-        window as Window & { getScreenDetails?: () => Promise<{ screens: ScreenInfo[] }> }
-      ).getScreenDetails?.();
-      const external = details?.screens.find((s) => !s.isPrimary) ?? details?.screens[0];
-      if (external) {
-        features = `width=${external.availWidth},height=${external.availHeight},left=${external.availLeft},top=${external.availTop}`;
-      }
-    } catch {
-      // fall back to current screen dimensions
-    }
-    const win = window.open(projectorUrl, 'bible-projector-display', features);
-    displayWinRef.current = win;
     document.body.style.overflow = 'hidden';
     setPresenterOpen(true);
+    await openDisplay([translation.code], chapter.book.code, chapter.chapter);
   }
 
   // openPresenter locks body scroll; a route change unmounts this reader without
@@ -193,40 +166,6 @@ export default function BibleChapterReader({ translation, translations, books, c
     // Do NOT null the ref — keep the window alive so the next openPresenter()
     // call can reuse it without spawning a new window.
     setPresenterOpen(false);
-    setCompareCode(null);
-    setParallelChapter(null);
-  }
-
-  // Fetch parallel chapter data when a comparison translation is picked while
-  // the presenter is open. The display window navigates separately via the
-  // `passage` channel message + URL `?compare=` param.
-  useEffect(() => {
-    if (!compareCode || compareCode === translation.code) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setParallelChapter(null);
-      return;
-    }
-    let cancelled = false;
-    fetchParallelChapter(translation.code, compareCode, chapter.book.code, chapter.chapter, apiUrl).then((p) => {
-      if (!cancelled) setParallelChapter(p);
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [compareCode, translation.code, chapter.book.code, chapter.chapter, apiUrl]);
-
-  function handleCompareChange(secondaryCode: string | null) {
-    setCompareCode(secondaryCode);
-    // Reload the display window with the new compare param so its projector
-    // page re-fetches in parallel mode.
-    const win = displayWinRef.current;
-    if (!win || win.closed) return;
-    const params = new URLSearchParams();
-    params.set('projector', '1');
-    if (secondaryCode) params.set('compare', secondaryCode);
-    win.location.assign(
-      `/${locale}/bible/${translation.code}/${chapter.book.code}/${chapter.chapter}?${params.toString()}`
-    );
   }
 
   // Track native browser text selection within verse text spans.
@@ -858,18 +797,15 @@ export default function BibleChapterReader({ translation, translations, books, c
 
       {presenterOpen && (
         <BiblePresenterDashboard
-          chapter={chapter}
-          books={books}
           locale={locale}
+          apiUrl={apiUrl}
           translations={translations}
-          parallel={parallelChapter}
-          compareCode={compareCode}
+          initialCodes={[translation.code]}
+          bookCode={chapter.book.code}
+          chapter={chapter.chapter}
+          initialBooks={books}
+          onOpenDisplay={openDisplay}
           onClose={closePresenter}
-          onPickPassage={handlePickerTarget}
-          onCompareChange={handleCompareChange}
-          onTranslationChange={(code) =>
-            router.push(`/${locale}/bible/${code}/${chapter.book.code}/${chapter.chapter}`)
-          }
         />
       )}
 

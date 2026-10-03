@@ -4,8 +4,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslations } from 'next-intl';
 import type { SongDto } from '@sdarm/types';
-import { expandParts, getSiteTheme } from '@/app/lib/format';
+import { Wordmark } from '@sdarm/ui';
+import { getSiteTheme } from '@/app/lib/format';
+import { useLineMode, type LineMessage } from '@/app/lib/use-line-mode';
 import ChordLine from './ChordLine';
+import LineStage from './LineStage';
 import { amenLabel, chorusLabel } from './slide-labels';
 
 interface Props {
@@ -24,10 +27,32 @@ const pinchDistance = (t: TouchList) => Math.hypot(t[0].clientX - t[1].clientX, 
 
 export default function Projector({ song, onClose, isDisplay }: Props) {
   const t = useTranslations('songbook.projector');
-  const parts = expandParts(song.parts);
+  const [index, setIndex] = useState(0);
+  const indexRef = useRef(index);
+  useEffect(() => {
+    indexRef.current = index;
+  }, [index]);
+
+  // BroadcastChannel — keep slide in sync across controller + display windows
+  const channelRef = useRef<BroadcastChannel | null>(null);
+  const isSlideRemote = useRef(false);
+  const post = useCallback((message: LineMessage) => channelRef.current?.postMessage(message), []);
+  // Only a slide that actually changes is marked remote. A message repeating
+  // the current slide causes no render, so a flag set for it would never be
+  // consumed and would swallow the next local change instead.
+  const setIndexFromRemote = useCallback((i: number) => {
+    if (indexRef.current === i) return false;
+    indexRef.current = i;
+    isSlideRemote.current = true;
+    setIndex(i);
+    return true;
+  }, []);
+  const line = useLineMode({ song, index, setIndex, setIndexFromRemote, post });
+  const { resetLine, receive: receiveLine, blank, setBlank, setLineMode } = line;
+
+  const parts = line.parts;
   // index 0 = title slide; 1..parts.length = song parts; parts.length+1 = amen slide
   const total = parts.length + 2;
-  const [index, setIndex] = useState(0);
   const [fontScale, setFontScale] = useState(1);
   // The pinch handler cannot read fontScale from the closure — it would need to
   // be a dependency, and re-registering listeners mid-gesture drops the pinch.
@@ -43,8 +68,16 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     setMounted(true);
   }, []);
 
-  const prev = useCallback(() => setIndex((i) => Math.max(0, i - 1)), []);
-  const next = useCallback(() => setIndex((i) => Math.min(total - 1, i + 1)), [total]);
+  const prevPart = useCallback(() => {
+    setIndex((i) => Math.max(0, i - 1));
+    resetLine();
+  }, [resetLine]);
+  const nextPart = useCallback(() => {
+    setIndex((i) => Math.min(total - 1, i + 1));
+    resetLine();
+  }, [total, resetLine]);
+  const prev = line.active ? line.prevStep : prevPart;
+  const next = line.active ? line.nextStep : nextPart;
   const openFullscreen = useCallback(() => {
     setDisplay(false);
   }, []);
@@ -62,9 +95,6 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     };
   }, [onClose, display]);
 
-  // BroadcastChannel — keep slide in sync across controller + display windows
-  const channelRef = useRef<BroadcastChannel | null>(null);
-  const isSlideRemote = useRef(false);
   const isFontRemote = useRef(false);
   const isSlideThemeRemote = useRef(false);
   useEffect(() => {
@@ -73,8 +103,9 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     const ch = new BC('projector');
     ch.onmessage = (e) => {
       if (e.data.type === 'slide') {
-        isSlideRemote.current = true;
-        setIndex(e.data.index);
+        if (setIndexFromRemote(e.data.index)) resetLine();
+      } else if (receiveLine(e.data)) {
+        // line-by-line message, applied by useLineMode
       } else if (e.data.type === 'fontScale') {
         isFontRemote.current = true;
         setFontScale(e.data.value);
@@ -89,7 +120,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
     // Announce to the presenter that the display window is ready
     if (isDisplay) ch.postMessage({ type: 'ready' });
     return () => ch.close();
-  }, [isDisplay]);
+  }, [isDisplay, setIndexFromRemote, resetLine, receiveLine]);
   useEffect(() => {
     if (isSlideRemote.current) {
       isSlideRemote.current = false;
@@ -126,10 +157,12 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
       else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prev();
       else if (e.key === 'f') openFullscreen();
       else if (e.key === 'Escape') onClose();
+      else if (e.key === 'b' || e.key === 'B') setBlank(!blank);
+      else if (e.key === '1' || e.key === '2') setLineMode(true, e.key === '1' ? 1 : 2);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [next, prev, onClose]);
+  }, [next, prev, onClose, blank, setBlank, setLineMode]);
 
   // Auto-hide chrome after 3s of inactivity. Only mouse movement and taps
   // reveal the bars — arrow keys and swipes are navigation gestures, not UI
@@ -232,6 +265,15 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   const isWordSymbol = isAmenSlide || part?.type === 'chorus';
 
   const counterLabel = isPartSlide ? `${index} / ${parts.length}` : '—';
+  const linePart = line.active && isPartSlide ? line.lineParts[index - 1] : null;
+  const atStart = line.active ? line.stepIndex === 0 : index === 0;
+  const atEnd = line.active ? line.stepIndex === line.steps.length - 1 : index === total - 1;
+  // Off → one line → two lines → off: one control, so the bar stays as quiet as before.
+  const cycleLineMode = () => {
+    if (!line.active) setLineMode(true, 1);
+    else if (line.linesPerSlide === 1) setLineMode(true, 2);
+    else setLineMode(false);
+  };
 
   if (!mounted) return null;
 
@@ -241,7 +283,10 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
   }
 
   return createPortal(
-    <div className={`projector${idle && !display ? ' projector--idle' : ''}`} data-slide-theme={slideTheme}>
+    <div
+      className={`projector${idle && !display ? ' projector--idle' : ''}${blank ? ' projector--blank' : ''}`}
+      data-slide-theme={slideTheme}
+    >
       {/* Fullscreen request overlay — requires a user gesture on this window */}
       {pendingFullscreen && (
         <button className="projector__fs-overlay" onClick={enterFullscreen} aria-label={t('enterFullscreen')}>
@@ -273,7 +318,7 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
       {/* Top bar: logo | song title (part slides only) | send to screen | close */}
       <div className="projector__topbar">
         <div className="projector__logo" aria-hidden="true">
-          SDARM<span className="projector__logo-accent">.life</span>
+          <Wordmark />
         </div>
         {isPartSlide && (
           <div className="projector__header">
@@ -303,6 +348,15 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
           <div className="projector__title-slide">
             <div className="projector__title-name">{song.title}</div>
           </div>
+        ) : linePart ? (
+          <LineStage
+            key={line.stepIndex}
+            part={linePart}
+            steps={line.steps}
+            stepIndex={line.stepIndex}
+            transition={line.transition}
+            direction={line.direction}
+          />
         ) : !isAmenSlide ? (
           <div className="projector__lyrics">
             {lines.map((line, i) => (
@@ -315,21 +369,41 @@ export default function Projector({ song, onClose, isDisplay }: Props) {
       {/* Bottom bar: nav (centered) + font controls (right) */}
       <div className="projector__bottombar">
         <div className="projector__nav">
-          <button className="projector__nav-btn" onClick={prev} disabled={index === 0} aria-label={t('previousPart')}>
+          <button className="projector__nav-btn" onClick={prev} disabled={atStart} aria-label={t('previousPart')}>
             ‹
           </button>
           <span className="projector__counter">{counterLabel}</span>
-          <button
-            className="projector__nav-btn"
-            onClick={next}
-            disabled={index === total - 1}
-            aria-label={t('nextPart')}
-          >
+          <button className="projector__nav-btn" onClick={next} disabled={atEnd} aria-label={t('nextPart')}>
             ›
           </button>
         </div>
         {!display && (
           <div className="projector__controls">
+            <button
+              className={`projector__ctrl-btn${line.active ? ' projector__ctrl-btn--active' : ''}`}
+              onClick={cycleLineMode}
+              title={t('lineMode')}
+              aria-label={t('lineMode')}
+              aria-pressed={line.active}
+            >
+              {line.active ? (
+                line.linesPerSlide
+              ) : (
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.5" width="18" height="18">
+                  <path d="M4 6h12M6 10h8M4 14h12" strokeLinecap="round" />
+                </svg>
+              )}
+            </button>
+            {line.active && line.languages.length > 1 && line.secondaryLang && (
+              <button
+                className="projector__ctrl-btn"
+                onClick={line.swapLanguages}
+                title={t('swapLanguages')}
+                aria-label={t('swapLanguages')}
+              >
+                {line.primaryLang.toUpperCase()}
+              </button>
+            )}
             <button
               className="projector__ctrl-btn"
               onClick={() => setSlideTheme((prev) => (prev === 'dark' ? 'light' : 'dark'))}

@@ -1,0 +1,41 @@
+/* ── CATALOG HERO (photo background behind PageHero) ── */
+.catalog-hero {
+  position: relative;
+  background-color: #0c0b09;
+  background-size: cover;
+  background-position: center 40%;
+  background-repeat: no-repeat;
+}
+
+.catalog-hero__overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(12, 11, 9, 0.72) 0%,
+    rgba(12, 11, 9, 0.15) 25%,
+    rgba(12, 11, 9, 0.15) 70%,
+    rgba(12, 11, 9, 0.95) 100%
+  );
+  z-index: 1;
+  pointer-events: none;
+}
+
+.catalog-hero .page-hero {
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+
+[data-theme='light'] .catalog-hero .page-hero {
+  background: transparent;
+}
+
+@media (max-width: 1200px) {
+  .hero-deco-icons {
+    display: none;
+  }
+  .deco-circle-hero {
+    display: none;
+  }
+}

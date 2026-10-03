@@ -47,6 +47,36 @@ describe('OpenAPI document', () => {
 		}
 	});
 
+	it('documents /bible/parallel for 2–4 translations and the projector gate (issue #14)', async () => {
+		const res = await SELF.fetch('https://example.com/api/openapi.json');
+		const doc = (await res.json()) as {
+			paths: Record<string, { get?: { parameters?: { name: string }[]; responses?: Record<string, unknown> } }>;
+		};
+		const get = doc.paths['/api/v1/bible/parallel']?.get;
+		const names = (get?.parameters ?? []).map((p) => p.name);
+		expect(names).toEqual(expect.arrayContaining(['t', 'a', 'b', 'book', 'chapter', 'use']));
+		expect(Object.keys(get?.responses ?? {})).toEqual(expect.arrayContaining(['200', '400', '403', '404']));
+	});
+
+	it('registers the admin top-songs route (issue #197)', async () => {
+		const res = await SELF.fetch('https://example.com/api/openapi.json');
+		const doc = (await res.json()) as { paths: Record<string, unknown> };
+		// Routers mounted at admin.route('', …) document as `/admin//…`; compare with
+		// the doubled slash collapsed so this test does not pin that quirk.
+		const paths = Object.keys(doc.paths).map((p) => p.replace(/\/{2,}/g, '/'));
+		expect(paths).toContain('/api/v1/admin/songs/top');
+	});
+
+	it('registers the subscriber digest routes and one-click unsubscribe (issue #184)', async () => {
+		const res = await SELF.fetch('https://example.com/api/openapi.json');
+		const doc = (await res.json()) as { paths: Record<string, Record<string, unknown>> };
+		const paths = Object.fromEntries(Object.entries(doc.paths).map(([p, v]) => [p.replace(/\/{2,}/g, '/'), v]));
+		for (const path of ['/api/v1/admin/email/digest', '/api/v1/admin/email/digest/preview', '/api/v1/admin/email/digest/test']) {
+			expect(Object.keys(paths)).toContain(path);
+		}
+		expect(Object.keys(paths['/api/v1/unsubscribe'])).toEqual(expect.arrayContaining(['get', 'post']));
+	});
+
 	it('serves the Swagger UI', async () => {
 		const res = await SELF.fetch('https://example.com/api/ui');
 		expect(res.status).toBe(200);
@@ -119,6 +149,7 @@ describe('admin auth', () => {
 		['GET', '/api/v1/admin/bible/translations'],
 		['PUT', '/api/v1/admin/bible/allowlist'],
 		['POST', '/api/v1/admin/bible/takedown'],
+		['GET', '/api/v1/admin/songs/top'],
 	])('rejects %s %s with no Authorization header', async (method, path) => {
 		const res = await SELF.fetch(`https://example.com${path}`, { method });
 		expect(res.status).toBe(401);
@@ -153,4 +184,19 @@ describe('routing', () => {
 		const res = await SELF.fetch('https://example.com/nope');
 		expect(res.status).toBe(404);
 	});
+});
+
+// Rejected before any translation is resolved, so these need no Bible data.
+describe('Bible parallel validation', () => {
+	for (const [label, query] of [
+		['a single translation', 't=kjv'],
+		['five translations', 't=a,b,c,d,e'],
+		['the same translation twice', 't=kjv,kjv'],
+		['a legacy pair with one side missing', 'a=kjv'],
+	] as const) {
+		it(`answers 400 for ${label}`, async () => {
+			const res = await SELF.fetch(`https://example.com/api/v1/bible/parallel?${query}&book=JHN&chapter=3`);
+			expect(res.status).toBe(400);
+		});
+	}
 });

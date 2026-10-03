@@ -20,7 +20,8 @@ export default defineConfig({
     animations: 'disabled',
     // Prevent Playwright from injecting `caret-color: transparent` on focusable
     // elements before React hydrates. That inline style causes a hydration
-    // mismatch on Footer inputs (newsletter + location autocomplete).
+    // mismatch on inputs (the footer newsletter, the home sunset card's
+    // location search).
     // Screenshots remain caret-free because inputs are not focused during tests.
     caret: 'initial',
   },
@@ -50,6 +51,8 @@ export default defineConfig({
         SONGBOOK_URL: 'http://localhost:3002',
         EVENTS_URL: 'http://localhost:3003',
         TREASURES_URL: 'http://localhost:3004',
+        // The lesson card reads its quarter from the mock (see mockSblQuarters).
+        SBL_URL: `http://localhost:${MOCK_PORT}/sbl`,
       },
     },
     {

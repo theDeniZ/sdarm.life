@@ -69,23 +69,17 @@ nav.site-nav.scrolled {
 }
 
 /* ── Logo ── */
+/* Face, weight and tracking come from wordmark.css; the bar sets size and colour. */
 .nav-logo {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
   font-size: 1.35rem;
-  letter-spacing: 0.04em;
   color: var(--nav-fg-primary);
   text-decoration: none;
   transition: color 0.5s ease;
   flex-shrink: 0; /* never let logo squeeze under content pressure */
   white-space: nowrap;
-}
-.nav-logo span {
-  font-family: 'Cormorant Garamond', serif;
-  font-weight: 700;
-  font-style: italic;
-  color: var(--gold);
-  letter-spacing: 0;
+  /* 44px tall hit area without changing the bar's height */
+  padding: 9px 0;
+  margin: -9px 0;
 }
 .nav-logo:hover {
   color: var(--nav-fg-primary-hover);
@@ -133,9 +127,9 @@ nav.site-nav.scrolled {
   color: var(--nav-fg-secondary);
   text-decoration: none;
   transition: color 0.5s ease;
-  /* enlarge touch target without changing visual size */
-  padding: 12px 4px;
-  margin: -12px -4px;
+  /* enlarge touch target without changing visual size — 44×44 around "EN" */
+  padding: 12px 11px;
+  margin: -12px -11px;
   flex-shrink: 0;
 }
 .nav-lang:hover {
@@ -358,16 +352,23 @@ nav.site-nav.scrolled {
 
 /* ── Light theme ── */
 /* Only the two tiers are re-set; every control follows them.
-   secondary at 0.75 measures 4.12:1 on --dark (#fcfbf8) — the old 0.44 on the
-   language switcher was 2.10:1. */
+   secondary at 0.8 measures 4.65:1 on --dark (#fcfbf8). "EN" is text, so it
+   needs the 4.5:1 text minimum, not the 3:1 for icons; 0.75 was 4.12:1 and the
+   old 0.44 on the language switcher 2.10:1. */
 [data-theme='light'] nav.site-nav {
   --nav-fg-primary: rgba(14, 14, 20, 0.88);
   --nav-fg-primary-hover: rgba(14, 14, 20, 1);
-  --nav-fg-secondary: rgba(80, 78, 96, 0.75);
+  --nav-fg-secondary: rgba(80, 78, 96, 0.8);
   --nav-fg-secondary-hover: rgba(28, 28, 38, 0.95);
 }
 [data-theme='light'] .nav-mobile__links a {
   color: rgba(14, 14, 20, 0.85);
+}
+/* Same specificity as the rule above, so the active item needs restating or
+   the light theme loses its highlight in the mobile menu. */
+[data-theme='light'] .nav-mobile__links a:hover,
+[data-theme='light'] .nav-mobile__links a.active {
+  color: var(--gold);
 }
 
 /* ── Adaptive contrast: navbar over a [data-nav-overlay="dark"] section ──

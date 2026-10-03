@@ -1,0 +1,249 @@
+/* ── ITEM CARD ── */
+.item-card {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  position: relative;
+  overflow: visible;
+  transition:
+    opacity 0.55s var(--ease),
+    transform 0.55s var(--ease);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(22px);
+  display: flex;
+  flex-direction: row;
+  align-items: stretch;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+.item-card--no-link {
+  cursor: default;
+}
+.item-card.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── ITEM VISUAL ── */
+.item-visual {
+  width: 180px;
+  flex-shrink: 0;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.4rem 1rem;
+  overflow: visible;
+}
+
+.book-visual {
+  border-radius: 10px 0 0 10px;
+}
+.book-visual::before {
+  display: none;
+}
+[data-theme='light'] .book-visual::before {
+  display: none;
+}
+
+/* ── ITEM BADGE ── */
+.item-badge {
+  position: absolute;
+  top: 0.9rem;
+  right: 0.9rem;
+  z-index: 5;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 0.18rem 0.55rem;
+  border-radius: 1px;
+}
+.free-badge {
+  color: rgba(201, 169, 110, 0.9);
+  border: 1px solid rgba(201, 169, 110, 0.3);
+  background: rgba(201, 169, 110, 0.06);
+}
+.post-badge {
+  color: rgba(180, 220, 180, 0.85);
+  border: 1px solid rgba(180, 220, 180, 0.25);
+  background: rgba(180, 220, 180, 0.06);
+}
+
+/* ── ITEM BODY ── */
+.item-body {
+  padding: 1.2rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-width: 0;
+  min-height: 0;
+  justify-content: center;
+}
+
+.item-title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin-bottom: 0.2rem;
+}
+
+.item-title {
+  font-family: 'Inter', sans-serif;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-strong, var(--text));
+  letter-spacing: 0;
+  line-height: 1.3;
+  flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.item-lang {
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.65rem;
+  color: var(--gold);
+  opacity: 0.7;
+  letter-spacing: 0.1em;
+  flex-shrink: 0;
+}
+
+.item-author {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.85rem;
+  font-style: italic;
+  color: var(--gold);
+  opacity: 0.95;
+  margin-bottom: 0.45rem;
+}
+
+.item-desc {
+  font-family: 'Lora', serif;
+  font-size: 0.875rem;
+  font-weight: 400;
+  color: var(--text);
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  margin-top: 0.4rem;
+}
+
+.item-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.item-price {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.88rem;
+  font-weight: 300;
+  color: rgba(220, 210, 195, 0.7);
+  letter-spacing: 0.04em;
+}
+.item-price.free {
+  color: rgba(201, 169, 110, 0.75);
+  font-style: italic;
+}
+
+.item-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.45);
+  text-decoration: none;
+  transition:
+    color 0.3s,
+    gap 0.3s;
+}
+.item-card:hover .item-cta {
+  color: rgba(201, 169, 110, 0.85);
+  gap: 0.52rem;
+}
+.item-cta svg {
+  width: 9px;
+  height: 9px;
+  stroke: currentColor;
+  stroke-width: 2;
+  fill: none;
+}
+
+/* ── Disabled CTA ────────────────────────────────────────── */
+.item-cta--disabled {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Two columns on a tablet leave ~350px a card; the 180px cover column left the
+   text 130px. */
+@media (min-width: 601px) and (max-width: 900px) {
+  .item-visual {
+    width: 150px;
+    padding: 1.2rem 0.8rem;
+  }
+  .item-body {
+    padding: 1.1rem 1.1rem 1.1rem 0.4rem;
+  }
+}
+
+@media (max-width: 600px) {
+  .item-card {
+    flex-direction: column;
+    align-items: center;
+  }
+  /* The visual takes the height of the book. A fixed 160px box held a cover of
+     up to 158 x 211px aligned to its bottom edge, so every book stood ~60px out
+     of the top of its card and over the text of the card above. */
+  .item-visual {
+    width: 100%;
+    height: auto;
+    align-items: center;
+    padding: 1.6rem 1rem 0.4rem;
+  }
+  .item-visual .tome {
+    max-width: 132px;
+  }
+  .book-visual {
+    border-radius: 10px 10px 0 0;
+  }
+}
+
+/* Light theme. .item-card was declared twice for it — once beside the base rule
+   (border-color only, a 0.08 shadow) and once in the old trailing light block,
+   which won on source order. One rule now, with the values that won. */
+[data-theme='light'] .item-card {
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+[data-theme='light'] .item-card:hover {
+  background: #ffffff;
+  box-shadow:
+    0 10px 32px rgba(0, 0, 0, 0.1),
+    0 0 0 1px rgba(146, 114, 35, 0.1);
+}
+[data-theme='light'] .book-visual {
+  background: transparent;
+}
+
+/* The light gold is darker than the dark theme's; at 0.7 / 0.95 the language
+   tag and the author fell to 2.7:1 and 4.1:1. */
+[data-theme='light'] .item-lang,
+[data-theme='light'] .item-author {
+  opacity: 1;
+}

@@ -1,0 +1,482 @@
+/* ═══════════════════════════════════════════════════════════════════
+   BIBLE PROJECTOR — the 1920×1080 slide stage (issue #14)
+
+   One stage, three places: the display window (`.bible-display`), the
+   presenter's Live mirror and its Vorschau thumbnail. Every size here is in
+   stage pixels at 1080p; `ProjectorFrame` scales the whole stage, so nothing
+   in this file needs a breakpoint. The verse size itself comes from auto-fit
+   as `--bps-px` (and `--bps-px2` for the smaller texts in the focus layout).
+
+   The stage carries its own theme chosen by the operator — it does not
+   follow the site's light/dark switch, because the room's screen is not the
+   operator's screen. Four neutral palettes (the "neutral palettes" section of
+   the projector Figma file); no orange, amber or gold anywhere on the stage:
+   - Violett (default): near-black glass, one lavender-violet accent
+   - Graphit: graphite, a pale champagne accent (SDARM Germany's brand
+     beige) used very sparingly
+   - Tinte: ink blue, pale steel accent
+   - Papier: paper white, navy accent — for bright rooms
+   The accent marks only the translation labels, the chapter reference, the
+   verse numbers and «.life» in the wordmark.
+   ═══════════════════════════════════════════════════════════════════ */
+
+.bps {
+  --bps-bg: #0b0b10;
+  --bps-glow: radial-gradient(ellipse 55.6% 41.7% at 50% 50%, #15151c 0%, rgba(11, 11, 16, 0) 100%);
+  --bps-text: #f5f5f7;
+  --bps-text2: #d1d1d6;
+  --bps-accent: #a78bfa;
+  --bps-muted: #8e8e93;
+  --bps-dot: rgba(142, 142, 147, 0.8);
+  --bps-line: rgba(245, 245, 247, 0.12);
+  --bps-px: 48px;
+  --bps-px2: 32px;
+
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 84px 160px 60px;
+  overflow: hidden;
+  background: var(--bps-glow), var(--bps-bg);
+  color: var(--bps-text);
+  font-family: 'Lora', serif;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.bps--graphite {
+  --bps-bg: #0e0f11;
+  --bps-glow: radial-gradient(ellipse 55.6% 41.7% at 50% 50%, #17191c 0%, rgba(14, 15, 17, 0) 100%);
+  --bps-text: #f2f3f5;
+  --bps-text2: #d4d6da;
+  --bps-accent: #e2d0ae;
+  --bps-muted: #8b8f96;
+  --bps-dot: rgba(180, 184, 190, 0.55);
+  --bps-line: rgba(180, 184, 190, 0.16);
+}
+
+.bps--ink {
+  --bps-bg: #0f1a2b;
+  --bps-glow: radial-gradient(ellipse 55.6% 41.7% at 50% 50%, #15233a 0%, rgba(15, 26, 43, 0) 100%);
+  --bps-text: #eef1f5;
+  --bps-text2: #cfd7e3;
+  --bps-accent: #9fb3cf;
+  --bps-muted: #8d9bb0;
+  --bps-dot: rgba(159, 179, 207, 0.55);
+  --bps-line: rgba(159, 179, 207, 0.16);
+}
+
+.bps--paper {
+  --bps-bg: #f7f7f5;
+  --bps-glow: none;
+  --bps-text: #1b1b1d;
+  --bps-text2: #3a3b40;
+  --bps-accent: #24426e;
+  --bps-muted: #5e6168;
+  --bps-dot: rgba(36, 66, 110, 0.55);
+  --bps-line: rgba(36, 66, 110, 0.16);
+}
+
+/* ── Title: every shown language's book name, then the reference ──
+   Deliberately lighter than the verse (regular weight, muted names) so the
+   text reads first; it stops short of the wordmark's corner. */
+.bps-title {
+  margin: 0;
+  padding-right: 260px;
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 400;
+  font-size: 40px;
+  line-height: 1.2;
+  letter-spacing: 0.005em;
+  color: var(--bps-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.bps--n1 .bps-title {
+  font-size: 46px;
+}
+.bps--n4 .bps-title {
+  font-size: 38px;
+}
+.bps-title__dot {
+  margin: 0 0.42em;
+  color: var(--bps-dot);
+}
+.bps-title__ref {
+  margin-left: 0.62em;
+  color: var(--bps-accent);
+}
+/* «1/2» — a slide split across screens; quiet, after the reference. */
+.bps-title__part {
+  margin-left: 0.9em;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.46em;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  vertical-align: 0.28em;
+  color: var(--bps-muted);
+}
+.bps-rule {
+  flex: none;
+  height: 1px;
+  margin-top: 30px;
+  background: var(--bps-line);
+}
+
+/* ── Body: auto-fit measures this box ── */
+.bps-body {
+  flex: 1;
+  min-height: 0;
+  margin-top: 60px;
+  overflow: hidden;
+}
+.bps--n4 .bps-body {
+  margin-top: 52px;
+}
+.bps-text {
+  margin: 0;
+  font-size: var(--bps-px);
+  line-height: 1.38;
+  font-weight: 400;
+  color: var(--bps-text);
+}
+.bps-vn {
+  margin-right: 0.22em;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.42em;
+  font-weight: 500;
+  line-height: 0;
+  vertical-align: 0.95em;
+  color: var(--bps-accent);
+}
+.bps-missing,
+.bps-cont {
+  color: var(--bps-muted);
+}
+/* A license that asks for more than "public domain": its notice, verbatim,
+   under its own text — inside the measured body, so auto-fit keeps room. */
+.bps-note {
+  margin: 16px 0 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--bps-muted);
+}
+
+/* ── Labels: the translation's short name only, quiet ── */
+.bps-label {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-family: 'Lexend', sans-serif;
+}
+.bps-label__abbr {
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--bps-accent);
+}
+/* Psalms numbered differently on this side (LXX / Hebrew). */
+.bps-label__chapter {
+  font-size: 16px;
+  font-weight: 300;
+  color: var(--bps-muted);
+}
+/* Above the text (every layout but rows with two or more translations). */
+.bps--n1 .bps-label,
+.bps-grid .bps-label,
+.bps-table .bps-label,
+.bps--focus .bps-label {
+  margin-bottom: 20px;
+}
+.bps-grid .bps-label__abbr,
+.bps-table .bps-label__abbr,
+.bps-focus__others .bps-label__abbr {
+  font-size: 16px;
+  letter-spacing: 0.12em;
+}
+.bps--n1 .bps-label {
+  margin-bottom: 26px;
+}
+.bps--n1 .bps-label__abbr {
+  font-size: 20px;
+}
+
+/* ── Rows (Zeilen) — one full-width row per translation ── */
+.bps-rows {
+  display: flex;
+  flex-direction: column;
+}
+.bps-rows .bps-cell {
+  display: grid;
+  grid-template-columns: 110px minmax(0, 1fr);
+  column-gap: 44px;
+  align-items: start;
+}
+.bps-rows .bps-cell + .bps-cell {
+  margin-top: 48px;
+  padding-top: 48px;
+  border-top: 1px solid var(--bps-line);
+}
+/* Centre the label on the first line of text, whatever size auto-fit chose. */
+.bps-rows .bps-label {
+  padding-top: calc((var(--bps-px) * 1.38 - 23px) / 2);
+}
+.bps--n1 .bps-rows .bps-cell {
+  grid-template-columns: minmax(0, 1fr);
+}
+.bps--n1 .bps-rows .bps-label {
+  padding-top: 0;
+}
+.bps-rows .bps-cell > .bps-cell__body:only-child {
+  grid-column: 2;
+}
+.bps--n1 .bps-rows .bps-cell > .bps-cell__body:only-child {
+  grid-column: 1;
+}
+
+/* ── Grid (Raster) — 2×2, each language in its own quarter ── */
+.bps-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  column-gap: 72px;
+  row-gap: 52px;
+}
+.bps-grid .bps-cell:nth-child(even) {
+  padding-left: 72px;
+  border-left: 1px solid var(--bps-line);
+}
+.bps-grid .bps-cell:nth-child(n + 3) {
+  padding-top: 52px;
+  border-top: 1px solid var(--bps-line);
+}
+
+/* ── Columns (Spalten) — one column per translation, a range aligned by verse ── */
+.bps-table {
+  display: grid;
+  align-items: start;
+}
+/* No column gap: the gutters are padding, so row rules run unbroken. */
+.bps-table__col {
+  padding-right: 60px;
+}
+.bps-table__head {
+  padding-bottom: 6px;
+}
+.bps-table__col--rest {
+  align-self: stretch;
+  padding-left: 60px;
+  border-left: 1px solid var(--bps-line);
+}
+.bps-table__sep {
+  margin-top: 34px;
+  padding-top: 34px;
+  border-top: 1px solid var(--bps-line);
+}
+.bps-table__num {
+  padding-top: calc((var(--bps-px) * 1.38 - 25px) / 2);
+  font-family: 'Lexend', sans-serif;
+  font-size: 20px;
+  font-weight: 500;
+  color: var(--bps-accent);
+}
+.bps-table__foot .bps-note {
+  margin-top: 18px;
+}
+.bps-table--numbered .bps-table__head {
+  padding-bottom: 20px;
+}
+
+/* ── Focus (Fokus) — the main translation large, the others beneath ── */
+.bps-focus__others {
+  display: grid;
+  column-gap: 72px;
+  margin-top: 52px;
+  padding-top: 52px;
+  border-top: 1px solid var(--bps-line);
+}
+.bps--n2 .bps-focus__others {
+  max-width: 1260px;
+}
+.bps-text--secondary {
+  font-size: var(--bps-px2);
+  line-height: 1.4;
+  color: var(--bps-text2);
+}
+
+/* ── Footer: one quiet centred line for every plain public-domain text ──
+   Outside the measured body, so auto-fit reserves its space. */
+.bps-foot {
+  flex: none;
+  margin-top: 40px;
+}
+.bps-pd {
+  margin: 0;
+  font-family: 'Lexend', sans-serif;
+  font-size: 16px;
+  font-weight: 300;
+  letter-spacing: 0.02em;
+  line-height: 1.3;
+  text-align: center;
+  color: var(--bps-muted);
+}
+.bps-pd__dash {
+  margin: 0 0.7em;
+}
+
+/* The site wordmark is the shared <Wordmark /> from @sdarm/ui (styles/wordmark.css
+   owns face, weight and tracking). Each place here only sets its size,
+   `--wordmark-ink` for "SDARM" and `--wordmark-accent` for ".life". */
+.bps-brand.wordmark,
+.bp-brand.wordmark {
+  color: var(--wordmark-ink, currentColor);
+}
+
+/* The wordmark on every slide: 40 px, top right like a broadcaster's bug
+   (the heads of the room hide the bottom of the screen), right edge at
+   1800 px, top at 91 px, 55 % so it never competes with the verse. Outside
+   the measured body and clear of the title (its padding-right). */
+.bps-brand {
+  --wordmark-ink: var(--bps-text);
+  --wordmark-accent: var(--bps-accent);
+  position: absolute;
+  top: 91px;
+  right: 120px;
+  font-size: 40px;
+  line-height: 1.2;
+  opacity: 0.55;
+}
+/* Black-out («Schwarz»): the bare ground and the wordmark, dimmer, in its
+   usual place — on Papier too, so a bright room does not flash dark. */
+.bps-blank {
+  position: absolute;
+  inset: 0;
+  background: var(--bps-glow), var(--bps-bg);
+}
+.bps-blank .bps-brand {
+  opacity: 0.4;
+}
+
+/* The only motion: a 200 ms fade when the text changes. */
+.bps-title,
+.bps-content {
+  animation: bpsIn 0.2s ease both;
+}
+@keyframes bpsIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bps-title,
+  .bps-content {
+    animation: none;
+  }
+}
+
+/* ── Scaling frame ── */
+.bps-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.bps-frame--contain {
+  height: 100%;
+}
+.bps-frame--width {
+  aspect-ratio: 16 / 9;
+}
+.bps-frame__stage {
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-origin: 0 0;
+}
+
+/* ── Display window ── the letterbox around the stage matches its ground. */
+.bible-display {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #0b0b10;
+}
+.bible-display--graphite {
+  background: #0e0f11;
+}
+.bible-display--ink {
+  background: #0f1a2b;
+}
+.bible-display--paper {
+  background: #f7f7f5;
+}
+
+.bible-projector__fs-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 1rem;
+  background: rgba(11, 11, 16, 0.92);
+  color: rgba(245, 245, 247, 0.85);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  letter-spacing: 0.1em;
+  border: none;
+  cursor: pointer;
+}
+
+/* Refusal screen for a translation not licensed for a shared screen. */
+.bible-projector-blocked {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  background: #0b0b10;
+  text-align: center;
+}
+.bible-projector-blocked__title {
+  font-family: 'Cormorant Garamond', serif;
+  font-weight: 600;
+  font-size: 1.8rem;
+  color: #f5f5f7;
+}
+.bible-projector-blocked__body {
+  max-width: 480px;
+  font-family: 'Lexend', sans-serif;
+  font-weight: 300;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #8e8e93;
+}
+.bible-projector-blocked__close {
+  margin-top: 0.5rem;
+  padding: 0.6rem 1.4rem;
+  background: transparent;
+  border: 1px solid rgba(167, 139, 250, 0.45);
+  border-radius: 999px;
+  color: #a78bfa;
+  font-family: 'Lexend', sans-serif;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.bible-projector-blocked__close:hover {
+  border-color: rgba(167, 139, 250, 0.8);
+  background: rgba(167, 139, 250, 0.1);
+}

@@ -12,6 +12,8 @@ export const WEB_URL = process.env.WEB_URL ?? 'https://sdarm.life';
 export const TREASURES_URL = process.env.TREASURES_URL ?? 'https://treasures.sdarm.life';
 export const SONGBOOK_URL = process.env.SONGBOOK_URL ?? 'https://songs.sdarm.life';
 export const EVENTS_URL = process.env.EVENTS_URL ?? 'https://events.sdarm.life';
+/** The Sabbath Bible Lesson — a static site of its own, without locales or theme sync. */
+export const SBL_URL = process.env.SBL_URL ?? 'https://sbl.sdarm.life';
 
 // There is deliberately no FALLBACK_IMG. It was a hotlinked Unsplash photo, so
 // every page that used it put the visitor's IP on a third-party server before
@@ -77,6 +79,10 @@ export interface NewsData {
   eventsUrl: string;
   aboutUrl: string;
   youVersionUrl: string;
+  /** The Bible reader on the treasures host, `{TREASURES_URL}/{locale}/bible`. */
+  bibleUrl: string;
+  /** The lesson sheet, `SBL_URL` as it is — the static site has no locale path. */
+  sblUrl: string;
 }
 
 export async function fetchTreasures(params: string): Promise<TreasureDto[] | null> {

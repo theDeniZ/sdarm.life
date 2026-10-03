@@ -1,6 +1,8 @@
 /* This file owns every rule for this section, including its @media
-   breakpoints and its [data-theme="light"] overrides. Imported from
-   app/layout.tsx. */
+   breakpoints and its [data-theme="light"] overrides. Shared by every public
+   app's not-found page, so a lost visitor meets the same page on every host;
+   imported as a module from each app's app/layout.tsx (not @import-ed from
+   index.css — see the Turbopack note in apps/web/app/layout.tsx). */
 
 /* ═══ 404 — VERLORENES SCHAF ═══
    Lukas 15,4 parable as a typographic page. 99 dots clustered (the flock
@@ -148,7 +150,10 @@
   color: var(--text-strong);
   text-decoration: none;
   border-bottom: 1px solid var(--border);
-  padding: 0 0 4px;
+  /* The extra top padding is taken back by the margin: a 44px touch target
+     with the underline still 4px under the word. */
+  padding: 20px 0 4px;
+  margin-top: -20px;
   transition:
     color 0.4s ease,
     border-color 0.4s ease,

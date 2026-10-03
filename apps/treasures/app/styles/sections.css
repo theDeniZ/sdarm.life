@@ -1,0 +1,52 @@
+/* ─── Sections on the shelf: the Bible and the Sabbath Bible Lesson ──────────
+   They are cards like the books, pinned ahead of them, and they carry a tint of
+   paper so the eye separates "a room to enter" from "a book to receive" without
+   being told. The tint is deliberately faint — a shelf that shouts in two
+   places is no longer a shelf. Both themes are set: on the dark ground the
+   colour is a wash, on white it is the paper itself.
+
+   No icon stands in for a cover: the card is text on its tint, with a 2px rule
+   on the leading edge in the section's colour (the quarterly's own quote rule)
+   and a serif title that carries the weight a cover would. */
+
+.item-card--section {
+  --section-accent: var(--gold);
+  box-shadow: inset 2px 0 0 var(--section-accent);
+}
+.item-card--section .item-body {
+  padding: 1.6rem 1.6rem 1.6rem 1.8rem;
+  gap: 0.5rem;
+}
+.item-card--section .item-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem;
+  font-weight: 400;
+  line-height: 1.2;
+  letter-spacing: -0.005em;
+}
+.item-card--section .item-desc {
+  margin-top: 0;
+}
+
+/* the Bible: warm parchment */
+.item-card--bible {
+  background: rgba(201, 169, 110, 0.07);
+  border-color: rgba(201, 169, 110, 0.22);
+}
+
+/* the lesson: the navy of the quarterly's own cover */
+.item-card--sbl {
+  --section-accent: #9db4d4;
+  background: rgba(122, 152, 196, 0.08);
+  border-color: rgba(122, 152, 196, 0.24);
+}
+
+[data-theme='light'] .item-card--bible {
+  background: #faf6ee;
+  border-color: rgba(146, 114, 35, 0.18);
+}
+[data-theme='light'] .item-card--sbl {
+  --section-accent: #24426e;
+  background: #f2f5fa;
+  border-color: rgba(36, 66, 110, 0.16);
+}

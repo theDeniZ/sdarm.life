@@ -1,0 +1,100 @@
+/* ── Statistics charts ────────────────────────── */
+
+.stat-mini {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.stat-mini > div { display: flex; flex-direction: column; }
+
+.stat-mini b {
+  font-family: 'Lexend', sans-serif;
+  font-weight: 600;
+  font-size: 17px;
+  color: var(--heading);
+}
+
+.stat-mini span { font-size: 11px; color: var(--muted); }
+
+.bar-chart { width: 100%; height: auto; display: block; }
+
+.bar-chart__bar { fill: var(--gold-dim); }
+
+.bar-chart__value {
+  font-family: 'Lexend', sans-serif;
+  font-size: 9px;
+  fill: var(--muted);
+}
+
+.bar-chart__label {
+  font-family: 'Lexend', sans-serif;
+  font-size: 8.5px;
+  fill: var(--muted);
+  opacity: 0.7;
+}
+
+.hbar-chart { display: flex; flex-direction: column; gap: 10px; }
+
+.hbar-chart__row {
+  display: grid;
+  grid-template-columns: minmax(90px, 150px) 1fr 48px;
+  align-items: center;
+  gap: 10px;
+}
+
+.hbar-chart__label {
+  font-size: 12px;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Second line under the label — which songbook a top song belongs to. */
+.hbar-chart__sub {
+  display: block;
+  margin-top: 1px;
+  font-size: 10.5px;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hbar-chart__track {
+  height: 10px;
+  background: var(--track);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.hbar-chart__bar {
+  height: 100%;
+  background: var(--gold-dim);
+  border-radius: 999px;
+}
+
+.hbar-chart__value {
+  font-family: 'Lexend', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--heading);
+  text-align: right;
+}
+
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  color: var(--muted);
+  cursor: help;
+}
+
+.info-badge svg { width: 14px; height: 14px; }
+
+.card--roadmap { opacity: 0.75; }
+.card--roadmap .state-empty { padding: 24px 12px; }

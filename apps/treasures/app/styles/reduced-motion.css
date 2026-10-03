@@ -1,0 +1,22 @@
+/* ── REDUCED MOTION ──
+   Global: the universal rule reaches into every section, so it is imported
+   after the other site-wide files. The reader's stylesheet still loads after
+   it; that is harmless, because the durations here are !important. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .tome-stack {
+    transition: none;
+  }
+  .tome:hover .tome-stack {
+    transform: rotateY(-8deg);
+  }
+  .item-card {
+    transition: none;
+  }
+}

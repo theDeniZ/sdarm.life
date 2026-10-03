@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import Pagination from '../../components/Pagination';
-import { usePaginatedList } from '../../lib/hooks';
+import { usePaginatedList, useRowLink } from '../../lib/hooks';
 import { fetchSongs, deleteSong, SONG_LIMIT } from './repository';
 import type { SongListItemDto } from '@sdarm/types';
 
@@ -16,6 +16,7 @@ type Props = {
 export default function SongList({ songbookId, songbookSlug }: Props) {
   const [q, setQ] = useState('');
   const [pendingDelete, setPendingDelete] = useState<SongListItemDto | null>(null);
+  const rowLink = useRowLink();
 
   const { items, total, page, loading, setPage, reload } = usePaginatedList<SongListItemDto>(
     (p) => fetchSongs(songbookSlug, p, q || undefined),
@@ -65,7 +66,7 @@ export default function SongList({ songbookId, songbookSlug }: Props) {
               </thead>
               <tbody>
                 {items.map((song) => (
-                  <tr key={song.id}>
+                  <tr key={song.id} className="row-link" onClick={rowLink(`/songs/${song.id}`)}>
                     <td style={{ width: 48, fontWeight: 600 }}>{song.number}</td>
                     <td>{song.title}</td>
                     <td>{song.author ?? '—'}</td>

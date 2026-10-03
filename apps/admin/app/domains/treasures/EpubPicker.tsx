@@ -54,7 +54,15 @@ export default function EpubPicker({ value, onChange }: Props) {
 
       <div
         className={`image-drop${drag ? ' drag-over' : ''}`}
+        role="button"
+        tabIndex={0}
+        aria-busy={uploadStatus === 'uploading'}
         onClick={() => inputRef.current?.click()}
+        onKeyDown={(e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          e.preventDefault();
+          inputRef.current?.click();
+        }}
         onDragOver={(e) => {
           e.preventDefault();
           setDrag(true);

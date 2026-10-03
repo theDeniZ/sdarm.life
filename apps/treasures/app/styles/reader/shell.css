@@ -1,0 +1,277 @@
+/* ── Loading screen ──────────────────────────────────────── */
+.epub-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 2rem;
+}
+
+.epub-loading__inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  max-width: 380px;
+  width: 100%;
+  text-align: center;
+}
+
+.epub-loading__icon {
+  color: var(--gold);
+  width: 64px;
+  height: 64px;
+  animation: epub-icon-pulse 1.8s ease-in-out infinite alternate;
+}
+
+.epub-loading__icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes epub-icon-pulse {
+  from {
+    opacity: 0.45;
+    filter: drop-shadow(0 0 6px rgba(201, 169, 110, 0.25));
+  }
+  to {
+    opacity: 1;
+    filter: drop-shadow(0 0 20px rgba(201, 169, 110, 0.65));
+  }
+}
+
+.epub-loading__title {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.15rem;
+  font-style: italic;
+  color: var(--text);
+  margin-top: 0.3rem;
+  line-height: 1.3;
+}
+
+.epub-loading__author {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.83rem;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
+.epub-loading__phase {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.55);
+  margin-top: 0.4rem;
+}
+
+.epub-loading__phase--error {
+  color: #c06868;
+}
+
+.epub-loading__bar-wrap {
+  width: 100%;
+  height: 2px;
+  background: rgba(201, 169, 110, 0.12);
+  border-radius: 1px;
+  overflow: hidden;
+  margin-top: 0.2rem;
+}
+
+.epub-loading__bar-fill {
+  height: 100%;
+  background: var(--gold);
+  border-radius: 1px;
+  transition: width 0.3s ease;
+}
+
+.epub-loading__bytes {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.78rem;
+  color: var(--muted);
+  letter-spacing: 0.04em;
+}
+
+/* ── The site chrome tones into the book, for exactly as long as the book is open ──
+   The navbar sits outside .epub-reader, so it cannot inherit the reader's
+   palette. It is toned from here instead, keyed on the reader's presence with
+   :has(). That is what makes it temporary without anything having to undo it:
+   the reader is a fixed element that exists in the DOM only while it is being
+   read, so navigating back to a site page removes it and this whole block stops
+   matching. Nothing is written to <html> and nothing has to be restored — the
+   site's own theme sits underneath, untouched, and simply reappears.
+
+   (The earlier version did write to <html> and then removeAttribute() on the way
+   out, which stripped the site's theme instead of restoring it: a visitor who
+   arrived with a light site left the reader with a dark one, permanently.)
+
+   The navbar never gains .scrolled here — Navbar derives that from
+   window.scrollY, and the reader is fixed so the window never scrolls — which is
+   why the bar is transparent and the body colour behind it is what shows. */
+/* Nav links and the secondary controls need separate values, not one shared
+   "dim". Sharing it inverted the hierarchy: the links dropped from the site's
+   0.88 to 0.6 while the language switcher rose from 0.28 to 0.6, so the least
+   important control became the loudest thing in the bar. The dark set below
+   reproduces the site's own dark navbar exactly — a dark book against a dark
+   bar needs no reinterpretation, only the same treatment. */
+body:has(.epub-reader[data-reader-theme='dark']) {
+  --book-tone-bar: rgba(9, 8, 6, 0.72);
+  --book-tone-page: #0c0b09;
+  --book-tone-fg: rgba(240, 235, 225, 0.92);
+  --book-tone-link: rgba(255, 255, 255, 0.88);
+  /* The site's own dark secondary tier (packages/ui navbar.css); 0.4 was 2.7:1. */
+  --book-tone-muted: rgba(210, 200, 185, 0.65);
+  --book-tone-line: rgba(201, 169, 110, 0.2);
+  --book-tone-accent: #c9a96e;
+}
+body:has(.epub-reader[data-reader-theme='sepia']) {
+  --book-tone-bar: rgba(244, 236, 224, 0.9);
+  --book-tone-page: #faf6ef;
+  --book-tone-fg: #1c1208;
+  --book-tone-link: rgba(44, 28, 8, 0.85);
+  --book-tone-muted: rgba(44, 28, 8, 0.66);
+  --book-tone-line: rgba(100, 70, 30, 0.2);
+  --book-tone-accent: #935f24;
+}
+body:has(.epub-reader[data-reader-theme='light']) {
+  --book-tone-bar: rgba(238, 238, 240, 0.9);
+  --book-tone-page: #f5f4f2;
+  --book-tone-fg: #1c1c1e;
+  --book-tone-link: rgba(20, 20, 25, 0.85);
+  --book-tone-muted: rgba(20, 20, 25, 0.64);
+  --book-tone-line: rgba(0, 0, 0, 0.14);
+  /* Same values as the reader palettes in EpubReader.tsx: 4.5:1 on the bar. */
+  --book-tone-accent: #80651d;
+}
+
+body:has(.epub-reader) {
+  background: var(--book-tone-page);
+}
+/* The bar carries the book's tone itself. It is transparent by default and only
+   Navbar's own .scrolled class gives it a backdrop — which it never gains here,
+   because Navbar derives that from window.scrollY and the reader is fixed, so
+   the window never scrolls. Without this the bar was clear glass over the body
+   and read as unfinished. Specificity (0,2,2) beats nav.site-nav.scrolled at
+   (0,2,1), so this wins wherever both apply. */
+body:has(.epub-reader) nav.site-nav,
+body:has(.epub-reader) nav.site-nav.scrolled {
+  /* !important on the background only, and deliberately. The competing rule is
+     [data-theme='light'] nav.site-nav.scrolled in packages/ui — three classes to
+     this selector's two, so it wins on specificity no matter how this one is
+     written short of stacking hacks. An app overriding its own shared package
+     for one screen is what the flag is for; the alternative was padding the
+     selector with repeated classes, which hides the intent instead of stating it. */
+  background: var(--book-tone-bar) !important;
+  backdrop-filter: blur(18px);
+  /* No rule under the navbar while a book is open. The bar and the page below it
+     are already the same tone, so the line was the only thing dividing the
+     reading surface — and dividing it into two pieces that agree. */
+  border-bottom: none;
+}
+body:has(.epub-reader) .nav-logo {
+  color: var(--book-tone-fg);
+  /* the .life takes the gold tuned for this paper (wordmark.css) */
+  --wordmark-accent: var(--book-tone-accent);
+}
+body:has(.epub-reader) .nav-links a {
+  color: var(--book-tone-link);
+}
+body:has(.epub-reader) .nav-links a:hover,
+body:has(.epub-reader) .nav-links a.active {
+  color: var(--book-tone-accent);
+}
+body:has(.epub-reader) .nav-lang {
+  color: var(--book-tone-muted);
+  border-color: var(--book-tone-line);
+}
+body:has(.epub-reader) .nav-theme {
+  color: var(--book-tone-muted);
+}
+body:has(.epub-reader) .nav-theme:hover {
+  color: var(--book-tone-accent);
+}
+
+/* ── Reader shell ────────────────────────────────────────── */
+.epub-reader {
+  display: flex;
+  flex-direction: column;
+  position: fixed;
+  top: var(--nav-h);
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  overflow: hidden;
+  background: var(--reader-bg);
+  transition:
+    background 0.25s,
+    color 0.25s;
+}
+
+/* ── Layout ──────────────────────────────────────────────── */
+.epub-layout {
+  flex: 1;
+  display: flex;
+  overflow: hidden;
+  min-height: 0;
+  position: relative;
+}
+
+/* ── Content pane (wrapper for content + nav arrows) ────── */
+.epub-content-pane {
+  flex: 1;
+  position: relative;
+  display: flex;
+  overflow: hidden;
+}
+
+/* ── Content area ────────────────────────────────────────── */
+.epub-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 3rem 2rem 0;
+  scroll-behavior: smooth;
+}
+
+.epub-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.epub-content::-webkit-scrollbar-thumb {
+  background: rgba(201, 169, 110, 0.12);
+  border-radius: 2px;
+}
+
+/* ── Error retry button ──────────────────────────────────── */
+.epub-retry-btn {
+  margin-top: 1.5rem;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 0.78rem;
+  font-weight: 300;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--border);
+  cursor: pointer;
+  padding: 0.5rem 1.2rem;
+  border-radius: 4px;
+  transition:
+    color 0.2s,
+    border-color 0.2s;
+}
+
+.epub-retry-btn:hover {
+  color: var(--gold);
+  border-color: var(--gold);
+}
+
+@media (max-width: 768px) {
+  .epub-content {
+    padding: 2rem 1.25rem 0;
+  }
+}

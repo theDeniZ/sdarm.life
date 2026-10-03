@@ -1,0 +1,124 @@
+/* Self-hosted fonts — no third-party requests, no Google tracking */
+@import '@fontsource/lexend/300.css';
+@import '@fontsource/lexend/400.css';
+@import '@fontsource/lexend/500.css';
+@import '@fontsource/lexend/600.css';
+/* Cyrillic for Lexend, which ships none — see font-cyrillic.css (issue #177) */
+@import '../font-cyrillic.css';
+@import '@fontsource/oswald/200.css';
+@import '@fontsource/oswald/300.css';
+@import '@fontsource/oswald/400.css';
+@import '@fontsource/cormorant-garamond/300.css';
+@import '@fontsource/cormorant-garamond/400.css';
+@import '@fontsource/cormorant-garamond/500.css';
+/* 700 and 700 italic: the SDARM.life wordmark in the sidebar */
+@import '@fontsource/cormorant-garamond/700.css';
+@import '@fontsource/cormorant-garamond/700-italic.css';
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  color-scheme: dark;
+  --accent:       #c9a96e;
+  --accent-hover: #d4b47a;
+  --accent-soft:  rgba(201, 169, 110, 0.12);
+  --gold:         var(--accent);
+  --gold-dim:     rgba(201, 169, 110, 0.5);
+  --on-accent:    #1a1408;
+  /* Text on a solid dark or danger fill (image/sheet delete overlays, Delete
+     hover). The same in both themes, unlike --on-accent, which is dark on the
+     dark theme's light gold. */
+  --on-solid:     #ffffff;
+  --red:          #dc2626;
+  --red-text:     #f87171;
+  --dark:         #020617;
+  --surface:      #0b1120;
+  --surface-2:    #151d30;
+  --text:         #e2e8f0;
+  --heading:      #f8fafc;
+  --muted:        #94a3b8;
+  --border:       rgba(255, 255, 255, 0.07);
+  --border-2:     rgba(255, 255, 255, 0.12);
+  --ok:           #4ade80;
+  --ok-soft:      rgba(22, 163, 74, 0.16);
+  --warn:         #fbbf24;
+  --warn-soft:    rgba(180, 83, 9, 0.16);
+  --danger-soft:  rgba(220, 38, 38, 0.16);
+  --row-hover:    rgba(255, 255, 255, 0.04);
+  --row-link-hover: rgba(255, 255, 255, 0.07);
+  /* Unfilled part of a chart bar — quiet, but visible on the card surface. */
+  --track:        var(--surface-2);
+  --overlay:      rgba(2, 6, 23, 0.55);
+  /* Code-ish text (HTML body, API keys). A bare `monospace` resolves to
+     Courier on macOS; ui-monospace is the platform's modern mono face. */
+  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --r:            10px;
+  --sidebar-w:    240px;
+  --sidebar-w-collapsed: 65px;
+}
+
+/* Light theme — toggled from the Sidebar profile menu, persisted to
+   localStorage('sdarm-admin-theme'). Same neutral slate system as dark,
+   inverted (shadcn/ui slate palette, mirrors admin-mockup.html). */
+/* Text tokens are set for 4.5:1 on every light surface, the #f1f5f9 table
+   header and the tinted chips included: --muted was 4.3:1 there, the accent
+   4.0:1 on its own soft tint, --ok (badges, "Public domain") 2.9–3.3:1 and
+   --red-text 4.1:1 on the danger tint. */
+[data-theme='light'] {
+  color-scheme: light;
+  --accent:       #866a1f;
+  --accent-hover: #6f5719;
+  --accent-soft:  rgba(146, 114, 35, 0.1);
+  --gold-dim:     rgba(146, 114, 35, 0.45);
+  --on-accent:    #ffffff;
+  --red-text:     #b91c1c;
+  --dark:         #f8fafc;
+  --surface:      #ffffff;
+  --surface-2:    #f1f5f9;
+  --text:         #1e293b;
+  --heading:      #0f172a;
+  --muted:        #5d6b7f;
+  --border:       rgba(2, 6, 23, 0.08);
+  --border-2:     rgba(2, 6, 23, 0.14);
+  --ok:           #136c33;
+  --ok-soft:      rgba(22, 163, 74, 0.12);
+  --warn:         #92400e;
+  --warn-soft:    rgba(180, 83, 9, 0.12);
+  --danger-soft:  rgba(220, 38, 38, 0.12);
+  --row-hover:    rgba(2, 6, 23, 0.035);
+  --row-link-hover: rgba(2, 6, 23, 0.06);
+  /* --surface-2 (#f1f5f9) on the white card all but disappears. */
+  --track:        rgba(2, 6, 23, 0.08);
+  --overlay:      rgba(2, 6, 23, 0.45);
+}
+
+html, body { height: 100%; }
+
+:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+body {
+  font-family: 'Lexend', sans-serif;
+  color: var(--text);
+  font-size: 14px;
+  background: var(--dark);
+  -webkit-font-smoothing: antialiased;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+a { text-decoration: none; color: inherit; }
+
+/* Form controls do not inherit the page font — browsers give them their own
+   system face. Every control that set no font-family of its own (filter chips,
+   reorder buttons, the Bible catalog search, …) rendered in Arial. */
+button, input, select, textarea { font-family: inherit; }

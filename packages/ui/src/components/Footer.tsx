@@ -1,18 +1,12 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { getTimes } from 'suncalc';
 import CommunityMap from './CommunityMap';
-import {
-  DEFAULT_COORDS,
-  findLocationSlug,
-  readStoredLocation,
-  writeStoredLocation,
-  type StoredLocation,
-} from '../lib/sunset-location';
+import { useSunsetLocation } from '../lib/sunset-location';
 import { useCurrentTheme, withTheme } from '../lib/theme-link';
+import Wordmark from './Wordmark';
 
 export interface FooterConfig {
   donation_url?: string | null;
@@ -29,185 +23,8 @@ interface FooterProps {
   songbookUrl?: string;
   eventsUrl?: string;
   treasuresUrl?: string;
+  sblUrl?: string;
   locale?: string;
-}
-
-interface SunData {
-  todaySunrise: number;
-  todaySunset: number;
-  tomorrowSunrise: number;
-  tomorrowSunset: number;
-}
-
-interface ClockState {
-  label: string;
-  sublabel: string;
-  timeVal: string;
-  progress: number;
-  sunDay?: string;
-}
-
-const CIRC = 2 * Math.PI * 76;
-
-interface NominatimResult {
-  lat: string;
-  lon: string;
-  display_name: string;
-  address?: {
-    city?: string;
-    town?: string;
-    village?: string;
-    municipality?: string;
-    county?: string;
-    state?: string;
-    country?: string;
-    country_code?: string;
-    postcode?: string;
-  };
-}
-
-function extractCityName(r: NominatimResult): string {
-  const a = r.address;
-  if (!a) return r.display_name.split(',')[0];
-  return a.city || a.town || a.village || a.municipality || a.county || a.state || r.display_name.split(',')[0];
-}
-
-function extractDropdownLabel(r: NominatimResult): string {
-  const a = r.address;
-  const city = extractCityName(r);
-  const postcode = a?.postcode;
-  const country = a?.country || '';
-  const countryCode = a?.country_code?.toUpperCase() || '';
-
-  // For US/CA/AU show "City, State" — country is too broad
-  const stateCountries = ['us', 'ca', 'au'];
-  if (a?.state && a.country_code && stateCountries.includes(a.country_code)) {
-    const prefix = postcode ? `${postcode} · ` : '';
-    return `${prefix}${city}, ${a.state}`;
-  }
-
-  // Postal code search: show "10115 · Berlin, Germany"
-  if (postcode && postcode === r.display_name.split(',')[0].trim()) {
-    return city !== postcode ? `${postcode} · ${city}, ${countryCode}` : `${postcode}, ${country}`;
-  }
-
-  return country ? `${city}, ${country}` : city;
-}
-
-function dateToMsOfDay(d: Date | null): number {
-  // suncalc 2 returns null where v1 returned an Invalid Date (polar day/night).
-  if (!d) return NaN;
-  return (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) * 1000;
-}
-
-function msToHHMM(ms: number): string {
-  const totalMin = Math.floor(ms / 60000);
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
-
-function fmtRemaining(diffMs: number): string {
-  const h = Math.floor(diffMs / 3600000);
-  const m = Math.floor((diffMs % 3600000) / 60000);
-  if (h > 0) return `${h}h ${m}m`;
-  return `${m}m`;
-}
-
-function nowMs(): number {
-  const d = new Date();
-  return (d.getHours() * 3600 + d.getMinutes() * 60 + d.getSeconds()) * 1000;
-}
-
-function computeClock(sun: SunData, now: number, dow: number, clockT: (key: string) => string): ClockState {
-  const DAY_MS = 86400000;
-
-  const { todaySunrise, todaySunset, tomorrowSunrise, tomorrowSunset } = sun;
-
-  const isFriday = dow === 5;
-  const isSaturday = dow === 6;
-
-  const isBeforeSunrise = now < todaySunrise;
-  const isAfterSunset = now >= todaySunset;
-  const isNight = isAfterSunset || isBeforeSunrise;
-
-  const sunDay = isFriday ? clockT('friday') : isSaturday ? clockT('saturday') : '';
-
-  const calcProgress = (remaining: number, total: number) => Math.min(1, Math.max(0, remaining / total));
-
-  if (isFriday && !isAfterSunset) {
-    const total = todaySunset - todaySunrise;
-    const remaining = Math.max(0, todaySunset - now);
-    return {
-      label: clockT('untilSabbath'),
-      sublabel: fmtRemaining(remaining),
-      timeVal: msToHHMM(todaySunset),
-      progress: calcProgress(remaining, total),
-      sunDay,
-    };
-  }
-
-  if ((isFriday && isAfterSunset) || (isSaturday && !isAfterSunset)) {
-    let total: number;
-    let remaining: number;
-    let endTimeVal: number;
-
-    if (isFriday) {
-      // Sabbath started at today's sunset, ends at tomorrow's sunset (crosses midnight)
-      total = DAY_MS - todaySunset + tomorrowSunset;
-      remaining = Math.max(0, DAY_MS - now + tomorrowSunset);
-      endTimeVal = tomorrowSunset;
-    } else {
-      // Saturday: period from yesterday's sunset (~DAY_MS ago) to today's sunset
-      total = DAY_MS;
-      remaining = Math.max(0, todaySunset - now);
-      endTimeVal = todaySunset;
-    }
-
-    return {
-      label: clockT('sabbathEnds'),
-      sublabel: fmtRemaining(remaining),
-      timeVal: msToHHMM(endTimeVal),
-      progress: calcProgress(remaining, total),
-      sunDay,
-    };
-  }
-
-  if (!isNight) {
-    const total = todaySunset - todaySunrise;
-    const remaining = Math.max(0, todaySunset - now);
-    return {
-      label: clockT('untilSunset'),
-      sublabel: fmtRemaining(remaining),
-      timeVal: msToHHMM(todaySunset),
-      progress: calcProgress(remaining, total),
-      sunDay,
-    };
-  }
-
-  const total = DAY_MS - todaySunset + tomorrowSunrise;
-  const remaining = isAfterSunset ? DAY_MS - now + tomorrowSunrise : Math.max(0, tomorrowSunrise - now);
-
-  return {
-    label: clockT('untilSunrise'),
-    sublabel: fmtRemaining(remaining),
-    timeVal: msToHHMM(tomorrowSunrise),
-    progress: calcProgress(remaining, total),
-    sunDay,
-  };
-}
-
-function fetchSunData(lat: number, lng: number): SunData {
-  const today = new Date();
-  const tomorrow = new Date(today.getTime() + 86400000);
-  const t1 = getTimes(today, lat, lng);
-  const t2 = getTimes(tomorrow, lat, lng);
-  return {
-    todaySunrise: dateToMsOfDay(t1.sunrise),
-    todaySunset: dateToMsOfDay(t1.sunset),
-    tomorrowSunrise: dateToMsOfDay(t2.sunrise),
-    tomorrowSunset: dateToMsOfDay(t2.sunset),
-  };
 }
 
 export default function Footer({
@@ -217,6 +34,7 @@ export default function Footer({
   songbookUrl = 'https://songs.sdarm.life',
   eventsUrl = 'https://events.sdarm.life',
   treasuresUrl = 'https://treasures.sdarm.life',
+  sblUrl = 'https://sbl.sdarm.life',
   locale = 'de',
 }: FooterProps) {
   const t = useTranslations('common.footer');
@@ -231,76 +49,9 @@ export default function Footer({
 
   const [email, setEmail] = useState('');
   const [subStatus, setSubStatus] = useState<'idle' | 'loading' | 'ok' | 'error' | 'conflict'>('idle');
-  const [current, setCurrent] = useState<StoredLocation>(() => ({
-    ...DEFAULT_COORDS,
-    name: clockT('defaultLocation'),
-  }));
-  const [locationInput, setLocationInput] = useState('');
-  const [suggestions, setSuggestions] = useState<NominatimResult[]>([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [clock, setClock] = useState<ClockState>({
-    label: clockT('sunset'),
-    sublabel: '…',
-    timeVal: '–:––',
-    progress: 0,
-  });
-
-  // Restore from localStorage on mount (client-only — server has no localStorage).
-  // Allow overriding via query params for screenshot tests: ?screenshotLocation=Pforzheim&screenshotTime=14:30
-  useEffect(() => {
-    const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-    const screenshotLocation = params.get('screenshotLocation');
-    if (screenshotLocation) {
-      // Fixed location for testing
-      setCurrent({
-        lat: 48.895,
-        lng: 8.681,
-        name: screenshotLocation,
-        slug: 'pforzheim',
-      });
-    } else {
-      const saved = readStoredLocation();
-      if (saved) setCurrent(saved);
-    }
-  }, []);
-
-  const sunData = useMemo(() => fetchSunData(current.lat, current.lng), [current.lat, current.lng]);
-
-  useEffect(() => {
-    function tick() {
-      const params = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-      const screenshotTime = params.get('screenshotTime');
-
-      let now: number;
-      if (screenshotTime) {
-        // For screenshots, use fixed time: HH:MM format
-        const [h, m] = screenshotTime.split(':').map(Number);
-        now = (h * 3600 + m * 60) * 1000;
-      } else {
-        now = nowMs();
-      }
-
-      const dow = new Date().getDay();
-      const state = computeClock(sunData, now, dow, clockT);
-
-      // Override display time directly when in screenshot mode
-      if (screenshotTime) {
-        state.timeVal = screenshotTime;
-      }
-
-      setClock(state);
-    }
-    tick();
-    const id = setInterval(tick, 1000);
-    return () => clearInterval(id);
-  }, [sunData, clockT]);
-
-  function handlePickLocation(loc: { lat: number; lng: number; name: string; slug?: string }) {
-    const slug = loc.slug ?? findLocationSlug(loc.name);
-    const next: StoredLocation = { lat: loc.lat, lng: loc.lng, name: loc.name, slug };
-    setCurrent(next);
-    writeStoredLocation(next);
-  }
+  // The map marks the visitor's sunset location, shared with the home page's
+  // sunset card (SunsetClock).
+  const [location, pickLocation] = useSunsetLocation(clockT('defaultLocation'));
 
   async function handleSubscribe() {
     if (!email) return;
@@ -323,63 +74,9 @@ export default function Footer({
     }
   }
 
-  useEffect(() => {
-    if (locationInput.trim().length < 2) {
-      setSuggestions([]);
-      setShowSuggestions(false);
-      return;
-    }
-    const timer = setTimeout(async () => {
-      try {
-        const res = await fetch(`${apiUrl}/geocode?q=${encodeURIComponent(locationInput)}&limit=3`);
-        const data = (await res.json()) as NominatimResult[];
-        setSuggestions(data);
-        setShowSuggestions(data.length > 0);
-      } catch {}
-    }, 320);
-    return () => clearTimeout(timer);
-  }, [locationInput]);
-
-  async function applyLocation(result: NominatimResult) {
-    handlePickLocation({
-      lat: Number(result.lat),
-      lng: Number(result.lon),
-      name: extractCityName(result),
-    });
-    setLocationInput('');
-    setSuggestions([]);
-    setShowSuggestions(false);
-  }
-
-  async function handleLocationChange(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    if (suggestions.length > 0) {
-      await applyLocation(suggestions[0]);
-      return;
-    }
-    if (!locationInput.trim()) return;
-    try {
-      const geo = await fetch(`${apiUrl}/geocode?q=${encodeURIComponent(locationInput)}&limit=1`);
-      const results = (await geo.json()) as NominatimResult[];
-      if (!results.length) return;
-      await applyLocation(results[0]);
-    } catch {}
-  }
-
-  // Ring shows ELAPSED progress: fills up as time passes (empty at start, full when period ends)
-  const elapsed = 1 - clock.progress;
-  const dashOffset = CIRC * (1 - elapsed); // = CIRC * clock.progress
-  // Dot at the leading edge of the fill, going clockwise from 12 o'clock
-  const R = 76;
-  const CX = 90;
-  const CY = 90;
-  const angle = elapsed * 2 * Math.PI;
-  const dotX = CX + R * Math.cos(angle);
-  const dotY = CY + R * Math.sin(angle);
-
   return (
     <footer className="site-footer">
-      <CommunityMap current={current} onPick={handlePickLocation} />
+      <CommunityMap current={location} onPick={pickLocation} />
 
       <div className="footer-inner-wrap">
         {/* Column 1: contact + subscribe */}
@@ -465,91 +162,18 @@ export default function Footer({
         <nav className="footer-nav" aria-label={t('footerNavAria')}>
           <div className="footer-nav-links">
             <Link href={withTheme(songbookUrl, theme)}>{navT('songs')}</Link>
-            <Link href={withTheme(eventsUrl, theme)}>{navT('events')}</Link>
+            <Link href={withTheme(`${treasuresUrl}/bible`, theme)}>{navT('bible')}</Link>
             <Link href={withTheme(treasuresUrl, theme)}>{navT('treasures')}</Link>
+            <Link href={sblUrl}>{navT('sbl')}</Link>
+            <Link href={withTheme(eventsUrl, theme)}>{navT('events')}</Link>
             <Link href={withTheme(`${webUrl}/about`, theme)}>{navT('about')}</Link>
             <Link href={withTheme(`${webUrl}/kontakt`, theme)}>{navT('contact')}</Link>
           </div>
         </nav>
-
-        {/* Column 3: sunset clock */}
-        <div className="footer-sunset">
-          <div className="sunset-clock-wrap">
-            <svg className="sunset-svg" viewBox="0 0 180 180">
-              <circle className="sunset-ring-track" cx="90" cy="90" r="76" />
-              <circle
-                className="sunset-ring-fill"
-                cx="90"
-                cy="90"
-                r="76"
-                strokeDasharray={CIRC}
-                strokeDashoffset={dashOffset}
-              />
-              {clock.progress > 0 && clock.progress < 1 && (
-                <>
-                  <circle className="sunset-ring-dot" cx={dotX} cy={dotY} r="5" />
-                  <circle className="sunset-ring-dot-glow" cx={dotX} cy={dotY} r="9" />
-                </>
-              )}
-            </svg>
-            <div className="sunset-clock-inner">
-              <div className="sunset-time-value">
-                {clock.timeVal === '–:––' ? (
-                  clock.timeVal
-                ) : (
-                  <>
-                    {clock.timeVal.split(':')[0]}
-                    <span className="sunset-colon">:</span>
-                    {clock.timeVal.split(':')[1]}
-                  </>
-                )}
-              </div>
-            </div>
-          </div>
-          <div className="sunset-footer-text">
-            <div className="sunset-footer-location">{current.name}</div>
-            <div className="sunset-footer-label">{clock.label}</div>
-            <div className="sunset-location-wrap">
-              <form className="sunset-location-form" onSubmit={handleLocationChange}>
-                <input
-                  type="text"
-                  className="sunset-location-input"
-                  placeholder={t('locationPlaceholder')}
-                  aria-label={t('locationInputAria')}
-                  autoComplete="off"
-                  spellCheck={false}
-                  value={locationInput}
-                  onChange={(e) => setLocationInput(e.target.value)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                  onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
-                />
-                <button type="submit" className="sunset-location-btn" aria-label={t('locationUpdateAria')}>
-                  <svg viewBox="0 0 13 13" aria-hidden="true">
-                    <line x1="1.5" y1="6.5" x2="11" y2="6.5" />
-                    <polyline points="7.5,3 11,6.5 7.5,10" />
-                  </svg>
-                </button>
-              </form>
-              {showSuggestions && suggestions.length > 0 && (
-                <ul className="sunset-suggestions">
-                  {suggestions.map((s, i) => (
-                    <li key={i}>
-                      <button type="button" className="sunset-suggestion-item" onMouseDown={() => applyLocation(s)}>
-                        {extractDropdownLabel(s)}
-                      </button>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
 
       <div className="footer-bottom">
-        <span className="footer-bottom-logo">
-          SDARM<span>.life</span>
-        </span>
+        <Wordmark className="footer-bottom-logo" />
         <span className="footer-copy">{t('copyright', { year: new Date().getFullYear() })}</span>
         <div className="footer-legal">
           <Link href={withTheme(`${webUrl}/impressum`, theme)}>{navT('imprint')}</Link>

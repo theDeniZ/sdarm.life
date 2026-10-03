@@ -44,8 +44,9 @@ These are the only external data recipients currently named in [Datenschutzerkl�
 | egwwritings.org (White Estate) | EPUB file delivery for Treasures | section5 |
 | YouVersion / Life.Church (US) | Bible text for **`yv:` translations only** — `loc:` translations contact nobody | section8 |
 | sbl.sdarm.life (`apps/sbl`) | The Sabbath Bible Lesson — carries **its own** Datenschutzerklärung | section9 |
+| Resend (Plus Five Five, Inc., US) | Email delivery — newsletter confirmation/welcome/broadcast, book-request forward to `info@sdarm.life`, admin single sends | section10 |
 
-**To add a new processor:** update [de.json + en.json legal.datenschutz](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
+**To add a new processor:** update [de.json + en.json `web.legal.datenschutz`](../packages/i18n/src/messages/) AND ship the code change in the same PR. Not a separate PR, not "TODO later".
 
 ### Bible feature (treasures.sdarm.life/bible) — two sources
 
@@ -69,7 +70,7 @@ posture (see below), not a data-protection one.
 ⚠️ **The disclosure is conditional on the allowlist, and the allowlist is a button in
 the admin.** An operator enabling one YouVersion translation re-creates the US transfer
 in a single click. Disclosure must precede the transfer, never follow it — so
-`legal.datenschutz.section8` **stays as long as the YouVersion provider exists at all**,
+`web.legal.datenschutz.section8` **stays as long as the YouVersion provider exists at all**,
 even while the allowlist happens to hold only `loc:` ids. Shrink it only when the
 provider is removed from the code, not when it merely happens to be unused.
 
@@ -90,7 +91,7 @@ What keeps the **YouVersion** half defensible:
 - **No YouVersion branding** in the UI — the Platform Terms forbid using their marks without explicit authorisation. Do not add a "Powered by YouVersion" logo.
 - **Publisher copyright notices are rendered** with the text (`.bible-copyright`) — several per-Bible licenses require this. Do not remove it.
 - **Do not add "Sign in with YouVersion".** That would send the user's browser to YouVersion directly and trigger consent-banner requirements.
-- Reader localStorage keys (`bible_last_read`, `bible_font_scale`, `bible_copy_options`) are functional preferences with no identifiers — same category as `sdarm-theme`.
+- Reader localStorage keys (`bible_last_read`, `bible_font_scale`, `bible_copy_options`, `bible_presenter_settings`) are functional preferences with no identifiers — same category as `sdarm-theme`.
 
 **Which translations are exposed is an operator decision** (Admin → Bible). Each Bible carries its own license; enabling a restrictively-licensed translation is a licensing decision, not a technical one.
 
@@ -115,7 +116,7 @@ this repository (`apps/sbl/upstream/`). It is served as-is by `apps/sbl`.
 
 **It carries its own Datenschutzerklärung and Impressum** (`datenschutz.html`,
 `impressum.html` in the same directory), reachable from the page itself.
-`legal.datenschutz.section9` names the address, says the offering is separate
+`web.legal.datenschutz.section9` names the address, says the offering is separate
 and independently maintained, and states that this policy does not apply there.
 
 ⚠️ **Since the page is now maintained in this repository, section9's "independently
@@ -129,7 +130,14 @@ must therefore cover:**
 | Call | To | Why it is a transfer |
 |---|---|---|
 | Bible editions, and any quarter not in its own mirror | `app.sdarm.org` | Reader IP to a third party on page load |
-| Quarter list + unpublished quarters — **only** once the reader turns on the *Alpha-Kanal* in the settings (off by default) | `sbl.thedeniz.dev` | Reader IP to a third party; disclosed in the page's § 4 |
+| Quarter list + unpublished quarters — whenever a quarter is missing from our mirror and `app.sdarm.org`, unless the reader has turned the *Alpha-Kanal* off (on by default) | `sbl.thedeniz.dev` | Reader IP to a third party; disclosed in the page's § 4 |
+
+**The home page's lesson card fetches the same quarters server-side**
+(`apps/web/app/lib/home-live.ts`): our mirror on `SBL_URL`, then `app.sdarm.org`,
+then `sbl.thedeniz.dev`, in the page's own order. Those requests come from the
+web worker, not from the reader's browser — they carry no visitor IP or cookie,
+so they are no transfer of the visitor's data and need no entry in the home
+page's policy. Keep it that way: the card must never fetch these from the client.
 
 A subdomain of `sdarm.life` reads as our service to a German visitor, so if that
 page's own policy does not cover the call, the exposure lands here. **Re-check it
@@ -154,13 +162,50 @@ self-hosted via `@fontsource`. That is why this file used to describe a
 server-side retrieval. All of it — route, proxy, section9 wording — was removed
 when the lesson moved to its own host.
 
+### Song open counter — not personal data
+
+`song_opens` (issue #197) stores one integer per song and the time of the most recent open **of that song**. Nothing about the person or the request is written: no IP, no user agent, no session, no per-event row. The user agent is read only to skip crawlers and is discarded. Against the five questions below: no browser call (server-side increment on a request the page already makes), no processor (own D1), no personal data, nothing written client-side, no email. So it adds no processor, needs no Datenschutz entry and no consent, and is not a row in the table below.
+
+⚠️ **The boundary:** the moment this grows a per-event row carrying a timestamp and any request attribute, it is behavioural analytics and this assessment no longer holds. That is a new issue with its own DSGVO pass, not an extension of this one.
+
+### Email delivery (Resend)
+
+Every email leaves through the Resend API, called **server-side** from the Worker
+(`RESEND_API_KEY` is a Worker secret): `routes/book-request.ts`,
+`routes/subscribers.ts` (double opt-in confirmation + welcome) and
+`routes/admin/email.ts` (single send + subscriber broadcast). The visitor's IP never
+reaches Resend; what does is listed per call site in `section10`.
+
+- **Legal entity:** Resend is operated by **Plus Five Five, Inc.**, 2261 Market Street
+  #5039, San Francisco, CA 94114, USA (as named in Resend's DPA). Not "Resend, Inc.".
+- **Transfer basis:** the EU SCCs (Module 2) incorporated in Resend's DPA, which binds on
+  acceptance of their Terms of Service; the DPA also states EU-U.S. DPF participation,
+  which `section10` reports as Resend's own statement. The EU sending region does not
+  move account data, logs or metadata out of the US.
+- ⚠️ **`religion` is accepted by the API but not collected by the form.**
+  `book-request.ts` has an optional `religion` field that would be forwarded to
+  Resend; `BookRequestModal` never sends it, so `section6`/`section10` do not name it.
+  Religious belief is Art. 9 data: if the form ever asks for it, both sections must
+  name it and the consent must be explicit (Art. 9(2)(a)) — in the same PR.
+- **What every email carries** (shared layout, `emails/layout.ts`): links to Impressum and
+  Datenschutz and the association's name and address from `legal.impressum.section1Body`;
+  mail to subscribers also carries the reason line and a one-click unsubscribe link
+  (`/{locale}/unsubscribe?token=…`). Broadcasts, the digest and subscriber-template single
+  sends add the `List-Unsubscribe` / `List-Unsubscribe-Post` headers. For a single send the
+  API reads the recipient's own subscriber row (token only) to fill the link; a recipient who
+  is not a confirmed subscriber gets no subscription lines — nothing claims a consent that
+  does not exist. No images, remote CSS or web fonts in any email.
+- **A new email type goes into `section10` in the same PR.** So does turning on open
+  or click tracking in the Resend dashboard — that is tracking of the recipient and is
+  not covered by the current text.
+
 ## ⚠️ Known gaps to close
 
 These are currently in code but not fully DSGVO-clean:
 
 | # | Item | Status |
 |---|---|---|
-| 1 | **Resend** (email sender) — not named in Datenschutz | Needs disclosure (Art. 28) |
+| 1 | ~~**Resend** (email sender) — not named in Datenschutz~~ | ✅ **Disclosed** in section10 (see below) — whether to move to an EU provider is still open (#196) |
 | 2 | ~~**Unsplash FALLBACK_IMG**~~ | ✅ **Closed** — removed, not moved (see below) |
 | 3 | ~~**Wikimedia HeroSection fallback**~~ | ✅ **Closed** — removed with it |
 | 4 | **Double opt-in wording** in Datenschutz | Expand section2Body |
@@ -195,6 +240,18 @@ If any answer triggers extra work, **raise it before coding**. Don't merge first
 - Confirmation email itself must be minimal (no marketing, just the confirm link). Changing this risks classifying it as unsolicited marketing.
 - Unsubscribe link must be in every marketing email, one-click, no login required. Already implemented — do not weaken.
 - `unsubscribed_at` is a hard delete in this project — good, don't convert to soft-delete without a retention reason disclosed.
+
+### Subscriber digest (issue #184)
+
+The automatic "what's new" email (see [api.md](api.md#subscriber-digest)) is the newsletter the subscriber already consented to, not a new processing activity:
+
+- **Same recipients, same basis.** Only rows with `confirmed_at` set receive it — double opt-in stays the gate. Basis is the consent in `legal.datenschutz.section2Body` (Art. 6(1)(a)); UWG §7 is satisfied by the same DOI.
+- **Same processor, same data.** Resend receives the email address and the rendered message, exactly as for the welcome email. No new recipient, no new data category. Resend's own disclosure is known gap 1 above (being closed separately); the digest adds volume to that transfer, not a new one — **close gap 1 before switching the digest on in production.**
+- **Nothing in the email phones home.** No images, no remote CSS, no web fonts (system font stacks only), no tracking pixel, no link rewriting on our side. ⚠️ Resend's **open/click tracking** is a per-domain dashboard switch: turning it on would add a pixel and redirect every link through Resend — that is behavioural tracking of subscribers and needs its own consent and disclosure. Keep it off.
+- **Unsubscribe is one click, twice over.** A visible link in every digest (`/{locale}/unsubscribe?token=…`) and the `List-Unsubscribe` / `List-Unsubscribe-Post: List-Unsubscribe=One-Click` headers (RFC 8058), which let the mail client unsubscribe with no page visit. Both hard-delete the row.
+- **Impressum in every digest** — association name and address from `legal.impressum.section1Body`, plus links to Impressum and Datenschutz.
+- **Off by default.** The owner switches it on in Admin → Email; nothing is sent from any environment without `RESEND_API_KEY`.
+- **Wording to confirm.** The subscribe form only says "Newsletter" and does not describe what it contains; section2 speaks of "unseren Newsletter" without content either. A digest of new posts, songs and books is what a church-site newsletter is commonly understood to be, so the consent plausibly covers it — but a one-line description at the point of subscription ("Neuigkeiten zu neuen Beiträgen, Liedern und Büchern") would make the consent specific (Art. 4(11), Art. 7). A legal-text decision for the owner; not changed in #184.
 
 ## Language
 

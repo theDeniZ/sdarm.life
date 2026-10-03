@@ -1,0 +1,220 @@
+/* ═══ EMAIL SCREEN ═══
+   Every rule here used to be an inline style={{}} literal in
+   EmailComposer.tsx, which is why this was the one admin screen that ignored
+   the design system: the preview was #0f0e0c with #3a3830 text, so it rendered
+   as the same black slab in both themes and could not follow the toggle at
+   all. Same grid shape as .grid-editor — settings left, live preview right. */
+
+.email-layout {
+  display: grid;
+  grid-template-columns: minmax(340px, 480px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+.email-template-row {
+  display: flex;
+  gap: 8px;
+}
+/* `.form-row select` sets width:100%, which an inline style used to override.
+   These need the same two-class specificity to win, or both selects take the
+   full row and push the Load button out of the card. */
+.form-row .email-template-locale {
+  width: 80px;
+  flex: 0 0 auto;
+}
+.form-row .email-template-select {
+  width: auto;
+  flex: 1;
+  min-width: 0;
+}
+
+.email-hint {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* Two classes, for the same reason as the selects above: `.form-row textarea`
+   sets the UI font, and this field holds HTML source. */
+.form-row .email-body {
+  font-family: var(--font-mono);
+  font-size: 12px;
+}
+
+.email-status {
+  padding: 8px 0;
+}
+
+.email-preview {
+  min-width: 0;
+  position: sticky;
+  top: 24px;
+}
+
+/* Matches `thead th`, which does the same job through the same token. */
+.email-preview__label {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 8px;
+}
+
+/* A plain sheet: the emails paint their own ground (dark, or light when the
+   preview's Appearance switch or the reader's mail app asks for it), and the
+   empty-state pages are white. The frame around it is the card treatment
+   every other surface in the admin uses. */
+.email-preview__frame {
+  display: block;
+  width: 100%;
+  height: 700px;
+  background: #ffffff;
+  border: 1px solid var(--border);
+  border-radius: var(--r);
+  box-shadow: 0 1px 2px rgba(2, 6, 23, 0.04);
+}
+
+/* Preview header, shared by the composer and the digest (EmailPreview.tsx):
+   the subject on the left, appearance and width switches on the right. */
+.email-preview-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+.email-preview-head .email-preview__label {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 12px;
+}
+
+.email-preview-controls {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 6px;
+}
+
+.email-preview-select {
+  flex: 0 0 auto;
+  padding: 4px 8px;
+  border: 1px solid var(--border-2);
+  border-radius: var(--r);
+  font-size: 12px;
+  font-family: 'Lexend', sans-serif;
+  color: var(--text);
+  background: var(--surface-2);
+  margin-bottom: 8px;
+}
+
+/* A phone-width sheet, to check the single-column layout the emails switch to. */
+.email-preview__frame--phone {
+  max-width: 390px;
+  margin: 0 auto;
+}
+
+/* Below this width the 480px form left the preview a sliver — 192px at
+   1024, and 2px at 834, while still 700px tall. Stack instead, and let the
+   preview take a height it can actually be read at. */
+@media (max-width: 1100px) {
+  /* minmax(0, …): a bare 1fr keeps the form's min-content width as a floor,
+     which pushed the card 40px past a 375px screen. */
+  .email-layout {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .email-preview {
+    position: static;
+  }
+  .email-preview__frame {
+    height: 60vh;
+    min-height: 420px;
+  }
+}
+
+/* ═══ UPDATE DIGEST (issue #184) ═══
+   Second section of the Email screen, below the composer, on the same
+   settings-left / preview-right grid. */
+
+.digest {
+  margin-top: 48px;
+}
+
+.digest-intro {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+
+/* .flash-err carries only a top margin; as a banner above the toggle it needs the gap below. */
+.digest-warning {
+  margin: 0 0 18px;
+}
+
+.digest-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+/* Two selects (or select + date) side by side; one column on a phone. */
+.digest-schedule {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+}
+.digest-schedule .form-row {
+  margin-bottom: 0;
+}
+
+.digest-facts {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 8px 16px;
+  margin: 20px 0 0;
+  font-size: 13px;
+}
+.digest-facts dt {
+  color: var(--muted);
+}
+.digest-facts dd {
+  margin: 0;
+  color: var(--text);
+}
+
+.digest-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 28px 0 24px;
+}
+
+.digest-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 12px;
+}
+.digest-row input {
+  flex: 1;
+  min-width: 0;
+}
+.form-row .digest-row {
+  margin-top: 0;
+}
+
+.digest-test {
+  margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+  .digest-schedule {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+  .digest-schedule .form-row {
+    margin-bottom: 18px;
+  }
+}

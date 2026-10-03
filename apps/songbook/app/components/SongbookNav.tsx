@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { SongbookDto } from '@sdarm/types';
+import { Wordmark } from '@sdarm/ui';
 
 interface SongbookNavProps {
   songbooks?: SongbookDto[];
@@ -15,7 +16,7 @@ export default function SongbookNav({ songbooks = [], webUrl = 'https://sdarm.li
   return (
     <nav className="top-nav">
       <a href={webUrl} className="top-nav__brand">
-        SDARM<span className="top-nav__brand-accent">.life</span>
+        <Wordmark />
       </a>
       {songbooks.map((sb) => {
         const href = `/songbooks/${sb.slug}`;

@@ -1,7 +1,8 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
-import { PageHero, ScriptureVerseSection } from '@sdarm/ui';
-import { fetchSongbooks } from '../../lib/api';
+import { PageHero, ScriptureVerseSection, siteHomeMetadata } from '@sdarm/ui';
+import { API, SITE_URL, fetchSongbooks } from '../../lib/api';
 
 const MUSIC_NOTE = (
   <svg viewBox="0 0 100 130" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -12,6 +13,19 @@ const MUSIC_NOTE = (
     <line x1="38" y1="10" x2="88" y2="20" stroke="rgba(201,169,110,0.9)" strokeWidth="3.5" />
   </svg>
 );
+
+export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: 'songbook.metadata' });
+  return siteHomeMetadata({
+    app: 'songbook',
+    base: SITE_URL,
+    api: API,
+    locale,
+    title: t('title'),
+    description: t('description'),
+  });
+}
 
 export default async function HomePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;

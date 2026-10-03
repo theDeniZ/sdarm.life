@@ -1,0 +1,64 @@
+/* ── SCRIPTURE QUOTE ── */
+.schaetze-quote {
+  padding: 4rem 6vw;
+  border-top: 1px solid rgba(201, 169, 110, 0.07);
+  display: flex;
+  align-items: center;
+  gap: 3rem;
+  background: linear-gradient(180deg, rgba(201, 169, 110, 0.02) 0%, transparent 100%);
+  position: relative;
+  overflow: hidden;
+}
+.schaetze-quote::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse 50% 100% at 50% 50%, rgba(201, 169, 110, 0.025) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.schaetze-quote-mark {
+  font-family: 'DM Serif Display', serif;
+  font-size: clamp(5rem, 8vw, 8rem);
+  line-height: 0.7;
+  color: rgba(201, 169, 110, 0.14);
+  flex-shrink: 0;
+  font-style: italic;
+  align-self: flex-start;
+  position: relative;
+  z-index: 2;
+}
+
+.schaetze-quote-body {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+}
+
+.schaetze-quote-text {
+  font-family: 'DM Serif Display', serif;
+  font-style: italic;
+  font-size: clamp(1.1rem, 2.2vw, 1.6rem);
+  color: rgba(225, 215, 200, 0.85);
+  line-height: 1.55;
+}
+
+.schaetze-quote-source {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: normal;
+  font-size: 0.72rem;
+  font-weight: 300;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(201, 169, 110, 0.6);
+  margin-top: 1rem;
+  display: block;
+}
+
+@media (max-width: 900px) {
+  .schaetze-quote {
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 3rem 2rem;
+  }
+}

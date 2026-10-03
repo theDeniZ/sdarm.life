@@ -5,9 +5,12 @@
 /* ═══ STATS BENTO GRID ═══
    Three equal columns; each column is a flex stack sharing the same gap, so
    the column bottoms line up. Heights do the arithmetic:
-     col 1  724
+     col 1  724                    (the reading plan, always)
      col 2  420 + 24 + 280 = 724
      col 3  350 + 24 + 350 = 724
+   The four smaller slots take whichever block the admin puts there (default:
+   sunset, lesson, Bible, songbook), so a block's height comes from its slot's
+   modifier (--media, --short, --mid), never from the block itself.
    Palette is driven by the --stats-* custom properties below: the base values
    are the site's dark tokens, the [data-theme='light'] block at the bottom
    swaps in the light bento palette. */
@@ -353,6 +356,92 @@
 }
 
 
+/* ── Sunset card ──
+   The clock from @sdarm/ui (styles/sunset-clock.css) on a plain card: its
+   palette is mapped onto the section's, so it follows the theme like every
+   other card. It can sit in any of the four smaller slots, and the ring box
+   follows the slot: 160px in the 420 slot, 140px in a 350 slot, and in the 280
+   slot the clock turns sideways (rings left, city, countdown and search right).
+   The card is not a link, so it keeps its resting border under the cursor; and
+   it must not clip, or the location suggestions and the ring tooltips are
+   cut off. It has no label: the rings, the city and the countdown say what
+   it is, centred in the card. */
+.stats__card--sunset:hover {
+  border-color: var(--stats-line);
+}
+.stats__card--sunset .sunset-clock {
+  --sunset-size: 140px;
+  --sunset-text: var(--stats-text);
+  --sunset-muted: var(--stats-muted);
+  --sunset-accent: var(--stats-accent);
+  --sunset-surface: var(--stats-card-bg);
+  --sunset-line: var(--stats-line-hover);
+  gap: 14px;
+  /* Centred in the space under the label. */
+  margin: auto 0;
+}
+.stats__card--sunset.stats__card--media .sunset-clock {
+  --sunset-size: 160px;
+  gap: 18px;
+}
+.stats__card--sunset.stats__card--short .sunset-clock {
+  --sunset-size: 124px;
+  flex-direction: row;
+  gap: 28px;
+  text-align: left;
+}
+.stats__card--sunset.stats__card--short .sunset-text {
+  flex: 1;
+  align-items: flex-start;
+}
+.stats__card--sunset.stats__card--short .sunset-location-wrap {
+  width: 100%;
+  max-width: 220px;
+}
+
+/* ── Live cards: Bible, lesson, songbook ──
+   Their content is fetched by the page (lib/home-live.ts): a small context
+   line (--kicker: "Heute", "Lektion 1 · 27. Sept. – 3. Okt.", "Lied der Woche
+   · Nr. 120"), the concrete thing as the headline, and a fact line (--desc:
+   the translations, the quarter, the song count). The fact line needs room:
+   the 280 slot drops it, and so do phones (see the 640 block). No icons —
+   type carries these cards. */
+.stats__card-kicker {
+  margin: 0 0 12px;
+  font:
+    400 15px/1.4 var(--stats-sans);
+  letter-spacing: 0.01em;
+  color: var(--stats-muted);
+}
+.stats__card-desc {
+  max-width: 34ch;
+  margin-top: 14px;
+  font-size: 15px;
+  line-height: 1.55;
+}
+.stats__card--short .stats__card-desc {
+  display: none;
+}
+.stats__card--live .stats__card-body {
+  position: relative;
+  z-index: 1;
+}
+
+/* The lesson's one motif: a short navy rule on the card's top edge, the head
+   rule of the printed quarterly. It sits in the padding, so nothing moves. */
+.stats__card--sbl {
+  --stats-sbl-rule: #7a98c4;
+}
+.stats__rule {
+  position: absolute;
+  top: -1px;
+  left: 32px;
+  width: 44px;
+  height: 3px;
+  border-radius: 0 0 2px 2px;
+  background: var(--stats-sbl-rule);
+}
+
 @media (prefers-reduced-motion: reduce) {
   .stats__card,
   .stats__btn,
@@ -451,6 +540,81 @@
   .stats__card-label {
     font-size: 11px;
   }
+
+  /* A half-width card leaves the clock ~140 x 200px. It stands upright in
+     every slot here — sideways there is no room for the text — and the ring
+     box shrinks with the slot: 84px in the 240 slot, 72px in a 216 slot. The
+     192 slot cannot also fit the 44px search field, so it drops the search. */
+  .stats__card--sunset {
+    padding: 20px 12px;
+  }
+  /* The field keeps its 16px text (below that iOS zooms on focus) but the
+     placeholder steps down, and the arrow's 44px hit area reaches into the
+     card padding, so "Stadt oder PLZ" is not cut off at 375px. */
+  .stats__card--sunset .sunset-location-input::placeholder {
+    font-size: 13px;
+  }
+  .stats__card--sunset .sunset-location-btn {
+    margin-right: -12px;
+  }
+  .stats__card--sunset .sunset-clock,
+  .stats__card--sunset.stats__card--media .sunset-clock,
+  .stats__card--sunset.stats__card--short .sunset-clock {
+    --sunset-size: 72px;
+    flex-direction: column;
+    gap: 8px;
+    text-align: center;
+  }
+  .stats__card--sunset.stats__card--media .sunset-clock {
+    --sunset-size: 84px;
+  }
+  /* Stretched to the card, or the search field's intrinsic width sizes the
+     column and the field runs out of the card. */
+  .stats__card--sunset .sunset-text,
+  .stats__card--sunset.stats__card--short .sunset-text {
+    align-self: stretch;
+    align-items: center;
+  }
+  .stats__card--sunset .sunset-city {
+    font-size: 17px;
+  }
+  .stats__card--sunset .sunset-label {
+    margin-top: 2px;
+    font-size: 12px;
+  }
+  .stats__card--sunset .sunset-location-wrap,
+  .stats__card--sunset.stats__card--short .sunset-location-wrap {
+    width: 100%;
+    margin-top: 6px;
+  }
+  .stats__card--sunset.stats__card--short .sunset-location-wrap {
+    display: none;
+  }
+
+  /* No fact line in a half-width card; the context line steps down to its
+     first part ("Lektion 1", "Lied der Woche"), and the 192 slot drops it,
+     or the headline would be fitted down to caption size. */
+  .stats__card-desc,
+  .stats__card-kicker-extra {
+    display: none;
+  }
+  /* In the 192 slot a live card keeps its concrete line ("Lektion 1 ·
+     27. Sept. – 3. Okt.") and drops the generic label ("Sabbatschule")
+     instead: the dates say which lesson, the label only says what kind. */
+  .stats__card--live.stats__card--short .stats__card-label {
+    display: none;
+  }
+  .stats__card--live.stats__card--short .stats__card-kicker-extra {
+    display: inline;
+  }
+  .stats__card-kicker {
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+  .stats__rule {
+    left: 20px;
+    width: 32px;
+  }
   .stats__card-sub {
     font-size: 13px;
     margin-top: 12px;
@@ -487,4 +651,12 @@
   --stats-mark: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 44' preserveAspectRatio='none'><path fill='rgb(118,170,108)' fill-opacity='0.42' d='M3,16 C30,10 70,12.4 110,9.2 C140,6.8 172,8.6 196,10.5 C198.5,14.4 199,22.6 197,27.8 C170,32.4 130,29.4 92,31.2 C64,32.4 28,31 5,28.4 C1.6,25 1,20.2 3,16 Z'/></svg>");
   --stats-line: #e8e4dc;
   --stats-line-hover: #cdc7bb;
+}
+/* The outer ring pales the umbra toward white; at the dark theme's 55% it
+   fades to ~2.6:1 on the white card, so it keeps more of the accent here. */
+[data-theme='light'] .stats__card--sunset .sunset-clock {
+  --sunset-outer-mix: 62%;
+}
+[data-theme='light'] .stats__card--sbl {
+  --stats-sbl-rule: #24426e;
 }

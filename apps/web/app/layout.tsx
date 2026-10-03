@@ -16,6 +16,7 @@ import './styles/hero-welcome.css';
 /* styles/news.css is intentionally absent — NewsSection.tsx still exists but
    the homepage renders StatsGrid in its place, so none of it is loaded.
    Its warm gold section background lived there. */
+import '@sdarm/ui/src/styles/sunset-clock.css';
 import './styles/stats-grid.css';
 import './styles/quote-share.css';
 import './styles/glaubens.css';
@@ -23,7 +24,7 @@ import './styles/post.css';
 import './styles/legal.css';
 import './styles/about.css';
 import './styles/kontakt.css';
-import './styles/not-found.css';
+import '@sdarm/ui/src/styles/not-found.css';
 
 import { getLocale } from 'next-intl/server';
 import { ThemeScript } from '@sdarm/ui';
